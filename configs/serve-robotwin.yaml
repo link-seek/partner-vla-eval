@@ -1,14 +1,12 @@
-# DB-CogACT serve 配置（RobotWin 双臂口径，自包含，不用 extends）
-# 上游参考：configs/model_servers/db_cogact/robotwin2.yaml
-# 权重 Dexmal/robotwin-db-cogact 按 task 分头；model_path 必须和所跑 task 对上
-# （smoke 跑 grab_roller 就用 grab_roller 头，全量按 task 逐个换）。
-# 注意：from_pretrained 不认 `repo/subdir` 三段式，CI 会 snapshot 后生成
-# 本地路径版 configs/serve-robotwin-local.yaml（gitignored），serve 用本地版。
-# 与 serve-pi05.yaml 的区别：单臂 pi05（chunk 10）-> 双臂 CogACT（chunk 16，三相机）。
-script: "src/vla_eval/model_servers/dexbotic/cogact.py"
+# X-VLA serve 配置（RobotWin 双臂，参考模型，自包含，不用 extends）
+# 上游：configs/model_servers/xvla/robotwin.yaml
+# 权重 2toINF/X-VLA-WidowX（单仓共享权重，无子目录 hack），0.9B，官称 70/39%。
+# benchmark_profile=robotwin + domain_id=6 选双臂 embodiment prompt。
+script: "src/vla_eval/model_servers/xvla.py"
 args:
-  model_path: Dexmal/robotwin-db-cogact/grab_roller
+  model_path: 2toINF/X-VLA-WidowX
+  benchmark_profile: robotwin
+  domain_id: 6
+  chunk_size: 30
+  denoising_steps: 10
   port: 8000
-  chunk_size: 16
-  camera_keys: '["head_camera", "left_camera", "right_camera"]'
-  use_text_template: false
