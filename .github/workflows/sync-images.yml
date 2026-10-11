@@ -1,0 +1,54 @@
+name: Sync Images to SWR
+
+# registry-to-registry 直拷（skopeo copy，不落盘）：
+# ghcr.io/allenai/vla-evaluation-harness/<img>:0.7.0
+#   -> swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-<img>:0.7.0
+# tag 钉 0.7.0，对齐 HARNESS_REF=v0.7.0；latest 不跟。
+# 小镜像跑免费机；robotwin（28.6GB）同样先试免费机，超时再切 hw21。
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: "逗号分隔：libero,calvin,robotwin（默认全量）"
+        required: false
+        default: "libero,calvin,robotwin"
+
+permissions:
+  contents: read
+
+env:
+  SRC_REG: ghcr.io/allenai/vla-evaluation-harness
+  DST_REG: swr.cn-north-4.myhuaweicloud.com/link-seek
+  TAG: "0.7.0"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [libero, calvin, robotwin]
+    steps:
+      - name: Filter image list
+        id: gate
+        run: |
+          if echo ",${{ inputs.images }}," | grep -q ",${{ matrix.image }},"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Skopeo copy (retry 3x)
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          for i in 1 2 3; do
+            if skopeo copy --all \
+              "docker://${{ env.SRC_REG }}/${{ matrix.image }}:${{ env.TAG }}" \
+              --dest-creds "cn-north-4@${{ secrets.OBS_AK }}:${{ secrets.OBS_SK }}" \
+              "docker://${{ env.DST_REG }}/vla-eval-${{ matrix.image }}:${{ env.TAG }}"; then
+              echo "synced ${{ matrix.image }}:${{ env.TAG }} (attempt $i)"; break
+            fi
+            echo "attempt $i failed, retry in 60s..."; sleep 60
+            [ "$i" = "3" ] && exit 1
+          done
