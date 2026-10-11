@@ -1,0 +1,24 @@
+# RoboTwin 2.0 smoke（grab_roller 1ep，链路验证，不计分）
+# 上游参考：configs/benchmarks/robotwin/eval.yaml
+# 全量是 50 task x 50ep=2500ep（见 run-robotwin-full.yaml，待补），smoke 先确认：
+# 双臂 14 维 / 三相机 / chunk 16 / timeout 无误，再开全量。
+server:
+  url: "ws://localhost:8000"
+  timeout: 600.0
+
+docker:
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.7.0
+
+output_dir: "./results"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark"
+    episodes_per_task: 1
+    params:
+      task_name: grab_roller
+      task_config: demo_clean
+      seed: 0
+      instruction_type: seen
+      test_num: 1
+      skip_expert_check: true
+    action_dim: 14

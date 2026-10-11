@@ -30,7 +30,8 @@ env:
 
 jobs:
   start-ecs:
-    runs-on: ubuntu-latest
+    # 常驻机 hw21-linkseek-org（组织级自托管），ECS 关着时也能叫醒 V100
+    runs-on: [self-hosted, hw21]
     timeout-minutes: 15
     steps:
       - name: Setup hcloud CLI
@@ -81,7 +82,8 @@ jobs:
 
   stop-ecs:
     needs: smoke
-    runs-on: ubuntu-latest
+    # 常驻机 hw21-linkseek-org；smoke 在 V100 上跑，不抢这台
+    runs-on: [self-hosted, hw21]
     if: always()
     timeout-minutes: 10
     steps:

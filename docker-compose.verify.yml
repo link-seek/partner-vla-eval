@@ -1,0 +1,85 @@
+# 伙伴评测 compose（bridge 网，不用 host 模式）
+# 服务：serve（模型/GPU，自建）+ benchmark-‹榜›（环境/CPU，按 profile 选一起）
+# 跑法：
+#   docker compose -f docker-compose.verify.yml up -d serve
+#   # 等 serve healthy 后：
+#   docker compose -f docker-compose.verify.yml --profile robotwin run --rm benchmark \
+#     run --config /work/configs/run-robotwin-smoke.yaml --server-url ws://serve:8000
+# 说明：
+# - server 地址一律走 --server-url 覆盖（上游官方 flag，避免 per-host 配置文件），
+#   yaml 里保持 ws://localhost:8000 不动。
+# - benchmark 容器挂 docker.sock：harness run --docker 自己起环境容器，上游机制。
+# - 镜像全走 SWR（北京四内网）；molmo 上游未发布，沿用本地构建 tag。
+
+name: partner-vla-eval
+
+networks:
+  eval:
+    driver: bridge
+
+x-benchmark: &benchmark
+  networks: [eval]
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./configs:/work/configs:ro
+    - ./results:/work/results
+    - ./.cache/hf:/root/.cache/huggingface
+  working_dir: /work
+  environment:
+    HF_ENDPOINT: https://hf-mirror.com
+
+services:
+  serve:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.verify
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve:0.1
+    networks:
+      eval:
+        aliases: [serve]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./configs:/work/configs:ro
+      - ./results:/work/results
+      - ./.cache/hf:/root/.cache/huggingface
+      - ./.cache/uv:/root/.cache/uv
+    working_dir: /work/harness
+    environment:
+      CUDA_VISIBLE_DEVICES: "0"
+      COMPILE_MODEL: "false"
+      HF_ENDPOINT: https://hf-mirror.com
+    # 默认 serve pi05；跑双臂时 compose 覆盖 command 换 serve-robotwin.yaml
+    command: ["vla-eval", "serve", "-c", "/work/configs/serve-pi05.yaml"]
+    healthcheck:
+      test: ["CMD-SHELL", "(echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+
+  benchmark-libero:
+    <<: *benchmark
+    profiles: [libero]
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0
+
+  benchmark-calvin:
+    <<: *benchmark
+    profiles: [calvin]
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.7.0
+
+  benchmark-robotwin:
+    <<: *benchmark
+    profiles: [robotwin]
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.7.0
+
+  # molmo 上游未发布镜像，沿用本地构建（见 scripts/ci_smoke.sh [2/5]）
+  benchmark-molmo:
+    <<: *benchmark
+    profiles: [molmo]
+    image: vla-evaluation-harness/molmospaces:latest
