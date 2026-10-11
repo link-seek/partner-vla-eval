@@ -36,23 +36,23 @@ jobs:
           V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
           V100_REG_TOKEN: ${{ secrets.V100_REG_TOKEN }}
         run: |
-          ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 "REG_TOKEN='$V100_REG_TOKEN' bash -s" << 'REMOTE' 2>&1 | tail -n 15
+          set -o pipefail
+          ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 "REG_TOKEN='$V100_REG_TOKEN' bash -s" << 'REMOTE' 2>&1 | tee /tmp/repair-v100.log; CODE=${PIPESTATUS[0]}
           set -e
           for pair in "gh-runner:ecs-0002-org" "gh-runner2:ecs-0002-pi0"; do
             dir="/data/${pair%%:*}"; name="${pair##*:}"
             echo "== $name ($dir) =="
             cd "$dir"
             ./svc.sh stop || true
-            ./config.sh --unattended --replace \
-              --url https://github.com/link-seek \
-              --token "$REG_TOKEN" \
-              --name "$name" \
-              --labels V100,V100-pi0 \
-              --work _work
+            # agent 文件属 runner 用户：config 必须 runner 身份跑，svc 启停 root 来
+            su -s /bin/bash runner -c "cd '$dir' && ./config.sh --unattended --replace --url https://github.com/link-seek --token '$REG_TOKEN' --name '$name' --labels V100,V100-pi0 --work _work"
             ./svc.sh start
           done
           echo "== status =="
           systemctl is-active "actions.runner.link-seek.ecs-0002-org.service" || true
-          sleep 10
+          sleep 15
           ps aux | grep -c "[R]unner.Listener"
           REMOTE
+          echo "remote exit=$CODE"
+          tail -n 30 /tmp/repair-v100.log
+          exit $CODE
