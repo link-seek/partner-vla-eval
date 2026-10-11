@@ -80,7 +80,8 @@ echo "[4/5] 预热 DB-CogACT 权重 (grab_roller 头, mirror, 带重试)"
 for i in 1 2 3; do
   if SNAP=$(docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
-    -e HF_ENDPOINT=https://hf-mirror.com \
+    -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
+    -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
     "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ] && [ -d "$SNAP" ]; then
     echo "snapshot: $SNAP"; break
   fi
@@ -102,6 +103,7 @@ docker run -d --name cogact-serve --gpus '"device=0"' --network host \
   -e CUDA_VISIBLE_DEVICES=0 \
   -e PIP_INDEX_URL=https://download.pytorch.org/whl/cu126 \
   -e PIP_EXTRA_INDEX_URL=https://pypi.org/simple \
+  -e HF_HUB_DISABLE_XET=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
   "$VERIFY_IMAGE" \
