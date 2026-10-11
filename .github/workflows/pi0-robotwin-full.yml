@@ -1,0 +1,117 @@
+name: RobotWin Full (chunked)
+
+# RobotWin 全量分块战役：50 task x N ep，按块跑，结果 OBS 按块累积。
+# 单块建议 5 task x 50ep（约 2-4h @8 分片），10 块跑完。
+
+on:
+  workflow_dispatch:
+    inputs:
+      tasks:
+        description: "逗号分隔 task（默认首块）"
+        required: false
+        default: "grab_roller,adjust_bottle,click_bell,handover_block,stack_blocks_two"
+      episodes:
+        description: "每 task 集数"
+        required: false
+        default: "50"
+      shards:
+        description: "分片数"
+        required: false
+        default: "8"
+      video:
+        description: "1=录像，默认关"
+        required: false
+        default: "0"
+
+concurrency:
+  group: gpu-ecs-pi0-smoke
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: read
+
+env:
+  ECS_SERVER_ID: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+  ECS_REGION: cn-north-4
+  OBS_BUCKET: so101-sim-pipeline
+
+jobs:
+  start-ecs:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 15
+    steps:
+      - name: Setup hcloud CLI
+        run: |
+          curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
+          tar -xzf /tmp/hcloud.tar.gz -C /tmp/
+          sudo mv /tmp/hcloud /usr/local/bin/hcloud
+      - name: Start ECS
+        env:
+          HCLOUD_AGREE_PRIVACY: "true"
+        run: |
+          echo "y" | hcloud ECS BatchStartServers \
+            --cli-region="${{ env.ECS_REGION }}" \
+            --cli-access-key="${{ secrets.OBS_AK }}" \
+            --cli-secret-key="${{ secrets.OBS_SK }}" \
+            --os-start.servers.1.id="${{ env.ECS_SERVER_ID }}"
+          sleep 120
+
+  chunk:
+    needs: start-ecs
+    runs-on: [self-hosted, Linux, X64, V100-pi0]
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: false
+      - name: Run RobotWin chunk
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+          RW_TASKS: ${{ inputs.tasks }}
+          RW_EPISODES: ${{ inputs.episodes }}
+          RW_SHARDS: ${{ inputs.shards }}
+          RW_VIDEO: ${{ inputs.video }}
+        run: |
+          mkdir -p results
+          chmod +x scripts/ci_robotwin_full.sh
+          bash scripts/ci_robotwin_full.sh 2>&1 | tee results/ci.log; CODE=${PIPESTATUS[0]}
+          echo "chunk_exit=$CODE"
+          exit $CODE
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robotwin-chunk
+          path: results/
+      - name: Upload to OBS
+        if: always()
+        run: |
+          obsutil cp results/ obs://${{ env.OBS_BUCKET }}/eval/robotwin-full/ -f -r -flat || true
+
+  stop-ecs:
+    needs: chunk
+    runs-on: [self-hosted, hw21]
+    if: always()
+    timeout-minutes: 10
+    steps:
+      - name: Setup hcloud CLI
+        run: |
+          curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
+          tar -xzf /tmp/hcloud.tar.gz -C /tmp/
+          sudo mv /tmp/hcloud /usr/local/bin/hcloud
+      - name: Stop ECS
+        env:
+          HCLOUD_AGREE_PRIVACY: "true"
+        run: |
+          sleep 120
+          echo "y" | hcloud ECS BatchStopServers \
+            --cli-region="${{ env.ECS_REGION }}" \
+            --cli-access-key="${{ secrets.OBS_AK }}" \
+            --cli-secret-key="${{ secrets.OBS_SK }}" \
+            --os-stop.servers.1.id="${{ env.ECS_SERVER_ID }}"
+          sleep 60
+          exit 0
