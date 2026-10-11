@@ -35,6 +35,8 @@ jobs:
           V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
         run: |
           export V100=192.168.0.9
+          echo "== hw21 egress ip =="
+          curl -s --max-time 15 ifconfig.me; echo
           echo "== probe 22 =="
           (echo > /dev/tcp/$V100/22) 2>/dev/null && echo "port 22 OPEN" || echo "port 22 CLOSED"
           echo "== runner dirs =="
