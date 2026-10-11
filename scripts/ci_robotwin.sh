@@ -58,6 +58,10 @@ fi
 if ! grep -q '"torch==2.6.0"' "$COG"; then
   sed -i 's|"torch>=2.0"|"torch==2.6.0"|' "$COG"
 fi
+if ! grep -q '"transformers==4.46.3"' "$COG"; then
+  # 官方复现要求：v5.x 有 meta device 问题，钉 4.46.3（见 dexbotic.md）
+  sed -i 's|"transformers>=4.40,<5"|"transformers==4.46.3"|' "$COG"
+fi
 if ! grep -q 'requires-python = ">=3.11"' "$COG"; then
   sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' "$COG"
 fi
@@ -74,13 +78,18 @@ docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
 
 echo "[4/5] 预热 DB-CogACT 权重 (grab_roller 头, mirror, 带重试)"
 for i in 1 2 3; do
-  if docker run --rm --network host \
+  if SNAP=$(docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4)" 2>&1 | tail -n 2; then break; fi
+    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>/dev/null | tail -n 1) && [ -n "$SNAP" ]; then
+    echo "snapshot: $SNAP"; break
+  fi
   echo "checkpoint 预热失败, 重试 $i..."; sleep 15
   [ "$i" = "3" ] && exit 1
 done
+echo "[4a/5] 生成本地路径 serve 配置 (from_pretrained 不认三段式 repo/subdir，只能本地路径)"
+sed "s|model_path: .*|model_path: $SNAP/grab_roller|" "$WORK/configs/serve-robotwin.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
+grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
 
 echo "[4b/5] 启动 DB-CogACT serve (GPU0, 后台)"
 docker rm -f cogact-serve 2>/dev/null || true
@@ -95,7 +104,7 @@ docker run -d --name cogact-serve --gpus '"device=0"' --network host \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
   "$VERIFY_IMAGE" \
-  vla-eval serve -c /work/configs/serve-robotwin.yaml
+  vla-eval serve -c /work/configs/serve-robotwin-local.yaml
 }
 wait_serve() {
   for i in $(seq 1 120); do

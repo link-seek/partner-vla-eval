@@ -1,3 +1,5 @@
 results/
 __pycache__/
 *.sqlite
+# 本地权重路径 serve 配置（CI 生成，机内绝对路径，不进仓）
+configs/serve-robotwin-local.yaml
