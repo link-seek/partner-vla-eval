@@ -40,8 +40,8 @@ jobs:
           getent hosts github.com | head -n 2
           getent hosts 192.168.0.9 | head -n 2
           curl -s --max-time 10 https://api.github.com/meta -o /dev/null -w "github-api:%{http_code}\n" || echo "github-api FAIL"
-          for u in https://icanhazip.com https://ifconfig.co https://api.ipify.org https://ipinfo.io/ip; do echo -n "$u => "; curl -s --max-time 8 "$u" || echo FAIL; done
-          which nc ssh curl python3
+          curl -s --max-time 8 https://icanhazip.com; echo " <- hw21 egress"
+          command -v ssh curl python3
           echo "== probe 22 =="
           (echo > /dev/tcp/$V100/22) 2>/dev/null && echo "port 22 OPEN" || echo "port 22 CLOSED"
           echo "== runner dirs =="
