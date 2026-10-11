@@ -6,7 +6,8 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 HARNESS_REF="${HARNESS_REF:-v0.7.0}"
 MOLMO_IMAGE="ghcr.io/allenai/vla-evaluation-harness/molmospaces:latest"
-LIBERO_IMAGE="ghcr.io/allenai/vla-evaluation-harness/libero:latest"
+# LIBERO 走 SWR（北京四内网），tag 钉 0.7.0 对齐 HARNESS_REF；molmo 上游无包，沿用本地构建
+LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 mkdir -p results
 echo "[0/5] workspace 属主修复 (容器以 root 写文件, 改回 runner 1001)"
@@ -57,6 +58,9 @@ else
 fi
 
 echo "[2/5] benchmark 镜像 (libero 拉取, molmo 本地构建, 上游未发布)"
+echo "[2a/5] 登录 SWR（私仓，HMAC 派生口令，同 sync workflow）"
+LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
+echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
 docker pull "$LIBERO_IMAGE"
 if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q 'vla-evaluation-harness/molmospaces:latest'; then
   (cd harness && bash docker/build.sh molmospaces)
