@@ -39,13 +39,19 @@ jobs:
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Compute SWR login key (HMAC-SHA256, same as so101 docker-build.yml)
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          LOGIN_KEY=$(printf "${{ secrets.OBS_AK }}" | openssl dgst -binary -sha256 -hmac "${{ secrets.OBS_SK }}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
+          echo "::add-mask::$LOGIN_KEY"
+          echo "LOGIN_KEY=$LOGIN_KEY" >> "$GITHUB_ENV"
       - name: Skopeo copy (retry 3x)
         if: steps.gate.outputs.run == 'true'
         run: |
           for i in 1 2 3; do
             if skopeo copy --all \
               "docker://${{ env.SRC_REG }}/${{ matrix.image }}:${{ env.TAG }}" \
-              --dest-creds "cn-north-4@${{ secrets.OBS_AK }}:${{ secrets.OBS_SK }}" \
+              --dest-creds "cn-north-4@${{ secrets.OBS_AK }}:${{ env.LOGIN_KEY }}" \
               "docker://${{ env.DST_REG }}/vla-eval-${{ matrix.image }}:${{ env.TAG }}"; then
               echo "synced ${{ matrix.image }}:${{ env.TAG }} (attempt $i)"; break
             fi
