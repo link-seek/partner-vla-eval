@@ -81,9 +81,10 @@ for i in 1 2 3; do
   if SNAP=$(docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>/dev/null | tail -n 1) && [ -n "$SNAP" ]; then
+    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ] && [ -d "$SNAP" ]; then
     echo "snapshot: $SNAP"; break
   fi
+  echo "prewarm 输出尾:"; tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   echo "checkpoint 预热失败, 重试 $i..."; sleep 15
   [ "$i" = "3" ] && exit 1
 done
