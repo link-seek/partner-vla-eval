@@ -117,12 +117,14 @@ echo "[6/6] run_sharded 全块跑（分片 $RW_SHARDS，录像=$RW_VIDEO，cpu �
 VIDEO_FLAG="--no-record-video"
 [ "$RW_VIDEO" = "1" ] && VIDEO_FLAG="--record-video"
 set +e
+# run_sharded.sh 在 0.7.0 镜像里缺失（tag 里有，镜像构建早），从 host 的 harness clone 挂进去用
 docker run --rm --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK":/work \
+  -v "$WORK/harness/scripts":/opt/harness-scripts:ro \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   "$ROBOTWIN_IMAGE" \
-  -c "conda run --no-capture-output -n robotwin bash /workspace/scripts/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG --render cpu" 2>&1 | tee "$OUTDIR/shard.log"
+  -c "conda run --no-capture-output -n robotwin bash /opt/harness-scripts/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG --render cpu" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
 set -e
 docker logs xvla-serve > "$OUTDIR/xvla-serve.log" 2>&1 || true
