@@ -34,7 +34,7 @@ jobs:
         env:
           V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
         run: |
-          export V100=192.168.0.9
+          export V100=114.116.228.0
           echo "== net diag =="
           env | grep -i -E "proxy" | sed 's/=.*/=***/' | head -n 10
           getent hosts github.com | head -n 2
