@@ -1,0 +1,42 @@
+name: Inspect V100 Runner
+
+# 一次性诊断：hw21 跳板 SSH 进 V100，只看 runner 现状不动手。
+# 密码走 secret，日志里只回显状态，不回显任何密钥材料。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 20
+    steps:
+      - name: SSH helper (askpass, no sshpass needed)
+        run: |
+          mkdir -p ~/.ssh-runner-fix
+          cat > ~/.ssh-runner-fix/askpass.sh << EOF
+          #!/bin/sh
+          echo "\$V100_SSH_PASS"
+          EOF
+          chmod 700 ~/.ssh-runner-fix/askpass.sh
+          cat > ~/.ssh-runner-fix/ssh.sh << 'EOF'
+          #!/bin/sh
+          export SSH_ASKPASS="$HOME/.ssh-runner-fix/askpass.sh"
+          export SSH_ASKPASS_REQUIRE=force
+          export DISPLAY=:0
+          exec setsid ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "$@"
+          EOF
+          chmod 700 ~/.ssh-runner-fix/ssh.sh
+      - name: Probe SSH then inspect runner dirs
+        env:
+          V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
+        run: |
+          export V100=114.116.228.0
+          echo "== probe 22 =="
+          (echo > /dev/tcp/$V100/22) 2>/dev/null && echo "port 22 OPEN" || echo "port 22 CLOSED"
+          echo "== runner dirs =="
+          ~/.ssh-runner-fix/ssh.sh root@$V100 'ls -d ~/actions-runner* /opt/actions-runner* /root/*runner* 2>/dev/null; echo "---"; ps aux | grep -i "Runner.Listener" | grep -v grep | head -n 5; echo "---"; systemctl list-units --type=service --state=running 2>/dev/null | grep -i -E "runner|actions" | head -n 5; echo "---"; ls /etc/systemd/system/ 2>/dev/null | grep -i -E "runner|actions" | head -n 5' 2>&1 | tail -n 30
+          echo "inspect exit=$?"
