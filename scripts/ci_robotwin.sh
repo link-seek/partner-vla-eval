@@ -82,8 +82,12 @@ for i in 1 2 3; do
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ] && [ -d "$SNAP" ]; then
-    echo "snapshot: $SNAP"; break
+    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ]; then
+    # SNAP 是容器内路径；宿主侧按 rev 拼同等路径校验（两边挂的是同一目录）
+    REV=$(basename "$SNAP")
+    SNAP_HOST="$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/$REV"
+    if [ -d "$SNAP_HOST/grab_roller" ]; then echo "snapshot: $SNAP"; break; fi
+    echo "宿主路径不存在: $SNAP_HOST/grab_roller"
   fi
   echo "prewarm 输出尾:"; tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   echo "checkpoint 预热失败, 重试 $i..."; sleep 15
