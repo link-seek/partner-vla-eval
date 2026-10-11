@@ -46,4 +46,6 @@ jobs:
           (echo > /dev/tcp/$V100/22) 2>/dev/null && echo "port 22 OPEN" || echo "port 22 CLOSED"
           echo "== runner dirs =="
           ~/.ssh-runner-fix/ssh.sh root@$V100 'ls -d ~/actions-runner* /opt/actions-runner* /root/*runner* 2>/dev/null; echo "---"; ps aux | grep -i "Runner.Listener" | grep -v grep | head -n 5; echo "---"; systemctl list-units --type=service --state=running 2>/dev/null | grep -i -E "runner|actions" | head -n 5; echo "---"; ls /etc/systemd/system/ 2>/dev/null | grep -i -E "runner|actions" | head -n 5' 2>&1 | tail -n 30
+          echo "== deep dive =="
+          ~/.ssh-runner-fix/ssh.sh root@$V100 'cat /etc/systemd/system/actions.runner.link-seek.ecs-0002-org.service; echo "==="; systemctl status actions.runner.link-seek.ecs-0002-org --no-pager 2>&1 | head -n 12; echo "==="; find / -maxdepth 4 -name "Runner.Listener" -o -maxdepth 4 -name ".credentials" 2>/dev/null | head -n 10; echo "==="; ls ~ /opt /srv /home 2>/dev/null' 2>&1 | tail -n 40
           echo "inspect exit=$?"
