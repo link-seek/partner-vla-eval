@@ -35,8 +35,13 @@ jobs:
           V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
         run: |
           export V100=192.168.0.9
-          echo "== hw21 egress ip =="
-          curl -s --max-time 15 ifconfig.me; echo
+          echo "== net diag =="
+          env | grep -i -E "proxy" | sed 's/=.*/=***/' | head -n 10
+          getent hosts github.com | head -n 2
+          getent hosts 192.168.0.9 | head -n 2
+          curl -s --max-time 10 https://api.github.com/meta -o /dev/null -w "github-api:%{http_code}\n" || echo "github-api FAIL"
+          curl -s --max-time 10 https://checkip.amazonaws.com || echo "checkip FAIL"
+          which nc ssh curl python3
           echo "== probe 22 =="
           (echo > /dev/tcp/$V100/22) 2>/dev/null && echo "port 22 OPEN" || echo "port 22 CLOSED"
           echo "== runner dirs =="
