@@ -14,6 +14,9 @@ echo "[0/5] workspace 属主修复 (容器以 root 写文件, 改回 runner 1001
 docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \
   sudo chown -R "$(id -u):$(id -g)" "$WORK" 2>/dev/null || true
 
+# 缓存目录必须先建：docker -v 会把不存在的宿主目录建为 root，后续步骤写不进
+mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" 2>/dev/null || sudo mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" || true
+sudo chown -R "$(id -u):$(id -g)" "$WORK/.cache" 2>/dev/null || true
 echo "[1b/5] lerobot 源码 (host 侧 clone, serve 容器内 github 不通, header 改本地 path)"
 LEROBOT_URL="https://github.com/huggingface/lerobot.git"
 [ -n "${GITHUB_TOKEN:-}" ] && LEROBOT_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/huggingface/lerobot.git"

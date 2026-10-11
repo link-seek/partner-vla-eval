@@ -46,6 +46,6 @@ jobs:
           (echo > /dev/tcp/$V100/22) 2>/dev/null && echo "port 22 OPEN" || echo "port 22 CLOSED"
           echo "== runner dirs =="
           ~/.ssh-runner-fix/ssh.sh root@$V100 'ls -d ~/actions-runner* /opt/actions-runner* /root/*runner* 2>/dev/null; echo "---"; ps aux | grep -i "Runner.Listener" | grep -v grep | head -n 5; echo "---"; systemctl list-units --type=service --state=running 2>/dev/null | grep -i -E "runner|actions" | head -n 5; echo "---"; ls /etc/systemd/system/ 2>/dev/null | grep -i -E "runner|actions" | head -n 5' 2>&1 | tail -n 30
-          echo "== perm check =="
-          ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 'id runner; echo "==="; grep -E "^User=" /etc/systemd/system/actions.runner.link-seek.ecs-0002-*.service; echo "==="; ls -la /data/gh-runner/_work/partner-vla-eval/ 2>/dev/null | head -n 8; echo "==="; ls -ld /data/gh-runner/_work/partner-vla-eval/partner-vla-eval /data/gh-runner/_work/partner-vla-eval/partner-vla-eval/.cache 2>&1' 2>&1 | tail -n 20
+          echo "== chown work dirs =="
+          ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 'chown -R runner:runner /data/gh-runner/_work /data/gh-runner2/_work && ls -ld /data/gh-runner/_work/partner-vla-eval/partner-vla-eval/.cache' 2>&1 | tail -n 5
           echo "inspect exit=$?"
