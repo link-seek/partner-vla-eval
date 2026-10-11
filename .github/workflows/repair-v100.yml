@@ -1,0 +1,58 @@
+name: Repair V100 Runners
+
+# V100 机上两个 agent（/data/gh-runner、/data/gh-runner2）凭证被 GitHub 回收，
+# 用新 org 注册 token 重配。token 走 secret，用完即删。
+# labels 保持 [V100, V100-pi0]，名字沿用 ecs-0002-org / ecs-0002-pi0。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 20
+    steps:
+      - name: SSH helper
+        run: |
+          mkdir -p ~/.ssh-runner-fix
+          cat > ~/.ssh-runner-fix/askpass.sh << EOF
+          #!/bin/sh
+          echo "\$V100_SSH_PASS"
+          EOF
+          chmod 700 ~/.ssh-runner-fix/askpass.sh
+          cat > ~/.ssh-runner-fix/ssh.sh << 'EOF'
+          #!/bin/sh
+          export SSH_ASKPASS="$HOME/.ssh-runner-fix/askpass.sh"
+          export SSH_ASKPASS_REQUIRE=force
+          export DISPLAY=:0
+          exec setsid ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 "$@"
+          EOF
+          chmod 700 ~/.ssh-runner-fix/ssh.sh
+      - name: Re-register both agents
+        env:
+          V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
+          V100_REG_TOKEN: ${{ secrets.V100_REG_TOKEN }}
+        run: |
+          ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 "REG_TOKEN='$V100_REG_TOKEN' bash -s" << 'REMOTE' 2>&1 | tail -n 15
+          set -e
+          for pair in "gh-runner:ecs-0002-org" "gh-runner2:ecs-0002-pi0"; do
+            dir="/data/${pair%%:*}"; name="${pair##*:}"
+            echo "== $name ($dir) =="
+            cd "$dir"
+            ./svc.sh stop || true
+            ./config.sh --unattended --replace \
+              --url https://github.com/link-seek \
+              --token "$REG_TOKEN" \
+              --name "$name" \
+              --labels V100,V100-pi0 \
+              --work _work
+            ./svc.sh start
+          done
+          echo "== status =="
+          systemctl is-active "actions.runner.link-seek.ecs-0002-org.service" || true
+          sleep 10
+          ps aux | grep -c "[R]unner.Listener"
+          REMOTE
