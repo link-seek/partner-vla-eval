@@ -44,9 +44,11 @@ jobs:
             echo "== $name ($dir) =="
             cd "$dir"
             ./svc.sh stop || true
-            # agent 文件属 runner 用户：config 必须 runner 身份跑，svc 启停 root 来
+            ./svc.sh uninstall || true
+            # agent 文件属 runner 用户：config 必须 runner 身份跑，svc 启停/安装 root 来
             su -s /bin/bash runner -c "cd '$dir' && ./config.sh remove --token '$REG_TOKEN' || true"
             su -s /bin/bash runner -c "cd '$dir' && ./config.sh --unattended --url https://github.com/link-seek --token '$REG_TOKEN' --name '$name' --labels V100,V100-pi0 --work _work"
+            ./svc.sh install runner
             ./svc.sh start
           done
           echo "== status =="
