@@ -68,7 +68,9 @@ jobs:
         run: |
           python3 -m pip install -q --user "huggingface_hub" 2>&1 | tail -n 1
           export PATH="$PATH:$(python3 -m site --user-base)/bin"
-          command -v huggingface-cli && command -v aws || pip install -q "awscli" 2>&1 | tail -n 1
+          # 新版 hub CLI 改名 hf，老版叫 huggingface-cli，兼容
+          if command -v hf >/dev/null 2>&1; then HFCLI="hf"; else HFCLI="huggingface-cli"; fi
+          command -v aws >/dev/null || pip install -q "awscli" 2>&1 | tail -n 1
           IFS=',' read -ra TLIST <<< "${{ inputs.weights_tasks }}"
           for t in "${TLIST[@]}"; do
             t=$(echo "$t" | tr -d '[:space:]')
@@ -79,7 +81,7 @@ jobs:
             fi
             echo "== $t =="
             mkdir -p /tmp/w && cd /tmp/w
-            huggingface-cli download Dexmal/robotwin-db-cogact --include "$t/*" --local-dir "$t-dl"
+            "$HFCLI" download Dexmal/robotwin-db-cogact --include "$t/*" --local-dir "$t-dl"
             aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 cp "$t-dl/$t" "$DEST" --recursive
             rm -rf "$t-dl"
             cd - > /dev/null
