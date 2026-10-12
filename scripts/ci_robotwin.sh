@@ -1,4 +1,5 @@
 #!/bin/bash
+# RW_VIDEO=1 时录像（诊断用，默认关）。
 # RobotWin smoke: host 编排 serve(DB-CogACT 双臂, GPU0) + run(SWR robotwin 镜像当 client)。
 # serve 用自研 configs/serve-robotwin.yaml（上游 robotwin2.yaml 口径：chunk 16 + 三相机）。
 # V100 适配（同 molmo smoke 教训）：
@@ -145,7 +146,7 @@ docker run --rm --gpus all --network host \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$ROBOTWIN_IMAGE" \
-  run --config /work/configs/run-robotwin-smoke.yaml 2>&1 | tee results/robotwin-smoke.log
+  run --config /work/configs/run-robotwin-smoke.yaml ${RW_VIDEO:+--record-video} 2>&1 | tee results/robotwin-smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 echo "[5b/5] 收 serve 日志"

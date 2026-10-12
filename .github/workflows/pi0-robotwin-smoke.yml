@@ -51,6 +51,7 @@ jobs:
           clean: false
       - name: Run RobotWin smoke via Docker (host orchestration)
         env:
+          RW_VIDEO: "1"
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OBS_AK: ${{ secrets.OBS_AK }}
