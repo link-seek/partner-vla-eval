@@ -83,15 +83,17 @@ docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
 
 echo "[4/5] 预热 DB-CogACT 权重 (grab_roller 头, mirror, 带重试)"
 for i in 1 2 3; do
-  if SNAP=$(docker run --rm --network host \
+  if docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('Dexmal/robotwin-db-cogact', allow_patterns=['grab_roller/*'], max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ]; then
-    REV=$(basename "$SNAP")
-    SNAP_HOST="$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/$REV"
-    if [ -d "$SNAP_HOST/grab_roller" ]; then echo "snapshot: $SNAP"; break; fi
-    echo "宿主路径不存在: $SNAP_HOST/grab_roller"
+    "$VERIFY_IMAGE" huggingface-cli download Dexmal/robotwin-db-cogact --include "grab_roller/*" > /tmp/prewarm.log 2>&1; then
+    SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/"*/ 2>/dev/null | head -n 1)
+    if [ -n "$SNAP_HOST" ] && [ -d "${SNAP_HOST}grab_roller" ]; then
+      SNAP="/root/.cache/huggingface/hub/models--Dexmal--robotwin-db-cogact/snapshots/$(basename "$SNAP_HOST")"
+      echo "snapshot: $SNAP"; break
+    fi
+    echo "snapshot 目录异常"; ls "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/" 2>/dev/null || true
   fi
   echo "prewarm 输出尾:"; tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   echo "checkpoint 预热失败, 重试 $i..."; sleep 15

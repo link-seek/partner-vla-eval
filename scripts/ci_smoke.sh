@@ -78,7 +78,7 @@ for i in 1 2 3; do
   if docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; snapshot_download('lerobot/pi05_libero_finetuned', max_workers=4)" 2>&1 | tail -n 2; then break; fi
+    "$VERIFY_IMAGE" huggingface-cli download lerobot/pi05_libero_finetuned > /tmp/pi05-prewarm.log 2>&1; then break; fi
   echo "checkpoint 预热失败, 重试 $i..."; sleep 15
   [ "$i" = "3" ] && exit 1
 done

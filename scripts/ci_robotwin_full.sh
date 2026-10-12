@@ -98,30 +98,34 @@ docker pull "$ROBOTWIN_IMAGE"
 docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
 
 echo "[4/6] 预热 DB-CogACT 权重（按块内 task 子目录）"
+# CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
+FIRST_TASK=$(echo "${RW_TASKS:-grab_roller}" | cut -d, -f1)
 for i in 1 2 3; do
-  docker run --rm --network host \
+  # 纯 CLI 预热：huggingface-cli 下载 + ls 定位 snapshot（不写 python）
+  INC=()
+  IFS=',' read -ra TLIST <<< "${RW_TASKS:-grab_roller}"
+  for t in "${TLIST[@]}"; do
+    t=$(echo "$t" | tr -d '[:space:]')
+    [ -n "$t" ] && INC+=(--include "$t/*")
+  done
+  if docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    -e RW_TASKS="${RW_TASKS:-grab_roller}" \
-    "$VERIFY_IMAGE" python - > /tmp/prewarm.out 2>/tmp/prewarm.log << 'PYEOF_INNER'
-import os
-from huggingface_hub import snapshot_download
-tasks = [t.strip() for t in os.environ.get("RW_TASKS", "grab_roller").split(",") if t.strip()]
-pats = [t + "/*" for t in tasks]
-print(snapshot_download("Dexmal/robotwin-db-cogact", allow_patterns=pats, max_workers=4))
-PYEOF_INNER
-  SNAP=$(tail -n 1 /tmp/prewarm.out)
-  if [ -n "$SNAP" ] && [ "${SNAP#/}" != "$SNAP" ]; then
-    echo "snapshot: $SNAP"; break
+    "$VERIFY_IMAGE" huggingface-cli download Dexmal/robotwin-db-cogact "${INC[@]}" > /tmp/prewarm.log 2>&1; then
+    # snapshot 即缓存下最新子目录（宿主/容器同挂载，路径对应）
+    SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/"*/ 2>/dev/null | head -n 1)
+    if [ -n "$SNAP_HOST" ] && [ -d "$SNAP_HOST$FIRST_TASK" ]; then
+      SNAP="/root/.cache/huggingface/hub/models--Dexmal--robotwin-db-cogact/snapshots/$(basename "$SNAP_HOST")"
+      echo "snapshot: $SNAP"; break
+    fi
+    echo "snapshot 目录异常"; ls "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/" 2>/dev/null || true
   fi
   tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   sleep 15
   [ "$i" = "3" ] && exit 1
 done
-# CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
 # from_pretrained 不认 repo/subdir，用本地子目录绝对路径。
-FIRST_TASK=$(echo "$RW_TASKS" | cut -d, -f1)
 sed "s|model_path: .*|model_path: $SNAP/$FIRST_TASK|" "$WORK/configs/serve-robotwin-cogact.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
 grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
 
