@@ -58,7 +58,7 @@ echo "      task_config: demo_clean"
 echo "      seed: 0"
 echo "      instruction_type: seen"
 echo "      test_num: $RW_EPISODES"
-echo "      skip_expert_check: true"
+echo "      skip_expert_check: false"
 echo "    action_dim: 14"
 done
 } > "$GEN"
