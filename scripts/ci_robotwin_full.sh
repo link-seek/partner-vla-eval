@@ -27,37 +27,10 @@ docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null
 mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" 2>/dev/null || sudo mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" || true
 sudo chown -R "$(id -u):$(id -g)" "$WORK/.cache" 2>/dev/null || true
 
-echo "[1/6] harness + cogact header（幂等补丁，smoke 已验证）"
-DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
-if [ ! -f dexbotic-src/pyproject.toml ]; then
-  rm -rf dexbotic-src
-  DEX_URL="https://github.com/MilkClouds/dexbotic.git"
-  [ -n "${GITHUB_TOKEN:-}" ] && DEX_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/MilkClouds/dexbotic.git"
-  for i in 1 2 3; do
-    if git clone "$DEX_URL" dexbotic-src 2>&1 | tail -n 1 && (cd dexbotic-src && git checkout -q "$DEXBOTIC_REV"); then break; fi
-    rm -rf dexbotic-src; sleep 20
-    [ "$i" = "3" ] && exit 128
-  done
-fi
-COG=harness/src/vla_eval/model_servers/dexbotic/cogact.py
-grep -q '/work/dexbotic-src' "$COG" || sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", rev = "42f72859dfe48bb4c30a09ab151a018c2ca0700a" }|dexbotic = { path = "/work/dexbotic-src" }|' "$COG"
-grep -q '"torch==2.6.0"' "$COG" || sed -i 's|"torch>=2.0"|"torch==2.6.0"|' "$COG"
-grep -q '"transformers==4.46.3"' "$COG" || sed -i 's|"transformers>=4.40,<5"|"transformers==4.46.3"|' "$COG"
-grep -q 'torch_dtype=torch.float16' "$COG" || sed -i 's|torch_dtype=torch.bfloat16|torch_dtype=torch.float16|' "$COG"
-grep -q 'requires-python = ">=3.11"' "$COG" || sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' "$COG"
-if [ ! -f harness/pyproject.toml ]; then
-  rm -rf harness
-  CLONE_URL="https://github.com/allenai/vla-evaluation-harness.git"
-  [ -n "${GITHUB_TOKEN:-}" ] && CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/allenai/vla-evaluation-harness.git"
-  for i in 1 2 3 4 5; do
-    if git clone --depth 1 --branch "$HARNESS_REF" "$CLONE_URL" harness 2>&1 | tail -n 1; then break; fi
-    rm -rf harness; sleep 20
-    [ "$i" = "5" ] && exit 128
-  done
-fi
-XVLA=harness/src/vla_eval/model_servers/xvla.py
-grep -q '"torch==2.6.0"' "$XVLA" || sed -i 's|"torch>=2.2"|"torch==2.6.0"|' "$XVLA"
-grep -q 'requires-python = ">=3.11"' "$XVLA" || sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' "$XVLA"
+SERVE_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
+VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
+
+echo "[1/6] harness 代码已烘进 serve 镜像，无 clone（V100 离线要求）"
 
 echo "[2/6] 生成本块 run 配置（每 task 一个 entry）"
 GEN="$WORK/configs/run-robotwin-chunk.yaml"
@@ -91,11 +64,12 @@ done
 } > "$GEN"
 grep -c "task_name:" "$GEN"
 
-echo "[3/6] robotwin 镜像 + verify 镜像"
+echo "[3/6] 拉镜像（SWR 内网：benchmark + serve 烘焙版，不本地构建）"
 LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
 echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
 docker pull "$ROBOTWIN_IMAGE"
-docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
+docker pull "$SERVE_IMAGE"
+docker pull "$VERIFY_IMAGE"
 
 echo "[4/6] 预热 DB-CogACT 权重（按块内 task 子目录）"
 # CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
@@ -129,18 +103,18 @@ done
 sed "s|model_path: .*|model_path: $SNAP/$FIRST_TASK|" "$WORK/configs/serve-robotwin-cogact.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
 grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
 
-echo "[5/6] 启动 DB-CogACT serve (GPU0, 后台)"
+echo "[5/6] 启动 DB-CogACT serve (GPU0, 后台；烘焙镜像 + UV_OFFLINE，零下载)"
 docker rm -f cogact-serve 2>/dev/null || true
 docker run -d --name cogact-serve --gpus '"device=0"' --network host \
-  -v "$WORK":/work -w /work/harness \
-  -v "$WORK/.cache/uv":/root/.cache/uv \
+  -v "$WORK/configs":/work/configs:ro \
+  -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  -w /work/harness \
   -e CUDA_VISIBLE_DEVICES=0 \
-  -e PIP_INDEX_URL=https://download.pytorch.org/whl/cu126 \
-  -e PIP_EXTRA_INDEX_URL=https://pypi.org/simple \
+  -e UV_OFFLINE=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-  "$VERIFY_IMAGE" \
+  "$SERVE_IMAGE" \
   vla-eval serve -c /work/configs/serve-robotwin-local.yaml
 for i in $(seq 1 120); do
   [ "$(docker inspect -f '{{.State.Running}}' cogact-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
@@ -153,13 +127,14 @@ echo "[6/6] run_sharded 全块跑（分片 $RW_SHARDS，录像=$RW_VIDEO，gpu �
 VIDEO_FLAG="--no-record-video"
 [ "$RW_VIDEO" = "1" ] && VIDEO_FLAG="--record-video"
 set +e
-# run_sharded.sh 在 0.7.0 镜像里缺失（tag 里有，镜像构建早），从 host 的 harness clone 挂进去用
+# run_sharded.sh vendoring 在本仓（scripts/upstream，0.7.0 镜像里缺失）
 # 分片跑在卡1：serve 独占卡0，8 分片同卡 SAPIEN 会 hang（watchdog 全杀，见 run 38186912836）。
 # V100 双32G，卡1空闲给渲染。
 docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$WORK":/work \
-  -v "$WORK/harness/scripts":/opt/harness-scripts:ro \
+  -v "$WORK/configs":/work/configs:ro \
+  -v "$WORK/results":/work/results \
+  -v "$WORK/scripts/upstream":/opt/harness-scripts:ro \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -e CUDA_VISIBLE_DEVICES=1 \
   "$ROBOTWIN_IMAGE" \
