@@ -87,7 +87,7 @@ for i in 1 2 3; do
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    "$VERIFY_IMAGE" huggingface-cli download Dexmal/robotwin-db-cogact --include "grab_roller/*" > /tmp/prewarm.log 2>&1; then
+    "$VERIFY_IMAGE" hf-download download Dexmal/robotwin-db-cogact --include "grab_roller/*" > /tmp/prewarm.log 2>&1; then
     SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/"*/ 2>/dev/null | head -n 1)
     if [ -n "$SNAP_HOST" ] && [ -d "${SNAP_HOST}grab_roller" ]; then
       SNAP="/root/.cache/huggingface/hub/models--Dexmal--robotwin-db-cogact/snapshots/$(basename "$SNAP_HOST")"
