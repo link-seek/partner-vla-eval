@@ -1,5 +1,6 @@
 #!/bin/bash
-# RobotWin 全量（分块）：host 编排 serve(X-VLA 双臂) + run_sharded.sh 多分片。
+# RobotWin 全量（分块）：host 编排 serve(DB-CogACT 关节口径) + run_sharded.sh 多分片。
+# X-VLA 是 EE 口径，benchmark 只要关节，已记债 park（serve-robotwin.yaml 留档）。
 # 输入（环境变量，workflow 透传）：
 #   RW_TASKS     逗号分隔 task 名（默认首块 5 个）
 #   RW_EPISODES  每 task 集数（默认 50；验证用小值）
@@ -26,7 +27,24 @@ docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null
 mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" 2>/dev/null || sudo mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" || true
 sudo chown -R "$(id -u):$(id -g)" "$WORK/.cache" 2>/dev/null || true
 
-echo "[1/6] harness + xvla header（幂等补丁，smoke 已验证过直接复用逻辑）"
+echo "[1/6] harness + cogact header（幂等补丁，smoke 已验证）"
+DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
+if [ ! -f dexbotic-src/pyproject.toml ]; then
+  rm -rf dexbotic-src
+  DEX_URL="https://github.com/MilkClouds/dexbotic.git"
+  [ -n "${GITHUB_TOKEN:-}" ] && DEX_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/MilkClouds/dexbotic.git"
+  for i in 1 2 3; do
+    if git clone "$DEX_URL" dexbotic-src 2>&1 | tail -n 1 && (cd dexbotic-src && git checkout -q "$DEXBOTIC_REV"); then break; fi
+    rm -rf dexbotic-src; sleep 20
+    [ "$i" = "3" ] && exit 128
+  done
+fi
+COG=harness/src/vla_eval/model_servers/dexbotic/cogact.py
+grep -q '/work/dexbotic-src' "$COG" || sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", rev = "42f72859dfe48bb4c30a09ab151a018c2ca0700a" }|dexbotic = { path = "/work/dexbotic-src" }|' "$COG"
+grep -q '"torch==2.6.0"' "$COG" || sed -i 's|"torch>=2.0"|"torch==2.6.0"|' "$COG"
+grep -q '"transformers==4.46.3"' "$COG" || sed -i 's|"transformers>=4.40,<5"|"transformers==4.46.3"|' "$COG"
+grep -q 'torch_dtype=torch.float16' "$COG" || sed -i 's|torch_dtype=torch.bfloat16|torch_dtype=torch.float16|' "$COG"
+grep -q 'requires-python = ">=3.11"' "$COG" || sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' "$COG"
 if [ ! -f harness/pyproject.toml ]; then
   rm -rf harness
   CLONE_URL="https://github.com/allenai/vla-evaluation-harness.git"
@@ -79,24 +97,29 @@ echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.
 docker pull "$ROBOTWIN_IMAGE"
 docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
 
-echo "[4/6] 预热 X-VLA 权重"
+echo "[4/6] 预热 DB-CogACT 权重（按块内 task 子目录）"
 for i in 1 2 3; do
   if SNAP=$(docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; print(snapshot_download('2toINF/X-VLA-WidowX', max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ]; then
+    -e RW_TASKS="${RW_TASKS:-grab_roller}" \
+    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; import os; pats=[t.strip()+"/*" for t in os.environ.get("RW_TASKS","grab_roller").split(",")]; print(snapshot_download('"'"'Dexmal/robotwin-db-cogact'"'"', allow_patterns=pats, max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ]; then
     echo "snapshot: $SNAP"; break
   fi
   tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   sleep 15
   [ "$i" = "3" ] && exit 1
 done
-sed "s|model_path: .*|model_path: $SNAP|" "$WORK/configs/serve-robotwin.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
+# CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
+# from_pretrained 不认 repo/subdir，用本地子目录绝对路径。
+FIRST_TASK=$(echo "$RW_TASKS" | cut -d, -f1)
+sed "s|model_path: .*|model_path: $SNAP/$FIRST_TASK|" "$WORK/configs/serve-robotwin-cogact.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
+grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
 
-echo "[5/6] 启动 X-VLA serve (GPU0, 后台)"
-docker rm -f xvla-serve 2>/dev/null || true
-docker run -d --name xvla-serve --gpus '"device=0"' --network host \
+echo "[5/6] 启动 DB-CogACT serve (GPU0, 后台)"
+docker rm -f cogact-serve 2>/dev/null || true
+docker run -d --name cogact-serve --gpus '"device=0"' --network host \
   -v "$WORK":/work -w /work/harness \
   -v "$WORK/.cache/uv":/root/.cache/uv \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
@@ -108,13 +131,13 @@ docker run -d --name xvla-serve --gpus '"device=0"' --network host \
   "$VERIFY_IMAGE" \
   vla-eval serve -c /work/configs/serve-robotwin-local.yaml
 for i in $(seq 1 120); do
-  [ "$(docker inspect -f '{{.State.Running}}' xvla-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs xvla-serve 2>&1 | tail -n 15; exit 1; }
+  [ "$(docker inspect -f '{{.State.Running}}' cogact-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
   if (echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null; then echo "serve UP"; break; fi
-  [ "$i" = "120" ] && { echo "serve 超时"; docker logs xvla-serve 2>&1 | tail -n 15; exit 1; }
+  [ "$i" = "120" ] && { echo "serve 超时"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
   sleep 10
 done
 
-echo "[6/6] run_sharded 全块跑（分片 $RW_SHARDS，录像=$RW_VIDEO，cpu 软渲染）"
+echo "[6/6] run_sharded 全块跑（分片 $RW_SHARDS，录像=$RW_VIDEO，gpu 渲染）"
 VIDEO_FLAG="--no-record-video"
 [ "$RW_VIDEO" = "1" ] && VIDEO_FLAG="--record-video"
 set +e
@@ -131,8 +154,8 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -c "conda run --no-capture-output -n robotwin bash /opt/harness-scripts/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
 set -e
-docker logs xvla-serve > "$OUTDIR/xvla-serve.log" 2>&1 || true
-docker rm -f xvla-serve 2>/dev/null || true
+docker logs cogact-serve > "$OUTDIR/cogact-serve.log" 2>&1 || true
+docker rm -f cogact-serve 2>/dev/null || true
 ls -lh "$OUTDIR" || true
 echo "chunk_exit=$CODE"
 exit $CODE
