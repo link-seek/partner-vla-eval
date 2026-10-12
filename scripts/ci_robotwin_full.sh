@@ -60,7 +60,7 @@ IFS=',' read -ra TLIST <<< "$RW_TASKS"
 for t in "${TLIST[@]}"; do
 echo "  - benchmark: \"vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark\""
 echo "    name: $t"
-echo "    episodes_per_task: $RW_EPISODES"
+echo "    episodes_per_task: 1"
 echo "    params:"
 echo "      task_name: $t"
 echo "      task_config: demo_clean"
