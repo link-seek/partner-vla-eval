@@ -131,7 +131,7 @@ for attempt in 1 2 3; do
   start_serve
   sleep 15
   if wait_serve; then SERVE_OK=1; break; fi
-  echo "serve 未起来 (尝试 $attempt), 尾日志:"; docker logs cogact-serve 2>&1 | tail -n 15
+  echo "serve 未起来 (尝试 $attempt), exit=$(docker inspect -f '{{.State.ExitCode}}' cogact-serve 2>/dev/null), 尾日志:"; docker logs cogact-serve 2>&1 | tail -n 15; docker logs cogact-serve 2>&1 | head -n 80 > results/serve-debug-attempt$attempt.log || true
   docker rm -f cogact-serve 2>/dev/null || true
   sleep 10
 done
