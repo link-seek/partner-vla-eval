@@ -9,4 +9,8 @@ RUN pip install --no-cache-dir --upgrade pip uv
 RUN pip install --no-cache-dir torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 RUN pip install --no-cache-dir "lerobot==0.6.0"
 RUN pip install --no-cache-dir "vla-eval==0.7.0"
+# huggingface-cli：CI 预热权重用（huggingface_hub 自带 entry point，此处显式声明，
+# 防 transitive 依赖变更悄悄 drop 掉 CLI）
+RUN pip install --no-cache-dir "huggingface_hub" \
+ && huggingface-cli --version
 CMD ["bash"]
