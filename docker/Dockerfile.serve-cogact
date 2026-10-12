@@ -5,6 +5,9 @@
 ARG HARNESS_REF=v0.7.0
 ARG DEXBOTIC_REV=42f72859dfe48bb4c30a09ab151a018c2ca0700a
 FROM python:3.12-slim
+# 全局 ARG 进 stage 要重声明，否则展开为空（已踩坑）
+ARG HARNESS_REF
+ARG DEXBOTIC_REV
 WORKDIR /work
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

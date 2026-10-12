@@ -66,7 +66,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.OBS_AK }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OBS_SK }}
         run: |
-          pip install -q "huggingface_hub" 2>&1 | tail -n 1
+          python3 -m pip install -q --user "huggingface_hub" 2>&1 | tail -n 1
+          export PATH="$PATH:$(python3 -m site --user-base)/bin"
+          command -v huggingface-cli && command -v aws || pip install -q "awscli" 2>&1 | tail -n 1
           IFS=',' read -ra TLIST <<< "${{ inputs.weights_tasks }}"
           for t in "${TLIST[@]}"; do
             t=$(echo "$t" | tr -d '[:space:]')
