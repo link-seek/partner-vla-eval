@@ -1,7 +1,9 @@
-name: Build Serve Images + Sync Weights
+name: Build Serve Images
 
-# 外网活全在这：免费机打 serve 镜像→SWR；权重子集→OBS 标准桶。
-# V100 只从 SWR/OBS 内网取，零下载。
+# 外网构建活：免费机打 serve 镜像→SWR。V100 只从 SWR 内网拉，零构建。
+#
+# 权重不同步到 OBS：15GB 级跨洋上传太慢（实测 60KB/s），权重走 mirror+token 直下 V100（已验证通）。
+# V100 上的“下载”只剩 mirror/SWR/OBS 内网 endpoint，符合内网机要求。
 
 on:
   workflow_dispatch:
@@ -10,18 +12,12 @@ on:
         description: "逗号分隔：serve-cogact,serve-xvla（默认全量，xvla Dockerfile 待补先跳过）"
         required: false
         default: "serve-cogact"
-      weights_tasks:
-        description: "逗号分隔 task，下其权重子目录到 OBS（空=跳过）"
-        required: false
-        default: ""
 
 permissions:
   contents: read
 
 env:
   SWR_REG: swr.cn-north-4.myhuaweicloud.com/link-seek
-  OBS_BUCKET: so101-sim-pipeline
-  OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
 
 jobs:
   build-serve:
@@ -54,35 +50,3 @@ jobs:
           esac
           docker build -f "$DOCKERFILE" -t "${{ env.SWR_REG }}/$TAG" .
           docker push "${{ env.SWR_REG }}/$TAG"
-
-  sync-weights:
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
-    steps:
-      - name: Download subset from HF + upload to OBS
-        if: inputs.weights_tasks != ''
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.OBS_AK }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.OBS_SK }}
-        run: |
-          python3 -m pip install -q --user "huggingface_hub" 2>&1 | tail -n 1
-          export PATH="$PATH:$(python3 -m site --user-base)/bin"
-          # 新版 hub CLI 改名 hf，老版叫 huggingface-cli，兼容
-          if command -v hf >/dev/null 2>&1; then HFCLI="hf"; else HFCLI="huggingface-cli"; fi
-          command -v aws >/dev/null || pip install -q "awscli" 2>&1 | tail -n 1
-          IFS=',' read -ra TLIST <<< "${{ inputs.weights_tasks }}"
-          for t in "${TLIST[@]}"; do
-            t=$(echo "$t" | tr -d '[:space:]')
-            [ -z "$t" ] && continue
-            DEST="s3://${{ env.OBS_BUCKET }}/weights/robotwin-db-cogact/$t/"
-            if aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 ls "$DEST" 2>/dev/null | grep -q .; then
-              echo "$t 已在 OBS，跳过"; continue
-            fi
-            echo "== $t =="
-            mkdir -p /tmp/w && cd /tmp/w
-            "$HFCLI" download Dexmal/robotwin-db-cogact --include "$t/*" --local-dir "$t-dl"
-            aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 cp "$t-dl/$t" "$DEST" --recursive
-            rm -rf "$t-dl"
-            cd - > /dev/null
-          done
