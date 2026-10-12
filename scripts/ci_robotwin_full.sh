@@ -99,12 +99,20 @@ docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
 
 echo "[4/6] 预热 DB-CogACT 权重（按块内 task 子目录）"
 for i in 1 2 3; do
-  if SNAP=$(docker run --rm --network host \
+  docker run --rm --network host \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
     -e RW_TASKS="${RW_TASKS:-grab_roller}" \
-    "$VERIFY_IMAGE" python -c "from huggingface_hub import snapshot_download; import os; pats=[t.strip()+"/*" for t in os.environ.get("RW_TASKS","grab_roller").split(",")]; print(snapshot_download('"'"'Dexmal/robotwin-db-cogact'"'"', allow_patterns=pats, max_workers=4))" 2>&1 | tee /tmp/prewarm.log | tail -n 1) && [ -n "$SNAP" ]; then
+    "$VERIFY_IMAGE" python - > /tmp/prewarm.out 2>/tmp/prewarm.log << 'PYEOF_INNER'
+import os
+from huggingface_hub import snapshot_download
+tasks = [t.strip() for t in os.environ.get("RW_TASKS", "grab_roller").split(",") if t.strip()]
+pats = [t + "/*" for t in tasks]
+print(snapshot_download("Dexmal/robotwin-db-cogact", allow_patterns=pats, max_workers=4))
+PYEOF_INNER
+  SNAP=$(tail -n 1 /tmp/prewarm.out)
+  if [ -n "$SNAP" ] && [ "${SNAP#/}" != "$SNAP" ]; then
     echo "snapshot: $SNAP"; break
   fi
   tail -n 5 /tmp/prewarm.log 2>/dev/null || true
