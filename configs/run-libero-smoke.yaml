@@ -1,10 +1,19 @@
-# LIBERO 对照 smoke，上游 configs/benchmarks/libero/smoke_test.yaml 的本地镜像引用
-# 用于证明 serve 链路本身正常，再对比 MolmoSpaces 是否额外挂。
+# LIBERO 对照 smoke（上游 smoke_test.yaml 口径，镜像切 SWR 0.7.0）
+# 1 task x 1ep：只验 serve 链路，不计分。
 
 server:
   url: "ws://localhost:8000"
 
 docker:
-  image: ghcr.io/allenai/vla-evaluation-harness/libero:latest
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0
 
 output_dir: "./results"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.libero.benchmark:LIBEROBenchmark"
+    episodes_per_task: 1
+    max_tasks: 1
+    params:
+      suite: libero_spatial
+      seed: 7
+      num_steps_wait: 10
