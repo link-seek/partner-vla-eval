@@ -13,6 +13,10 @@ on:
         description: "逗号分隔：libero,calvin,robotwin（默认全量）"
         required: false
         default: "libero,calvin,robotwin"
+      tag:
+        description: "上游 tag（默认 0.7.0；robotwin 0.8.0 含 expert_seeds+warp 修）"
+        required: false
+        default: "0.7.0"
 
 permissions:
   contents: read
@@ -20,7 +24,6 @@ permissions:
 env:
   SRC_REG: ghcr.io/allenai/vla-evaluation-harness
   DST_REG: swr.cn-north-4.myhuaweicloud.com/link-seek
-  TAG: "0.7.0"
 
 jobs:
   sync:
@@ -50,10 +53,10 @@ jobs:
         run: |
           for i in 1 2 3; do
             if skopeo copy --all \
-              "docker://${{ env.SRC_REG }}/${{ matrix.image }}:${{ env.TAG }}" \
+              "docker://${{ env.SRC_REG }}/${{ matrix.image }}:${{ inputs.tag }}" \
               --dest-creds "cn-north-4@${{ secrets.OBS_AK }}:${{ env.LOGIN_KEY }}" \
-              "docker://${{ env.DST_REG }}/vla-eval-${{ matrix.image }}:${{ env.TAG }}"; then
-              echo "synced ${{ matrix.image }}:${{ env.TAG }} (attempt $i)"; break
+              "docker://${{ env.DST_REG }}/vla-eval-${{ matrix.image }}:${{ inputs.tag }}"; then
+              echo "synced ${{ matrix.image }}:${{ inputs.tag }} (attempt $i)"; break
             fi
             echo "attempt $i failed, retry in 60s..."; sleep 60
             [ "$i" = "3" ] && exit 1
