@@ -23,13 +23,13 @@ on:
         required: false
         default: "0"
       bench_tag:
-        description: "benchmark 镜像 tag（0.8.0 含 expert_seeds+warp 修）"
+        description: "benchmark 镜像 tag（0.8.0 含 expert_seeds+warp 修，已验证）"
         required: false
-        default: "0.7.0"
+        default: "0.8.0"
       skip_expert:
-        description: "true=盲种子（0.7.0），false=校验种子（0.8.0 探）"
+        description: "true=盲种子，false=校验种子（0.8.0 默认）"
         required: false
-        default: "true"
+        default: "false"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
