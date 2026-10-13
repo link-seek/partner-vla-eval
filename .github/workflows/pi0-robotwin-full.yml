@@ -68,7 +68,8 @@ jobs:
   chunk:
     needs: start-ecs
     runs-on: [self-hosted, Linux, X64, V100-pi0]
-    timeout-minutes: 360
+    # 自托管上限 5 天；50ep/轮约 3-5h，设 24h 留足（公有 runner 才限 6h）
+    timeout-minutes: 1440
     steps:
       - uses: actions/checkout@v4
         with:
