@@ -26,6 +26,10 @@ on:
         description: "benchmark 镜像 tag（0.8.0 含 expert_seeds+warp 修）"
         required: false
         default: "0.7.0"
+      skip_expert:
+        description: "true=盲种子（0.7.0），false=校验种子（0.8.0 探）"
+        required: false
+        default: "true"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -80,6 +84,7 @@ jobs:
           RW_SHARDS: ${{ inputs.shards }}
           RW_VIDEO: ${{ inputs.video }}
           RW_BENCH_TAG: ${{ inputs.bench_tag }}
+          RW_SKIP_EXPERT: ${{ inputs.skip_expert }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_robotwin_full.sh

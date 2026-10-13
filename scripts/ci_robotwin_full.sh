@@ -58,7 +58,7 @@ echo "      task_config: demo_clean"
 echo "      seed: 0"
 echo "      instruction_type: seen"
 echo "      test_num: $RW_EPISODES"
-echo "      skip_expert_check: true  # 0.7.0 镜像无 expert_seeds，false 必掉进已坏的 oracle；坏种子记 error 单列"
+echo "      skip_expert_check: ${RW_SKIP_EXPERT:-true}  # 0.7.0 无 bundled seeds 必须 true；0.8.0 探 false 走自带种子+oracle"
 echo "    action_dim: 14"
 done
 } > "$GEN"
