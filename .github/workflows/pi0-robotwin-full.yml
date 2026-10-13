@@ -22,6 +22,10 @@ on:
         description: "1=录像，默认关"
         required: false
         default: "0"
+      bench_tag:
+        description: "benchmark 镜像 tag（0.8.0 含 expert_seeds+warp 修）"
+        required: false
+        default: "0.7.0"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -75,6 +79,7 @@ jobs:
           RW_EPISODES: ${{ inputs.episodes }}
           RW_SHARDS: ${{ inputs.shards }}
           RW_VIDEO: ${{ inputs.video }}
+          RW_BENCH_TAG: ${{ inputs.bench_tag }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_robotwin_full.sh

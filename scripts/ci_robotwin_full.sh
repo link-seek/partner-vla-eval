@@ -11,7 +11,7 @@ set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
 HARNESS_REF="${HARNESS_REF:-v0.7.0}"
-ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.7.0"
+ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.7.0}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 RW_TASKS="${RW_TASKS:-grab_roller,adjust_bottle,click_bell,handover_block,stack_blocks_two}"
 RW_EPISODES="${RW_EPISODES:-50}"
