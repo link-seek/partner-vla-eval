@@ -1,0 +1,37 @@
+# X-VLA serve 镜像：V100 离线跑，依赖全烘，uv 缓存预热。
+# 构建机要求外网（免费 runner）。运行时（V100）零下载：UV_OFFLINE=1。
+ARG HARNESS_REF=v0.7.0
+FROM python:3.12-slim
+ARG HARNESS_REF
+WORKDIR /work
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir --upgrade pip uv
+
+# vla-eval CLI（serve 入口；纯 python）
+RUN pip install --no-cache-dir "vla-eval==0.7.0"
+
+# harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
+RUN git clone --depth 1 --branch ${HARNESS_REF} \
+      https://github.com/allenai/vla-evaluation-harness.git harness
+
+# V100 补丁（烘进镜像不再运行时 sed）：
+# torch 钉 2.6.0cu126（sm_70 无 cu128 内核）/ python 放宽
+RUN sed -i 's|"torch>=2.2"|"torch==2.6.0"|' \
+      harness/src/vla_eval/model_servers/xvla.py \
+ && sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' \
+      harness/src/vla_eval/model_servers/xvla.py \
+ && grep -nE '"torch==|requires-python' \
+      harness/src/vla_eval/model_servers/xvla.py | head -n 4
+
+# uv 缓存预热（随镜像层走）
+ENV PIP_INDEX_URL=https://download.pytorch.org/whl/cu126
+ENV PIP_EXTRA_INDEX_URL=https://pypi.org/simple
+ENV UV_OFFLINE=0
+RUN cd /work/harness \
+ && uv run src/vla_eval/model_servers/xvla.py --help > /dev/null
+
+WORKDIR /work/harness
+CMD ["bash"]

@@ -1,0 +1,10 @@
+# X-VLA serve 配置（LIBERO，模拟伙伴：第三家族，验证模板）
+# 上游：configs/model_servers/xvla/libero.yaml（官称 98.1%，已复现 97.4%）
+script: "src/vla_eval/model_servers/xvla.py"
+args:
+  model_path: 2toINF/X-VLA-Libero
+  benchmark_profile: libero
+  domain_id: 3
+  chunk_size: 30
+  denoising_steps: 10
+  port: 8000

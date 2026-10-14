@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
-SERVE_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0"
+SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0}"
 mkdir -p results
 
 echo "[0/4] workspace 属主修复 + 缓存目录预建"
