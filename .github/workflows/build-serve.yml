@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       images:
-        description: "逗号分隔：serve-cogact,verify（serve-xvla Dockerfile 待补先跳过）"
+        description: "逗号分隔：serve-cogact,serve-pi05,verify（serve-xvla Dockerfile 待补先跳过）"
         required: false
-        default: "serve-cogact,verify"
+        default: "serve-cogact,serve-pi05,verify"
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [serve-cogact, verify]
+        image: [serve-cogact, serve-pi05, verify]
     steps:
       - uses: actions/checkout@v4
       - name: Filter
@@ -47,6 +47,7 @@ jobs:
         run: |
           case "${{ matrix.image }}" in
             serve-cogact) DOCKERFILE=docker/Dockerfile.serve-cogact; TAG=vla-serve-cogact:0.7.0 ;;
+            serve-pi05) DOCKERFILE=docker/Dockerfile.serve-pi05; TAG=vla-serve-pi05:0.7.0 ;;
             verify) DOCKERFILE=docker/Dockerfile.verify; TAG=vla-verify:0.1 ;;
           esac
           docker build -f "$DOCKERFILE" -t "${{ env.SWR_REG }}/$TAG" .

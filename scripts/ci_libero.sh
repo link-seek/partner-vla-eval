@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
+SERVE_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0"
 mkdir -p results
 
 echo "[0/4] workspace 属主修复 + 缓存目录预建"
@@ -33,13 +34,15 @@ done
 echo "[3/4] 启动 pi05 serve (GPU0, 后台)"
 docker rm -f pi05-serve 2>/dev/null || true
 docker run -d --name pi05-serve --gpus '"device=0"' --network host \
-  -v "$WORK":/work -w /work/harness \
-  -v "$WORK/.cache/uv":/root/.cache/uv \
+  -v "$WORK/configs":/work/configs:ro \
+  -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  -w /work/harness \
   -e CUDA_VISIBLE_DEVICES=0 -e COMPILE_MODEL=false \
+  -e UV_OFFLINE=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
-  "$VERIFY_IMAGE" \
+  "$SERVE_IMAGE" \
   vla-eval serve -c /work/configs/serve-pi05-libero.yaml
 for i in $(seq 1 120); do
   [ "$(docker inspect -f '{{.State.Running}}' pi05-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs pi05-serve 2>&1 | tail -n 15; exit 1; }
