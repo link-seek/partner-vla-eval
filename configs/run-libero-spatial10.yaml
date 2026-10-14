@@ -1,0 +1,17 @@
+# LIBERO 自演/论文实验 B：spatial 1 task x 10ep（精度对照用，n=10）。
+server:
+  url: "ws://localhost:8000"
+
+docker:
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0
+
+output_dir: "./results"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.libero.benchmark:LIBEROBenchmark"
+    episodes_per_task: 10
+    max_tasks: 1
+    params:
+      suite: libero_spatial
+      seed: 7
+      num_steps_wait: 10
