@@ -66,7 +66,7 @@ docker run --rm --gpus all --network host \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$CALVIN_IMAGE" \
-  run --config /work/configs/run-calvin-smoke.yaml --server-url ws://localhost:8000 2>&1 | tee results/calvin-smoke.log
+  run --config /work/configs/run-calvin-smoke.yaml --server-url ws://localhost:8000 --output-dir /work/results/calvin-smoke 2>&1 | tee results/calvin-smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 docker logs cogact-serve > results/cogact-calvin-serve.log 2>&1 || true
