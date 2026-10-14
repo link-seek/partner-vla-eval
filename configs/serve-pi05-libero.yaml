@@ -1,0 +1,15 @@
+# pi0 serve 配置（LIBERO 口径，自包含，不用 extends）
+# 上游：configs/model_servers/lerobot/pi05_libero.yaml
+# 体积关系见 serve-pi05.yaml（Molmo 版）；本文件给 LIBERO smoke 用。
+script: "src/vla_eval/model_servers/lerobot.py"
+args:
+  policy_type: pi05
+  checkpoint: lerobot/pi05_libero_finetuned
+  device: cuda
+  port: 8000
+  compile_model: false
+  state_key: observation.state
+  chunk_size: 10
+  image_keys:
+    agentview: image
+    wrist: image2
