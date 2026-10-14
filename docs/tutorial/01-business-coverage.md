@@ -16,6 +16,7 @@
 | 双臂基线 | RobotWin 2.0 | DB-CogACT（按 task 分头） | ✅ 4 轮出分 |
 | 双臂长程通用 | DuoBench | 待定 | 🔲 规划位（11 task×100ep，星少，先 smoke） |
 | 记忆专项 | RMBench | 待定 | 🔲 规划位（9 题，同 RobotWin 栈） |
+| 世界模型 | 仅限带动作输出的策略（如 FastWAM/VLA-JEPA 系走同一桥接）；纯视频预测不收 | — | 口径见 06 |
 | 双臂紧耦合前沿 | BiCoord | 待定 | 🔲 二期（harness 未接） |
 | 真机 | — | — | 🔲 后放（SimplerEnv 等） |
 
