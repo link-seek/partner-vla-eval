@@ -1,0 +1,14 @@
+# pi0 serve 配置（LIBERO，模拟伙伴：第三家族，验证模板与桥接）
+# 权重 lerobot/pi0（base，非 finetune，分数预期低，只验流程）。
+script: "src/vla_eval/model_servers/lerobot.py"
+args:
+  policy_type: pi0
+  checkpoint: lerobot/pi0
+  device: cuda
+  port: 8000
+  compile_model: false
+  state_key: observation.state
+  chunk_size: 10
+  image_keys:
+    agentview: image
+    wrist: image2
