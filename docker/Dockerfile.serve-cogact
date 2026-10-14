@@ -4,10 +4,13 @@
 # 不许 git clone / pip / HF。
 ARG HARNESS_REF=v0.7.0
 ARG DEXBOTIC_REV=42f72859dfe48bb4c30a09ab151a018c2ca0700a
+# 论文实验 B 用：float16（V100 默认）/ float32（对照组，build 时 --build-arg DTYPE=torch.float32）
+ARG DTYPE=torch.float16
 FROM python:3.12-slim
 # 全局 ARG 进 stage 要重声明，否则展开为空（已踩坑）
 ARG HARNESS_REF
 ARG DEXBOTIC_REV
+ARG DTYPE
 WORKDIR /work
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,7 +36,7 @@ RUN sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", r
       harness/src/vla_eval/model_servers/dexbotic/cogact.py \
  && sed -i 's|"transformers>=4.40,<5"|"transformers==4.46.3"|' \
       harness/src/vla_eval/model_servers/dexbotic/cogact.py \
- && sed -i 's|torch_dtype=torch.bfloat16|torch_dtype=torch.float16|' \
+ && sed -i "s|torch_dtype=torch.bfloat16|torch_dtype=${DTYPE}|" \
       harness/src/vla_eval/model_servers/dexbotic/cogact.py \
  && sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' \
       harness/src/vla_eval/model_servers/dexbotic/cogact.py \

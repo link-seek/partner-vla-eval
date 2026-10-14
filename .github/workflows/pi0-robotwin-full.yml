@@ -30,6 +30,10 @@ on:
         description: "true=盲种子，false=校验种子（0.8.0 默认）"
         required: false
         default: "false"
+      serve_image:
+        description: "serve 镜像（论文实验 B 用 fp32 版）"
+        required: false
+        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -86,6 +90,7 @@ jobs:
           RW_VIDEO: ${{ inputs.video }}
           RW_BENCH_TAG: ${{ inputs.bench_tag }}
           RW_SKIP_EXPERT: ${{ inputs.skip_expert }}
+          SERVE_IMAGE: ${{ inputs.serve_image }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_robotwin_full.sh
