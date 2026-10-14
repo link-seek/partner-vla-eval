@@ -4,6 +4,15 @@ name: LIBERO Smoke (pi05)
 
 on:
   workflow_dispatch:
+    inputs:
+      serve_yaml:
+        description: "serve 配置（如 serve-smolvla-libero.yaml）"
+        required: false
+        default: "serve-pi05-libero.yaml"
+      run_yaml:
+        description: "run 配置"
+        required: false
+        default: "run-libero-smoke.yaml"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -53,6 +62,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OBS_AK: ${{ secrets.OBS_AK }}
           OBS_SK: ${{ secrets.OBS_SK }}
+          SERVE_YAML: ${{ inputs.serve_yaml }}
+          RUN_YAML: ${{ inputs.run_yaml }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_libero.sh

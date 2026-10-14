@@ -1,0 +1,14 @@
+# SmolVLA serve 配置（LIBERO，模拟伙伴严格按对接指导书填写，不用内部知识）
+# 假设（待验证）：相机/状态映射同 pi05 LIBERO，chunk 10 对 LIBERO 节拍。
+script: "src/vla_eval/model_servers/lerobot.py"
+args:
+  policy_type: smolvla
+  checkpoint: lerobot/smolvla_base
+  device: cuda
+  port: 8000
+  compile_model: false
+  state_key: observation.state
+  chunk_size: 10
+  image_keys:
+    agentview: image
+    wrist: image2

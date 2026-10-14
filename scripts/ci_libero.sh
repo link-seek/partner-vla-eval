@@ -1,6 +1,6 @@
 #!/bin/bash
 # LIBERO smoke: host 编排 serve(pi05) + run(SWR libero 镜像当 client)。
-# serve 用 configs/serve-pi05-libero.yaml，1 task x 1ep，只验链路。
+# serve 用 $SERVE_YAML（默认 serve-pi05-libero.yaml），run 用 $RUN_YAML。
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
@@ -43,7 +43,7 @@ docker run -d --name pi05-serve --gpus '"device=0"' --network host \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
   "$SERVE_IMAGE" \
-  vla-eval serve -c /work/configs/serve-pi05-libero.yaml
+  vla-eval serve -c /work/configs/${SERVE_YAML:-serve-pi05-libero.yaml}
 for i in $(seq 1 120); do
   [ "$(docker inspect -f '{{.State.Running}}' pi05-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs pi05-serve 2>&1 | tail -n 15; exit 1; }
   if (echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null; then echo "serve UP"; break; fi
@@ -60,7 +60,7 @@ docker run --rm --gpus all --network host \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$LIBERO_IMAGE" \
-  run --config /work/configs/run-libero-smoke.yaml --server-url ws://localhost:8000 --output-dir /work/results/libero-smoke 2>&1 | tee results/libero-smoke.log
+  run --config /work/configs/${RUN_YAML:-run-libero-smoke.yaml} --server-url ws://localhost:8000 --output-dir /work/results/libero-smoke 2>&1 | tee results/libero-smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 docker logs pi05-serve > results/pi05-serve.log 2>&1 || true
