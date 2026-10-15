@@ -1,0 +1,81 @@
+name: Queue Conductor
+
+# 非阻塞队列：GPU 任务跑完自动发下一个，不依赖任何 agent 会话活着。
+# 触发：GPU 三 workflow 的 run completed。凭 queue-state.json 的 expect_run_id
+# 认领（只认自己发出去的 run，人工手动发的 completed 直接忽略不推进）。
+# 成功 → dispatch 下一件并更新 state；失败 → #1 帖记一笔等人修，不推进。
+# 并发：同组串行。注意：dispatch 会挤掉 pending（已验证 3 次），所以本队列
+# 同一时间只允许 conductor 持有一个待跑项——人工跑 GPU 期间不要 dispatch。
+
+on:
+  workflow_run:
+    workflows: ["RobotWin Full (chunked)", "LIBERO Smoke (pi05)", "CALVIN Smoke (DB-CogACT)"]
+    types: [completed]
+
+concurrency:
+  group: queue-conductor
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+  discussions: write
+
+jobs:
+  advance:
+    if: github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Advance or report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DONE_ID: ${{ github.event.workflow_run.id }}
+          DONE_WF: ${{ github.event.workflow_run.name }}
+          DONE_CONC: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          set -e
+          EXPECT=$(python3 -c "import json; print(json.load(open('.github/queue-state.json'))['expect_run_id'])")
+          echo "done=$DONE_ID ($DONE_WF/$DONE_CONC) expect=$EXPECT"
+          if [ "$DONE_ID" != "$EXPECT" ]; then
+            echo "not mine (manual run?), no advance"
+            exit 0
+          fi
+          if [ "$DONE_CONC" != "success" ]; then
+            gh discussion comment 1 -R link-seek/partner-vla-eval --body \
+              "## 队列告警：$DONE_WF 挂了（run $DONE_ID）
+
+              conductor 不推进，等人工修。日志：https://github.com/link-seek/partner-vla-eval/actions/runs/$DONE_ID"
+            exit 0
+          fi
+          NEXT=$(python3 -c "import json; print(json.load(open('.github/queue-state.json'))['next'])")
+          echo "advancing to: $NEXT"
+          case "$NEXT" in
+            libero-smoke)
+              gh workflow run pi-libero-smoke.yml -R link-seek/partner-vla-eval \
+                -f bench_image="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0"
+              sleep 30
+              NEWID=$(gh run list -R link-seek/partner-vla-eval --limit 1 --json databaseId --jq '.[0].databaseId')
+              FOLLOW="calvin-smoke"
+              ;;
+            calvin-smoke)
+              gh workflow run pi-calvin-smoke.yml -R link-seek/partner-vla-eval \
+                -f bench_image="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0"
+              sleep 30
+              NEWID=$(gh run list -R link-seek/partner-vla-eval --limit 1 --json databaseId --jq '.[0].databaseId')
+              FOLLOW="manual-cut-tags"
+              ;;
+            *)
+              gh discussion comment 1 -R link-seek/partner-vla-eval --body \
+                "## 队列到站：$DONE_WF 绿了，下一步 $NEXT 是人工活
+
+                conductor 止步，请人工接手（见巡检文档）。"
+              exit 0
+              ;;
+          esac
+          python3 -c "import json; s=json.load(open('.github/queue-state.json')); s['expect_run_id']=$NEWID; s['next']='$FOLLOW'; json.dump(s, open('.github/queue-state.json','w'))"
+          git config user.name "queue-conductor" && git config user.email "conductor@local"
+          git add .github/queue-state.json && git commit -m "chore: 队列推进 $DONE_WF -> $NEXT (run $NEWID)" && git push
+          gh discussion comment 1 -R link-seek/partner-vla-eval --body \
+            "## 队列推进：$DONE_WF ✅ → 已发 $NEXT（run $NEWID）"
