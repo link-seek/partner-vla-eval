@@ -5,6 +5,11 @@ name: Inspect V100 Runner
 
 on:
   workflow_dispatch:
+    inputs:
+      remote_cmd:
+        description: "V100 上只读命令（默认列资产目录）"
+        required: false
+        default: "ls -la /data/robotwin-assets/ 2>&1 | head -n 20"
 
 permissions:
   contents: read
@@ -48,4 +53,6 @@ jobs:
           ~/.ssh-runner-fix/ssh.sh root@$V100 'ls -d ~/actions-runner* /opt/actions-runner* /root/*runner* 2>/dev/null; echo "---"; ps aux | grep -i "Runner.Listener" | grep -v grep | head -n 5; echo "---"; systemctl list-units --type=service --state=running 2>/dev/null | grep -i -E "runner|actions" | head -n 5; echo "---"; ls /etc/systemd/system/ 2>/dev/null | grep -i -E "runner|actions" | head -n 5' 2>&1 | tail -n 30
           echo "== chown work dirs =="
           ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 'chown -R runner:runner /data/gh-runner/_work /data/gh-runner2/_work && ls -ld /data/gh-runner/_work/partner-vla-eval/partner-vla-eval/.cache' 2>&1 | tail -n 5
+          echo "== remote_cmd =="
+          ~/.ssh-runner-fix/ssh.sh root@114.116.228.0 '${{ inputs.remote_cmd }}' 2>&1 | tail -n 20
           echo "inspect exit=$?"
