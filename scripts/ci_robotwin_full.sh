@@ -43,6 +43,13 @@ echo ""
 echo "docker:"
 echo "  image: $ROBOTWIN_IMAGE"
 echo "  user: host"
+if [ -n "${RW_VOLUMES:-}" ]; then
+  echo "  volumes:"
+  IFS=';' read -ra VLIST <<< "$RW_VOLUMES"
+  for v in "${VLIST[@]}"; do
+    echo "    - \"$v\""
+  done
+fi
 echo ""
 echo "output_dir: \"./$OUTDIR\""
 echo ""

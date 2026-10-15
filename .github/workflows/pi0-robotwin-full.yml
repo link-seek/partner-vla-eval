@@ -30,6 +30,10 @@ on:
         description: "true=盲种子，false=校验种子（0.8.0 默认）"
         required: false
         default: "false"
+      volumes:
+        description: "分号分隔的 -v 挂载（资产外置对照实验）"
+        required: false
+        default: ""
       serve_image:
         description: "serve 镜像（论文实验 B 用 fp32 版）"
         required: false
@@ -90,6 +94,7 @@ jobs:
           RW_VIDEO: ${{ inputs.video }}
           RW_BENCH_TAG: ${{ inputs.bench_tag }}
           RW_SKIP_EXPERT: ${{ inputs.skip_expert }}
+          RW_VOLUMES: ${{ inputs.volumes }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
         run: |
           mkdir -p results
