@@ -44,5 +44,5 @@ jobs:
         run: |
           curl -sSL -o /tmp/obsutil.tgz https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz
           tar -xzf /tmp/obsutil.tgz -C /tmp
-          /tmp/obsutil_linux_amd64_*/obsutil cp /tmp/robotwin-assets.tar obs://so101-sim-pipeline/assets/robotwin/${{ inputs.robotwin_ref }}/assets.tar -e https://obs.cn-north-4.myhuaweicloud.com -ak "${{ secrets.OBS_AK }}" -sk "${{ secrets.OBS_SK }}" -f -r
-          /tmp/obsutil_linux_amd64_*/obsutil cp /tmp/asset-list.txt obs://so101-sim-pipeline/assets/robotwin/${{ inputs.robotwin_ref }}/manifest.txt -e https://obs.cn-north-4.myhuaweicloud.com -ak "${{ secrets.OBS_AK }}" -sk "${{ secrets.OBS_SK }}" -f
+          /tmp/obsutil_linux_amd64_*/obsutil cp /tmp/robotwin-assets.tar obs://so101-sim-pipeline/assets/robotwin/${{ inputs.robotwin_ref }}/assets.tar -e https://obs.cn-north-4.myhuaweicloud.com -i "${{ secrets.OBS_AK }}" -k "${{ secrets.OBS_SK }}" -f -r
+          /tmp/obsutil_linux_amd64_*/obsutil cp /tmp/asset-list.txt obs://so101-sim-pipeline/assets/robotwin/${{ inputs.robotwin_ref }}/manifest.txt -e https://obs.cn-north-4.myhuaweicloud.com -i "${{ secrets.OBS_AK }}" -k "${{ secrets.OBS_SK }}" -f
