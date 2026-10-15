@@ -6,8 +6,8 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 MOLMO_IMAGE="ghcr.io/allenai/vla-evaluation-harness/molmospaces:latest"
-# LIBERO 走 SWR（北京四内网），镜像暂留 0.7.0（0.8.0 待 sync-images 同步+smoke 重验）；molmo 上游无包，沿用本地构建
-LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0"
+# LIBERO 走 SWR（北京四内网），镜像 0.8.0（smoke 已绿）；molmo 上游无包，沿用本地构建
+LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 mkdir -p results
 echo "[0/5] workspace 属主修复 (容器以 root 写文件, 改回 runner 1001)"

@@ -66,12 +66,12 @@ services:
   benchmark-libero:
     <<: *benchmark
     profiles: [libero]
-    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0
 
   benchmark-calvin:
     <<: *benchmark
     profiles: [calvin]
-    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.7.0
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0
 
   benchmark-robotwin:
     <<: *benchmark
