@@ -17,6 +17,10 @@ on:
         description: "serve 镜像（X-VLA 用 vla-serve-xvla:0.7.0）"
         required: false
         default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0"
+      bench_image:
+        description: "benchmark 镜像（0.8.0 已同步到 SWR）"
+        required: false
+        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -69,6 +73,7 @@ jobs:
           SERVE_YAML: ${{ inputs.serve_yaml }}
           RUN_YAML: ${{ inputs.run_yaml }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
+          LIBERO_IMAGE: ${{ inputs.bench_image }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_libero.sh

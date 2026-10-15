@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 SERVE_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
-CALVIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.7.0"
+CALVIN_IMAGE="${CALVIN_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0}"
 mkdir -p results
 
 echo "[0/4] workspace 属主修复 + 缓存目录预建"
