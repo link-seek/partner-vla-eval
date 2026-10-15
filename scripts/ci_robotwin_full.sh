@@ -150,6 +150,8 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
+echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<内置>}"
+echo "outer -v flags: ${MOUNT_FLAGS[*]:-<无>}"
 docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
