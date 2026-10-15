@@ -1,0 +1,48 @@
+name: Export RoboTwin Assets
+
+# 资产外置 Phase 1：免费机 clone RoboTwin 同 ref，下资产zip，解包校验，
+# 打包传 OBS（版本目录 = ROBOTWIN_REF）。V100 从 OBS 内网拖，不碰外网。
+
+on:
+  workflow_dispatch:
+    inputs:
+      robotwin_ref:
+        description: "RoboTwin commit（跟 benchmark 镜像一致）"
+        required: false
+        default: "c3ddfa8b97d5519efa828b075999bd0006778e5e"
+
+permissions:
+  contents: read
+
+env:
+  OBS_BUCKET: so101-sim-pipeline
+  OBS_ENDPOINT: https://so101-sim-pipeline.obs.cn-north-4.myhuaweicloud.com
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.OBS_AK }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBS_SK }}
+    steps:
+      - name: Clone RoboTwin + download assets
+        run: |
+          rm -rf RoboTwin && git init -q RoboTwin && cd RoboTwin
+          git remote add origin https://github.com/RoboTwin-Platform/RoboTwin.git
+          git fetch -q --depth 1 origin "${{ inputs.robotwin_ref }}"
+          git checkout -q FETCH_HEAD
+          cd assets && python3 _download.py
+          ls -la
+      - name: Unzip + manifest
+        run: |
+          cd RoboTwin/assets
+          for z in objects.zip embodiments.zip background_texture.zip; do unzip -qo "$z" && rm -f "$z"; done
+          ls
+          find objects embodiments background_texture files -type f | sort > /tmp/asset-list.txt; wc -l /tmp/asset-list.txt
+          tar -cf /tmp/robotwin-assets.tar objects embodiments background_texture files
+          ls -lh /tmp/robotwin-assets.tar
+      - name: Upload to OBS
+        run: |
+          aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 cp /tmp/robotwin-assets.tar s3://assets/robotwin/${{ inputs.robotwin_ref }}/assets.tar
+          aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 cp /tmp/asset-list.txt s3://assets/robotwin/${{ inputs.robotwin_ref }}/manifest.txt
