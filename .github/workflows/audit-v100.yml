@@ -1,0 +1,34 @@
+name: V100 Audit
+
+# V100 本机审计（可复用）：传任意只读命令跑完回显。默认：磁盘+镜像分层。
+# 写操作禁令：本 workflow 只跑只读命令（df/docker history/du/ls），不动系统。
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: "只读命令（默认：磁盘+28GB分层审计）"
+        required: false
+        default: "audit-layers"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: [self-hosted, Linux, X64, V100-pi0]
+    timeout-minutes: 30
+    steps:
+      - name: Audit
+        run: |
+          if [ "${{ inputs.cmd }}" = "audit-layers" ]; then
+            echo "=== disk ==="; df -h / /data 2>/dev/null
+            echo "=== docker disk ==="; docker system df
+            echo "=== robotwin 0.8.0 layers (top 20) ==="
+            docker history --no-trunc --format '{{.Size}}\t{{.CreatedBy}}' swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0 2>/dev/null | sort -rh | head -n 20 || docker history swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0 | head -n 25
+            echo "=== key paths inside image ==="
+            docker run --rm --entrypoint bash swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0 -c 'du -sh /app/RoboTwin/assets /app/RoboTwin/envs /opt/conda /workspace/src 2>/dev/null; echo "---"; ls /app/RoboTwin/assets'
+          else
+            echo "custom cmd not implemented; use audit-layers"
+            exit 1
+          fi
