@@ -28,6 +28,7 @@ jobs:
     steps:
       - name: Clone RoboTwin + download assets
         run: |
+          python3 -m pip install -q "huggingface_hub" 2>&1 | tail -n 1
           rm -rf RoboTwin && git init -q RoboTwin && cd RoboTwin
           git remote add origin https://github.com/RoboTwin-Platform/RoboTwin.git
           git fetch -q --depth 1 origin "${{ inputs.robotwin_ref }}"
