@@ -144,7 +144,12 @@ set +e
 # yaml 的 docker.volumes 只对 harness 自己起的 sibling 容器有效（阴性对照已证）。
 # ASSETS_MOUNT 形如 /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro（空=不用）。
 MOUNT_FLAGS=()
-[ -n "${ASSETS_MOUNT:-}" ] && MOUNT_FLAGS+=(-v "$ASSETS_MOUNT")
+if [ -n "${ASSETS_MOUNT:-}" ]; then
+  IFS=';' read -ra VLIST <<< "$ASSETS_MOUNT"
+  for v in "${VLIST[@]}"; do
+    [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
+  done
+fi
 docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
