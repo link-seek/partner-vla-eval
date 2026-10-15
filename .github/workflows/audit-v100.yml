@@ -22,6 +22,12 @@ jobs:
       - name: Audit
         run: |
           if [ "${{ inputs.cmd }}" = "audit-layers" ]; then
+            echo "=== /data top ==="; du -sh /data/* 2>/dev/null | sort -rh | head -n 20
+            echo "=== docker images ==="; docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | sort -k2 -rh | head -n 25
+            echo "=== workspace caches ==="; du -sh /data/gh-runner/_work/*/ 2>/dev/null | sort -rh | head -n 10; du -sh ~/.cache 2>/dev/null
+            exit 0
+          fi
+          if [ "${{ inputs.cmd }}" = "audit-layers-legacy" ]; then
             echo "=== disk ==="; df -h / /data 2>/dev/null
             echo "=== docker disk ==="; docker system df
             echo "=== robotwin 0.8.0 layers (top 20) ==="
