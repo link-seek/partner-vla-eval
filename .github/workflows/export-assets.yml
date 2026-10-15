@@ -22,9 +22,6 @@ jobs:
   export:
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.OBS_AK }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.OBS_SK }}
     steps:
       - name: Clone RoboTwin + download assets
         run: |
@@ -43,7 +40,9 @@ jobs:
           find objects embodiments background_texture files -type f | sort > /tmp/asset-list.txt; wc -l /tmp/asset-list.txt
           tar -cf /tmp/robotwin-assets.tar objects embodiments background_texture files
           ls -lh /tmp/robotwin-assets.tar
-      - name: Upload to OBS
+      - name: Upload to OBS (obsutil)
         run: |
-          aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 cp /tmp/robotwin-assets.tar s3://assets/robotwin/${{ inputs.robotwin_ref }}/assets.tar
-          aws --endpoint-url "${{ env.OBS_ENDPOINT }}" s3 cp /tmp/asset-list.txt s3://assets/robotwin/${{ inputs.robotwin_ref }}/manifest.txt
+          curl -sSL -o /tmp/obsutil.tgz https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz
+          tar -xzf /tmp/obsutil.tgz -C /tmp
+          /tmp/obsutil_linux_amd64_*/obsutil cp /tmp/robotwin-assets.tar obs://so101-sim-pipeline/assets/robotwin/${{ inputs.robotwin_ref }}/assets.tar -e https://obs.cn-north-4.myhuaweicloud.com -ak "${{ secrets.OBS_AK }}" -sk "${{ secrets.OBS_SK }}" -f -r
+          /tmp/obsutil_linux_amd64_*/obsutil cp /tmp/asset-list.txt obs://so101-sim-pipeline/assets/robotwin/${{ inputs.robotwin_ref }}/manifest.txt -e https://obs.cn-north-4.myhuaweicloud.com -ak "${{ secrets.OBS_AK }}" -sk "${{ secrets.OBS_SK }}" -f
