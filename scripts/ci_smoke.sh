@@ -4,9 +4,9 @@
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
-HARNESS_REF="${HARNESS_REF:-v0.7.0}"
+HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 MOLMO_IMAGE="ghcr.io/allenai/vla-evaluation-harness/molmospaces:latest"
-# LIBERO 走 SWR（北京四内网），tag 钉 0.7.0 对齐 HARNESS_REF；molmo 上游无包，沿用本地构建
+# LIBERO 走 SWR（北京四内网），镜像暂留 0.7.0（0.8.0 待 sync-images 同步+smoke 重验）；molmo 上游无包，沿用本地构建
 LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 mkdir -p results

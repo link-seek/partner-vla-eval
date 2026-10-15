@@ -76,7 +76,7 @@ services:
   benchmark-robotwin:
     <<: *benchmark
     profiles: [robotwin]
-    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.7.0
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0
 
   # molmo 上游未发布镜像，沿用本地构建（见 scripts/ci_smoke.sh [2/5]）
   benchmark-molmo:

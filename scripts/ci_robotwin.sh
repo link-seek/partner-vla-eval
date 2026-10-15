@@ -9,9 +9,9 @@
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
-HARNESS_REF="${HARNESS_REF:-v0.7.0}"
+HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
-ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.7.0"
+ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 mkdir -p results
 

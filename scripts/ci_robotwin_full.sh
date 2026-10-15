@@ -10,8 +10,8 @@
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
-HARNESS_REF="${HARNESS_REF:-v0.7.0}"
-ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.7.0}"
+HARNESS_REF="${HARNESS_REF:-v0.8.0}"
+ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 RW_TASKS="${RW_TASKS:-grab_roller,adjust_bottle,click_bell,handover_block,stack_blocks_two}"
 RW_EPISODES="${RW_EPISODES:-50}"
@@ -137,7 +137,7 @@ echo "[6/6] run_sharded 全块跑（分片 $RW_SHARDS，录像=$RW_VIDEO，gpu �
 VIDEO_FLAG="--no-record-video"
 [ "$RW_VIDEO" = "1" ] && VIDEO_FLAG="--record-video"
 set +e
-# run_sharded.sh vendoring 在本仓（scripts/upstream，0.7.0 镜像里缺失）
+# run_sharded.sh vendoring 在本仓（scripts/upstream；0.8.0 Dockerfile 仍只 COPY src/configs，未烘 scripts，挂载保留）
 # 分片跑在卡1：serve 独占卡0，8 分片同卡 SAPIEN 会 hang（watchdog 全杀，见 run 38186912836）。
 # V100 双32G，卡1空闲给渲染。
 # 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，

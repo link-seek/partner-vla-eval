@@ -1,9 +1,9 @@
 name: Sync Images to SWR
 
 # registry-to-registry 直拷（skopeo copy，不落盘）：
-# ghcr.io/allenai/vla-evaluation-harness/<img>:0.7.0
-#   -> swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-<img>:0.7.0
-# tag 钉 0.7.0，对齐 HARNESS_REF=v0.7.0；latest 不跟。
+# ghcr.io/allenai/vla-evaluation-harness/<img>:0.8.0
+#   -> swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-<img>:0.8.0
+# tag 钉 0.8.0，对齐 HARNESS_REF=v0.8.0；latest 不跟。
 # 小镜像跑免费机；robotwin（28.6GB）同样先试免费机，超时再切 hw21。
 
 on:
@@ -14,9 +14,9 @@ on:
         required: false
         default: "libero,calvin,robotwin"
       tag:
-        description: "上游 tag（默认 0.7.0；robotwin 0.8.0 含 expert_seeds+warp 修）"
+        description: "上游 tag（默认 0.8.0；robotwin 0.8.0 含 expert_seeds+warp 修，已验证）"
         required: false
-        default: "0.7.0"
+        default: "0.8.0"
 
 permissions:
   contents: read
