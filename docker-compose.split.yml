@@ -1,0 +1,72 @@
+# 分拆架构（compose 宣言）：仿真 / 评测 / 模型三权分立。
+#
+#   serve      模型模块：serve 烘焙镜像（权重+推理依赖），GPU0
+#   benchmark  评测+仿真：官方 benchmark 镜像暂当环境底座，
+#              已验证的挂载（configs/results/缓存/docker.sock）先行；
+#              Phase 2（资产外置、代码覆盖）待 V100 审计（docker history 量层）
+#              + benchmark 认 env/路径验证后，再打开下面注释掉的卷。
+#
+# 跑法：
+#   1. docker compose -f docker-compose.split.yml up -d serve
+#   2. 等 healthy 后：
+#      docker compose -f docker-compose.split.yml --profile robotwin run --rm benchmark \
+#        run --config /work/configs/run-robotwin-chunk.yaml --server-url ws://serve:8000
+#
+# 等价性承诺：任何挂载覆盖（代码/资产）都版本化记录，
+# 与一体镜像的差值单列量化（见 99-audit）。
+
+name: partner-vla-split
+
+networks:
+  eval:
+    driver: bridge
+
+volumes:
+  hf-cache:
+
+services:
+  serve:
+    image: ${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0}
+    networks:
+      eval:
+        aliases: [serve]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./configs:/work/configs:ro
+      - ./results:/work/results
+      - hf-cache:/root/.cache/huggingface
+    working_dir: /work/harness
+    environment:
+      CUDA_VISIBLE_DEVICES: "0"
+      UV_OFFLINE: "1"
+      HF_ENDPOINT: https://hf-mirror.com
+      HF_HUB_VERBOSITY: warning
+    command: ["vla-eval", "serve", "-c", "/work/configs/${SERVE_CONFIG:-serve-robotwin-local.yaml}"]
+    healthcheck:
+      test: ["CMD-SHELL", "(echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 120s
+
+  benchmark:
+    profiles: [robotwin]
+    image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${BENCH_TAG:-0.8.0}
+    networks: [eval]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./configs:/work/configs:ro
+      - ./results:/work/results
+      - hf-cache:/root/.cache/huggingface
+      # Phase 2（待审计后打开）：
+      # - ./patches/robotwin/<版本>/benchmark.py:/workspace/src/vla_eval/benchmarks/robotwin/benchmark.py:ro
+      # - robotwin-assets:/app/RoboTwin/assets:ro
+    working_dir: /work
+    environment:
+      HF_ENDPOINT: https://hf-mirror.com
