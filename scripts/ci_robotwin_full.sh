@@ -70,6 +70,9 @@ echo "    action_dim: 14"
 done
 } > "$GEN"
 grep -c "task_name:" "$GEN"
+echo "--- generated docker block ---"
+grep -A6 "^docker:" "$GEN" | head -n 10
+echo "--- end docker block ---"
 
 echo "[3/6] 拉镜像（SWR 内网：benchmark + serve 烘焙版，不本地构建）"
 LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
