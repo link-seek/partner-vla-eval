@@ -140,12 +140,18 @@ set +e
 # run_sharded.sh vendoring 在本仓（scripts/upstream，0.7.0 镜像里缺失）
 # 分片跑在卡1：serve 独占卡0，8 分片同卡 SAPIEN 会 hang（watchdog 全杀，见 run 38186912836）。
 # V100 双32G，卡1空闲给渲染。
+# 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，
+# yaml 的 docker.volumes 只对 harness 自己起的 sibling 容器有效（阴性对照已证）。
+# ASSETS_MOUNT 形如 /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro（空=不用）。
+MOUNT_FLAGS=()
+[ -n "${ASSETS_MOUNT:-}" ] && MOUNT_FLAGS+=(-v "$ASSETS_MOUNT")
 docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
   -v "$WORK/scripts/upstream":/opt/harness-scripts:ro \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  "${MOUNT_FLAGS[@]}" \
   -e CUDA_VISIBLE_DEVICES=1 \
   "$ROBOTWIN_IMAGE" \
   -c "conda run --no-capture-output -n robotwin bash /opt/harness-scripts/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"

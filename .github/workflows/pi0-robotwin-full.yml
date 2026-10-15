@@ -38,6 +38,10 @@ on:
         description: "serve 镜像（论文实验 B 用 fp32 版）"
         required: false
         default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
+      assets_mount:
+        description: "资产外置挂载（host:container:ro），空=用镜像内置"
+        required: false
+        default: ""
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -96,6 +100,7 @@ jobs:
           RW_SKIP_EXPERT: ${{ inputs.skip_expert }}
           RW_VOLUMES: ${{ inputs.volumes }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
+          ASSETS_MOUNT: ${{ inputs.assets_mount }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_robotwin_full.sh
