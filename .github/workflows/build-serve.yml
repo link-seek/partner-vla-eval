@@ -11,7 +11,7 @@ on:
       images:
         description: "逗号分隔：serve-cogact,serve-cogact-fp32,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,verify"
         required: false
-        default: "serve-cogact,serve-pi05,serve-xvla,verify"
+        default: "serve-cogact,serve-pi05,serve-xvla,serve-smolvla,serve-pi0,verify"
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [serve-cogact, serve-cogact-fp32, serve-pi05, serve-xvla, serve-xvla-fp16, serve-smolvla, verify]
+        image: [serve-cogact, serve-cogact-fp32, serve-pi05, serve-xvla, serve-xvla-fp16, serve-smolvla, serve-pi0, verify]
     steps:
       - uses: actions/checkout@v4
       - name: Filter
@@ -52,6 +52,7 @@ jobs:
             serve-xvla) DOCKERFILE=docker/Dockerfile.serve-xvla; TAG=vla-serve-xvla:0.7.0; BUILD_ARGS="" ;;
             serve-xvla-fp16) DOCKERFILE=docker/Dockerfile.serve-xvla; TAG=vla-serve-xvla-fp16:0.7.0; BUILD_ARGS="--build-arg DTYPE=torch.float16" ;;
             serve-smolvla) DOCKERFILE=docker/Dockerfile.serve-smolvla; TAG=vla-serve-smolvla:0.8.0; BUILD_ARGS="" ;;
+            serve-pi0) DOCKERFILE=docker/Dockerfile.serve-pi0; TAG=vla-serve-pi0:0.8.0; BUILD_ARGS="" ;;
             verify) DOCKERFILE=docker/Dockerfile.verify; TAG=vla-verify:0.1; BUILD_ARGS="" ;;
           esac
           # shellcheck disable=SC2086

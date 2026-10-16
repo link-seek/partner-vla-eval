@@ -1,0 +1,43 @@
+# pi0 serve 镜像：V100 离线跑，依赖全烘，uv 缓存预热。
+# 构建机要求外网（免费 runner）。运行时（V100）零下载：UV_OFFLINE=1。
+ARG HARNESS_REF=v0.8.0
+ARG LEROBOT_REV=v0.6.1
+FROM python:3.12-slim
+ARG HARNESS_REF
+ARG LEROBOT_REV
+WORKDIR /work
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir --upgrade pip uv
+
+# vla-eval CLI（serve 入口；纯 python）
+RUN pip install --no-cache-dir "vla-eval==0.7.0"
+
+# harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
+RUN git clone --depth 1 --branch ${HARNESS_REF} \
+      https://github.com/allenai/vla-evaluation-harness.git harness
+# lerobot（桥接 header 原指 git，改本地 path 前先 vendoring）
+RUN git clone --depth 1 --branch ${LEROBOT_REV} \
+      https://github.com/huggingface/lerobot.git lerobot-src
+
+# V100 补丁（同 CI 历史，烘进镜像不再运行时 sed）：
+# torch 钉 2.6.0cu126 / lerobot 本地 path / python 放宽
+RUN sed -i 's|lerobot = { git = "https://github.com/huggingface/lerobot.git", rev = "v0.6.0" }|lerobot = { path = "/work/lerobot-src" }|' \
+      harness/src/vla_eval/model_servers/lerobot.py \
+ && sed -i 's|"torch>=2.7,<2.12"|"torch==2.6.0"|' \
+      harness/src/vla_eval/model_servers/lerobot.py \
+ && sed -i 's|"torch>=2.7,<2.12.0"|"torch==2.6.0"|; s|"torchvision>=0.22.0,<0.27.0"|"torchvision==0.21.0"|; s|download.pytorch.org/whl/cu128|download.pytorch.org/whl/cu126|' \
+      lerobot-src/pyproject.toml \
+ && grep -nE '"torch==|lerobot = ' harness/src/vla_eval/model_servers/lerobot.py | head -n 4
+
+# uv 缓存预热（随镜像层走）
+ENV PIP_INDEX_URL=https://download.pytorch.org/whl/cu126
+ENV PIP_EXTRA_INDEX_URL=https://pypi.org/simple
+ENV UV_OFFLINE=0
+RUN cd /work/harness \
+ && uv run src/vla_eval/model_servers/lerobot.py --help > /dev/null
+
+WORKDIR /work/harness
+CMD ["bash"]
