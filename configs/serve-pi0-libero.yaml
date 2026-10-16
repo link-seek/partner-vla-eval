@@ -1,14 +1,12 @@
-# pi0 serve 配置（LIBERO，模拟伙伴：第三家族，验证模板与桥接）
-# 权重 lerobot/pi0（base，非 finetune，分数预期低，只验流程）。
+# pi0 serve 配置（LIBERO，模拟伙伴：还债第二腿）
+# 权重 lerobot/pi0_libero_base（LIBERO finetune；0.6.0 读不了新格式，用 serve-pi0/lerobot 0.6.1）。
+# policy 输入键即 image/image2，与 benchmark 同名，image_keys 省略走位置映射。
 script: "src/vla_eval/model_servers/lerobot.py"
 args:
   policy_type: pi0
-  checkpoint: lerobot/pi0
+  checkpoint: lerobot/pi0_libero_base
   device: cuda
   port: 8000
   compile_model: false
   state_key: observation.state
   chunk_size: 10
-  image_keys:
-    agentview: image
-    wrist: image2
