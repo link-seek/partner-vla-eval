@@ -66,6 +66,7 @@ echo "      seed: 0"
 echo "      instruction_type: seen"
 echo "      test_num: $RW_EPISODES"
 echo "      skip_expert_check: ${RW_SKIP_EXPERT:-true}  # 0.7.0 无 bundled seeds 必须 true；0.8.0 探 false 走自带种子+oracle"
+echo "      action_type: ${RW_ACTION_TYPE:-qpos}  # EE 验证传 ee（benchmark 镜像须含补丁，如 ee-0.8.0）"
 echo "    action_dim: 14"
 done
 } > "$GEN"
@@ -81,8 +82,12 @@ docker pull "$ROBOTWIN_IMAGE"
 docker pull "$SERVE_IMAGE"
 docker pull "$VERIFY_IMAGE"
 
-echo "[4/6] 预热 DB-CogACT 权重（按块内 task 子目录）"
+echo "[4/6] 预热权重（默认 DB-CogACT 按 task 子目录；RW_PREWARM=none 跳过，如 X-VLA 由 serve 镜像自理）"
 # CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
+SERVE_YAML="${RW_SERVE_YAML:-serve-robotwin-cogact.yaml}"
+if [ "${RW_PREWARM:-cogact}" = "none" ]; then
+  echo "prewarm skipped"
+else
 FIRST_TASK=$(echo "${RW_TASKS:-grab_roller}" | cut -d, -f1)
 for i in 1 2 3; do
   # 纯 CLI 预热：huggingface-cli 下载 + ls 定位 snapshot（不写 python）
@@ -112,8 +117,13 @@ done
 # from_pretrained 不认 repo/subdir，用本地子目录绝对路径。
 sed "s|model_path: .*|model_path: $SNAP/$FIRST_TASK|" "$WORK/configs/serve-robotwin-cogact.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
 grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
+fi
+# 非 CogACT 路（RW_PREWARM=none，如 X-VLA）：serve 配置直用 $SERVE_YAML，不生成 local。
+if [ "${RW_PREWARM:-cogact}" = "none" ]; then
+  cp "$WORK/configs/$SERVE_YAML" "$WORK/configs/serve-robotwin-local.yaml"
+fi
 
-echo "[5/6] 启动 DB-CogACT serve (GPU0, 后台；烘焙镜像 + UV_OFFLINE，零下载)"
+echo "[5/6] 启动 serve (GPU0, 后台；烘焙镜像 + UV_OFFLINE，零下载；配置 $SERVE_YAML)"
 docker rm -f cogact-serve 2>/dev/null || true
 docker run -d --name cogact-serve --gpus '"device=0"' --network host \
   -v "$WORK/configs":/work/configs:ro \

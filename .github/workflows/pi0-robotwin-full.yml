@@ -42,6 +42,18 @@ on:
         description: "资产外置挂载（host:container:ro），空=用镜像内置"
         required: false
         default: ""
+      action_type:
+        description: "qpos（默认）或 ee（需 benchmark 镜像含补丁，如 ee-0.8.0）"
+        required: false
+        default: "qpos"
+      serve_yaml:
+        description: "serve 配置名（默认 CogACT 双臂；X-VLA 用 serve-robotwin.yaml）"
+        required: false
+        default: "serve-robotwin-cogact.yaml"
+      prewarm:
+        description: "cogact（默认，预热 Dexmal 权重）或 none（X-VLA 由 serve 自理）"
+        required: false
+        default: "cogact"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -98,6 +110,9 @@ jobs:
           RW_VIDEO: ${{ inputs.video }}
           RW_BENCH_TAG: ${{ inputs.bench_tag }}
           RW_SKIP_EXPERT: ${{ inputs.skip_expert }}
+          RW_ACTION_TYPE: ${{ inputs.action_type }}
+          RW_SERVE_YAML: ${{ inputs.serve_yaml }}
+          RW_PREWARM: ${{ inputs.prewarm }}
           RW_VOLUMES: ${{ inputs.volumes }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
           ASSETS_MOUNT: ${{ inputs.assets_mount }}
