@@ -1,5 +1,7 @@
 # SmolVLA serve 配置（LIBERO，模拟伙伴严格按对接指导书填写，不用内部知识）
-# 假设（待验证）：相机/状态映射同 pi05 LIBERO，chunk 10 对 LIBERO 节拍。
+# 映射：image_keys 省略，上游按位置映射（benchmark image/image2 → camera1/camera2；
+# smolvla_base 要 camera1..3，允许缺（up to three），缺 camera3 靠前二推理）。
+# chunk 10 对 LIBERO 节拍（上游默认 null=50 太慢）。
 script: "src/vla_eval/model_servers/lerobot.py"
 args:
   policy_type: smolvla
@@ -9,6 +11,3 @@ args:
   compile_model: false
   state_key: observation.state
   chunk_size: 10
-  image_keys:
-    agentview: image
-    wrist: image2
