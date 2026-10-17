@@ -84,7 +84,7 @@ $\times$10, same seed): fp32 scores 9/10, 10/10, 10/10 (29/30); fp16 scores
 errors at the first inference with
 \texttt{RuntimeError: Input type (float) and bias type (c10::Half) should be
 the same}. The denoising path is numerically broken in fp16 on this stack.
-A pi0 fp32 control runs cleanly (10/10 episodes evaluated, no errors), confirming the stack is healthy and the X-VLA fp16 breakage is model-specific. A 7\,B CogACT in fp32 does not load on a 32\,GB card (OOM at first forward);
+A 7\,B CogACT in fp32 does not load on a 32\,GB card (OOM at first forward);
 sharded across two cards it loads, but its custom forward uses bare
 cross-device concatenations, so split inference needs model surgery ---
 reported as a limit, not a result.
