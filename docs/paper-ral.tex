@@ -38,7 +38,10 @@ A VLA score is a joint product of model, benchmark, and stack. The community
 standardizes the first two and ignores the third. Papers and leaderboards
 routinely compare an fp16 number from one lab against a bf16 number from
 another, or a v0.7.0 number against a v0.8.0 number, as if the stack were
-transparent. We test whether it is.
+transparent. We test whether it is. That a bf16-trained model runs in fp32 is
+expected (same exponent range) and is used here only as the control arm; the
+non-trivial finding is that fp16 fails catastrophically rather than
+degrading, contrary to interchangeability assumptions in prior work.
 
 \section{Method}
 One knob at a time, everything else pinned (V100 32\,GB, fixed seeds, fixed
