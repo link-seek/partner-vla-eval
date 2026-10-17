@@ -32,7 +32,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
         run: |
           python3 - "$OPENCODE_API_KEY" <<'EOF'
-          import json, sys, urllib.request
+          import json, sys, urllib.request, urllib.error
           key = sys.argv[1]
           for url in ["https://opencode.ai/inference/v1/models"]:
               req = urllib.request.Request(url, headers={"Authorization": "Bearer " + key})
@@ -42,6 +42,10 @@ jobs:
                       ms = [m.get("id", m) for m in (d if isinstance(d, list) else d.get("data", []))]
                       jev = [m for m in ms if "jev" in str(m).lower()]
                       print("MODELS_TOTAL:", len(ms), "JEV_ENTRIES:", jev if jev else "NONE")
+              except urllib.error.HTTPError as e:
+                  print(url, "HTTP:", e.code)
+                  hd = dict(e.headers.items()) if e.headers else {}
+                  print("ERR_BODY:", e.read().decode(errors="replace")[:800])
               except Exception as e:
                   print(url, "CALL_FAILED:", str(e)[:300])
           EOF
