@@ -1,0 +1,39 @@
+name: Probe JEV via hw21
+
+# 同一 key，换 hw21 出口跑：若通 = GitHub runner IP 被 CF 拦；若同样 403 = key 本身问题。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe-hw21:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 10
+    steps:
+      - name: Egress IP
+        run: curl -s --max-time 15 https://icanhazip.com; echo " <- hw21 egress"
+      - name: Ask JEV via hw21
+        env:
+          OPENCODE_API_KEY_JEV: ${{ secrets.OPENCODE_API_KEY_JEV }}
+        run: |
+          python3 - "$OPENCODE_API_KEY_JEV" <<'EOF'
+          import json, sys, urllib.request, urllib.error
+          key = sys.argv[1]
+          for name, url, body in [
+            ("models", "https://opencode.ai/inference/v1/models", None),
+            ("systemone", "https://opencode.ai/inference/systemone/v1/systemone",
+             {"model": "jev-1.13-free", "state": "test", "questions": {}}),
+          ]:
+              data = json.dumps(body).encode() if body else None
+              req = urllib.request.Request(url, data=data, headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req, timeout=120) as r:
+                      print(name, "OK:", r.status, r.read().decode(errors="replace")[:300])
+              except urllib.error.HTTPError as e:
+                  print(name, "HTTP:", e.code, "BODY:", e.read().decode(errors="replace")[:300])
+              except Exception as e:
+                  print(name, "CALL_FAILED:", str(e)[:300])
+          EOF
