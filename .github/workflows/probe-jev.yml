@@ -49,4 +49,14 @@ jobs:
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
         run: |
-          echo skip
+          python3 - "$OPENCODE_API_KEY" '${{ inputs.model }}' '${{ inputs.state }}' '${{ inputs.questions }}' <<'PYEOF2'
+          import json, sys, urllib.request
+          key, model, state, questions = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+          body = json.dumps({"model": model, "state": state, "questions": json.loads(questions)}).encode()
+          req = urllib.request.Request("https://opencode.ai/inference/systemone/v1/systemone", data=body, headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+          try:
+              with urllib.request.urlopen(req, timeout=120) as r:
+                  print(r.read().decode()[:3000])
+          except Exception as e:
+              print("CALL_FAILED:", str(e)[:500])
+          PYEOF2
