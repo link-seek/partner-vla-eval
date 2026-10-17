@@ -65,7 +65,11 @@ if os.environ.get("DEVICE_MAP"):
         )
         self._device = torch.device("cuda:0")"""
     # 自定义类无 _no_split_modules：给常见 LLM decoder 层名，accelerate 按命中切分
-    new_load = """        CogACTForCausalLM._no_split_modules = ["Qwen2DecoderLayer", "Qwen3DecoderLayer", "LlamaDecoderLayer", "MistralDecoderLayer", "Gemma2DecoderLayer"]
+    # 外层+内层都要（accelerate 逐层查），另加视觉/动作塔常见块名兜底
+    new_load = """        from dexbotic.model.cogact.cogact_arch import CogActModel
+        _NO_SPLIT = ["Qwen2DecoderLayer", "Qwen3DecoderLayer", "LlamaDecoderLayer", "MistralDecoderLayer", "Gemma2DecoderLayer"]
+        CogACTForCausalLM._no_split_modules = _NO_SPLIT
+        CogActModel._no_split_modules = _NO_SPLIT
 """ + new_load
     assert s.count(old_load) == 1, "load block not found"
     s = s.replace(old_load, new_load)
