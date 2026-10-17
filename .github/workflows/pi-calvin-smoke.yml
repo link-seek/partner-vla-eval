@@ -9,6 +9,14 @@ on:
         description: "benchmark 镜像（0.8.0 已同步到 SWR）"
         required: false
         default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0"
+      serve_image:
+        description: "serve 镜像（fp32 双卡对照用 serve-cogact-fp32-2gpu）"
+        required: false
+        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
+      serve_cuda:
+        description: "serve 可见卡（默认 0；fp32 分片用 0,1）"
+        required: false
+        default: "0"
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -59,6 +67,8 @@ jobs:
           OBS_AK: ${{ secrets.OBS_AK }}
           OBS_SK: ${{ secrets.OBS_SK }}
           CALVIN_IMAGE: ${{ inputs.bench_image }}
+          SERVE_IMAGE: ${{ inputs.serve_image }}
+          SERVE_CUDA: ${{ inputs.serve_cuda }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_calvin.sh

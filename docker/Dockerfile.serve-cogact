@@ -5,12 +5,15 @@
 ARG HARNESS_REF=v0.7.0
 ARG DEXBOTIC_REV=42f72859dfe48bb4c30a09ab151a018c2ca0700a
 # 论文实验 B 用：float16（V100 默认）/ float32（对照组，build 时 --build-arg DTYPE=torch.float32）
+# fp32 单卡 OOM（28GB 权重）：DEVICE_MAP=auto 时双卡分片（每卡 ~14GB），见下方 python 补丁。
 ARG DTYPE=torch.float16
+ARG DEVICE_MAP=
 FROM python:3.12-slim
 # 全局 ARG 进 stage 要重声明，否则展开为空（已踩坑）
 ARG HARNESS_REF
 ARG DEXBOTIC_REV
 ARG DTYPE
+ARG DEVICE_MAP
 WORKDIR /work
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -42,6 +45,31 @@ RUN sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", r
       harness/src/vla_eval/model_servers/dexbotic/cogact.py \
  && grep -nE '"torch==|"transformers==|torch_dtype=torch|dexbotic =|requires-python' \
       harness/src/vla_eval/model_servers/dexbotic/cogact.py
+# 双卡分片（DEVICE_MAP=auto）：device_map 进 from_pretrained，去 .to()，
+# 输入统一放 cuda:0（accelerate 按 hf_device_map 分发），model.device 全换输入设备。
+RUN if [ -n "$DEVICE_MAP" ]; then python3 - <<'PYEOF'
+p = "harness/src/vla_eval/model_servers/dexbotic/cogact.py"
+s = open(p).read()
+old_load = """        self._model = CogACTForCausalLM.from_pretrained(
+            self.model_path,
+            torch_dtype=torch.float32,
+            trust_remote_code=True,
+        ).to(self._device)"""
+new_load = """        self._model = CogACTForCausalLM.from_pretrained(
+            self.model_path,
+            torch_dtype=torch.float32,
+            trust_remote_code=True,
+            device_map="auto",
+        )
+        self._device = torch.device("cuda:0")"""
+assert s.count(old_load) == 1, "load block not found"
+s = s.replace(old_load, new_load)
+assert "self._model.device" in s
+s = s.replace("self._model.device", "self._device")
+open(p, "w").write(s)
+print("DEVICE_MAP patch OK")
+PYEOF
+fi
 
 # uv 缓存预热：跑一次 --help 即同步 env 进 /root/.cache/uv（随镜像层走）
 ENV PIP_INDEX_URL=https://download.pytorch.org/whl/cu126

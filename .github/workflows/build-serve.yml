@@ -11,7 +11,7 @@ on:
       images:
         description: "逗号分隔：serve-cogact,serve-cogact-fp32,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,verify"
         required: false
-        default: "serve-cogact,serve-pi05,serve-xvla,serve-smolvla,serve-pi0,verify"
+        default: "serve-cogact,serve-pi05,serve-xvla,serve-smolvla,serve-pi0,serve-cogact-fp32-2gpu,verify"
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [serve-cogact, serve-cogact-fp32, serve-pi05, serve-xvla, serve-xvla-fp16, serve-smolvla, serve-pi0, verify]
+        image: [serve-cogact, serve-cogact-fp32, serve-pi05, serve-xvla, serve-xvla-fp16, serve-smolvla, serve-pi0, serve-cogact-fp32-2gpu, verify]
     steps:
       - uses: actions/checkout@v4
       - name: Filter
@@ -48,6 +48,7 @@ jobs:
           case "${{ matrix.image }}" in
             serve-cogact) DOCKERFILE=docker/Dockerfile.serve-cogact; TAG=vla-serve-cogact:0.7.0; BUILD_ARGS="" ;;
             serve-cogact-fp32) DOCKERFILE=docker/Dockerfile.serve-cogact; TAG=vla-serve-cogact-fp32:0.7.0; BUILD_ARGS="--build-arg DTYPE=torch.float32" ;;
+            serve-cogact-fp32-2gpu) DOCKERFILE=docker/Dockerfile.serve-cogact; TAG=vla-serve-cogact-fp32-2gpu:0.8.0; BUILD_ARGS="--build-arg DTYPE=torch.float32 --build-arg DEVICE_MAP=auto" ;;
             serve-pi05) DOCKERFILE=docker/Dockerfile.serve-pi05; TAG=vla-serve-pi05:0.7.0; BUILD_ARGS="" ;;
             serve-xvla) DOCKERFILE=docker/Dockerfile.serve-xvla; TAG=vla-serve-xvla:0.7.0; BUILD_ARGS="" ;;
             serve-xvla-fp16) DOCKERFILE=docker/Dockerfile.serve-xvla; TAG=vla-serve-xvla-fp16:0.7.0; BUILD_ARGS="--build-arg DTYPE=torch.float16" ;;

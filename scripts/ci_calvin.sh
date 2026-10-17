@@ -5,7 +5,7 @@
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
-SERVE_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
+SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 CALVIN_IMAGE="${CALVIN_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0}"
 mkdir -p results
@@ -37,14 +37,14 @@ for i in 1 2 3; do
   [ "$i" = "3" ] && exit 1
 done
 
-echo "[3/4] 启动 CogACT serve (GPU0, 后台；烘焙镜像 + UV_OFFLINE)"
+echo "[3/4] 启动 CogACT serve (GPU${SERVE_CUDA:-0}, 后台；烘焙镜像 + UV_OFFLINE)"
 docker rm -f cogact-serve 2>/dev/null || true
-docker run -d --name cogact-serve --gpus '"device=0"' --network host \
+docker run -d --name cogact-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network host \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -w /work/harness \
-  -e CUDA_VISIBLE_DEVICES=0 \
+  -e CUDA_VISIBLE_DEVICES="${SERVE_CUDA:-0}" \
   -e UV_OFFLINE=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
