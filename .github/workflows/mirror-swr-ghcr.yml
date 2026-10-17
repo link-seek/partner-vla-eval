@@ -1,0 +1,72 @@
+name: Mirror SWR to GHCR
+
+# 双仓保留：SWR（内网用）→ ghcr.io/link-seek（对外/论文复现）。
+# skopeo registry-to-registry 直拷，不占 runner 磁盘。只增不删，两边 tag 全保留。
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: "逗号分隔按组选：libero,calvin,robotwin（三国三 tag 全拷）,serve-cogact,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,serve-pi0,verify"
+        required: false
+        default: "libero,calvin,robotwin,serve-cogact,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,serve-pi0,verify"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  SRC_REG: swr.cn-north-4.myhuaweicloud.com/link-seek
+  DST_REG: ghcr.io/link-seek
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - { src: "vla-eval-libero:0.8.0", dst: "vla-eval-libero:0.8.0" }
+          - { src: "vla-eval-calvin:0.8.0", dst: "vla-eval-calvin:0.8.0" }
+          - { src: "vla-eval-robotwin:0.8.0", dst: "vla-eval-robotwin:0.8.0" }
+          - { src: "vla-eval-robotwin:slim-0.8.0", dst: "vla-eval-robotwin:slim-0.8.0" }
+          - { src: "vla-eval-robotwin:ee-0.8.0", dst: "vla-eval-robotwin:ee-0.8.0" }
+          - { src: "vla-serve-cogact:0.7.0", dst: "vla-serve-cogact:0.7.0" }
+          - { src: "vla-serve-pi05:0.7.0", dst: "vla-serve-pi05:0.7.0" }
+          - { src: "vla-serve-xvla:0.7.0", dst: "vla-serve-xvla:0.7.0" }
+          - { src: "vla-serve-xvla-fp16:0.7.0", dst: "vla-serve-xvla-fp16:0.7.0" }
+          - { src: "vla-serve-smolvla:0.8.0", dst: "vla-serve-smolvla:0.8.0" }
+          - { src: "vla-serve-pi0:0.8.0", dst: "vla-serve-pi0:0.8.0" }
+          - { src: "vla-verify:0.1", dst: "vla-verify:0.1" }
+    steps:
+      - name: Filter
+        id: gate
+        # 同 repo 多 tag（如 robotwin 有 0.8.0/slim/ee）视为一组：选 robotwin 即全拷。
+        run: |
+          DST="${{ matrix.image.dst }}"
+          REPO="${DST%%:*}"
+          SHORT=$(echo "$REPO" | sed 's/^vla-eval-//; s/^vla-serve-/serve-/; s/^vla-verify$/verify/')
+          if echo ",${{ inputs.images }}," | grep -q ",${SHORT},\|,${DST},"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Login both
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          LOGIN_KEY=$(printf "${{ secrets.OBS_AK }}" | openssl dgst -binary -sha256 -hmac "${{ secrets.OBS_SK }}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
+          echo "$LOGIN_KEY" | skopeo login --username "cn-north-4@${{ secrets.OBS_AK }}" --password-stdin swr.cn-north-4.myhuaweicloud.com
+          echo "${{ secrets.GITHUB_TOKEN }}" | skopeo login --username "${{ github.actor }}" --password-stdin ghcr.io
+      - name: Skopeo copy (retry 3x)
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          for i in 1 2 3; do
+            if skopeo copy --all \
+              "docker://${{ env.SRC_REG }}/${{ matrix.image.src }}" \
+              "docker://${{ env.DST_REG }}/${{ matrix.image.dst }}"; then
+              echo "mirrored ${{ matrix.image.dst }} (attempt $i)"; break
+            fi
+            echo "attempt $i failed, retry in 60s..."; sleep 60
+            [ "$i" = "3" ] && exit 1
+          done
