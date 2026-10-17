@@ -47,29 +47,32 @@ RUN sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", r
       harness/src/vla_eval/model_servers/dexbotic/cogact.py
 # 双卡分片（DEVICE_MAP=auto）：device_map 进 from_pretrained，去 .to()，
 # 输入统一放 cuda:0（accelerate 按 hf_device_map 分发），model.device 全换输入设备。
-RUN if [ -n "$DEVICE_MAP" ]; then python3 - <<'PYEOF'
-p = "harness/src/vla_eval/model_servers/dexbotic/cogact.py"
-s = open(p).read()
-old_load = """        self._model = CogACTForCausalLM.from_pretrained(
+RUN <<'PYEOF'
+import os
+if os.environ.get("DEVICE_MAP"):
+    p = "harness/src/vla_eval/model_servers/dexbotic/cogact.py"
+    s = open(p).read()
+    old_load = """        self._model = CogACTForCausalLM.from_pretrained(
             self.model_path,
             torch_dtype=torch.float32,
             trust_remote_code=True,
         ).to(self._device)"""
-new_load = """        self._model = CogACTForCausalLM.from_pretrained(
+    new_load = """        self._model = CogACTForCausalLM.from_pretrained(
             self.model_path,
             torch_dtype=torch.float32,
             trust_remote_code=True,
             device_map="auto",
         )
         self._device = torch.device("cuda:0")"""
-assert s.count(old_load) == 1, "load block not found"
-s = s.replace(old_load, new_load)
-assert "self._model.device" in s
-s = s.replace("self._model.device", "self._device")
-open(p, "w").write(s)
-print("DEVICE_MAP patch OK")
+    assert s.count(old_load) == 1, "load block not found"
+    s = s.replace(old_load, new_load)
+    assert "self._model.device" in s
+    s = s.replace("self._model.device", "self._device")
+    open(p, "w").write(s)
+    print("DEVICE_MAP patch OK")
+else:
+    print("single-device, skip")
 PYEOF
-fi
 
 # uv 缓存预热：跑一次 --help 即同步 env 进 /root/.cache/uv（随镜像层走）
 ENV PIP_INDEX_URL=https://download.pytorch.org/whl/cu126
