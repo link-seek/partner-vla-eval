@@ -1,0 +1,124 @@
+\documentclass[journal]{IEEEtran}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{cite}
+
+\title{How Much of a VLA Leaderboard Score Is the Stack?}
+
+\author{
+  Yucheng Xie \\
+  \texttt{xieyucheng@outlook.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+VLA leaderboards compare models while rarely controlling what the scores
+were produced \emph{with}: GPU type, weight dtype, benchmark image version,
+seed set, sharding, asset mounting. We vary one knob at a time on a fixed
+V100 stack and report each knob's score delta. Most knobs do not move scores
+(benchmark image v0.7.0 vs v0.8.0: 86\% vs 92\%, n=50, within noise; rebuilt
+slim image vs stock: 18/20 vs 18/20; external asset mount vs baked-in: 45/50
+vs 46/50). One knob moves scores off a cliff: X-VLA in fp16 vs fp32 on
+LIBERO goes from 0/30 to 29/30 across three suites --- the fp16 path fails
+at the operator level (\texttt{float} vs \texttt{Half} bias mismatch on the
+first inference), it does not merely degrade. We release a disclosure
+checklist (GPU / dtype / image digest / seed protocol / shards / mounts) and
+publish all images so every entry in our tables re-runs with one pull.
+\end{abstract}
+
+\section{Introduction}
+A VLA score is a joint product of model, benchmark, and stack. The community
+standardizes the first two and ignores the third. Papers and leaderboards
+routinely compare an fp16 number from one lab against a bf16 number from
+another, or a v0.7.0 number against a v0.8.0 number, as if the stack were
+transparent. We test whether it is.
+
+\section{Method}
+One knob at a time, everything else pinned (V100 32\,GB, fixed seeds, fixed
+shards unless the knob \emph{is} sharding). Artifacts (aggregate JSON,
+SQLite recordings, logs) are archived per run; every image is published with
+its Dockerfile. Negative-control discipline: mounts are verified by breaking
+them on purpose; image identity is verified by digest, not tag.
+
+\section{Results}
+\label{sec:results}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=28pt, ymin=0, ymax=100, ylabel={success (\%)},
+  symbolic x coords={fp32,fp16}, xtick=data, nodes near coords,
+  width=0.55\linewidth, height=0.32\linewidth,
+]
+\addplot coordinates {(fp32,96.7) (fp16,0)};
+\end{axis}
+\end{tikzpicture}
+\caption{X-VLA on LIBERO, 3 suites $\times$10 episodes same seed (29/30 vs
+0/30). fp16 never scores: every episode errors at the first inference.}
+\label{fig:cliff}
+\end{figure}
+
+\paragraph{Benchmark image (v0.7.0 vs v0.8.0).} grab\_roller $\times$50, same
+seeds: 43/50 (86\%) vs 46/50 (92\%). Difference 6pp against a ${\sim}12$pp
+2-sigma band at n=50: no significant difference. Scope: one task.
+
+\paragraph{Baked vs native.} Rebuilt slim image (assets removed, nvcc
+stripped, 11.3\,GB vs 21\,GB) vs the upstream-identical stock image,
+grab\_roller $\times$20 same seeds: 18/20 vs 18/20. Zero delta; 50-episode
+equivalence 46/50 vs 46/50 exact.
+
+\paragraph{Asset mounting.} External 16\,GB asset mount vs image-baked
+assets, same 50 seeds: 45/50 (90\%) vs 46/50 (92\%). Equivalent.
+
+\paragraph{Precision (the cliff).} X-VLA on LIBERO (spatial/object/goal
+$\times$10, same seed): fp32 scores 9/10, 10/10, 10/10 (29/30); fp16 scores
+0/10 $\times$3 (0/30). The fp16 zeros are not low scores: every episode
+errors at the first inference with
+\texttt{RuntimeError: Input type (float) and bias type (c10::Half) should be
+the same}. The denoising path is numerically broken in fp16 on this stack.
+A 7\,B CogACT in fp32 does not load on a 32\,GB card (OOM at first forward);
+sharded across two cards it loads, but its custom forward uses bare
+cross-device concatenations, so split inference needs model surgery ---
+reported as a limit, not a result.
+
+\paragraph{Sharding.} 2 shards stable, 4 slow, 8 hangs. Speed/stability only.
+
+\paragraph{Seeds.} Blind seeds vs bundled verified seeds move the error rate,
+not the valid score; re-running the same bundled 50 seeds gives 41/50 vs
+46/50 (diff $-10$pp, ${\sim}1.7\sigma$: noise).
+
+\paragraph{Cross-stack reference.} place\_empty\_cup: our V100 fp16 16--20\%
+vs official H100 bf16 28\%. Recorded as pending (different GPU \emph{and}
+dtype), not judged.
+
+\section{Related work}
+vla-eval (protocol layer), VLATest (environment perturbations),
+VLA-Perf (cross-GPU speed only, assumes BF16/FP16 interchangeable --- \S\ref{sec:results}
+falsifies that for at least X-VLA), leaderboard-design studies, REPLICA
+(real-robot cross-site), practical eval guides (checklists, no precision
+study), ROCm accuracy-parity work (hardware direction). None quantifies
+same-code-different-stack score deltas. That is this paper.
+
+\section{The disclosure checklist}
+GPU model + driver; weight dtype; benchmark image digest (+ slim/patch
+notes); serve image digest; seed protocol; shard count; asset/code mounts;
+harness ref. Missing one item: not comparable.
+
+\section{Conclusion}
+Stacks are not transparent: one common knob (fp16) takes a model from 97\%
+to 0\% without changing a single weight. Compare same-stack, or disclose.
+
+\section*{Acknowledgments}
+Compute provided by Huawei Cloud. AI coding assistance was used for
+engineering (experiment orchestration, plotting) under human direction; all
+results were produced by executed runs.
+
+\end{document}
