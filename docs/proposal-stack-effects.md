@@ -30,6 +30,8 @@
 - VLA-Perf：跨 GPU 只谈速度不谈分数，还默认 BF16/FP16 可互换——我们的 B（9/10→0/10）至少在 X-VLA 上证伪后者。
 - [2606.04233]：审榜单设计。REPLICA：真机跨场地。我们：仿真跨栈。
 
+官方训练命令（2toinf/X-VLA README）为 `accelerate --mixed_precision bf16`：正确推理精度是 bf16，fp16 属数值越界；bf16 复刻待 H100。
+
 ## 产出
 
 1. 对照表（上）+ VLA 评测栈披露清单：GPU / dtype / benchmark 镜像 tag（含 slim/补丁说明）/ serve 镜像 / 种子（bundled 还是盲）/ 分片 / 资产挂载。
