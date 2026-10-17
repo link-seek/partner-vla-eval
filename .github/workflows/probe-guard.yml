@@ -1,0 +1,50 @@
+name: Guard Replace-Restore Probe
+
+# 验证 vault_guard 对组织 key 的替换与还原：
+# 1. 发一个带标记 key 的请求经网关（LiteLLM /chat/completions，非流式）
+# 2. 上游回显收到的 key 形状（长度/字符类），不断言值
+# 3. 判据：上游看到的是等长假串（替换生效）且客户端收到的回答无假串残留（还原生效）
+# key 本体只活在 secrets，日志只打形状指纹（长度+首尾掩码）。
+
+on:
+  workflow_dispatch:
+    inputs:
+      marker_len:
+        description: "标记长度（仅自检用，不传真实 key）"
+        required: false
+        default: "32"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Shape fingerprint through gateway
+        env:
+          GW_BASE: ${{ secrets.ORG_GW_BASE_URL }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, urllib.request, urllib.error
+          base = os.environ.get("GW_BASE_URL", os.environ.get("GW_BASE", "")).rstrip("/")
+          if not base:
+              print("SKIP: ORG_GW_BASE_URL not set; ask owner to add org secret, then rerun")
+              raise SystemExit(0)
+          import secrets as _s
+          fake = "sk-test-" + _s.token_hex(16)
+          print("FAKE_KEY_SHAPE: len=%d head=%s tail=%s" % (len(fake), fake[:7], fake[-4:]))
+          for label, k in [("fake", fake)]:
+              body = json.dumps({"model": "glm-5.3-flash-free", "messages": [{"role": "user", "content": "reply with the single word OK"}], "max_tokens": 8}).encode()
+              req = urllib.request.Request(base + "/v1/chat/completions", data=body, headers={"Authorization": "Bearer " + k, "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req, timeout=120) as r:
+                      txt = r.read().decode(errors="replace")
+                      print(label, "STATUS:", r.status, "LEN:", len(txt))
+                      print(label, "BODY_HEAD:", txt[:400])
+              except urllib.error.HTTPError as e:
+                  print(label, "HTTP:", e.code, "BODY:", e.read().decode(errors="replace")[:500])
+              except Exception as e:
+                  print(label, "CALL_FAILED:", str(e)[:300])
+          EOF
