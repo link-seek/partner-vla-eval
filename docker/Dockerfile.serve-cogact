@@ -47,7 +47,7 @@ RUN sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", r
       harness/src/vla_eval/model_servers/dexbotic/cogact.py
 # 双卡分片（DEVICE_MAP=auto）：device_map 进 from_pretrained，去 .to()，
 # 输入统一放 cuda:0（accelerate 按 hf_device_map 分发），model.device 全换输入设备。
-RUN <<'PYEOF'
+RUN python3 <<'PYEOF'
 import os
 if os.environ.get("DEVICE_MAP"):
     p = "harness/src/vla_eval/model_servers/dexbotic/cogact.py"
