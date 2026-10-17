@@ -17,7 +17,7 @@
 | A | benchmark 镜像 | 0.7.0 vs 0.8.0（同种子 grab_roller×50） | 43/50=86% vs 46/50=92% | 差 6pp，2σ 内，不搬分 |
 | A2 | 资产内置 vs 外置挂载 | 同种子×50 | 46/50 vs 45/50 | 差 1ep，等价 |
 | A3 | 烘焙 vs 原生 | stock vs slim×20 | 18/20 vs 18/20 | 差 0，自证清白 |
-| B | 模型精度 | X-VLA fp32 vs fp16（LIBERO spatial×10 同种子） | 9/10 vs 0/10 | **搬 90pp**，上游“去噪精度敏感”注释实锤 |
+| B | 模型精度 | X-VLA fp32 vs fp16（LIBERO spatial/object/goal×10 同种子，6 轮） | 29/30 vs 0/30 | fp16 首推理即崩（float vs Half bias 算子错），跨 task 一致 |
 | B2 | 精度 | CogACT fp32 vs fp16（V100） | fp32 首个 forward 即 OOM（31GB） | 单侧不可行本身即证据 |
 | C | 分片 | 2 / 4 / 8 | 2 稳、4 慢、8 hang | 只动速度/稳定性 |
 | D | 种子 | 盲种子 vs 校验种子 | 35/35 有效+15 坏种 vs 零 error；同集重跑 41 vs 46 | 种子集动 error 率；同集轮间差 ≈1.7σ（噪声） |
