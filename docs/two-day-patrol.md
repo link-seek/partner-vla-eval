@@ -39,3 +39,9 @@ opencode 会话结束 = 后台 watcher 全死，无人能叫醒 agent。
   slim Dockerfile+构建流、serve-smolvla。
 - 上游 draft PR：allenai/vla-evaluation-harness#168。
 - 决策总账：Discussion #3（含第 2 件作废）。
+
+## 铁律：一切验证必须流水线可复现
+
+- GPU/构建实验：只许 workflow_dispatch，不许手跑；结论必须带 run id。
+- 只读查询（HF/arXiv/上游文件）：贴完整命令，他人同命令可复现。
+- 例外零容忍：没有 run id 或命令的结论不记帖。
