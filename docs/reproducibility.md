@@ -4,7 +4,7 @@
 
 所有镜像进 `swr.cn-north-4.myhuaweicloud.com/link-seek`（**私仓**，需 AK/SK 派生登录），
 Dockerfile + 构建 workflow 全在 git（`docker/` + `.github/workflows/build-*.yml`），
-tag 钉死、可重打。读论文的人**有权限**可直接拉；**没权限**拉不到——公开发布待决策。
+tag 钉死、可重打。读论文的人匿名可拉：`ghcr.io/link-seek/<上表名>:\<tag>`（SWR→GHCR mirror 全量 success，包 visibility=public 已验）。
 
 ## 镜像表
 
@@ -24,8 +24,8 @@ tag 钉死、可重打。读论文的人**有权限**可直接拉；**没权限*
 
 权重不在镜像里：OBS 标准桶（V100 内网拖）+ HF mirror 直下，serve 启动时挂载。
 
-## 对外可复现还缺（待决策）
+## 对外可复现还缺
 
-1. 公开镜像：私仓 → ghcr.io 公开（或 worv-ai 同款匿名 fallback）。镜像内无密钥，可公开；费的是公网推流时间。
+1. ~~公开镜像~~ ✅ 已公开（mirror-swr-ghcr.yml 全量 success，11 包 public）。
 2. digest 锁定：上表补每 tag 的 sha256（SWR 控制台抄），论文里贴 digest 不贴 tag。
 3. 第三方权重：Dexmal/*、2toINF/*、lerobot/* 全是公开 Hub 仓，可直接引用； gated 权重没有。
