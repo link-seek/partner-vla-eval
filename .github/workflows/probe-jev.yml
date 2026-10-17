@@ -45,6 +45,21 @@ jobs:
               except Exception as e:
                   print(url, "CALL_FAILED:", str(e)[:300])
           EOF
+      - name: Control - free chat model (same key)
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
+        run: |
+          python3 - "$OPENCODE_API_KEY" <<'PYEOF2'
+          import json, sys, urllib.request
+          key = sys.argv[1]
+          body = json.dumps({"model": "glm-5.3-flash-free", "messages": [{"role": "user", "content": "say hi"}]}).encode()
+          req = urllib.request.Request("https://opencode.ai/inference/openai/v1/chat/completions", data=body, headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+          try:
+              with urllib.request.urlopen(req, timeout=120) as r:
+                  print(r.read().decode()[:500])
+          except Exception as e:
+              print("CHAT_CALL_FAILED:", str(e)[:500])
+          PYEOF2
       - name: Ask JEV systemone (same key)
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
