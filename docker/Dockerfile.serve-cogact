@@ -64,6 +64,9 @@ if os.environ.get("DEVICE_MAP"):
             device_map="auto",
         )
         self._device = torch.device("cuda:0")"""
+    # 自定义类无 _no_split_modules：给常见 LLM decoder 层名，accelerate 按命中切分
+    new_load = """        CogACTForCausalLM._no_split_modules = ["Qwen2DecoderLayer", "Qwen3DecoderLayer", "LlamaDecoderLayer", "MistralDecoderLayer", "Gemma2DecoderLayer"]
+""" + new_load
     assert s.count(old_load) == 1, "load block not found"
     s = s.replace(old_load, new_load)
     assert "self._model.device" in s
