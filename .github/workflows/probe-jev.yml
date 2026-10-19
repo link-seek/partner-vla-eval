@@ -2,6 +2,8 @@ name: Probe JEV Judge
 
 # JEV 裁判探针：state + questions 进，typed 判决出。OPENCODE_API_KEY 只活在 runner 侧，
 # 日志只打 JEV 的回答，不打 key。
+# 注意：opencode.ai 前面是 Cloudflare，会按 UA 签名封禁 Python-urllib（403 / error code 1010）。
+# 任何 200 侧 UA（requests 默认、curl、浏览器 UA、自定义 UA 均已验证）都行，urllib 需显式覆盖 UA。
 
 on:
   workflow_dispatch:
@@ -34,9 +36,11 @@ jobs:
           python3 - '${{ inputs.model }}' '${{ inputs.state }}' '${{ inputs.questions }}' "$OPENCODE_API_KEY" <<'EOF'
           import json, sys, urllib.request
           model, state, questions, key = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+          # CF error 1010: urllib 的默认 UA 被 opencode.ai 的 Cloudflare WAF 封禁，必须覆盖
+          UA = "partner-vla-eval-probe/1.0"
           def call(headers):
               body = json.dumps({"model": model, "state": state, "questions": json.loads(questions)}).encode()
-              req = urllib.request.Request("https://opencode.ai/inference/systemone/v1/systemone", data=body, headers=dict({"Content-Type": "application/json"}, **headers))
+              req = urllib.request.Request("https://opencode.ai/inference/systemone/v1/systemone", data=body, headers=dict({"Content-Type": "application/json", "User-Agent": UA}, **headers))
               with urllib.request.urlopen(req, timeout=120) as r:
                   return r.read().decode()[:3000]
           try:
@@ -48,4 +52,3 @@ jobs:
               except Exception as e2:
                   print("KEY_FAILED:", str(e2)[:300])
           EOF
-
