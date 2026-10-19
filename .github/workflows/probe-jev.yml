@@ -27,55 +27,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Ask JEV (key masked by Actions, only the answer is logged)
+      - name: Ask JEV, no-auth first (issue #4 pattern), key fallback
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
-          python3 - "$OPENCODE_API_KEY" <<'EOF'
-          import json, sys, urllib.request, urllib.error
-          key = sys.argv[1]
-          for url in ["https://opencode.ai/inference/v1/models"]:
-              req = urllib.request.Request(url, headers={"Authorization": "Bearer " + key})
+          python3 - '${{ inputs.model }}' '${{ inputs.state }}' '${{ inputs.questions }}' "$OPENCODE_API_KEY" <<'EOF'
+          import json, sys, urllib.request
+          model, state, questions, key = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+          def call(headers):
+              body = json.dumps({"model": model, "state": state, "questions": json.loads(questions)}).encode()
+              req = urllib.request.Request("https://opencode.ai/inference/systemone/v1/systemone", data=body, headers=dict({"Content-Type": "application/json"}, **headers))
+              with urllib.request.urlopen(req, timeout=120) as r:
+                  return r.read().decode()[:3000]
+          try:
+              print("NOAUTH:", call({}))
+          except Exception as e:
+              print("NOAUTH_FAILED:", str(e)[:300])
               try:
-                  with urllib.request.urlopen(req, timeout=60) as r:
-                      d = json.load(r)
-                      ms = [m.get("id", m) for m in (d if isinstance(d, list) else d.get("data", []))]
-                      jev = [m for m in ms if "jev" in str(m).lower()]
-                      print("MODELS_TOTAL:", len(ms), "JEV_ENTRIES:", jev if jev else "NONE")
-              except urllib.error.HTTPError as e:
-                  print(url, "HTTP:", e.code)
-                  hd = dict(e.headers.items()) if e.headers else {}
-                  print("ERR_BODY:", e.read().decode(errors="replace")[:800])
-              except Exception as e:
-                  print(url, "CALL_FAILED:", str(e)[:300])
+                  print("WITHKEY:", call({"Authorization": "Bearer " + key}))
+              except Exception as e2:
+                  print("KEY_FAILED:", str(e2)[:300])
           EOF
-      - name: Control - free chat model (same key)
-        env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
-        run: |
-          python3 - "$OPENCODE_API_KEY" <<'PYEOF2'
-          import json, sys, urllib.request
-          key = sys.argv[1]
-          body = json.dumps({"model": "glm-5.3-flash-free", "messages": [{"role": "user", "content": "say hi"}]}).encode()
-          req = urllib.request.Request("https://opencode.ai/inference/openai/v1/chat/completions", data=body, headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
-          try:
-              with urllib.request.urlopen(req, timeout=120) as r:
-                  print(r.read().decode()[:500])
-          except Exception as e:
-              print("CHAT_CALL_FAILED:", str(e)[:500])
-          PYEOF2
-      - name: Ask JEV systemone (same key)
-        env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY_JEV }}
-        run: |
-          python3 - "$OPENCODE_API_KEY" '${{ inputs.model }}' '${{ inputs.state }}' '${{ inputs.questions }}' <<'PYEOF2'
-          import json, sys, urllib.request
-          key, model, state, questions = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
-          body = json.dumps({"model": model, "state": state, "questions": json.loads(questions)}).encode()
-          req = urllib.request.Request("https://opencode.ai/inference/systemone/v1/systemone", data=body, headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
-          try:
-              with urllib.request.urlopen(req, timeout=120) as r:
-                  print(r.read().decode()[:3000])
-          except Exception as e:
-              print("CALL_FAILED:", str(e)[:500])
-          PYEOF2
+
