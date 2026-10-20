@@ -184,6 +184,7 @@ class LIBEROBenchmark(StepBenchmark):
         task_obj = task["task_obj"]
         task_id = task["task_id"]
         episode_idx = task.get("episode_idx", 0)
+        self._cur_ids = (task_id, episode_idx)  # P2: sidecar file key
 
         # Only create a new env when the task changes (reuse across episodes)
         if self._env is None or self._current_task_id != task_id:
@@ -236,8 +237,7 @@ class LIBEROBenchmark(StepBenchmark):
 
         assert self._env is not None
         obs, reward, done, info = self._env.step(processed_action)
-        if done:
-            self._dump_final_bodies()
+        self._dump_bodies_snapshot()
         self._recorder.record_video(self._extract_frame(obs))
         self._recorder.record_step(
             reward=float(reward),
@@ -333,11 +333,13 @@ class LIBEROBenchmark(StepBenchmark):
         except Exception:
             return None
 
-    def _dump_final_bodies(self) -> None:
-        """P2 instrumentation (partner-vla-eval): dump all sim body positions on episode end.
+    def _dump_bodies_snapshot(self) -> None:
+        """P2 instrumentation v2 (partner-vla-eval): per-step overwrite sidecar.
 
-        Appends one JSON line per episode to /work/results/libero-final-bodies.jsonl
-        (results dir is host-mounted). Best-effort: never breaks the eval path.
+        Writes /work/results/libero-state-t<TASK>-e<EP>.json every step
+        (overwrite); the file left behind IS the final state, including
+        timeouts (done=False never fired). Task/ep ids stashed at reset().
+        Best-effort: never breaks the eval path.
         """
         try:
             import json as _json
@@ -352,9 +354,9 @@ class LIBEROBenchmark(StepBenchmark):
             names = list(sim.model.body_names)
             pos = sim.data.body_xpos
             bodies = {n: [round(float(x), 4) for x in pos[i]] for i, n in enumerate(names)}
-            out = "/work/results/libero-final-bodies.jsonl"
+            tid, ep = getattr(self, "_cur_ids", ("?", "?"))
             _os.makedirs("/work/results", exist_ok=True)
-            with open(out, "a") as fh:
-                fh.write(_json.dumps({"task": getattr(self, "task_name", "?"), "bodies": bodies}) + "\n")
+            with open(f"/work/results/libero-state-t{tid}-e{ep}.json", "w") as fh:
+                _json.dump({"task_id": tid, "episode_idx": ep, "bodies": bodies}, fh)
         except Exception:
             pass
