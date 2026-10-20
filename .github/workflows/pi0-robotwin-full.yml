@@ -54,6 +54,10 @@ on:
         description: "cogact（默认，预热 Dexmal 权重）或 none（X-VLA 由 serve 自理）"
         required: false
         default: "cogact"
+      extra_mounts:
+        description: "分号分隔的外层 -v（P2 补丁等），空=不用"
+        required: false
+        default: ""
       fast_init:
         description: "true（默认，跳 CuRobo 预热）或 false（EE 必需，IK 走 plan_path）"
         required: false

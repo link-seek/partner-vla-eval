@@ -161,6 +161,13 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
+# 通用外层挂载（P2 补丁等）：RW_EXTRA_MOUNTS 形如 "host:container:ro;..."，与资产挂载同通道
+if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
+  IFS=';' read -ra VLIST <<< "$RW_EXTRA_MOUNTS"
+  for v in "${VLIST[@]}"; do
+    [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
+  done
+fi
 echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<内置>}"
 echo "outer -v flags: ${MOUNT_FLAGS[*]:-<无>}"
 docker run --rm --gpus all --network host --entrypoint bash \
