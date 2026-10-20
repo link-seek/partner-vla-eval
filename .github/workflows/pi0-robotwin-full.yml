@@ -58,6 +58,10 @@ on:
         description: "分号分隔的外层 -v（P2 补丁等），空=不用"
         required: false
         default: ""
+      state_patch:
+        description: "P2 终态补丁：空=不用，robotwin=挂载本仓补丁"
+        required: false
+        default: ""
       fast_init:
         description: "true（默认，跳 CuRobo 预热）或 false（EE 必需，IK 走 plan_path）"
         required: false
@@ -125,6 +129,8 @@ jobs:
           RW_VOLUMES: ${{ inputs.volumes }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
           ASSETS_MOUNT: ${{ inputs.assets_mount }}
+          RW_EXTRA_MOUNTS: ${{ inputs.extra_mounts }}
+          RW_STATE_PATCH: ${{ inputs.state_patch }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_robotwin_full.sh
