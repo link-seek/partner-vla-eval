@@ -43,9 +43,9 @@ on:
         required: false
         default: ""
       action_type:
-        description: "qpos（默认）或 ee（需 benchmark 镜像含补丁，如 ee-0.8.0）"
+        description: "空=不发（stock 镜像）；ee=EE 验证（需 ee 镜像）"
         required: false
-        default: "qpos"
+        default: 
       serve_yaml:
         description: "serve 配置名（默认 CogACT 双臂；X-VLA 用 serve-robotwin.yaml）"
         required: false

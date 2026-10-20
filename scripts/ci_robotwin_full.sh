@@ -66,7 +66,9 @@ echo "      seed: 0"
 echo "      instruction_type: seen"
 echo "      test_num: $RW_EPISODES"
 echo "      skip_expert_check: ${RW_SKIP_EXPERT:-true}  # 0.7.0 无 bundled seeds 必须 true；0.8.0 探 false 走自带种子+oracle"
-echo "      action_type: ${RW_ACTION_TYPE:-qpos}  # EE 验证传 ee（benchmark 镜像须含补丁，如 ee-0.8.0）"
+if [ -n "${RW_ACTION_TYPE:-}" ]; then
+echo "      action_type: ${RW_ACTION_TYPE}  # 仅 EE 镜像认；stock 镜像未知参数会炸，故缺省不发"
+fi
 echo "      fast_init: ${RW_FAST_INIT:-true}  # EE 必须 false：fast-path 禁 plan_path，而 EE 靠它做 IK"
 echo "    action_dim: 14"
 done
