@@ -21,6 +21,10 @@ on:
         description: "benchmark 镜像（0.8.0 已同步到 SWR）"
         required: false
         default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0"
+      volumes:
+        description: "分号分隔的 -v 挂载（P2  instrumentation 用）"
+        required: false
+        default: 
 
 concurrency:
   group: gpu-ecs-pi0-smoke
@@ -74,6 +78,7 @@ jobs:
           RUN_YAML: ${{ inputs.run_yaml }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
           LIBERO_IMAGE: ${{ inputs.bench_image }}
+          LIBERO_VOLUMES: ${{ inputs.volumes }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_libero.sh

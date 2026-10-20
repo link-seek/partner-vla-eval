@@ -52,12 +52,22 @@ for i in $(seq 1 120); do
 done
 
 echo "[4/4] 跑 LIBERO smoke (spatial 1 task x 1ep)"
+# P2 instrumentation: LIBERO_VOLUMES 形如 "host:container:ro;..."（分号分隔多个 -v），挂载跑在外层容器
+MOUNT_FLAGS=()
+if [ -n "${LIBERO_VOLUMES:-}" ]; then
+  IFS=';' read -ra VLIST <<< "$LIBERO_VOLUMES"
+  for v in "${VLIST[@]}"; do
+    [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
+  done
+fi
+echo "outer -v flags: ${MOUNT_FLAGS[*]:-<无>}"
 set +e
 docker run --rm --gpus all --network host \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  "${MOUNT_FLAGS[@]}" \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$LIBERO_IMAGE" \
   run --config /work/configs/${RUN_YAML:-run-libero-smoke.yaml} --server-url ws://localhost:8000 --output-dir /work/results/libero-smoke 2>&1 | tee results/libero-smoke.log
