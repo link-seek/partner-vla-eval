@@ -161,6 +161,16 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
+# P2 状态补丁（RW_STATE_PATCH=robotwin）：自动挂载本仓 vendoring 补丁，无需手写 host 路径
+if [ "${RW_STATE_PATCH:-}" = "robotwin" ]; then
+  _P="$WORK/scripts/upstream/robotwin_benchmark_state.py"
+  if [ -f "$_P" ]; then
+    MOUNT_FLAGS+=(-v "$_P:/workspace/src/vla_eval/benchmarks/robotwin/benchmark.py:ro")
+    echo "state-patch mounted: robotwin"
+  else
+    echo "state-patch MISSING: $_P"; exit 1
+  fi
+fi
 # 通用外层挂载（P2 补丁等）：RW_EXTRA_MOUNTS 形如 "host:container:ro;..."，与资产挂载同通道
 if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
   IFS=';' read -ra VLIST <<< "$RW_EXTRA_MOUNTS"
