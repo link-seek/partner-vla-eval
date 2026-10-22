@@ -23,10 +23,8 @@ rm -rf "$OUTDIR"  # 同名块跨 run 累积污染 artifact；OBS 已留档
 mkdir -p "$OUTDIR"
 
 echo "[0/6] workspace 属主修复 + 缓存目录预建"
-docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \
-  sudo chown -R "$(id -u):$(id -g)" "$WORK" 2>/dev/null || true
-mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" 2>/dev/null || sudo mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" || true
-sudo chown -R "$(id -u):$(id -g)" "$WORK/.cache" 2>/dev/null || true
+source "$WORK/scripts/lib/common.sh"
+workspace_fix "0/6"
 
 SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"

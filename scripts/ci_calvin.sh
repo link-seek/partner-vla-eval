@@ -8,18 +8,12 @@ WORK="$PWD"
 SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 CALVIN_IMAGE="${CALVIN_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0}"
-mkdir -p results
-rm -rf results/*  # 同上
-
-echo "[0/4] workspace 属主修复 + 缓存目录预建"
-docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \
-  sudo chown -R "$(id -u):$(id -g)" "$WORK" 2>/dev/null || true
-mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" 2>/dev/null || sudo mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" || true
-sudo chown -R "$(id -u):$(id -g)" "$WORK/.cache" 2>/dev/null || true
+source "$WORK/scripts/lib/common.sh"
+results_fresh
+workspace_fix "0/4"
 
 echo "[1/4] 拉镜像（SWR 内网）"
-LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
-echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
+swr_login
 docker pull "$CALVIN_IMAGE"
 docker pull "$SERVE_IMAGE"
 docker pull "$VERIFY_IMAGE"

@@ -13,14 +13,9 @@ HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
-mkdir -p results
-rm -rf results/*  # 同上
-
-echo "[0/5] workspace 属主修复"
-docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \
-  sudo chown -R "$(id -u):$(id -g)" "$WORK" 2>/dev/null || true
-mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" 2>/dev/null || sudo mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf" || true
-sudo chown -R "$(id -u):$(id -g)" "$WORK/.cache" 2>/dev/null || true
+source "$WORK/scripts/lib/common.sh"
+results_fresh
+workspace_fix "0/5"
 
 echo "[1/5] harness 源码 (host 侧 clone)"
 LEROBOT_URL="https://github.com/huggingface/lerobot.git"
