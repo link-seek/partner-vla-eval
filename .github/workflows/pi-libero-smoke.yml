@@ -48,9 +48,13 @@ jobs:
     runs-on: [self-hosted, hw21]
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: Wandalen/wretry.action@v1
         with:
-          fetch-depth: 1
+          attempt_limit: 3
+          attempt_delay: 60000
+          action: actions/checkout@v4
+          with: |
+            fetch-depth: 1
       - uses: ./.github/actions/ecs-power
         with:
           action: start
@@ -61,9 +65,13 @@ jobs:
     runs-on: [self-hosted, Linux, X64, V100-pi0]
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v4
+      - uses: Wandalen/wretry.action@v1
         with:
-          clean: false
+          attempt_limit: 3
+          attempt_delay: 60000
+          action: actions/checkout@v4
+          with: |
+            clean: false
       - name: Run LIBERO smoke
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
