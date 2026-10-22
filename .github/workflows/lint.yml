@@ -1,0 +1,36 @@
+name: Lint
+
+# 每次推 main 自动跑：bash -n 全部脚本 + YAML 解析全部 workflow + composite action。
+# 2026-10-22 前已因此类错误翻车 3 次（heredoc 解析、本地 action 路径、wretry 参数）。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: bash -n all scripts
+        run: |
+          fail=0
+          for f in scripts/*.sh scripts/lib/*.sh scripts/upstream/*.sh; do
+            bash -n "$f" || { echo "SYNTAX FAIL: $f"; fail=1; }
+          done
+          [ "$fail" = 0 ] && echo "BASH OK"
+          exit $fail
+      - name: YAML parse all workflows + actions
+        run: |
+          python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + glob.glob('.github/actions/*/action.yml')]; print('YAML OK')"
+      - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
+        run: |
+          ! grep -rn "rm -rf /\s*$\|rm -rf /\*" scripts/ || { echo "DANGEROUS rm FOUND"; exit 1; }
+          echo "GUARDS OK"
