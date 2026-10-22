@@ -14,6 +14,7 @@ DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 mkdir -p results
+rm -rf results/*  # 同上
 
 echo "[0/5] workspace 属主修复"
 docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \

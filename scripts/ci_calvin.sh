@@ -9,6 +9,7 @@ SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 CALVIN_IMAGE="${CALVIN_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.8.0}"
 mkdir -p results
+rm -rf results/*  # 同上
 
 echo "[0/4] workspace 属主修复 + 缓存目录预建"
 docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \

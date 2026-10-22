@@ -8,6 +8,7 @@ LIBERO_IMAGE="${LIBERO_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eva
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0}"
 mkdir -p results
+rm -rf results/*  # 跨 run 累积污染 artifact，每轮 OBS+artifact 已留档，清掉重来
 
 echo "[0/4] workspace 属主修复 + 缓存目录预建"
 docker run --rm -v "$WORK":/w python:3.12-slim chown -R 1001:1001 /w 2>/dev/null || \
@@ -31,14 +32,14 @@ for i in 1 2 3; do
   [ "$i" = "3" ] && exit 1
 done
 
-echo "[3/4] 启动 pi05 serve (GPU0, 后台)"
+echo "[3/4] 启动 pi05 serve (GPU${SERVE_CUDA:-0}, 后台)"
 docker rm -f pi05-serve 2>/dev/null || true
-docker run -d --name pi05-serve --gpus '"device=0"' --network host \
+docker run -d --name pi05-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network host \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -w /work/harness \
-  -e CUDA_VISIBLE_DEVICES=0 -e COMPILE_MODEL=false \
+  -e CUDA_VISIBLE_DEVICES=${SERVE_CUDA:-0} -e COMPILE_MODEL=false \
   -e UV_OFFLINE=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \

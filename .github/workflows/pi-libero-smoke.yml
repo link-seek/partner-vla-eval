@@ -17,6 +17,10 @@ on:
         description: "serve 镜像（X-VLA 用 vla-serve-xvla:0.7.0）"
         required: false
         default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0"
+      serve_cuda:
+        description: "serve 可见卡（默认 0；双卡分片用 0,1）"
+        required: false
+        default: "0"
       bench_image:
         description: "benchmark 镜像（0.8.0 已同步到 SWR）"
         required: false
@@ -66,6 +70,7 @@ jobs:
           SERVE_YAML: ${{ inputs.serve_yaml }}
           RUN_YAML: ${{ inputs.run_yaml }}
           SERVE_IMAGE: ${{ inputs.serve_image }}
+          SERVE_CUDA: ${{ inputs.serve_cuda }}
           LIBERO_IMAGE: ${{ inputs.bench_image }}
           LIBERO_VOLUMES: ${{ inputs.volumes }}
         run: |

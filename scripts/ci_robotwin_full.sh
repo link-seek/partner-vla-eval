@@ -19,6 +19,7 @@ RW_SHARDS="${RW_SHARDS:-8}"
 RW_VIDEO="${RW_VIDEO:-0}"
 CHUNK_TAG=$(echo "$RW_TASKS" | tr ',' '+' | cut -c1-60)
 OUTDIR="results/robotwin-${CHUNK_TAG}-x${RW_EPISODES}"
+rm -rf "$OUTDIR"  # 同名块跨 run 累积污染 artifact；OBS 已留档
 mkdir -p "$OUTDIR"
 
 echo "[0/6] workspace 属主修复 + 缓存目录预建"
@@ -126,14 +127,14 @@ if [ "${RW_PREWARM:-cogact}" = "none" ]; then
   cp "$WORK/configs/$SERVE_YAML" "$WORK/configs/serve-robotwin-local.yaml"
 fi
 
-echo "[5/6] 启动 serve (GPU0, 后台；烘焙镜像 + UV_OFFLINE，零下载；配置 $SERVE_YAML)"
+echo "[5/6] 启动 serve (GPU${SERVE_CUDA:-0}，后台；烘焙镜像 + UV_OFFLINE，零下载；配置 $SERVE_YAML)"
 docker rm -f cogact-serve 2>/dev/null || true
-docker run -d --name cogact-serve --gpus '"device=0"' --network host \
+docker run -d --name cogact-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network host \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -w /work/harness \
-  -e CUDA_VISIBLE_DEVICES=0 \
+  -e CUDA_VISIBLE_DEVICES=${SERVE_CUDA:-0} \
   -e UV_OFFLINE=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
