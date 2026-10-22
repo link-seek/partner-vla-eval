@@ -56,8 +56,8 @@ runs:
         for i in $(seq 1 ${{ inputs.timeout-min }}); do
           sleep 60
           # NOTE: 不用 ShowServer（要 project_id，runner 无 profile；ListServersDetails 已验证可行）
-          RAW=$(hcloud ECS ListServersDetails --cli-region="${{ inputs.region }}" --limit=25 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print([s['status'] for s in d['servers'] if s['id']=='${{ inputs.server-id }}'][0])" 2>/dev/null || echo UNKNOWN)
-          ST=$(echo "$RAW" | python3 -c "import json,sys; print(json.load(sys.stdin)['server']['status'])" 2>/dev/null || echo UNKNOWN)
+          RAW=$(hcloud ECS ListServersDetails --cli-region="${{ inputs.region }}" --limit=25 2>&1)
+          ST=$(echo "$RAW" | python3 -c "import json,sys; d=json.load(sys.stdin); print([s['status'] for s in d['servers'] if s['id']=='${{ inputs.server-id }}'][0])" 2>/dev/null || echo UNKNOWN)
           echo "poll $i: $ST (want $WANT)"
           if [ "$ST" = UNKNOWN ]; then echo "---showserver raw (truncated)---"; echo "$RAW" | head -c 400; echo; fi
           [ "$ST" = "$WANT" ] && { echo "power-verified: $ST"; exit 0; }
