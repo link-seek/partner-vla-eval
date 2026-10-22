@@ -58,6 +58,7 @@ jobs:
       - uses: ./.github/actions/ecs-power
         with:
           action: start
+          server-id: ${{ env.ECS_SERVER_ID }}
           obs-ak: ${{ secrets.OBS_AK }}
           obs-sk: ${{ secrets.OBS_SK }}
   smoke:
@@ -110,5 +111,6 @@ jobs:
       - uses: ./.github/actions/ecs-power
         with:
           action: stop
+          server-id: ${{ env.ECS_SERVER_ID }}
           obs-ak: ${{ secrets.OBS_AK }}
           obs-sk: ${{ secrets.OBS_SK }}
