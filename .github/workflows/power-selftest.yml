@@ -1,0 +1,26 @@
+name: Power Selftest (manual)
+
+# 验证 ecs-power composite action：开机→验 ACTIVE→关机→验 SHUTOFF。
+# 平时不用，改 infra 后跑一遍。
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  cycle:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 30
+    steps:
+      - uses: ./.github/actions/ecs-power
+        with:
+          action: start
+          obs-ak: ${{ secrets.OBS_AK }}
+          obs-sk: ${{ secrets.OBS_SK }}
+      - uses: ./.github/actions/ecs-power
+        with:
+          action: stop
+          obs-ak: ${{ secrets.OBS_AK }}
+          obs-sk: ${{ secrets.OBS_SK }}

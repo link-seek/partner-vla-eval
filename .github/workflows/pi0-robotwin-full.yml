@@ -85,22 +85,11 @@ jobs:
     runs-on: [self-hosted, hw21]
     timeout-minutes: 15
     steps:
-      - name: Setup hcloud CLI
-        run: |
-          curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
-          tar -xzf /tmp/hcloud.tar.gz -C /tmp/
-          sudo mv /tmp/hcloud /usr/local/bin/hcloud
-      - name: Start ECS
-        env:
-          HCLOUD_AGREE_PRIVACY: "true"
-        run: |
-          echo "y" | hcloud ECS BatchStartServers \
-            --cli-region="${{ env.ECS_REGION }}" \
-            --cli-access-key="${{ secrets.OBS_AK }}" \
-            --cli-secret-key="${{ secrets.OBS_SK }}" \
-            --os-start.servers.1.id="${{ env.ECS_SERVER_ID }}"
-          sleep 120
-
+      - uses: ./.github/actions/ecs-power
+        with:
+          action: start
+          obs-ak: ${{ secrets.OBS_AK }}
+          obs-sk: ${{ secrets.OBS_SK }}
   chunk:
     needs: start-ecs
     runs-on: [self-hosted, Linux, X64, V100-pi0]
@@ -152,22 +141,10 @@ jobs:
     needs: chunk
     runs-on: [self-hosted, hw21]
     if: always()
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
-      - name: Setup hcloud CLI
-        run: |
-          curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
-          tar -xzf /tmp/hcloud.tar.gz -C /tmp/
-          sudo mv /tmp/hcloud /usr/local/bin/hcloud
-      - name: Stop ECS
-        env:
-          HCLOUD_AGREE_PRIVACY: "true"
-        run: |
-          sleep 120
-          echo "y" | hcloud ECS BatchStopServers \
-            --cli-region="${{ env.ECS_REGION }}" \
-            --cli-access-key="${{ secrets.OBS_AK }}" \
-            --cli-secret-key="${{ secrets.OBS_SK }}" \
-            --os-stop.servers.1.id="${{ env.ECS_SERVER_ID }}"
-          sleep 60
-          exit 0
+      - uses: ./.github/actions/ecs-power
+        with:
+          action: stop
+          obs-ak: ${{ secrets.OBS_AK }}
+          obs-sk: ${{ secrets.OBS_SK }}

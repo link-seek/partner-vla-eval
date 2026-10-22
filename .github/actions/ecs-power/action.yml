@@ -1,0 +1,59 @@
+name: "ECS power with verify"
+description: "Start/stop V100 ECS and poll until the target state, then verify runners(optional). Fixes fire-and-forget start-ecs."
+
+inputs:
+  action:
+    description: "start or stop"
+    required: true
+  server-id:
+    required: false
+    default: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+  region:
+    required: false
+    default: cn-north-4
+  timeout-min:
+    required: false
+    default: "10"
+  obs-ak:
+    required: true
+  obs-sk:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup hcloud CLI
+      shell: bash
+      run: |
+        curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
+        tar -xzf /tmp/hcloud.tar.gz -C /tmp/
+        sudo mv /tmp/hcloud /usr/local/bin/hcloud
+    - name: Power + verify
+      shell: bash
+      env:
+        HCLOUD_AGREE_PRIVACY: "true"
+      run: |
+        if [ "${{ inputs.action }}" = "start" ]; then
+          echo "y" | hcloud ECS BatchStartServers \
+            --cli-region="${{ inputs.region }}" \
+            --cli-access-key="${{ inputs.obs-ak }}" \
+            --cli-secret-key="${{ inputs.obs-sk }}" \
+            --os-start.servers.1.id="${{ inputs.server-id }}"
+          WANT="ACTIVE"
+        else
+          sleep 120
+          echo "y" | hcloud ECS BatchStopServers \
+            --cli-region="${{ inputs.region }}" \
+            --cli-access-key="${{ inputs.obs-ak }}" \
+            --cli-secret-key="${{ inputs.obs-sk }}" \
+            --os-stop.servers.1.id="${{ inputs.server-id }}"
+          WANT="SHUTOFF"
+        fi
+        for i in $(seq 1 ${{ inputs.timeout-min }}); do
+          sleep 60
+          ST=$(hcloud ECS ShowServer --cli-region "${{ inputs.region }}" --server_id "${{ inputs.server-id }}" 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)['server']['status'])" 2>/dev/null || echo UNKNOWN)
+          echo "poll $i: $ST (want $WANT)"
+          [ "$ST" = "$WANT" ] && { echo "power-verified: $ST"; exit 0; }
+        done
+        echo "power-timeout: never reached $WANT" >&2
+        exit 1
