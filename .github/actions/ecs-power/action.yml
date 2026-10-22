@@ -12,8 +12,9 @@ inputs:
     required: false
     default: cn-north-4
   timeout-min:
+    description: 开机验证曾超 10 分钟，默认 12
     required: false
-    default: "10"
+    default: "12"
   obs-ak:
     required: true
   obs-sk:
