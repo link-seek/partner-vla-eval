@@ -493,7 +493,7 @@ class RoboTwinBenchmark(StepBenchmark):
         _restore_play_once_attributes(self._env, self.task_name)
         self._env.set_instruction(instruction=task["instruction"])
         self._steps = 0
-        self._cur_ids = (self.task_name, task.get("episode_idx", 0))  # P2 state sidecar key
+        self._cur_ids = (self.task_name, task["seed"])  # P2 state sidecar key (seed 唯一；episode_idx 常缺省 0)
         raw_obs = self._env.get_obs()
         self._recorder.record_video(self._extract_frame(raw_obs))
         return raw_obs
@@ -576,7 +576,7 @@ class RoboTwinBenchmark(StepBenchmark):
     def _dump_state_snapshot(self, raw_obs: Any, success: bool) -> None:
         """P2 instrumentation (partner-vla-eval): per-step overwrite sidecar.
 
-        Writes /work/results/rw-state-<task>-e<EP>.json every step; the file left
+        Writes /work/results/rw-state-<task>-s<SEED>.json every step; the file left
         behind IS the final state (timeouts included). Joints always; cup/coaster
         functional points on a best-effort basis (place_empty_cup et al).
         Never breaks the eval path.
@@ -598,7 +598,7 @@ class RoboTwinBenchmark(StepBenchmark):
                     continue
             tname, ep = getattr(self, "_cur_ids", ("?", "?"))
             _os.makedirs("/work/results", exist_ok=True)
-            with open(f"/work/results/rw-state-{tname}-e{ep}.json", "w") as fh:
+            with open(f"/work/results/rw-state-{tname}-s{ep}.json", "w") as fh:
                 _json.dump({"task": tname, "episode_idx": ep, "success_so_far": bool(success),
                             "joints14": joints, "objects": objs}, fh)
         except Exception:
