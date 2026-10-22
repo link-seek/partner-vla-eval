@@ -5,7 +5,7 @@
 script: "src/vla_eval/model_servers/lerobot.py"
 args:
   policy_type: smolvla
-  checkpoint: lerobot/smolvla_base
+  checkpoint: lerobot/smolvla_libero  # 需 10-12 state-dim fix 之后版本（当前 main 已含；pin a24f1f38）；7-D action + 8-D state（#169 钥匙）
   device: cuda
   port: 8000
   compile_model: false
