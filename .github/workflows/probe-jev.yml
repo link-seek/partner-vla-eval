@@ -29,6 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Checkout (wretry 包裹，V100 同款写法金丝雀)
+        uses: Wandalen/wretry.action@v1
+        with:
+          attempt_limit: 3
+          attempt_delay: 15000
+          action: actions/checkout@v4
+          with: |
+            fetch-depth: 1
       - name: Ask JEV, no-auth first (issue #4 pattern), key fallback
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
