@@ -25,6 +25,9 @@ jobs:
     runs-on: [self-hosted, hw21]
     timeout-minutes: 15
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: ./.github/actions/ecs-power
         with:
           action: start
