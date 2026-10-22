@@ -31,7 +31,7 @@ runs:
         curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
         tar -xzf /tmp/hcloud.tar.gz -C /tmp/
         sudo mv -f /tmp/hcloud /usr/local/bin/hcloud
-        hcloud --help 2>&1 | head -n 1
+        hcloud version 2>&1 | head -n 1 || true
     - name: Power + verify
       shell: bash
       env:
