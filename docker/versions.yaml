@@ -23,3 +23,9 @@ dtype_xvla: torch.float32     # xvla 默认（官方默认；fp16 对照组见�
 ROBOTWIN_REF: c3ddfa8b97d5519efa828b075999bd0006778e5e
 CUROBO_REF: v0.7.8
 LIBERO_REF: 8f1084e3132a39270c3a13ebe37270a43ece2a01
+
+# 已知债登记（消债即删行；此处登记的不算漂移，未登记的漂移即红）
+known_debts_harness_070:
+  - Dockerfile.serve-cogact   # 升 0.8.0 + 跑 1 smoke 后删
+  - Dockerfile.serve-pi05     # 同上
+  - Dockerfile.serve-xvla     # 同上

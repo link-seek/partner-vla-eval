@@ -30,6 +30,8 @@ jobs:
       - name: YAML parse all workflows + actions
         run: |
           python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + glob.glob('.github/actions/*/action.yml')]; print('YAML OK')"
+      - name: versions.yaml consistency (no silent pin drift)
+        run: python3 scripts/check_versions.py
       - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
         run: |
           ! grep -rn "rm -rf /\s*$\|rm -rf /\*" scripts/ || { echo "DANGEROUS rm FOUND"; exit 1; }
