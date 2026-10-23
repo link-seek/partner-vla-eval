@@ -83,6 +83,7 @@ echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.
 docker pull "$ROBOTWIN_IMAGE"
 docker pull "$SERVE_IMAGE"
 docker pull "$VERIFY_IMAGE"
+results_root_wipe "$ROBOTWIN_IMAGE"
 
 echo "[4/6] 预热权重（默认 DB-CogACT 按 task 子目录；RW_PREWARM=none 跳过，如 X-VLA 由 serve 镜像自理）"
 # CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。

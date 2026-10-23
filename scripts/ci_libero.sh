@@ -14,6 +14,7 @@ echo "[1/4] 拉镜像（SWR 内网）"
 swr_login
 docker pull "$LIBERO_IMAGE"
 docker pull "$VERIFY_IMAGE"
+results_root_wipe "$LIBERO_IMAGE"
 
 echo "[2/4] 预热 pi05 权重（V100 盘已有缓存则秒过）"
 for i in 1 2 3; do

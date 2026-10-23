@@ -22,12 +22,21 @@ swr_login() {
 }
 results_fresh() {
   mkdir -p results
-  # docker 写出的文件属主是 root，runner 直接 rm 会 Permission denied（10-23 calvin smoke 翻车）；
-  # 先清属主再删，两种手段都不行才报错（不用裸 sudo，避免 runner 无 sudo 权限时挂）。
-  rm -rf results/* 2>/dev/null || {
-    local _w="${WORK:-$PWD}"
-    docker run --rm -v "$_w/results":/r python:3.12-slim chown -R 1001:1001 /r 2>/dev/null || \
-      sudo chown -R "$(id -u):$(id -g)" "$_w/results" 2>/dev/null || true
-    rm -rf "$_w"/results/*
-  }
+  # 先清能清的；root 属主的清不掉（docker 落盘）→ 留给 results_root_wipe（借已拉取镜像删）。
+  # 10-23 教训：docker 拉公共镜像/sudo 在 V100 上都不可用，fallback 必须走业务镜像。
+  rm -rf results/* 2>/dev/null || true
+  if [ -n "$(ls -A results 2>/dev/null)" ]; then
+    echo "[results] 有 root 残留，待 post-pull 清场（results_root_wipe）"
+  fi
+}
+# root 文件清场：借已拉取的业务镜像当 root 身份删（V100 唯一可行路）。
+# 调用点：各 ci 脚本 docker pull 之后。删不掉就 loud fail，不许带 stale 跑。
+results_root_wipe() {
+  local img="$1"
+  [ -n "$(ls -A results 2>/dev/null)" ] || return 0
+  echo "[results] root 残留清场（image: $img）"
+  docker run --rm --entrypoint bash -v "${WORK:-$PWD}/results":/r "$img" -c 'rm -rf /r/*' \
+    || { echo "root wipe FAILED"; exit 1; }
+  [ -z "$(ls -A results 2>/dev/null)" ] || { echo "root wipe INCOMPLETE"; exit 1; }
+  echo "[results] clean"
 }

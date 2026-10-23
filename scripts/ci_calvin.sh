@@ -17,6 +17,7 @@ swr_login
 docker pull "$CALVIN_IMAGE"
 docker pull "$SERVE_IMAGE"
 docker pull "$VERIFY_IMAGE"
+results_root_wipe "$CALVIN_IMAGE"
 
 echo "[2/4] 预热 CALVIN 权重（单仓，mirror）"
 for i in 1 2 3; do
