@@ -21,6 +21,9 @@ python_libero: "3.8"          # libero env（上游要求）
 dtype_cogact: torch.float16   # cogact 默认（V100 单卡 fp32 OOM，双卡分片见 Dockerfile）
 dtype_xvla: torch.float32     # xvla 默认（官方默认；fp16 对照组见论文实验 B）
 
+# 追踪仓补丁（议题 H）：CI 按此 REF 从 fork 拉取，不再读本仓 vendoring
+harness_patch_base: "https://raw.githubusercontent.com/link-seek/vla-evaluation-harness"
+harness_patch_ref: "07c3c910f9bf91cff8f7e3093268ecd51bf494fb"  # fork linkseek/p2-instrumentation，P2 双补丁+run_sharded（与上游一致）
 # 上游源码 pin（追踪仓跟随，研究仓只读）
 ROBOTWIN_REF: c3ddfa8b97d5519efa828b075999bd0006778e5e
 CUROBO_REF: v0.7.8

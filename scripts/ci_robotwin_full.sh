@@ -149,7 +149,7 @@ echo "[6/6] run_sharded 全块跑（分片 $RW_SHARDS，录像=$RW_VIDEO，gpu �
 VIDEO_FLAG="--no-record-video"
 [ "$RW_VIDEO" = "1" ] && VIDEO_FLAG="--record-video"
 set +e
-# run_sharded.sh vendoring 在本仓（scripts/upstream；0.8.0 Dockerfile 仍只 COPY src/configs，未烘 scripts，挂载保留）
+# run_sharded.sh 从追踪仓按 REF 拉取（见下方拉取块），0.8.0 镜像未烘 scripts，挂载保留
 # 分片跑在卡1：serve 独占卡0，8 分片同卡 SAPIEN 会 hang（watchdog 全杀，见 run 38186912836）。
 # V100 双32G，卡1空闲给渲染。
 # 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，
@@ -162,15 +162,18 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
-# P2 状态补丁（RW_STATE_PATCH=robotwin）：自动挂载本仓 vendoring 补丁，无需手写 host 路径
+# 追踪仓拉取（议题 H）：run_sharded 与 P2 补丁一律从 fork 按 REF 取，本仓不 vendoring
+_PB=$(grep -E '^harness_patch_base:' "$WORK/docker/versions.yaml" | sed -E 's/.*: *"([^"]+)".*/\1/')
+_PR=$(grep -E '^harness_patch_ref:' "$WORK/docker/versions.yaml" | sed -E 's/.*: *"([^"]+)".*/\1/')
+_PD="$WORK/.cache/patches/$_PR"
+mkdir -p "$_PD"
+[ -f "$_PD/run_sharded.sh" ] || curl -fsSL "$_PB/$_PR/scripts/run_sharded.sh" -o "$_PD/run_sharded.sh" || { echo "run_sharded fetch FAILED"; exit 1; }
+chmod +x "$_PD/run_sharded.sh"
+# P2 状态补丁（RW_STATE_PATCH=robotwin）：同源拉取，按需挂载
 if [ "${RW_STATE_PATCH:-}" = "robotwin" ]; then
-  _P="$WORK/scripts/upstream/robotwin_benchmark_state.py"
-  if [ -f "$_P" ]; then
-    MOUNT_FLAGS+=(-v "$_P:/workspace/src/vla_eval/benchmarks/robotwin/benchmark.py:ro")
-    echo "state-patch mounted: robotwin"
-  else
-    echo "state-patch MISSING: $_P"; exit 1
-  fi
+  [ -f "$_PD/robotwin_benchmark_state.py" ] || curl -fsSL "$_PB/$_PR/src/vla_eval/benchmarks/robotwin/benchmark.py" -o "$_PD/robotwin_benchmark_state.py" || { echo "patch fetch FAILED"; exit 1; }
+  MOUNT_FLAGS+=(-v "$_PD/robotwin_benchmark_state.py:/workspace/src/vla_eval/benchmarks/robotwin/benchmark.py:ro")
+  echo "state-patch fetched from fork @${_PR:0:8}: robotwin"
 fi
 # 通用外层挂载（P2 补丁等）：RW_EXTRA_MOUNTS 形如 "host:container:ro;..."，与资产挂载同通道
 if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
@@ -185,7 +188,7 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
-  -v "$WORK/scripts/upstream":/opt/harness-scripts:ro \
+  -v "$_PD/run_sharded.sh:/opt/harness-scripts/run_sharded.sh:ro" \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   "${MOUNT_FLAGS[@]}" \
   -e CUDA_VISIBLE_DEVICES=1 \
