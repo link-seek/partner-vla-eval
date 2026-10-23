@@ -22,5 +22,12 @@ swr_login() {
 }
 results_fresh() {
   mkdir -p results
-  rm -rf results/*  # 跨 run 累积污染 artifact；每轮 OBS+artifact 已留档，清掉重来
+  # docker 写出的文件属主是 root，runner 直接 rm 会 Permission denied（10-23 calvin smoke 翻车）；
+  # 先清属主再删，两种手段都不行才报错（不用裸 sudo，避免 runner 无 sudo 权限时挂）。
+  rm -rf results/* 2>/dev/null || {
+    local _w="${WORK:-$PWD}"
+    docker run --rm -v "$_w/results":/r python:3.12-slim chown -R 1001:1001 /r 2>/dev/null || \
+      sudo chown -R "$(id -u):$(id -g)" "$_w/results" 2>/dev/null || true
+    rm -rf "$_w"/results/*
+  }
 }
