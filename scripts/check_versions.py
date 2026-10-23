@@ -41,6 +41,14 @@ for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     if "FROM python:3.12-slim" not in open(f).read():
         fails.append(f"{f}: 基座不是 python:3.12-slim")
 
+# 4. 源码出处：serve 系只许从 fork clone（研究仓不再直连上游源码）
+for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
+    txt = open(f).read()
+    if "github.com/allenai/vla-evaluation-harness" in txt:
+        fails.append(f"{f}: 仍直连上游源码，改走 fork {V['harness_fork']}")
+    if V["harness_fork"] + ".git harness" not in txt:
+        fails.append(f"{f}: 未引用 fork {V['harness_fork']}")
+
 if fails:
     print("VERSION-DRIFT:")
     [print(" -", x) for x in fails]

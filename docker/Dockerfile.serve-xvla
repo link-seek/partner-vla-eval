@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir "vla-eval==0.7.0"
 
 # harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
 RUN git clone --depth 1 --branch ${HARNESS_REF} \
-      https://github.com/allenai/vla-evaluation-harness.git harness
+      https://github.com/link-seek/vla-evaluation-harness.git harness
 
 # V100 补丁（烘进镜像不再运行时 sed）：
 # torch 钉 2.6.0cu126（sm_70 无 cu128 内核）/ python 放宽
