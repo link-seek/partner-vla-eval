@@ -1,0 +1,25 @@
+# 唯一真源：全部镜像的版本 pin（议题 G，10-23）
+# 规则：Dockerfile 只许 ARG 引用这里的值，不许手写版本号；
+# lint 检查 pin 与此文件一致，漂了就红。
+# 带 TODO 的是已知债，还清即删注释。
+
+harness_bench: "0.8.0"        # bench 全系（libero/robotwin/calvin）
+harness_serve_target: "0.8.0" # serve 目标版本
+# TODO(账一): serve-cogact/pi05/xvla 仍为 0.7.0，升 0.8.0 各跑 1 smoke 后改此注释
+
+torch_bench_cu121: "2.4.1"    # robotwin env（cu121）
+torch_bench_cpu: "2.1.0"      # libero env（cpu）
+torch_serve_cu126: "2.6.0"    # serve 全系（cu126，sm_70 无 cu128 内核）
+# TODO(账二): verify 用 2.3.1 cu121，待对齐；torch 三版本统一需精度回归，排后
+
+python_serve: "3.12"          # serve 全系（python:3.12-slim）
+python_robotwin: "3.10"       # robotwin env（SAPIEN 3 要求）
+python_libero: "3.8"          # libero env（上游要求）
+
+dtype_cogact: torch.float16   # cogact 默认（V100 单卡 fp32 OOM，双卡分片见 Dockerfile）
+dtype_xvla: torch.float32     # xvla 默认（官方默认；fp16 对照组见论文实验 B）
+
+# 上游源码 pin（追踪仓跟随，研究仓只读）
+ROBOTWIN_REF: c3ddfa8b97d5519efa828b075999bd0006778e5e
+CUROBO_REF: v0.7.8
+LIBERO_REF: 8f1084e3132a39270c3a13ebe37270a43ece2a01
