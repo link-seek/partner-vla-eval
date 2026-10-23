@@ -19,7 +19,7 @@ RW_SHARDS="${RW_SHARDS:-8}"
 RW_VIDEO="${RW_VIDEO:-0}"
 CHUNK_TAG=$(echo "$RW_TASKS" | tr ',' '+' | cut -c1-60)
 OUTDIR="results/robotwin-${CHUNK_TAG}-x${RW_EPISODES}"
-rm -rf "$OUTDIR"  # 同名块跨 run 累积污染 artifact；OBS 已留档
+results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR 会把上轮 libero 残留打进 artifact）
 mkdir -p "$OUTDIR"
 
 echo "[0/6] workspace 属主修复 + 缓存目录预建"
