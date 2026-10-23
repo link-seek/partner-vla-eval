@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 LIBERO_IMAGE="${LIBERO_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
-SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0}"
+SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.8.0}"
 source "$WORK/scripts/lib/common.sh"
 results_fresh
 workspace_fix "0/4"

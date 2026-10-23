@@ -12,7 +12,7 @@ on:
       serve_image:
         description: "serve 镜像（fp32 双卡对照用 serve-cogact-fp32-2gpu）"
         required: false
-        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
+        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0"
       serve_cuda:
         description: "serve 可见卡（默认 0；fp32 分片用 0,1）"
         required: false

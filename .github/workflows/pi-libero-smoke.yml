@@ -14,9 +14,9 @@ on:
         required: false
         default: "run-libero-smoke.yaml"
       serve_image:
-        description: "serve 镜像（X-VLA 用 vla-serve-xvla:0.7.0）"
+        description: "serve 镜像（X-VLA 用 vla-serve-xvla:0.8.0）"
         required: false
-        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.7.0"
+        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-pi05:0.8.0"
       serve_cuda:
         description: "serve 可见卡（默认 0；双卡分片用 0,1）"
         required: false

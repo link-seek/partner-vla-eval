@@ -26,7 +26,7 @@ echo "[0/6] workspace 属主修复 + 缓存目录预建"
 source "$WORK/scripts/lib/common.sh"
 workspace_fix "0/6"
 
-SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0}"
+SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 
 echo "[1/6] harness 代码已烘进 serve 镜像，无 clone（V100 离线要求）"

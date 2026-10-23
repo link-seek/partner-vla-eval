@@ -37,7 +37,7 @@ on:
       serve_image:
         description: "serve 镜像（论文实验 B 用 fp32 版）"
         required: false
-        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.7.0"
+        default: "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0"
       assets_mount:
         description: "资产外置挂载（host:container:ro），空=用镜像内置"
         required: false
