@@ -7,7 +7,7 @@ harness_bench: "0.8.0"        # bench 全系（libero/robotwin/calvin）
 harness_serve_target: "0.8.0" # serve 目标版本
 harness_fork: link-seek/vla-evaluation-harness  # 源码唯一出处：只许从 fork clone，不许直连上游
 harness_cli: "0.8.0"          # serve 镜像内 vla-eval CLI pip 包版本（与源码 REF 对齐，10-23）
-# （账一 10-23 已改 REF，待构建+冒烟销账）
+# （账一 10-23 已销：构建+冒烟全绿，pi05 1/1、xvla seed-7 SUCCESS、cogact calvin 5/5）
 
 torch_bench_cu121: "2.4.1"    # robotwin env（cu121）
 torch_bench_cpu: "2.1.0"      # libero env（cpu）
