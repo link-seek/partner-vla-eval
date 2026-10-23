@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir --upgrade pip uv
 
 # vla-eval CLI（serve 入口；纯 python）
-RUN pip install --no-cache-dir "vla-eval==0.7.0"
+RUN pip install --no-cache-dir "vla-eval==0.8.0"
 
 # harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
 RUN git clone --depth 1 --branch ${HARNESS_REF} \

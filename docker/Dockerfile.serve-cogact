@@ -2,7 +2,7 @@
 # 构建机要求外网（免费 runner）：clone + pip + uv 全要下载。
 # 运行时（V100）零下载：UV_OFFLINE=1，harness/dexbotic/权重一律 baked 或挂载，
 # 不许 git clone / pip / HF。
-ARG HARNESS_REF=v0.7.0
+ARG HARNESS_REF=v0.8.0
 ARG DEXBOTIC_REV=42f72859dfe48bb4c30a09ab151a018c2ca0700a
 # 论文实验 B 用：float16（V100 默认）/ float32（对照组，build 时 --build-arg DTYPE=torch.float32）
 # fp32 单卡 OOM（28GB 权重）：DEVICE_MAP=auto 时双卡分片（每卡 ~14GB），见下方 python 补丁。
@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir --upgrade pip uv
 
 # vla-eval CLI（serve 入口；纯 python，无 torch 依赖）
-RUN pip install --no-cache-dir "vla-eval==0.7.0"
+RUN pip install --no-cache-dir "vla-eval==0.8.0"
 
 # harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
 RUN git clone --depth 1 --branch ${HARNESS_REF} \

@@ -1,6 +1,6 @@
 # pi05/Lerobot serve 镜像：V100 离线跑，依赖全烘，uv 缓存预热。
 # 构建机要求外网（免费 runner）。运行时（V100）零下载：UV_OFFLINE=1。
-ARG HARNESS_REF=v0.7.0
+ARG HARNESS_REF=v0.8.0
 ARG LEROBOT_REV=v0.6.0
 FROM python:3.12-slim
 ARG HARNESS_REF
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir --upgrade pip uv
 
 # vla-eval CLI（serve 入口；纯 python）
-RUN pip install --no-cache-dir "vla-eval==0.7.0"
+RUN pip install --no-cache-dir "vla-eval==0.8.0"
 
 # harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
 RUN git clone --depth 1 --branch ${HARNESS_REF} \

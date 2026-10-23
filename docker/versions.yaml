@@ -6,9 +6,8 @@
 harness_bench: "0.8.0"        # bench 全系（libero/robotwin/calvin）
 harness_serve_target: "0.8.0" # serve 目标版本
 harness_fork: link-seek/vla-evaluation-harness  # 源码唯一出处：只许从 fork clone，不许直连上游
-harness_cli: "0.7.0"          # serve 镜像内 vla-eval CLI pip 包版本
-# TODO(账四): CLI 0.7.0 vs 源码 0.8.0 不一致，待对齐验证后同升
-# TODO(账一): serve-cogact/pi05/xvla 仍为 0.7.0，升 0.8.0 各跑 1 smoke 后改此注释
+harness_cli: "0.8.0"          # serve 镜像内 vla-eval CLI pip 包版本（与源码 REF 对齐，10-23）
+# （账一 10-23 已改 REF，待构建+冒烟销账）
 
 torch_bench_cu121: "2.4.1"    # robotwin env（cu121）
 torch_bench_cpu: "2.1.0"      # libero env（cpu）
@@ -28,7 +27,4 @@ CUROBO_REF: v0.7.8
 LIBERO_REF: 8f1084e3132a39270c3a13ebe37270a43ece2a01
 
 # 已知债登记（消债即删行；此处登记的不算漂移，未登记的漂移即红）
-known_debts_harness_070:
-  - Dockerfile.serve-cogact   # 升 0.8.0 + 跑 1 smoke 后删
-  - Dockerfile.serve-pi05     # 同上
-  - Dockerfile.serve-xvla     # 同上
+known_debts_harness_070: []  # 10-23 已还清（cogact/pi05/xvla 升 0.8.0，CLI 同升）
