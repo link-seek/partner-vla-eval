@@ -10,6 +10,7 @@
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
+source "$WORK/scripts/lib/common.sh"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
@@ -23,7 +24,6 @@ results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR �
 mkdir -p "$OUTDIR"
 
 echo "[0/6] workspace 属主修复 + 缓存目录预建"
-source "$WORK/scripts/lib/common.sh"
 workspace_fix "0/6"
 
 SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0}"
