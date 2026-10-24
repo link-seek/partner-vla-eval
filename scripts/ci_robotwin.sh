@@ -11,7 +11,8 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
-ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0"
+ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
+ASSETS_MOUNT="${ASSETS_MOUNT:-/data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 source "$WORK/scripts/lib/common.sh"
 results_fresh
@@ -73,6 +74,7 @@ LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:
 echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
 docker pull "$ROBOTWIN_IMAGE"
 docker images | grep -E 'robotwin' || true
+results_root_wipe "$ROBOTWIN_IMAGE"
 
 echo "[3/5] 构建 verify 镜像 (host 缓存)"
 docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
@@ -142,6 +144,7 @@ docker run --rm --gpus all --network host \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK":/work -w /work \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  ${ASSETS_MOUNT:+-v "$ASSETS_MOUNT"} \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$ROBOTWIN_IMAGE" \
   run --config /work/configs/run-robotwin-smoke.yaml ${RW_VIDEO:+--record-video} 2>&1 | tee results/robotwin-smoke.log
