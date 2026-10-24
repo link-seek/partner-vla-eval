@@ -41,14 +41,20 @@ for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     if "FROM python:3.12-slim" not in open(f).read():
         fails.append(f"{f}: 基座不是 python:3.12-slim")
 
-# 5. 统一镜像：EE REF 与 fork 出处
+# 5. 统一镜像：EE REF + P2 烘焙 + fork 出处（构建时拉，运行时不拉）
 _U = open("docker/Dockerfile.robotwin-unified").read()
-if V["harness_ee_ref"] not in _U:
-    fails.append("Dockerfile.robotwin-unified: HARNESS_EE_REF 与 versions.yaml 不一致")
+for _k in ["harness_ee_ref", "harness_patch_ref"]:
+    if V[_k] not in _U:
+        fails.append("Dockerfile.robotwin-unified: %s 未烘进" % _k)
 if V["harness_fork"] not in _U:
     fails.append("Dockerfile.robotwin-unified: 未引用 fork")
-if "github.com/allenai/vla-evaluation-harness" in _U or "RoboTwin-Platform/RoboTwin" not in _U:
-    pass  # RoboTwin 上游源码仍直引（资产/仿真本体，非 harness；待追踪仓收编后再切）
+if "github.com/allenai/vla-evaluation-harness" in _U:
+    fails.append("Dockerfile.robotwin-unified: 仍直连上游 harness")
+import os as _os
+if not _os.path.exists("docker/entrypoint-robotwin.sh"):
+    fails.append("docker/entrypoint-robotwin.sh 缺失")
+elif "STATE_PATCH" not in open("docker/entrypoint-robotwin.sh").read():
+    fails.append("entrypoint-robotwin.sh: 无 STATE_PATCH 激活")
 
 # 4. 源码出处：serve 系只许从 fork clone（研究仓不再直连上游源码）
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):

@@ -76,6 +76,14 @@ RUN uv pip install --no-cache-dir wheel \
 FROM ${BASE_IMAGE}
 ARG HARNESS_FORK
 ARG HARNESS_EE_REF
+# P2 补丁烘进镜像（构建机外网可达 raw；V100 出境只认 github.com，运行时现拉必死）
+ARG HARNESS_PATCH_BASE=https://raw.githubusercontent.com/link-seek/vla-evaluation-harness
+ARG HARNESS_PATCH_REF=07c3c910f9bf91cff8f7e3093268ecd51bf494fb
+RUN mkdir -p /opt/patches && cd /opt/patches \
+ && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/scripts/run_sharded.sh" -o run_sharded.sh \
+ && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/src/vla_eval/benchmarks/robotwin/benchmark.py" -o robotwin_benchmark_state.py \
+ && chmod +x run_sharded.sh \
+ && grep -c "sidecar" robotwin_benchmark_state.py
 # conda env 整体搬运（含 torch/curobo wheel 产物）
 COPY --from=builder /opt/conda/envs/robotwin /opt/conda/envs/robotwin
 # RoboTwin 代码（无 .git、无 curobo 源码、无 assets）
@@ -90,7 +98,8 @@ RUN uv pip install --no-cache-dir "git+${HARNESS_FORK}@${HARNESS_EE_REF}" \
       "import vla_eval.benchmarks.robotwin.benchmark as b, inspect; assert 'action_type' in str(inspect.signature(b.RoboTwinBenchmark.__init__)), 'EE missing'; print('EE OK')"
 # 我们的 run 配置（研究仓资产，非上游源码）
 COPY configs/ configs/
-# entrypoint 包一层：资产挂载就绪后跑 embodiment 路径解析（幂等），再进 vla-eval
-RUN printf '#!/bin/bash\nset -e\nif [ -d /app/RoboTwin/assets ]; then cd /app/RoboTwin && python script/update_embodiment_config_path.py >/dev/null 2>&1 || true; fi\nexec conda run --no-capture-output -n robotwin vla-eval "$@"\n' > /usr/local/bin/vla-eval-entry && chmod +x /usr/local/bin/vla-eval-entry
+# entrypoint：资产就绪 + STATE_PATCH 激活（见 docker/entrypoint-robotwin.sh）
+COPY docker/entrypoint-robotwin.sh /usr/local/bin/vla-eval-entry
+RUN chmod +x /usr/local/bin/vla-eval-entry
 ENTRYPOINT ["/usr/local/bin/vla-eval-entry"]
 CMD ["run", "--config", "/workspace/configs/robotwin_eval.yaml"]

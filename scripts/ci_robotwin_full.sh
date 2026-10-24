@@ -164,17 +164,10 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
   done
 fi
 # 追踪仓拉取（议题 H）：run_sharded 与 P2 补丁一律从 fork 按 REF 取，本仓不 vendoring
-_PB=$(grep -E '^harness_patch_base:' "$WORK/docker/versions.yaml" | sed -E 's/.*: *"([^"]+)".*/\1/')
-_PR=$(grep -E '^harness_patch_ref:' "$WORK/docker/versions.yaml" | sed -E 's/.*: *"([^"]+)".*/\1/')
-_PD="$WORK/.cache/patches/$_PR"
-mkdir -p "$_PD"
-[ -f "$_PD/run_sharded.sh" ] || curl -fsSL "$_PB/$_PR/scripts/run_sharded.sh" -o "$_PD/run_sharded.sh" || { echo "run_sharded fetch FAILED"; exit 1; }
-chmod +x "$_PD/run_sharded.sh"
-# P2 状态补丁（RW_STATE_PATCH=robotwin）：同源拉取，按需挂载
+# P2/分片脚本：烘在统一镜像 /opt/patches（构建时从追踪仓拉；V100 出境不认 raw 域名，运行时现拉必死）。
+# 统一镜像 entrypoint 按 STATE_PATCH 环境变量激活补丁；stock 镜像无此机制（4→1 后 stock 退役）。
 if [ "${RW_STATE_PATCH:-}" = "robotwin" ]; then
-  [ -f "$_PD/robotwin_benchmark_state.py" ] || curl -fsSL "$_PB/$_PR/src/vla_eval/benchmarks/robotwin/benchmark.py" -o "$_PD/robotwin_benchmark_state.py" || { echo "patch fetch FAILED"; exit 1; }
-  MOUNT_FLAGS+=(-v "$_PD/robotwin_benchmark_state.py:/workspace/src/vla_eval/benchmarks/robotwin/benchmark.py:ro")
-  echo "state-patch fetched from fork @${_PR:0:8}: robotwin"
+  echo "state-patch: robotwin（镜像内激活）"
 fi
 # 通用外层挂载（P2 补丁等）：RW_EXTRA_MOUNTS 形如 "host:container:ro;..."，与资产挂载同通道
 if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
@@ -189,12 +182,12 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
-  -v "$_PD/run_sharded.sh:/opt/harness-scripts/run_sharded.sh:ro" \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   "${MOUNT_FLAGS[@]}" \
   -e CUDA_VISIBLE_DEVICES=1 \
+  -e STATE_PATCH="${RW_STATE_PATCH:-}" \
   "$ROBOTWIN_IMAGE" \
-  -c "conda run --no-capture-output -n robotwin bash /opt/harness-scripts/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
+  -c "conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
 set -e
 docker logs cogact-serve > "$OUTDIR/cogact-serve.log" 2>&1 || true
