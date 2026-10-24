@@ -13,7 +13,7 @@ HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
 ASSETS_MOUNT="${ASSETS_MOUNT:-/data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro}"
-VERIFY_IMAGE="pi0-molmo-verify:0.1"
+VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 source "$WORK/scripts/lib/common.sh"
 results_fresh
 workspace_fix "0/5"
@@ -76,8 +76,8 @@ docker pull "$ROBOTWIN_IMAGE"
 docker images | grep -E 'robotwin' || true
 results_root_wipe "$ROBOTWIN_IMAGE"
 
-echo "[3/5] 构建 verify 镜像 (host 缓存)"
-docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
+echo "[3/5] verify 镜像 (SWR 拉取，与 libero/calvin 同口径，不本地构建)"
+docker pull "$VERIFY_IMAGE"
 
 echo "[4/5] 预热 DB-CogACT 权重 (grab_roller 头, mirror, 带重试)"
 for i in 1 2 3; do

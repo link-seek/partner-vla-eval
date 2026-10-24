@@ -56,6 +56,18 @@ if not _os.path.exists("docker/entrypoint-robotwin.sh"):
 elif "STATE_PATCH" not in open("docker/entrypoint-robotwin.sh").read():
     fails.append("entrypoint-robotwin.sh: 无 STATE_PATCH 激活")
 
+# 6. verify 镜像：只许 SWR 拉，不许本地构建（V100 出境限速，构建按小时计）
+import subprocess as _sp
+_v = open("docker/Dockerfile.verify").read()
+if ('vla-eval==%s' % V["verify_vla_eval"]) not in _v:
+    fails.append("Dockerfile.verify: vla-eval 与 versions.yaml 不一致")
+for _f in ["scripts/ci_robotwin.sh", "scripts/ci_libero.sh", "scripts/ci_calvin.sh", "scripts/ci_robotwin_full.sh"]:
+    _t = open(_f).read()
+    if "docker build -f docker/Dockerfile.verify" in _t:
+        fails.append("%s: verify 改 SWR 拉，不许本地构建" % _f)
+    if "vla-verify:0.1" not in _t and "VERIFY_IMAGE" not in _t:
+        fails.append("%s: 未引用 SWR verify 镜像" % _f)
+
 # 4. 源码出处：serve 系只许从 fork clone（研究仓不再直连上游源码）
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     txt = open(f).read()
