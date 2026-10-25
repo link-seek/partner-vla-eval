@@ -1,79 +1,29 @@
 #!/bin/bash
 # RW_VIDEO=1 时录像（诊断用，默认关）。
 # RobotWin smoke: host 编排 serve(DB-CogACT 双臂, GPU0) + run(SWR robotwin 镜像当 client)。
-# serve 用自研 configs/serve-robotwin.yaml（上游 robotwin2.yaml 口径：chunk 16 + 三相机）。
-# V100 适配（同 molmo smoke 教训）：
-# - cogact.py header 打补丁：torch==2.6.0（cu126 源）+ requires-python 放宽到 3.11+；
-# - dexbotic host 侧 clone（serve 容器内 github 不通），header 改本地 path；
-# - uv 装包走 PIP_INDEX_URL=cu126 + EXTRA=pypi。
+# serve 用 SWR 烘焙镜像（与全量同口径，UV_OFFLINE 零下载）；host 侧 clone 已删（V100 出境限速）。
+# V100 适配（历史记录，現已烘进镜像）：
+# - torch==2.6.0 cu126 + transformers 4.46.3 + fp16（见 serve-cogact Dockerfile）。
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
-HARNESS_REF="${HARNESS_REF:-v0.8.0}"
-DEXBOTIC_REV="42f72859dfe48bb4c30a09ab151a018c2ca0700a"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
 ASSETS_MOUNT="${ASSETS_MOUNT:-/data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
+SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0}"
 source "$WORK/scripts/lib/common.sh"
 results_fresh
 workspace_fix "0/5"
 
-echo "[1/5] harness 源码 (host 侧 clone)"
-LEROBOT_URL="https://github.com/huggingface/lerobot.git"
-[ -n "${GITHUB_TOKEN:-}" ] && LEROBOT_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/huggingface/lerobot.git"
-if [ ! -f harness/pyproject.toml ]; then
-  rm -rf harness
-  CLONE_URL="https://github.com/allenai/vla-evaluation-harness.git"
-  [ -n "${GITHUB_TOKEN:-}" ] && CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/allenai/vla-evaluation-harness.git"
-  for i in 1 2 3 4 5; do
-    if git clone --depth 1 --branch "$HARNESS_REF" "$CLONE_URL" harness 2>&1 | tail -n 1; then break; fi
-    echo "clone 失败, 重试 $i..."; rm -rf harness; sleep 20
-    [ "$i" = "5" ] && exit 128
-  done
-else
-  echo "harness 已存在, 跳过 clone"
-fi
+# serve 走 SWR 烘焙镜像（与全量同口径，UV_OFFLINE 零下载）；
+# 历史 host 侧 clone（harness/dexbotic + sed）已删：V100 出境限速下现场下源码必挂。
 
-echo "[1b/5] dexbotic 源码 (host 侧 clone)"
-if [ ! -f dexbotic-src/pyproject.toml ]; then
-  rm -rf dexbotic-src
-  DEX_URL="https://github.com/MilkClouds/dexbotic.git"
-  [ -n "${GITHUB_TOKEN:-}" ] && DEX_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/MilkClouds/dexbotic.git"
-  for i in 1 2 3; do
-    if git clone "$DEX_URL" dexbotic-src 2>&1 | tail -n 1 && (cd dexbotic-src && git checkout -q "$DEXBOTIC_REV"); then break; fi
-    echo "dexbotic clone 失败, 重试 $i..."; rm -rf dexbotic-src; sleep 20
-    [ "$i" = "3" ] && exit 128
-  done
-else
-  echo "dexbotic-src 已存在, 跳过 clone"
-fi
-
-echo "[1c/5] cogact header 打补丁 (torch 钉 2.6.0 + dexbotic 本地 path + python 放宽)"
-COG=harness/src/vla_eval/model_servers/dexbotic/cogact.py
-if ! grep -q '/work/dexbotic-src' "$COG"; then
-  sed -i 's|dexbotic = { git = "https://github.com/MilkClouds/dexbotic.git", rev = "42f72859dfe48bb4c30a09ab151a018c2ca0700a" }|dexbotic = { path = "/work/dexbotic-src" }|' "$COG"
-fi
-if ! grep -q '"torch==2.6.0"' "$COG"; then
-  sed -i 's|"torch>=2.0"|"torch==2.6.0"|' "$COG"
-fi
-if ! grep -q 'torch_dtype=torch.float16' "$COG"; then
-  # V100 无 bf16 原生支持，且 vision tower 本就是 fp16：全模型 fp16 统一（bf16 在此必挂，见 discussion）
-  sed -i 's|torch_dtype=torch.bfloat16|torch_dtype=torch.float16|' "$COG"
-fi
-if ! grep -q '"transformers==4.46.3"' "$COG"; then
-  # 官方复现要求：v5.x 有 meta device 问题，钉 4.46.3（见 dexbotic.md）
-  sed -i 's|"transformers>=4.40,<5"|"transformers==4.46.3"|' "$COG"
-fi
-if ! grep -q 'requires-python = ">=3.11"' "$COG"; then
-  sed -i 's|requires-python = "~=3.11"|requires-python = ">=3.11"|' "$COG"
-fi
-grep -nE 'torch==|dexbotic =|requires-python' "$COG" | head -n 5
-
-echo "[2/5] robotwin 镜像 (SWR 内网拉取)"
+echo "[2/5] bench + serve 镜像 (SWR 内网拉取)"
 LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
 echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
 docker pull "$ROBOTWIN_IMAGE"
-docker images | grep -E 'robotwin' || true
+docker pull "$SERVE_IMAGE"
+docker images | grep -E 'robotwin|serve-cogact' || true
 results_root_wipe "$ROBOTWIN_IMAGE"
 
 echo "[3/5] verify 镜像 (SWR 拉取，与 libero/calvin 同口径，不本地构建)"
@@ -105,16 +55,16 @@ echo "[4b/5] 启动 DB-CogACT serve (GPU0, 后台)"
 docker rm -f cogact-serve 2>/dev/null || true
 start_serve() {
 docker run -d --name cogact-serve --gpus '"device=0"' --network host \
-  -v "$WORK":/work -w /work/harness \
-  -v "$WORK/.cache/uv":/root/.cache/uv \
+  -v "$WORK/configs":/work/configs:ro \
+  -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  -w /work/harness \
   -e CUDA_VISIBLE_DEVICES=0 \
-  -e PIP_INDEX_URL=https://download.pytorch.org/whl/cu126 \
-  -e PIP_EXTRA_INDEX_URL=https://pypi.org/simple \
+  -e UV_OFFLINE=1 \
   -e HF_HUB_DISABLE_XET=1 \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
-  "$VERIFY_IMAGE" \
+  "$SERVE_IMAGE" \
   vla-eval serve -c /work/configs/serve-robotwin-local.yaml
 }
 wait_serve() {

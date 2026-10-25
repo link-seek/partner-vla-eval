@@ -68,6 +68,12 @@ for _f in ["scripts/ci_robotwin.sh", "scripts/ci_libero.sh", "scripts/ci_calvin.
     if "vla-verify:0.1" not in _t and "VERIFY_IMAGE" not in _t:
         fails.append("%s: 未引用 SWR verify 镜像" % _f)
 
+# 7. V100 出境禁令：ci 编排脚本不许 git clone（现场下源码在限速下必挂；一律烘进镜像走 SWR）
+for _f in ["scripts/ci_libero.sh", "scripts/ci_calvin.sh", "scripts/ci_robotwin.sh", "scripts/ci_robotwin_full.sh"]:
+    _t = open(_f).read()
+    if "git clone" in _t:
+        fails.append("%s: 含 git clone，改烘进镜像" % _f)
+
 # 4. 源码出处：serve 系只许从 fork clone（研究仓不再直连上游源码）
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     txt = open(f).read()
