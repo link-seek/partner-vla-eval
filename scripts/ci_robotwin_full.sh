@@ -87,6 +87,9 @@ results_root_wipe "$ROBOTWIN_IMAGE"
 mkdir -p "$OUTDIR"  # wipe 之后建（见上注释）
 
 echo "[4/6] 预热权重（默认 DB-CogACT 按 task 子目录；RW_PREWARM=none 跳过，如 X-VLA 由 serve 镜像自理）"
+# 资产初始化（仅外置资产）：update_embodiment_config_path.py 把 _tmp 模板渲染成真正的
+# curobo_*.yml（写进挂载目录，幂等）。entrypoint 被 outer 的 --entrypoint bash 绕过，
+# 这里显式跑一次（rw 挂载）；主跑保持 :ro。
 # CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
 SERVE_YAML="${RW_SERVE_YAML:-serve-robotwin-cogact.yaml}"
 if [ "${RW_PREWARM:-cogact}" = "none" ]; then
@@ -125,6 +128,15 @@ fi
 # 非 CogACT 路（RW_PREWARM=none，如 X-VLA）：serve 配置直用 $SERVE_YAML，不生成 local。
 if [ "${RW_PREWARM:-cogact}" = "none" ]; then
   cp "$WORK/configs/$SERVE_YAML" "$WORK/configs/serve-robotwin-local.yaml"
+fi
+
+if [ -n "${ASSETS_MOUNT:-}" ]; then
+  echo "[4b/6] 资产初始化（_tmp 模板→真正的 curobo_*.yml，rw 跑一次，幂等）"
+  docker run --rm --entrypoint bash \
+    -v "${ASSETS_MOUNT%:ro}:rw" \
+    "$ROBOTWIN_IMAGE" \
+    -c "cd /app/RoboTwin && conda run --no-capture-output -n robotwin python script/update_embodiment_config_path.py" \
+    || { echo "assets init FAILED"; exit 1; }
 fi
 
 echo "[5/6] 启动 serve (GPU${SERVE_CUDA:-0}，后台；烘焙镜像 + UV_OFFLINE，零下载；配置 $SERVE_YAML)"
