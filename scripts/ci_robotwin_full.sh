@@ -157,6 +157,12 @@ set +e
 # 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，
 # yaml 的 docker.volumes 只对 harness 自己起的 sibling 容器有效（阴性对照已证）。
 # ASSETS_MOUNT 形如 /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro（空=不用）。
+# 资产挂载双通道（10-26 教训，勿混）：
+# - ASSETS_MOUNT（outer -v）：只进外层容器（run_sharded 本体、entrypoint 跑 config-path 用）。
+# - RW_VOLUMES（yaml docker.volumes）：才进 harness 起的 sibling 容器（eval 真跑的地方）。
+#   瘦身/统一镜像无内置资产：planner 初始化（fast_init=false，如 EE）读 assets/embodiments，
+#   必须走 RW_VOLUMES；只挂 outer 会 FileNotFoundError（curobo_left.yml）。
+#   place_empty_cup（fast_init=true，跳 planner）是唯一的例外——别拿它当反例。
 MOUNT_FLAGS=()
 if [ -n "${ASSETS_MOUNT:-}" ]; then
   IFS=';' read -ra VLIST <<< "$ASSETS_MOUNT"
@@ -177,7 +183,11 @@ if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
-echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<内置>}"
+if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${RW_VOLUMES:-}" ]; then
+  echo "REFUSE: fast_init=false 要走 planner，必须配 RW_VOLUMES 把资产挂进 sibling（outer -v 到不了 eval 容器）" >&2
+  exit 1
+fi
+echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<未用outer挂载>}"
 echo "outer -v flags: ${MOUNT_FLAGS[*]:-<无>}"
 docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
