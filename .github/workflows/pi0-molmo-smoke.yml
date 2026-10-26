@@ -54,11 +54,16 @@ jobs:
     steps:
       - uses: Wandalen/wretry.action@v1
         with:
-          attempt_limit: 3
-          attempt_delay: 60000
+          attempt_limit: 8
+          attempt_delay: 180000
           action: actions/checkout@v4
           with: |
             clean: false
+            sparse-checkout: |
+              scripts
+              configs
+              docker
+            sparse-checkout-cone-mode: false
       - name: Run smoke via Docker (host orchestration)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
