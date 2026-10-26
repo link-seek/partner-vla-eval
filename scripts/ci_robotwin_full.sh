@@ -157,11 +157,12 @@ set +e
 # 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，
 # yaml 的 docker.volumes 只对 harness 自己起的 sibling 容器有效（阴性对照已证）。
 # ASSETS_MOUNT 形如 /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro（空=不用）。
-# 资产挂载通道（10-26 更正：eval 就在外层容器跑，run_sharded 不传 --docker，无 sibling）：
-# - ASSETS_MOUNT（outer -v）：唯一有效通道（eval 进程 + entrypoint 都在外层容器）。
-# - RW_VOLUMES（yaml docker.volumes）：当前无 sibling 消费，保留仅防未来 --docker 化；别指望它。
+# 资产挂载通道（10-26 定稿，以实测为准）：
+# - eval 跑在 harness 起的 sibling 容器里（与外层隔离；铁证：outer 挂了资产 eval 照样 FileNotFound）。
+# - RW_VOLUMES（yaml docker.volumes）：唯一有效通道（sibling 挂载）。EE/planner/curobo 必需。
+# - ASSETS_MOUNT（outer -v）：只进外层（entrypoint 跑 config-path 用）；对 eval 无效，但无害、保留。
 # - 相对路径 assets/...（相对 CWD=/workspace）：靠镜像内 /workspace/assets 软链解析。
-#   place_empty_cup 不走 clutter（fast_init=true 跳 planner）所以早先没爆；grab_roller 必爆。
+# - place_empty_cup 能跑是因为它不读外部资产（无 clutter、无 planner）；grab_roller 两样都要。
 MOUNT_FLAGS=()
 if [ -n "${ASSETS_MOUNT:-}" ]; then
   IFS=';' read -ra VLIST <<< "$ASSETS_MOUNT"
@@ -182,8 +183,8 @@ if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
-if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${ASSETS_MOUNT:-}" ]; then
-  echo "REFUSE: fast_init=false 要走 planner，统一镜像无内置资产，必须配 ASSETS_MOUNT（outer -v；eval 就在外层跑）" >&2
+if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${RW_VOLUMES:-}" ]; then
+  echo "REFUSE: fast_init=false 要走 planner，必须配 RW_VOLUMES（sibling 挂载；outer -v 到不了 eval 容器）" >&2
   exit 1
 fi
 echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<未用outer挂载>}"
