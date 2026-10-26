@@ -6,3 +6,5 @@ FROM scratch
 COPY scripts/ /payload/scripts/
 COPY configs/ /payload/configs/
 COPY docker/versions.yaml /payload/docker/versions.yaml
+# 占位 CMD（scratch 无入口；V100 只 docker create/cp，不运行）
+CMD ["/bin/true"]
