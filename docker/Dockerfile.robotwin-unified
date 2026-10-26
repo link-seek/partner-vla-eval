@@ -100,7 +100,7 @@ RUN uv pip install --no-cache-dir "git+${HARNESS_FORK}@${HARNESS_UNIFIED_REF}" \
 # P2 补丁直接盖掉装好的 benchmark（统一镜像恒带 instrumentation；entrypoint 的 STATE_PATCH 条件保留当幂等复写）
 RUN SP=$(conda run --no-capture-output -n robotwin python -c "import vla_eval.benchmarks.robotwin.benchmark as m; print(m.__file__)") \
  && cp /opt/patches/robotwin_benchmark_state.py "$SP" \
- && conda run --no-capture-output -n robotwin python -c "import vla_eval.benchmarks.robotwin.benchmark as m; print('P2 BAKED:', m.__file__)"
+ && conda run --no-capture-output -n robotwin python -c "import vla_eval.benchmarks.robotwin.benchmark as b, inspect; assert 'action_type' in str(inspect.signature(b.RoboTwinBenchmark.__init__)), 'EE LOST by P2 bake'; assert hasattr(b.RoboTwinBenchmark, '_dump_state_snapshot'), 'P2 LOST'; print('UNIFIED OK: EE+P2')"
 # 我们的 run 配置（研究仓资产，非上游源码）
 COPY configs/ configs/
 # entrypoint：资产就绪 + STATE_PATCH 激活（见 docker/entrypoint-robotwin.sh）
