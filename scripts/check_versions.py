@@ -43,9 +43,9 @@ for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
 
 # 5. 统一镜像：EE REF + P2 烘焙 + fork 出处（构建时拉，运行时不拉）
 _U = open("docker/Dockerfile.robotwin-unified").read()
-for _k in ["harness_ee_ref", "harness_patch_ref"]:
+for _k in ["harness_unified_ref", "harness_patch_ref"]:
     if V[_k] not in _U:
-        fails.append("Dockerfile.robotwin-unified: %s 未烘进" % _k)
+        fails.append("Dockerfile.robotwin-unified: %s 未引用" % _k)
 if V["harness_fork"] not in _U:
     fails.append("Dockerfile.robotwin-unified: 未引用 fork")
 if "github.com/allenai/vla-evaluation-harness" in _U:

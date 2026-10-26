@@ -9,7 +9,7 @@
 
 ARG BASE_IMAGE=ghcr.io/allenai/vla-evaluation-harness/base:latest
 ARG HARNESS_FORK=https://github.com/link-seek/vla-evaluation-harness.git
-ARG HARNESS_EE_REF=56eba0ce9a5bde95305a73ce56b1d4e69cb9a097
+ARG HARNESS_UNIFIED_REF=9b5e45f55ba1aace6aacb50048e368e85fe0251d
 
 # ---------- builder：含 nvcc，编 CuRobo ----------
 FROM ${BASE_IMAGE} AS builder
@@ -75,7 +75,7 @@ RUN uv pip install --no-cache-dir wheel \
 # ---------- final：无 nvcc ----------
 FROM ${BASE_IMAGE}
 ARG HARNESS_FORK
-ARG HARNESS_EE_REF
+ARG HARNESS_UNIFIED_REF
 # P2 补丁烘进镜像（构建机外网可达 raw；V100 出境只认 github.com，运行时现拉必死）
 ARG HARNESS_PATCH_BASE=https://raw.githubusercontent.com/link-seek/vla-evaluation-harness
 ARG HARNESS_PATCH_REF=07c3c910f9bf91cff8f7e3093268ecd51bf494fb
@@ -93,7 +93,7 @@ WORKDIR /workspace
 # harness 从追踪仓 EE 分支装（含 action_type 开关，默认 qpos）；再验 EE 入口存在
 ARG HARNESS_VERSION=0.0.0
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=${HARNESS_VERSION}
-RUN uv pip install --no-cache-dir "git+${HARNESS_FORK}@${HARNESS_EE_REF}" \
+RUN uv pip install --no-cache-dir "git+${HARNESS_FORK}@${HARNESS_UNIFIED_REF}" \
  && conda run --no-capture-output -n robotwin python -c \
       "import vla_eval.benchmarks.robotwin.benchmark as b, inspect; assert 'action_type' in str(inspect.signature(b.RoboTwinBenchmark.__init__)), 'EE missing'; print('EE OK')"
 # P2 补丁直接盖掉装好的 benchmark（统一镜像恒带 instrumentation；entrypoint 的 STATE_PATCH 条件保留当幂等复写）
