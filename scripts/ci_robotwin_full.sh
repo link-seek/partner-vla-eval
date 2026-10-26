@@ -182,8 +182,8 @@ if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
-if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${RW_VOLUMES:-}" ]; then
-  echo "REFUSE: fast_init=false 要走 planner，必须配 RW_VOLUMES 把资产挂进 sibling（outer -v 到不了 eval 容器）" >&2
+if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${ASSETS_MOUNT:-}" ]; then
+  echo "REFUSE: fast_init=false 要走 planner，统一镜像无内置资产，必须配 ASSETS_MOUNT（outer -v；eval 就在外层跑）" >&2
   exit 1
 fi
 echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<未用outer挂载>}"
