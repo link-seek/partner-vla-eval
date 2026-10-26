@@ -1,0 +1,8 @@
+# 代码 payload 镜像（V100 执行侧唯一代码来源，不碰 github）：
+# 只装 scripts/ + configs/ + docker/versions.yaml（运行时读 pin 用），几 MB。
+# 构建：ubuntu-latest（网好），main 一推自动打 :<sha> + :latest。
+# V100：docker pull → docker create/cp 解到 workspace → 后面流程与 checkout 时一致。
+FROM scratch
+COPY scripts/ /payload/scripts/
+COPY configs/ /payload/configs/
+COPY docker/versions.yaml /payload/docker/versions.yaml

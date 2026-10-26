@@ -1,0 +1,133 @@
+#!/bin/bash
+# CI smoke: host 编排 serve(verify 容器, GPU0) + run(molmo 镜像当 client)。
+# serve 用自研配置 configs/serve-pi05.yaml (Franka 相机映射), 不用上游 LIBERO 版。
+set -e
+cd "$(dirname "$0")/.."
+WORK="$PWD"
+HARNESS_REF="${HARNESS_REF:-v0.8.0}"
+MOLMO_IMAGE="ghcr.io/allenai/vla-evaluation-harness/molmospaces:latest"
+# LIBERO 走 SWR（北京四内网），镜像 0.8.0（smoke 已绿）；molmo 上游无包，沿用本地构建
+LIBERO_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0"
+VERIFY_IMAGE="pi0-molmo-verify:0.1"
+source "$WORK/scripts/lib/common.sh"
+results_fresh
+# 缓存目录必须先建：docker -v 会把不存在的宿主目录建为 root，后续步骤写不进（见 common.sh）
+workspace_fix "0/5"
+echo "[1b/5] lerobot 源码 (host 侧 clone, serve 容器内 github 不通, header 改本地 path)"
+LEROBOT_URL="https://github.com/huggingface/lerobot.git"
+[ -n "${GITHUB_TOKEN:-}" ] && LEROBOT_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/huggingface/lerobot.git"
+if [ ! -f lerobot-src/pyproject.toml ]; then
+  rm -rf lerobot-src
+  for i in 1 2 3 4 5; do
+    if git clone --depth 1 --branch v0.6.0 "$LEROBOT_URL" lerobot-src 2>&1 | tail -n 1; then break; fi
+    echo "lerobot clone 失败, 重试 $i..."; rm -rf lerobot-src; sleep 20
+    [ "$i" = "5" ] && exit 128
+  done
+else
+  echo "lerobot-src 已存在, 跳过 clone"
+fi
+if [ ! -f harness/pyproject.toml ]; then
+  rm -rf harness
+  CLONE_URL="https://github.com/allenai/vla-evaluation-harness.git"
+  [ -n "${GITHUB_TOKEN:-}" ] && CLONE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/allenai/vla-evaluation-harness.git"
+  for i in 1 2 3 4 5; do
+    if git clone --depth 1 --branch "$HARNESS_REF" "$CLONE_URL" harness 2>&1 | tail -n 1; then break; fi
+    echo "clone 失败, 重试 $i..."; rm -rf harness; sleep 20
+    [ "$i" = "5" ] && exit 128
+  done
+else
+  echo "harness 已存在, 跳过 clone"
+fi
+echo "[1c/5] harness serve 脚本 header 改本地 lerobot (容器内 github 不通)"
+if ! grep -q '/work/lerobot-src' harness/src/vla_eval/model_servers/lerobot.py; then
+  sed -i 's|lerobot = { git = "https://github.com/huggingface/lerobot.git", rev = "v0.6.0" }|lerobot = { path = "/work/lerobot-src" }|' harness/src/vla_eval/model_servers/lerobot.py
+  grep -n 'lerobot = {' harness/src/vla_eval/model_servers/lerobot.py | head -n 2
+else
+  echo "header 已 patch, 跳过"
+fi
+echo "[1d/5] torch 降到 2.6.0cu126 (V100 sm_70; cu128 无 Volta 内核)"
+if ! grep -q 'torch==2.6.0' harness/src/vla_eval/model_servers/lerobot.py; then
+  sed -i 's|"torch>=2.7,<2.12"|"torch==2.6.0"|' harness/src/vla_eval/model_servers/lerobot.py
+fi
+if ! grep -q 'torch==2.6.0' lerobot-src/pyproject.toml; then
+  sed -i 's|"torch>=2.7,<2.12.0"|"torch==2.6.0"|; s|"torchvision>=0.22.0,<0.27.0"|"torchvision==0.21.0"|; s|download.pytorch.org/whl/cu128|download.pytorch.org/whl/cu126|' lerobot-src/pyproject.toml
+  grep -nE '"torch==|"torchvision==|whl/cu12' lerobot-src/pyproject.toml | head -n 5
+else
+  echo "lerobot torch pin 已 patch, 跳过"
+fi
+
+echo "[2/5] benchmark 镜像 (libero 拉取, molmo 本地构建, 上游未发布)"
+echo "[2a/5] 登录 SWR（私仓，HMAC 派生口令，同 sync workflow）"
+LOGIN_KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | sed 's/[ \n]//g' | sed 'N;s/\n//')
+echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
+docker pull "$LIBERO_IMAGE"
+if ! docker images --format '{{.Repository}}:{{.Tag}}' | grep -q 'vla-evaluation-harness/molmospaces:latest'; then
+  (cd harness && bash docker/build.sh molmospaces)
+fi
+docker images | grep -E 'molmospaces|libero' || true
+
+echo "[3/5] 构建 verify 镜像 (vla-eval + lerobot + torch, host 缓存)"
+docker build -f docker/Dockerfile.verify -t "$VERIFY_IMAGE" .
+
+echo "[4/5] 预热 checkpoint 缓存 (mirror 可靠, 带重试)"
+for i in 1 2 3; do
+  if docker run --rm --network host \
+    -v "$WORK/.cache/hf":/root/.cache/huggingface \
+    -e HF_ENDPOINT=https://hf-mirror.com \
+    "$VERIFY_IMAGE" hf-download download lerobot/pi05_libero_finetuned > /tmp/pi05-prewarm.log 2>&1; then break; fi
+  echo "checkpoint 预热失败, 重试 $i..."; sleep 15
+  [ "$i" = "3" ] && exit 1
+done
+echo "[4/5] 启动 pi0 serve (GPU0, 后台; uv/HF 缓存持久化到 workspace)"
+mkdir -p "$WORK/.cache/uv" "$WORK/.cache/hf"
+docker rm -f pi0-serve 2>/dev/null || true
+start_serve() {
+docker run -d --name pi0-serve --gpus '"device=0"' --network host \
+  -v "$WORK":/work -w /work/harness \
+  -v "$WORK/.cache/uv":/root/.cache/uv \
+  -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  -e CUDA_VISIBLE_DEVICES=0 -e COMPILE_MODEL=false \
+  -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
+  -e HF_TOKEN="${HF_TOKEN:-}" \
+  "$VERIFY_IMAGE" \
+  vla-eval serve -c /work/configs/serve-pi05.yaml
+}
+wait_serve() {
+  # 返回 0=UP, 1=容器退出(看日志), 2=超时
+  for i in $(seq 1 120); do
+    if [ "$(docker inspect -f '{{.State.Running}}' pi0-serve 2>/dev/null)" != "true" ]; then return 1; fi
+    if (echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null; then echo "serve UP"; return 0; fi
+    if [ "$i" = "120" ]; then return 2; fi
+    sleep 10
+  done
+}
+SERVE_OK=0
+for attempt in 1 2 3; do
+  echo "serve 启动尝试 $attempt/3"
+  docker rm -f pi0-serve 2>/dev/null || true
+  start_serve
+  sleep 15
+  if wait_serve; then SERVE_OK=1; break; fi
+  echo "serve 未起来 (尝试 $attempt), 尾日志:"; docker logs pi0-serve 2>&1 | tail -n 15
+  docker rm -f pi0-serve 2>/dev/null || true
+  sleep 10
+done
+[ "$SERVE_OK" = "1" ] || { echo "serve 3次都起不来"; exit 1; }
+
+echo "[5/5] 跑 MolmoSpaces smoke (10ep, 用 molmo 镜像自带 env,当 client)"
+set +e
+docker run --rm --gpus all --network host \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v "$WORK":/work -w /work \
+  -v "$WORK/.cache/hf":/root/.cache/huggingface \
+  -e CUDA_VISIBLE_DEVICES=0 \
+  "$MOLMO_IMAGE" \
+  run --config /work/configs/run-molmo-smoke10.yaml --shard-id 0 --num-shards 20 2>&1 | tee results/smoke.log
+CODE=${PIPESTATUS[0]}
+set -e
+echo "[5b/5] 收 serve 日志 (定位 observation_failed 必备)"
+docker logs pi0-serve > results/serve.log 2>&1 || true
+docker rm -f pi0-serve 2>/dev/null || true
+ls -lh results/ || true
+echo "smoke_exit=$CODE"
+exit $CODE

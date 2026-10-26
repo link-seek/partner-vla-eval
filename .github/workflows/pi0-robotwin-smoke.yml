@@ -43,18 +43,22 @@ jobs:
     runs-on: [self-hosted, Linux, X64, V100-pi0]
     timeout-minutes: 300
     steps:
-      - uses: Wandalen/wretry.action@v1
-        with:
-          attempt_limit: 8
-          attempt_delay: 180000
-          action: actions/checkout@v4
-          with: |
-            clean: false
-            sparse-checkout: |
-              scripts
-              configs
-              docker
-            sparse-checkout-cone-mode: false
+      - name: Fetch payload (SWR, no github)
+        env:
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+          PAYLOAD_IMAGE: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-payload:latest
+        run: |
+          set -e
+          rm -rf scripts configs docker
+          KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | tr -d ' \n')
+          echo "$KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
+          docker pull "$PAYLOAD_IMAGE"
+          docker rm -f payload-tmp 2>/dev/null || true
+          docker create --name payload-tmp "$PAYLOAD_IMAGE"
+          docker cp payload-tmp:/payload/. .
+          docker rm -f payload-tmp
+          ls scripts/lib/common.sh configs/ docker/versions.yaml
       - name: Run RobotWin smoke via Docker (host orchestration)
         env:
           RW_VIDEO: "1"

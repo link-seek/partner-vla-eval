@@ -69,10 +69,20 @@ for _f in ["scripts/ci_robotwin.sh", "scripts/ci_libero.sh", "scripts/ci_calvin.
         fails.append("%s: 未引用 SWR verify 镜像" % _f)
 
 # 7. V100 出境禁令：ci 编排脚本不许 git clone（现场下源码在限速下必挂；一律烘进镜像走 SWR）
+# 例外：ci_smoke.sh（molmo 路，待转 SWR serve；转完删豁免）
 for _f in ["scripts/ci_libero.sh", "scripts/ci_calvin.sh", "scripts/ci_robotwin.sh", "scripts/ci_robotwin_full.sh"]:
     _t = open(_f).read()
     if "git clone" in _t:
         fails.append("%s: 含 git clone，改烘进镜像" % _f)
+
+# 8. V100 job 零 checkout（代码走 payload 镜像；只剩 hw21 start-ecs 的 1 个）
+import glob as _glob
+for _wf in ["pi-libero-smoke.yml", "pi-calvin-smoke.yml", "pi0-robotwin-smoke.yml", "pi0-robotwin-full.yml", "pi0-molmo-smoke.yml"]:
+    _wt = open(f".github/workflows/{_wf}").read()
+    if _wt.count("actions/checkout") != 1:
+        fails.append(f"{_wf}: checkout 数={_wt.count('actions/checkout')}，应为 1（仅 hw21 start-ecs）")
+    if "sparse-checkout" in _wt:
+        fails.append(f"{_wf}: 还有 sparse-checkout 残留")
 
 # 4. 源码出处：serve 系只许从 fork clone（研究仓不再直连上游源码）
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
