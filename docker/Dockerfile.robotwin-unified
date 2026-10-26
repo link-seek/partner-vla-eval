@@ -103,6 +103,9 @@ RUN SP=$(conda run --no-capture-output -n robotwin python -c "import vla_eval.be
  && conda run --no-capture-output -n robotwin python -c "import vla_eval.benchmarks.robotwin.benchmark as b, inspect; assert 'action_type' in str(inspect.signature(b.RoboTwinBenchmark.__init__)), 'EE LOST by P2 bake'; assert hasattr(b.RoboTwinBenchmark, '_dump_state_snapshot'), 'P2 LOST'; print('UNIFIED OK: EE+P2')"
 # 我们的 run 配置（研究仓资产，非上游源码）
 COPY configs/ configs/
+# 相对路径兜底：RoboTwin 部分代码用相对路径 assets/...（相对 CWD=/workspace），
+# 统一镜像无内置资产，挂载后靠此软链解析（悬空挂载前无害；stock 时代靠 CWD 巧合）。
+RUN ln -s /app/RoboTwin/assets /workspace/assets
 # entrypoint：资产就绪 + STATE_PATCH 激活（见 docker/entrypoint-robotwin.sh）
 COPY docker/entrypoint-robotwin.sh /usr/local/bin/vla-eval-entry
 RUN chmod +x /usr/local/bin/vla-eval-entry

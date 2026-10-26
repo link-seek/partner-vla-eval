@@ -157,12 +157,11 @@ set +e
 # 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，
 # yaml 的 docker.volumes 只对 harness 自己起的 sibling 容器有效（阴性对照已证）。
 # ASSETS_MOUNT 形如 /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro（空=不用）。
-# 资产挂载双通道（10-26 教训，勿混）：
-# - ASSETS_MOUNT（outer -v）：只进外层容器（run_sharded 本体、entrypoint 跑 config-path 用）。
-# - RW_VOLUMES（yaml docker.volumes）：才进 harness 起的 sibling 容器（eval 真跑的地方）。
-#   瘦身/统一镜像无内置资产：planner 初始化（fast_init=false，如 EE）读 assets/embodiments，
-#   必须走 RW_VOLUMES；只挂 outer 会 FileNotFoundError（curobo_left.yml）。
-#   place_empty_cup（fast_init=true，跳 planner）是唯一的例外——别拿它当反例。
+# 资产挂载通道（10-26 更正：eval 就在外层容器跑，run_sharded 不传 --docker，无 sibling）：
+# - ASSETS_MOUNT（outer -v）：唯一有效通道（eval 进程 + entrypoint 都在外层容器）。
+# - RW_VOLUMES（yaml docker.volumes）：当前无 sibling 消费，保留仅防未来 --docker 化；别指望它。
+# - 相对路径 assets/...（相对 CWD=/workspace）：靠镜像内 /workspace/assets 软链解析。
+#   place_empty_cup 不走 clutter（fast_init=true 跳 planner）所以早先没爆；grab_roller 必爆。
 MOUNT_FLAGS=()
 if [ -n "${ASSETS_MOUNT:-}" ]; then
   IFS=';' read -ra VLIST <<< "$ASSETS_MOUNT"
