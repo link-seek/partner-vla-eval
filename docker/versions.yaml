@@ -26,7 +26,7 @@ dtype_xvla: torch.float32     # xvla 默认（官方默认；fp16 对照组见�
 harness_patch_base: "https://raw.githubusercontent.com/link-seek/vla-evaluation-harness"
 harness_patch_ref: "07c3c910f9bf91cff8f7e3093268ecd51bf494fb"  # fork linkseek/p2-instrumentation，P2 双补丁+run_sharded（与上游一致）
 harness_ee_ref: "56eba0ce9a5bde95305a73ce56b1d4e69cb9a097"  # fork linkseek/robotwin-ee（v0.8.0+action_type，默认qpos）；#168 上游审稿中
-harness_unified_ref: "9b5e45f55ba1aace6aacb50048e368e85fe0251d"  # fork linkseek/robotwin-ee-p2（EE+P2 合流）；统一镜像唯一来源
+harness_unified_ref: "9b5e45f55ba1aace6aacb50048e368e85fe0251d"  # fork linkseek/robotwin-ee-p2（EE+P2 合流）；统一镜像 pip+烘焙唯一来源（必须同源）
 # 上游源码 pin（追踪仓跟随，研究仓只读）
 ROBOTWIN_REF: c3ddfa8b97d5519efa828b075999bd0006778e5e
 CUROBO_REF: v0.7.8

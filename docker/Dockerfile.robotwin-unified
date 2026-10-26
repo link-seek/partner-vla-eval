@@ -78,7 +78,8 @@ ARG HARNESS_FORK
 ARG HARNESS_UNIFIED_REF
 # P2 补丁烘进镜像（构建机外网可达 raw；V100 出境只认 github.com，运行时现拉必死）
 ARG HARNESS_PATCH_BASE=https://raw.githubusercontent.com/link-seek/vla-evaluation-harness
-ARG HARNESS_PATCH_REF=07c3c910f9bf91cff8f7e3093268ecd51bf494fb
+# 注意：必须与 HARNESS_UNIFIED_REF 同源（pip 装什么就烘什么；曾用 P2-only 分支盖掉 EE，见 10-26 教训）
+ARG HARNESS_PATCH_REF=9b5e45f55ba1aace6aacb50048e368e85fe0251d
 RUN mkdir -p /opt/patches && cd /opt/patches \
  && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/scripts/run_sharded.sh" -o run_sharded.sh \
  && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/src/vla_eval/benchmarks/robotwin/benchmark.py" -o robotwin_benchmark_state.py \
