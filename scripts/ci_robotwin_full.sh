@@ -21,7 +21,7 @@ RW_VIDEO="${RW_VIDEO:-0}"
 CHUNK_TAG=$(echo "$RW_TASKS" | tr ',' '+' | cut -c1-60)
 OUTDIR="results/robotwin-${CHUNK_TAG}-x${RW_EPISODES}"
 results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR 会把上轮 libero 残留打进 artifact）
-mkdir -p "$OUTDIR"
+# 注意：mkdir OUTDIR 必须在 results_root_wipe 之后（wipe 清 results/* 会连 OUTDIR 一起扬掉）
 
 echo "[0/6] workspace 属主修复 + 缓存目录预建"
 workspace_fix "0/6"
@@ -84,6 +84,7 @@ docker pull "$ROBOTWIN_IMAGE"
 docker pull "$SERVE_IMAGE"
 docker pull "$VERIFY_IMAGE"
 results_root_wipe "$ROBOTWIN_IMAGE"
+mkdir -p "$OUTDIR"  # wipe 之后建（见上注释）
 
 echo "[4/6] 预热权重（默认 DB-CogACT 按 task 子目录；RW_PREWARM=none 跳过，如 X-VLA 由 serve 镜像自理）"
 # CogACT 一 task 一头：块内 task 必须同属一头，战役按 1 task/轮打。
