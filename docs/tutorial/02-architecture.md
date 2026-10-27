@@ -1,7 +1,7 @@
 # 02 技术架构
 
-> 版本：v1.0（2026-10-14）。上游：`allenai/vla-evaluation-harness`，`vla-eval v0.7.0`
-> （benchmark 镜像 0.8.0，见 03）。
+> 版本：v1.1（2026-10-27）。上游：`allenai/vla-evaluation-harness`，`vla-eval v0.8.0`
+> （serve/bench 全系 0.8.0，10-23 对齐；见 03）。
 
 ## 总览
 

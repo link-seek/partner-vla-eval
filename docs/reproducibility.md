@@ -14,9 +14,9 @@ tag 钉死、可重打。读论文的人匿名可拉：`ghcr.io/link-seek/<上�
 | benchmark CALVIN | vla-eval-calvin:0.8.0 | 同上 | 同上 |
 | benchmark RobotWin（回滚位） | vla-eval-robotwin:0.8.0 | skopeo 直拷上游 ghcr（bit-identical） | 不跑生产，只回滚 |
 | benchmark RobotWin（统一生产） | vla-eval-robotwin:0.8.0-ee-slim | docker/Dockerfile.robotwin-unified（slim 三刀 + EE 烘进 + P2 烘进，arch=7.0） | 4→1 收官；qpos 默认，ee 走 action_type |
-| serve CogACT | vla-serve-cogact:0.7.0 | docker/Dockerfile.serve-cogact（torch2.6.0cu126，tf 4.46.3） | 双臂关节口径 |
-| serve pi05 | vla-serve-pi05:0.7.0 | docker/Dockerfile.serve-pi05 | LIBERO 单臂 |
-| serve X-VLA fp32/fp16 | vla-serve-xvla[:]0.7.0 / vla-serve-xvla-fp16:0.7.0 | docker/Dockerfile.serve-xvla（DTYPE 构建参） | 精度对照组 |
+| serve CogACT | vla-serve-cogact:0.8.0 | docker/Dockerfile.serve-cogact（torch2.6.0cu126，tf 4.46.3） | 双臂关节口径 |
+| serve pi05 | vla-serve-pi05:0.8.0 | docker/Dockerfile.serve-pi05 | LIBERO 单臂 |
+| serve X-VLA fp32/fp16 | vla-serve-xvla:0.8.0 / vla-serve-xvla-fp16:0.8.0 | docker/Dockerfile.serve-xvla（DTYPE 构建参） | 精度对照组（fp16 全崩已证伪） |
 | serve SmolVLA | vla-serve-smolvla:0.8.0 | docker/Dockerfile.serve-smolvla（lerobot 0.6.1 + tf v5） | 还债 |
 | serve pi0 | vla-serve-pi0:0.8.0 | docker/Dockerfile.serve-pi0（lerobot 0.6.1） | 还债 |
 | 通用底座 | vla-verify:0.1 | docker/Dockerfile.verify | 预热/下载工具 |

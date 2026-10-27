@@ -23,7 +23,7 @@
   "mean_success": 0.0,
   "n": 50,
   "errors": 0,
-  "versions": {"harness": "v0.7.0", "benchmark_image": "<镜像:tag>"},
+  "versions": {"harness": "v0.8.0", "benchmark_image": "<镜像:tag>"},
   "machine": "<GPU型号>",
   "seeds": "bundled/盲种子说明",
   "date": "YYYY-MM-DD",

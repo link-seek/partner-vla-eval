@@ -20,7 +20,7 @@ issue 模板（照抄可用）：背景（一句话）→ 复现（镜像 tag + 
 
 ### 3. 解决问题：fork + 分支 + GPU 实测矩阵
 
-- fork 上游 → `robotwin-action-type-ee` 分支 → 本仓打 ee 验证镜像（Dockerfile.robotwin-ee + robotwin-ee.patch，import 自检 `EE PATCH OK`）。
+- fork 上游 → 补丁分支（P2 `linkseek/p2-instrumentation`、EE `linkseek/robotwin-ee` 及其合流 `linkseek/robotwin-ee-p2`）→ 统一镜像烘焙验证（`Dockerfile.robotwin-unified`，EE+P2 双断言）。
 - 验证矩阵（写进 PR description，缺一项 reviewer 就问）：benchmark 镜像 digest × serve 镜像 × 任务 × 集数 × action_type × fast_init（EE 必须 false：plan_path 被 fast-path 禁用，踩坑记录）。
 - #168 数据：6ep 全跑满 400 步零 ERROR，0/6（判负非链路问题，server 侧 gripper 语义，另开跟踪）；#169 按钥匙换 checkpoint 重跑出分才关（无 run 链接不关）。
 

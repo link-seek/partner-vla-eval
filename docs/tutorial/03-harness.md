@@ -1,7 +1,7 @@
 # 03 harness 本体
 
-> 版本：v1.0（2026-10-14）。serve 侧 `vla-eval v0.7.0`，benchmark 镜像 `0.8.0`
-> （0.8.0 含 expert_seeds + warp 修，0.7.0 无，见 08）。
+> 版本：v1.1（2026-10-27）。serve/bench 全系 `v0.8.0`（10-23 对齐，HARNESS_REF 同值；
+> 唯一真源见 `docker/versions.yaml`，lint 门禁漂移）。
 
 ## 三件套
 
@@ -22,5 +22,5 @@
 
 ## 版本跟随
 
-- serve 侧钉 `v0.7.0`，benchmark 镜像用 `0.8.0`，混用前先跑 2ep 探针验协议兼容（我们验过，兼容）。
+- 全系钉 `v0.8.0`（serve/bench/CLI，10-23 对齐，无需兼容探针）。
 - 上游发版先看 changelog 的 benchmark 修复项（#86/#87/#89 这类），再决定跟不跟。

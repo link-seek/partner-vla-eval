@@ -13,7 +13,7 @@
 | 7 | `.cache` Permission denied | docker -v 把宿主目录建成 root | 预建目录+改属主（脚本里已有） |
 | 8 | 分片 watchdog 全杀 | 多 SAPIEN 上下文抢单卡 | 降 2 分片，serve 独占卡0、分片放卡1 |
 | 9 | hub CLI 改名 | v1 只有 `hf`，0.x 无 `--version` | 镜像里钉别名 `hf-download`，脚本只认它 |
-| 10 | checkout 超时 | V100 连 github 抖 | 重跑（本机代码 clean:false 还在）；连续两次再修 |
+| 10 | checkout 超时 | 已根治：V100 job 无 checkout（payload 镜像 SWR 拉） | 失败先看 payload tag 是否过期 |
 | 11 | 集数翻倍 | `episodes_per_task × test_num` 相乘 | 集数走 `test_num`，前者固定 1 |
 | 12 | 6h 被杀 | 自设 360 帽，实际自托管 5 天 | chunk 提到 1440 |
 | 13 | 坏种子 error | 场景物理不稳定 | 0.8.0 开校验走自带种子；0.7.0 单列 error |
