@@ -25,7 +25,10 @@ jobs:
           for f in scripts/*.sh scripts/lib/*.sh; do
             bash -n "$f" || { echo "SYNTAX FAIL: $f"; fail=1; }
           done
-          [ "$fail" = 0 ] && echo "BASH OK"
+          for f in scripts/*.py; do
+            python3 -m py_compile "$f" || { echo "PY SYNTAX FAIL: $f"; fail=1; }
+          done
+          [ "$fail" = 0 ] && echo "SYNTAX OK"
           exit $fail
       - name: YAML parse all workflows + actions
         run: |

@@ -1,0 +1,17 @@
+{
+  "model": "2toINF/X-VLA-WidowX (fp16)",
+  "task": "LIBERO-spatial ×10",
+  "mean_success": null,
+  "n": 10,
+  "errors": 10,
+  "versions": {
+    "harness": "v0.7.0-era",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla-fp16:0.7.0"
+  },
+  "machine": "V100 (cn-north-4)",
+  "seeds": "suite default",
+  "date": "2026-10-17",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/38990222346",
+  "note": "未判分：10/10 ERROR（首个 act 即崩 RuntimeError float vs Half）。fp16 路径在算子级即坏，非模型不行——证伪记录，不计分",
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+}

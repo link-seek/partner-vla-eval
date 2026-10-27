@@ -1,0 +1,18 @@
+{
+  "model": "lerobot/smolvla_libero pin a24f1f38 (7-D action)",
+  "task": "LIBERO-spatial: pick up the black bowl",
+  "mean_success": 0.2,
+  "n": 10,
+  "errors": 0,
+  "versions": {
+    "harness": "v0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-smolvla:0.8.0"
+  },
+  "machine": "V100 (cn-north-4)",
+  "seeds": "suite default",
+  "date": "2026-10-22",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/39791574999",
+  "note": "6-D 断言墙拆除验证（换 finetune checkpoint 后零推理错误）；剩下的是模型分问题，链路已闭环。上游 #169 已附验证关闭",
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+}

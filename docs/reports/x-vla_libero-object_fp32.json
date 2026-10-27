@@ -1,0 +1,18 @@
+{
+  "model": "2toINF/X-VLA-WidowX (fp32)",
+  "task": "LIBERO-object: pick up the alphabet soup and place it in the basket",
+  "mean_success": 1.0,
+  "n": 10,
+  "errors": 0,
+  "versions": {
+    "harness": "v0.7.0-era",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.7.0"
+  },
+  "machine": "V100 (cn-north-4)",
+  "seeds": "suite default",
+  "date": "2026-10-17",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/38990222346",
+  "note": "成功集 130~146 步",
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+}
