@@ -4,7 +4,7 @@
 # 输入（环境变量，workflow 透传）：
 #   RW_TASKS     逗号分隔 task 名（默认首块 5 个）
 #   RW_EPISODES  每 task 集数（默认 50；验证用小值）
-#   RW_SHARDS    分片数（默认 8）
+#   RW_SHARDS    分片数（默认 8；EE 默认 4，见下）
 #   RW_VIDEO     1=录像，默认 0（全量关录像省时间/空间）
 # 输出：results/robotwin-<chunk>/aggregate.json + recording sqlite，OBS 按块累积。
 set -e
@@ -16,7 +16,11 @@ ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${R
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 RW_TASKS="${RW_TASKS:-grab_roller,adjust_bottle,click_bell,handover_block,stack_blocks_two}"
 RW_EPISODES="${RW_EPISODES:-50}"
-RW_SHARDS="${RW_SHARDS:-8}"
+# EE 默认 4 分片：fast_init=false 全量 planner + SAPIEN 抢显存，8 分片 OOM（10-27 实测 3/10 env_start）。
+# qpos 保持 8（已验证吞吐）。
+if [ -z "${RW_SHARDS:-}" ]; then
+  if [ "${RW_ACTION_TYPE:-}" = "ee" ]; then RW_SHARDS=4; else RW_SHARDS=8; fi
+fi
 RW_VIDEO="${RW_VIDEO:-0}"
 CHUNK_TAG=$(echo "$RW_TASKS" | tr ',' '+' | cut -c1-60)
 OUTDIR="results/robotwin-${CHUNK_TAG}-x${RW_EPISODES}"
