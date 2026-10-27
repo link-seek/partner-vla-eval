@@ -12,9 +12,8 @@ tag 钉死、可重打。读论文的人匿名可拉：`ghcr.io/link-seek/<上�
 |---|---|---|---|
 | benchmark LIBERO | vla-eval-libero:0.8.0 | skopeo 直拷上游 ghcr（bit-identical） | sync-images.yml |
 | benchmark CALVIN | vla-eval-calvin:0.8.0 | 同上 | 同上 |
-| benchmark RobotWin | vla-eval-robotwin:0.8.0 | 同上（ROBOTWIN_REF=c3ddfa8，CUROBO v0.7.8，nvcc 12.6） | 同上 |
-| benchmark RobotWin slim | vla-eval-robotwin:slim-0.8.0 | docker/Dockerfile.robotwin-slim（去资产/nvcc/清源码，arch=7.0） | 11.3GB；50ep 等价 46/50 |
-| benchmark RobotWin EE | vla-eval-robotwin:ee-0.8.0 | slim? 不——stock 0.8.0 + robotwin-ee.patch | PR#168 验证用 |
+| benchmark RobotWin（回滚位） | vla-eval-robotwin:0.8.0 | skopeo 直拷上游 ghcr（bit-identical） | 不跑生产，只回滚 |
+| benchmark RobotWin（统一生产） | vla-eval-robotwin:0.8.0-ee-slim | docker/Dockerfile.robotwin-unified（slim 三刀 + EE 烘进 + P2 烘进，arch=7.0） | 4→1 收官；qpos 默认，ee 走 action_type |
 | serve CogACT | vla-serve-cogact:0.7.0 | docker/Dockerfile.serve-cogact（torch2.6.0cu126，tf 4.46.3） | 双臂关节口径 |
 | serve pi05 | vla-serve-pi05:0.7.0 | docker/Dockerfile.serve-pi05 | LIBERO 单臂 |
 | serve X-VLA fp32/fp16 | vla-serve-xvla[:]0.7.0 / vla-serve-xvla-fp16:0.7.0 | docker/Dockerfile.serve-xvla（DTYPE 构建参） | 精度对照组 |

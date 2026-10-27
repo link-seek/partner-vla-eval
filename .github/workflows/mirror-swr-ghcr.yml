@@ -30,8 +30,7 @@ jobs:
           - { src: "vla-eval-libero:0.8.0", dst: "vla-eval-libero:0.8.0" }
           - { src: "vla-eval-calvin:0.8.0", dst: "vla-eval-calvin:0.8.0" }
           - { src: "vla-eval-robotwin:0.8.0", dst: "vla-eval-robotwin:0.8.0" }
-          - { src: "vla-eval-robotwin:slim-0.8.0", dst: "vla-eval-robotwin:slim-0.8.0" }
-          - { src: "vla-eval-robotwin:ee-0.8.0", dst: "vla-eval-robotwin:ee-0.8.0" }
+          - { src: "vla-eval-robotwin:0.8.0-ee-slim", dst: "vla-eval-robotwin:0.8.0-ee-slim" }
           - { src: "vla-serve-cogact:0.8.0", dst: "vla-serve-cogact:0.8.0" }
           - { src: "vla-serve-pi05:0.8.0", dst: "vla-serve-pi05:0.8.0" }
           - { src: "vla-serve-xvla:0.8.0", dst: "vla-serve-xvla:0.8.0" }
@@ -42,7 +41,7 @@ jobs:
     steps:
       - name: Filter
         id: gate
-        # 同 repo 多 tag（如 robotwin 有 0.8.0/slim/ee）视为一组：选 robotwin 即全拷。
+        # 同 repo 多 tag（如 robotwin 有 0.8.0 全量回滚版 + 0.8.0-ee-slim 统一生产版）视为一组：选 robotwin 即全拷。
         run: |
           DST="${{ matrix.image.dst }}"
           REPO="${DST%%:*}"
