@@ -1,0 +1,18 @@
+{
+  "model": "Dexmal/robotwin-db-cogact (fp16, qpos 14D)",
+  "task": "RobotWin place_empty_cup x50（官方 50 trials）",
+  "mean_success": 0.14,
+  "n": 50,
+  "errors": 0,
+  "versions": {
+    "harness": "v0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0"
+  },
+  "machine": "V100 (cn-north-4)",
+  "seeds": "bundled skip_expert=false",
+  "date": "2026-10-28",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40625856573",
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "note": "成功集步数 med=148；与历史 16% 一致，官称 28%，差 12pp 判待定（见 tutorial/07 规则 3）"
+}
