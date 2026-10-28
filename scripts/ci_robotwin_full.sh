@@ -199,8 +199,8 @@ if [ -n "${RW_EXTRA_MOUNTS:-}" ]; then
     [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
   done
 fi
-if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${RW_VOLUMES:-}" ]; then
-  echo "REFUSE: fast_init=false 要走 planner，必须配 RW_VOLUMES（sibling 挂载；outer -v 到不了 eval 容器）" >&2
+if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${RW_VOLUMES:-}" ] && [ -z "${ASSETS_MOUNT:-}" ]; then
+  echo "REFUSE: fast_init=false 要走 planner，必须给资产挂载（RW_VOLUMES 或 ASSETS_MOUNT 至少一个）" >&2
   exit 1
 fi
 echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<未用outer挂载>}"
