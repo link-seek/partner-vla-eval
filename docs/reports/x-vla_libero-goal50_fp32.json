@@ -1,0 +1,18 @@
+{
+  "model": "2toINF/X-VLA-WidowX (fp32)",
+  "task": "LIBERO-goal 全榜 10 tasks x 50ep（官方协议）",
+  "mean_success": 0.972,
+  "n": 500,
+  "errors": 0,
+  "versions": {
+    "harness": "v0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0"
+  },
+  "machine": "V100 (cn-north-4)",
+  "seeds": "bundled fixed inits (50/task), env_seed=7",
+  "date": "2026-10-28",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40595833935",
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "note": "官方协议整榜：486/500，最低 task 46/50。三榜合计 1463/1500=97.5%"
+}
