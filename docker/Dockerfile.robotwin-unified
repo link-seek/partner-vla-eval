@@ -78,7 +78,7 @@ ARG HARNESS_UPSTREAM_REF
 # run_sharded.sh：我们的编排修复版（含 shard 错峰，防 warp 并发编译撞缓存）。
 # 归档 tag 取（fork 分支已删，tag 永久保留可取）。
 ARG HARNESS_PATCH_BASE=https://raw.githubusercontent.com/link-seek/vla-evaluation-harness
-ARG HARNESS_PATCH_REF=e6d4aa8275b15363423295d2d924acec43ba7143
+ARG HARNESS_PATCH_REF=debab97b3d53bb3cf13db87bb545ebefe2e835c2
 RUN mkdir -p /opt/patches && cd /opt/patches \
  && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/scripts/run_sharded.sh" -o run_sharded.sh \
  && chmod +x run_sharded.sh \
