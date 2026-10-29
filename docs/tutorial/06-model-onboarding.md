@@ -1,13 +1,13 @@
 # 06 模型接入
 
-> 版本：v1.0（2026-10-14）。伙伴交两样：权重地址 + 一个 serve yaml。
+> 版本：v1.1。伙伴交两样：权重地址 + 一个 serve yaml。执行统一镜像 `0.8.0-ee-slim`（直连上游主线 EE，已合 #168）；V100 job 零 checkout（payload 镜像 SWR 拉）。
 
 ## serve yaml 模板（三例同段式：定位/口径/权重/备注）
 
 ### DB-CogACT（关节口径，双臂+CALVIN）
 
 ```yaml
-script: "src/vla_eval/model_servers/dexbotic/cogact.py"
+script: "src/vla_eval/model_servers/dexbotic/cogact.py"   # 上游主线已有对应实现
 args:
   model_path: Dexmal/<repo>/<task>   # 按 task 分头；from_pretrained 不认 repo/subdir，CI 用本地子目录绝对路径
   port: 8000
@@ -28,10 +28,12 @@ args:
   chunk_size: 10
 ```
 
-### X-VLA（EE 口径，parked）
+### X-VLA（EE 口径，已合入上游主线 #168）
 
-benchmark 只要关节，X-VLA 出 EE——现在接上必 0 分，等上游 issue #166。
-`domain_id` 按官方 recipe（RobotWin 用 6）。
+EE 参数走 `action_type=ee`（镜像默认 qpos，config 切 ee）；`domain_id` 按官方 recipe（RobotWin
+用 6）；fast_init 必须 false（EE 走 plan_path）。serve 用 `serve-robotwin.yaml`
+（benchmark_profile=robotwin + domain_id=6 + model_path `2toINF/X-VLA-WidowX`；serve 侧需声明
+`ee_pose`，warning advisory，动作实测是通的，见 #1）。
 
 ## 口径映射表（出 0 分先查这张）
 
@@ -46,3 +48,5 @@ benchmark 只要关节，X-VLA 出 EE——现在接上必 0 分，等上游 iss
 ## spec warning 读法
 
 episode 起点刷 `Spec mismatch` = 口径错配预警，先停手对表，不要烧卡硬跑。
+`action [ee_pose]: benchmark expects it but server doesn't declare it` 只是 advisory，
+400 步执行可照常（X-VLA EE 已验证）；真拦路的是 unknown kwarg（旧镜像，已退役）。
