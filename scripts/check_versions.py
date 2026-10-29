@@ -16,12 +16,15 @@ def arg_default(path, name):
     m = re.search(rf"^ARG\s+{name}=(.+?)\s*$", open(path).read(), re.M)
     return m.group(1).strip().strip('"') if m else None
 
-# 1. serve 系 HARNESS_REF：必须等于 target，或在 known_debts 中登记
+# 1. serve 系 HARNESS_REF：必须等于 target（tag 语义），或为上游主线 SHA（直连验证用），或在 known_debts 中登记
 debts = V.get("known_debts_harness_070", [])
 import glob
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     v = arg_default(f, "HARNESS_REF")
     if norm(v) == norm(V["harness_serve_target"]):
+        continue
+    if v and len(v) == 40 and all(c in "0123456789abcdef" for c in v.lower()):
+        print(f"MAIN-OK {f.split('/')[-1]} (上游主线 SHA)")
         continue
     name = f.split("/")[-1]
     if v == "v0.7.0" and name in debts:

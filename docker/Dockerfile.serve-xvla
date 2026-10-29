@@ -1,6 +1,6 @@
 # X-VLA serve 镜像：V100 离线跑，依赖全烘，uv 缓存预热。
 # 构建机要求外网（免费 runner）。运行时（V100）零下载：UV_OFFLINE=1。
-ARG HARNESS_REF=v0.8.0
+ARG HARNESS_REF=0cd7deb706982f25701fbd2c9ed45554f0cf46d7
 # 论文实验 B 用：float32（官方默认）/ float16（对照组，--build-arg DTYPE=torch.float16）
 ARG DTYPE=torch.float32
 FROM python:3.12-slim
@@ -17,8 +17,9 @@ RUN pip install --no-cache-dir --upgrade pip uv
 RUN pip install --no-cache-dir "vla-eval==0.8.0"
 
 # harness 源码（serve yaml 用相对 script 路径，CWD=/work/harness）
-RUN git clone --depth 1 --branch ${HARNESS_REF} \
-      https://github.com/allenai/vla-evaluation-harness.git harness
+RUN git clone -q https://github.com/allenai/vla-evaluation-harness.git harness \
+ && cd harness && git fetch -q --depth 1 origin ${HARNESS_REF} && git checkout -q FETCH_HEAD \
+ && cd /work
 
 # V100 补丁（烘进镜像不再运行时 sed）：
 # torch 钉 2.6.0cu126（sm_70 无 cu128 内核）/ python 放宽
