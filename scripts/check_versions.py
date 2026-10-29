@@ -41,21 +41,17 @@ for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     if "FROM python:3.12-slim" not in open(f).read():
         fails.append(f"{f}: 基座不是 python:3.12-slim")
 
-# 5. 统一镜像：EE REF + P2 烘焙 + fork 出处（构建时拉，运行时不拉）
+# 5. 统一镜像：上游主线直连（fork 已退役，归档见 versions.yaml）
 _U = open("docker/Dockerfile.robotwin-unified").read()
-for _k in ["harness_unified_ref"]:
-    if V[_k] not in _U:
-        fails.append("Dockerfile.robotwin-unified: %s 未引用" % _k)
-# harness_patch_ref 只记 P2-only 分支（上游 PR 用），烘焙以 unified 为准（同源防覆盖，10-26 教训）
-if V["harness_fork"] not in _U:
-    fails.append("Dockerfile.robotwin-unified: 未引用 fork")
-if "github.com/allenai/vla-evaluation-harness" in _U:
-    fails.append("Dockerfile.robotwin-unified: 仍直连上游 harness")
+if V["harness_upstream_ref"] not in _U:
+    fails.append("Dockerfile.robotwin-unified: 未引用 harness_upstream_ref")
+if "github.com/allenai/vla-evaluation-harness" not in _U:
+    fails.append("Dockerfile.robotwin-unified: 未直连上游")
+if "github.com/link-seek/vla-evaluation-harness" in _U and "HARNESS_FORK=https://github.com/link-seek" in _U:
+    fails.append("Dockerfile.robotwin-unified: 还在用 fork 主分支")
 import os as _os
 if not _os.path.exists("docker/entrypoint-robotwin.sh"):
     fails.append("docker/entrypoint-robotwin.sh 缺失")
-elif "STATE_PATCH" not in open("docker/entrypoint-robotwin.sh").read():
-    fails.append("entrypoint-robotwin.sh: 无 STATE_PATCH 激活")
 
 # 6. verify 镜像：只许 SWR 拉，不许本地构建（V100 出境限速，构建按小时计）
 import subprocess as _sp
@@ -85,13 +81,11 @@ for _wf in ["pi-libero-smoke.yml", "pi-calvin-smoke.yml", "pi0-robotwin-smoke.ym
     if "sparse-checkout" in _wt:
         fails.append(f"{_wf}: 还有 sparse-checkout 残留")
 
-# 4. 源码出处：serve 系只许从 fork clone（研究仓不再直连上游源码）
+# 4. 源码出处：serve 系直连上游（P2 退役、EE 已合入主线，不再经 fork；tag 内容与 fork 一致，零风险切换）
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
     txt = open(f).read()
-    if "github.com/allenai/vla-evaluation-harness" in txt:
-        fails.append(f"{f}: 仍直连上游源码，改走 fork {V['harness_fork']}")
-    if V["harness_fork"] + ".git harness" not in txt:
-        fails.append(f"{f}: 未引用 fork {V['harness_fork']}")
+    if "github.com/link-seek/vla-evaluation-harness" in txt:
+        fails.append(f"{f}: 还在走 fork，改直连上游")
 
 if fails:
     print("VERSION-DRIFT:")

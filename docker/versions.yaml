@@ -5,7 +5,7 @@
 
 harness_bench: "0.8.0"        # bench 全系（libero/robotwin/calvin）
 harness_serve_target: "0.8.0" # serve 目标版本
-harness_fork: link-seek/vla-evaluation-harness  # 源码唯一出处：只许从 fork clone，不许直连上游
+harness_fork: allenai/vla-evaluation-harness  # 源码出处：直连上游（P2 退役、EE 已合入主线后不再经 fork）
 harness_cli: "0.8.0"          # serve 镜像内 vla-eval CLI pip 包版本（与源码 REF 对齐，10-23）
 verify_vla_eval: "0.8.0"      # verify 镜像内 vla-eval（只做权重预热/export；torch 2.3.1 保持，待账二统一）
 # （账一 10-23 已销：构建+冒烟全绿，pi05 1/1、xvla seed-7 SUCCESS、cogact calvin 5/5）
@@ -24,9 +24,10 @@ dtype_xvla: torch.float32     # xvla 默认（官方默认；fp16 对照组见�
 
 # 追踪仓补丁（议题 H）：CI 按此 REF 从 fork 拉取，不再读本仓 vendoring
 harness_patch_base: "https://raw.githubusercontent.com/link-seek/vla-evaluation-harness"
-harness_patch_ref: "e6d4aa8275b15363423295d2d924acec43ba7143"  # fork linkseek/p2-instrumentation：P2 双补丁 + run_sharded stagger（编排修复落这里）
-harness_ee_ref: "56eba0ce9a5bde95305a73ce56b1d4e69cb9a097"  # fork linkseek/robotwin-ee（v0.8.0+action_type，默认qpos）；#168 上游审稿中
-harness_unified_ref: "9b5e45f55ba1aace6aacb50048e368e85fe0251d"  # fork linkseek/robotwin-ee-p2（EE+P2 合流）；统一镜像 pip+烘焙唯一来源（必须同源）
+harness_patch_ref: "e6d4aa8275b15363423295d2d924acec43ba7143"  # 归档 tag archive/p2-instrumentation-20261029：run_sharded stagger 版（编排修复）；分支已删
+harness_ee_ref: "56eba0ce9a5bde95305a73ce56b1d4e69cb9a097"  # 归档 tag archive/robotwin-ee-20261029：#168 已合入上游主线，此分支退役
+harness_unified_ref: "9b5e45f55ba1aace6aacb50048e368e85fe0251d"  # 归档 tag archive/robotwin-ee-p2-20261029（历史构建用）；现统一镜像改从上游主线装：
+harness_upstream_ref: "0cd7deb706982f25701fbd2c9ed45554f0cf46d7"  # 上游主线 squash 合并 #168 后的 HEAD（含官方 EE）；统一镜像 pip 唯一来源
 # 上游源码 pin（追踪仓跟随，研究仓只读）
 ROBOTWIN_REF: c3ddfa8b97d5519efa828b075999bd0006778e5e
 CUROBO_REF: v0.7.8

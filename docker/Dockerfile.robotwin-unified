@@ -1,15 +1,14 @@
-# RobotWin 统一运行镜像（议题 F 定盘，4→1）：
-# = slim 三刀（资产外置 / nvcc 多阶段 / curobo 源码清）+ EE 烘进。
-# 与 slim 的唯一区别：harness 不再 COPY 本仓 src，而是 pip 从追踪仓 EE 分支装
-# （议题 H：研究仓不 vendoring 上游源码；EE 默认 qpos，与现跑行为一致，ee 走 config 切）。
-# 上游基准：Dockerfile.robotwin@0.8.0（ROBOTWIN_REF=c3ddfa8，CUROBO_REF=v0.7.8）。
+# RobotWin 统一运行镜像（议题 F 定盘，4→1；10-29 起直连上游，不再经 fork）：
+# = slim 三刀（资产外置 / nvcc 多阶段 / curobo 源码清）+ 上游 EE（#168 已合入主线）。
+# P2 已退役（归档 tag 见 versions.yaml）：不再烘焙，不再挂载。
+# 上游基准：Dockerfile.robotwin@0.8.0 + 主线 EE 合并（0cd7deb）。
 # 构建（须外网：免费机/hw21；V100 内网不能打；arch 显式指定，无需真卡）：
 #   docker build -f docker/Dockerfile.robotwin-unified -t vla-eval-robotwin:0.8.0-ee-slim .
 # 验收：grab_roller×10（EE 口径通）+ place_empty_cup×10（qpos 默认，0/10 噪声带）。
 
 ARG BASE_IMAGE=ghcr.io/allenai/vla-evaluation-harness/base:latest
-ARG HARNESS_FORK=https://github.com/link-seek/vla-evaluation-harness.git
-ARG HARNESS_UNIFIED_REF=9b5e45f55ba1aace6aacb50048e368e85fe0251d
+ARG HARNESS_FORK=https://github.com/allenai/vla-evaluation-harness.git
+ARG HARNESS_UPSTREAM_REF=0cd7deb706982f25701fbd2c9ed45554f0cf46d7
 
 # ---------- builder：含 nvcc，编 CuRobo ----------
 FROM ${BASE_IMAGE} AS builder
@@ -75,33 +74,27 @@ RUN uv pip install --no-cache-dir wheel \
 # ---------- final：无 nvcc ----------
 FROM ${BASE_IMAGE}
 ARG HARNESS_FORK
-ARG HARNESS_UNIFIED_REF
-# P2 补丁烘进镜像（构建机外网可达 raw；V100 出境只认 github.com，运行时现拉必死）
+ARG HARNESS_UPSTREAM_REF
+# run_sharded.sh：我们的编排修复版（含 shard 错峰，防 warp 并发编译撞缓存）。
+# 归档 tag 取（fork 分支已删，tag 永久保留可取）。
 ARG HARNESS_PATCH_BASE=https://raw.githubusercontent.com/link-seek/vla-evaluation-harness
-# benchmark.py 必须与 pip 安装同源（UNIFIED；曾用 P2-only 分支盖掉 EE，见 10-26 教训）。
-# run_sharded.sh 与 benchmark 无关，走 P2 分支（stagger 等编排修复落这里）。
 ARG HARNESS_PATCH_REF=e6d4aa8275b15363423295d2d924acec43ba7143
 RUN mkdir -p /opt/patches && cd /opt/patches \
  && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/scripts/run_sharded.sh" -o run_sharded.sh \
- && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_UNIFIED_REF}/src/vla_eval/benchmarks/robotwin/benchmark.py" -o robotwin_benchmark_state.py \
  && chmod +x run_sharded.sh \
- && grep -c "sidecar" robotwin_benchmark_state.py
+ && grep -q "错峰" run_sharded.sh
 # conda env 整体搬运（含 torch/curobo wheel 产物）
 COPY --from=builder /opt/conda/envs/robotwin /opt/conda/envs/robotwin
 # RoboTwin 代码（无 .git、无 curobo 源码、无 assets）
 COPY --from=builder /app/RoboTwin /app/RoboTwin
 SHELL ["conda", "run", "-n", "robotwin", "/bin/bash", "-c"]
 WORKDIR /workspace
-# harness 从追踪仓 EE 分支装（含 action_type 开关，默认 qpos）；再验 EE 入口存在
+# harness 从上游主线装（官方 EE 已合入，action_type 开关，默认 qpos）；再验 EE 入口存在
 ARG HARNESS_VERSION=0.0.0
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=${HARNESS_VERSION}
-RUN uv pip install --no-cache-dir "git+${HARNESS_FORK}@${HARNESS_UNIFIED_REF}" \
+RUN uv pip install --no-cache-dir "git+${HARNESS_FORK}@${HARNESS_UPSTREAM_REF}" \
  && conda run --no-capture-output -n robotwin python -c \
       "import vla_eval.benchmarks.robotwin.benchmark as b, inspect; assert 'action_type' in str(inspect.signature(b.RoboTwinBenchmark.__init__)), 'EE missing'; print('EE OK')"
-# P2 补丁直接盖掉装好的 benchmark（统一镜像恒带 instrumentation；entrypoint 的 STATE_PATCH 条件保留当幂等复写）
-RUN SP=$(conda run --no-capture-output -n robotwin python -c "import vla_eval.benchmarks.robotwin.benchmark as m; print(m.__file__)") \
- && cp /opt/patches/robotwin_benchmark_state.py "$SP" \
- && conda run --no-capture-output -n robotwin python -c "import vla_eval.benchmarks.robotwin.benchmark as b, inspect; assert 'action_type' in str(inspect.signature(b.RoboTwinBenchmark.__init__)), 'EE LOST by P2 bake'; assert hasattr(b.RoboTwinBenchmark, '_dump_state_snapshot'), 'P2 LOST'; print('UNIFIED OK: EE+P2')"
 # 我们的 run 配置（研究仓资产，非上游源码）
 COPY configs/ configs/
 # 相对路径兜底：RoboTwin 部分代码用相对路径 assets/...（相对 CWD=/workspace），
