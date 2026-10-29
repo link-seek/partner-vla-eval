@@ -23,6 +23,9 @@ if [ -z "${RW_SHARDS:-}" ]; then
 fi
 RW_VIDEO="${RW_VIDEO:-0}"
 CHUNK_TAG=$(echo "$RW_TASKS" | tr ',' '+' | cut -c1-60)
+if [ -n "${RW_RUN_YAML:-}" ]; then
+  CHUNK_TAG=$(basename "$RW_RUN_YAML" .yaml | sed 's/^run-//')
+fi
 OUTDIR="results/robotwin-${CHUNK_TAG}-x${RW_EPISODES}"
 results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR 会把上轮 libero 残留打进 artifact）
 # 注意：mkdir OUTDIR 必须在 results_root_wipe 之后（wipe 清 results/* 会连 OUTDIR 一起扬掉）
@@ -37,6 +40,11 @@ echo "[1/6] harness 代码已烘进 serve 镜像，无 clone（V100 离线要求
 
 echo "[2/6] 生成本块 run 配置（每 task 一个 entry）"
 GEN="$WORK/configs/run-robotwin-chunk.yaml"
+if [ -n "${RW_RUN_YAML:-}" ]; then
+  echo "run 配置直用 $RW_RUN_YAML（对照实验，不自动生成）"
+  cp "$WORK/configs/$RW_RUN_YAML" "$GEN"
+  grep -c "subname:\|task_name:" "$GEN"
+else
 {
 echo "# 自动生成：chunk [$RW_TASKS] x $RW_EPISODES"
 echo "server:"
@@ -76,7 +84,8 @@ echo "      fast_init: ${RW_FAST_INIT:-true}  # EE 必须 false：fast-path 禁 
 echo "    action_dim: 14"
 done
 } > "$GEN"
-grep -c "task_name:" "$GEN"
+fi
+grep -c "task_name:\|subname:" "$GEN"
 echo "--- generated docker block ---"
 grep -A6 "^docker:" "$GEN" | head -n 10
 echo "--- end docker block ---"

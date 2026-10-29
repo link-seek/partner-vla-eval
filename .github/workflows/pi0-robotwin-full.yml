@@ -63,7 +63,11 @@ on:
         required: false
         default: ""
       state_patch:
-        description: "P2 终态补丁：空=不用，robotwin=挂载本仓补丁"
+        description: "P2 终态补丁：空=不用（已退役，归档），robotwin=挂载本仓补丁"
+        required: false
+        default: ""
+      run_yaml:
+        description: "run 配置直用（对照实验，如 run-robotwin-xvla-easy50.yaml）；空=按 tasks 自动生成"
         required: false
         default: ""
       fast_init:
@@ -146,6 +150,7 @@ jobs:
           ASSETS_MOUNT: ${{ inputs.assets_mount }}
           RW_EXTRA_MOUNTS: ${{ inputs.extra_mounts }}
           RW_STATE_PATCH: ${{ inputs.state_patch }}
+          RW_RUN_YAML: ${{ inputs.run_yaml }}
         run: |
           mkdir -p results
           chmod +x scripts/ci_robotwin_full.sh
