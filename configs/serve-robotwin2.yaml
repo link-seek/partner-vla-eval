@@ -9,4 +9,5 @@ args:
   domain_id: 6
   chunk_size: 30
   denoising_steps: 10
+  output_action_dim: 16  # EE：server 侧按官方 client 转 16D quat（上游 #168 合并后逻辑；benchmark 只认 16D）
   port: 8000
