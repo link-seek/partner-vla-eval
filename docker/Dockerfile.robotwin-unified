@@ -75,14 +75,14 @@ RUN uv pip install --no-cache-dir wheel \
 FROM ${BASE_IMAGE}
 ARG HARNESS_FORK
 ARG HARNESS_UPSTREAM_REF
-# run_sharded.sh：我们的编排修复版（含 shard 错峰，防 warp 并发编译撞缓存）。
+# run_sharded.sh：我们的编排修复版（分片隔离 WARP_CACHE_PATH，防 warp 并发编译撞缓存；替代旧 stagger 方案）。
 # 归档 tag 取（fork 分支已删，tag 永久保留可取）。
 ARG HARNESS_PATCH_BASE=https://raw.githubusercontent.com/link-seek/vla-evaluation-harness
 ARG HARNESS_PATCH_REF=debab97b3d53bb3cf13db87bb545ebefe2e835c2
 RUN mkdir -p /opt/patches && cd /opt/patches \
- && curl -fsSL "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/scripts/run_sharded.sh" -o run_sharded.sh \
+ && curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors "${HARNESS_PATCH_BASE}/${HARNESS_PATCH_REF}/scripts/run_sharded.sh" -o run_sharded.sh \
  && chmod +x run_sharded.sh \
- && grep -q "错峰" run_sharded.sh
+ && grep -q "WARP_CACHE_PATH" run_sharded.sh && echo "run_sharded OK (per-shard warp cache)"
 # conda env 整体搬运（含 torch/curobo wheel 产物）
 COPY --from=builder /opt/conda/envs/robotwin /opt/conda/envs/robotwin
 # RoboTwin 代码（无 .git、无 curobo 源码、无 assets）
