@@ -1,0 +1,19 @@
+# X-VLA EE 冒烟：easy 集首 task x1ep（验证 output_action_dim=16 通路）。对照上游 66.7% 的最小可跑单元。
+server:
+  url: ws://localhost:8000
+docker:
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim
+output_dir: ./results/robotwin-xvla-easy1
+benchmarks:
+- benchmark: vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark
+  subname: adjust_bottle
+  episodes_per_task: 1
+  max_steps: 300
+  params:
+    task_name: adjust_bottle
+    task_config: demo_clean
+    seed: 0
+    test_num: 1
+    action_type: ee
+    send_state: true
+    render_every: 30
