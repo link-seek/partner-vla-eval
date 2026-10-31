@@ -109,8 +109,8 @@ jobs:
   chunk:
     needs: start-ecs
     runs-on: [self-hosted, Linux, X64, V100-pi0]
-    # 自托管上限 5 天；50ep/轮约 3-5h，设 24h 留足（公有 runner 才限 6h）
-    timeout-minutes: 1440
+    # 自托管实际无 6h 限制；easy50 完整对照约 2~3 天，设 7 天（10080min）一次跑完
+    timeout-minutes: 10080
     steps:
       - name: Fetch payload (SWR, no github)
         env:
