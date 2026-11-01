@@ -36,19 +36,27 @@ jobs:
     runs-on: [self-hosted, hw21]
     timeout-minutes: 15
     steps:
-      - uses: Wandalen/wretry.action@v1
-        with:
-          attempt_limit: 8
-          attempt_delay: 180000
-          action: actions/checkout@v4
-          with: |
-            fetch-depth: 1
-      - uses: ./.github/actions/ecs-power
-        with:
-          action: start
-          server-id: ${{ env.ECS_SERVER_ID }}
-          obs-ak: ${{ secrets.OBS_AK }}
-          obs-sk: ${{ secrets.OBS_SK }}
+      # 内联开机（不 checkout、不引用本地 action）：HW21 hcloud 现成，走华为云内网 API。
+      # 背景：HW21 出境到 GitHub 被限速（~8KB/s），checkout 必超时；开关机本身零代码需求。
+      - name: Power on V100 (inline, no checkout)
+        env:
+          HCLOUD_AGREE_PRIVACY: "true"
+        run: |
+          set -e
+          echo "y" | hcloud ECS BatchStartServers \
+            --cli-region="${{ env.ECS_REGION }}" \
+            --cli-access-key="${{ secrets.OBS_AK }}" \
+            --cli-secret-key="${{ secrets.OBS_SK }}" \
+            --os-start.servers.1.id="${{ env.ECS_SERVER_ID }}"
+          for i in $(seq 1 12); do
+            sleep 60
+            RAW=$(hcloud ECS ListServersDetails --cli-region="${{ env.ECS_REGION }}" --cli-access-key="${{ secrets.OBS_AK }}" --cli-secret-key="${{ secrets.OBS_SK }}" --limit=25 2>&1)
+            ST=$(echo "$RAW" | python3 -c "import json,sys; d=json.load(sys.stdin); print([s['status'] for s in d['servers'] if s['id']=='${{ env.ECS_SERVER_ID }}'][0])" 2>/dev/null || echo UNKNOWN)
+            echo "poll $i: $ST (want ACTIVE)"
+            [ "$ST" = "ACTIVE" ] && { echo "power-verified: ACTIVE"; exit 0; }
+          done
+          echo "power-timeout: never reached ACTIVE" >&2
+          exit 1
   smoke:
     needs: start-ecs
     runs-on: [self-hosted, Linux, X64, V100-pi0]
@@ -102,9 +110,24 @@ jobs:
     if: always()
     timeout-minutes: 15
     steps:
-      - uses: ./.github/actions/ecs-power
-        with:
-          action: stop
-          server-id: ${{ env.ECS_SERVER_ID }}
-          obs-ak: ${{ secrets.OBS_AK }}
-          obs-sk: ${{ secrets.OBS_SK }}
+      # 内联关机（不 checkout；关机前拉代码无意义，且本地 action 引用依赖缓存）
+      - name: Power off V100 (inline, no checkout)
+        env:
+          HCLOUD_AGREE_PRIVACY: "true"
+        run: |
+          set -e
+          sleep 120
+          echo "y" | hcloud ECS BatchStopServers \
+            --cli-region="${{ env.ECS_REGION }}" \
+            --cli-access-key="${{ secrets.OBS_AK }}" \
+            --cli-secret-key="${{ secrets.OBS_SK }}" \
+            --os-stop.servers.1.id="${{ env.ECS_SERVER_ID }}"
+          for i in $(seq 1 12); do
+            sleep 60
+            RAW=$(hcloud ECS ListServersDetails --cli-region="${{ env.ECS_REGION }}" --cli-access-key="${{ secrets.OBS_AK }}" --cli-secret-key="${{ secrets.OBS_SK }}" --limit=25 2>&1)
+            ST=$(echo "$RAW" | python3 -c "import json,sys; d=json.load(sys.stdin); print([s['status'] for s in d['servers'] if s['id']=='${{ env.ECS_SERVER_ID }}'][0])" 2>/dev/null || echo UNKNOWN)
+            echo "poll $i: $ST (want SHUTOFF)"
+            [ "$ST" = "SHUTOFF" ] && { echo "power-verified: SHUTOFF"; exit 0; }
+          done
+          echo "power-timeout: never reached SHUTOFF" >&2
+          exit 1
