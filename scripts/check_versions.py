@@ -75,12 +75,12 @@ for _f in ["scripts/ci_libero.sh", "scripts/ci_calvin.sh", "scripts/ci_robotwin.
     if "git clone" in _t:
         fails.append("%s: 含 git clone，改烘进镜像" % _f)
 
-# 8. V100 job 零 checkout（代码走 payload 镜像；只剩 hw21 start-ecs 的 1 个）
+# 8. 全链路零 checkout（HW21 start-ecs 已内联，不再下代码；V100 走 payload 镜像）
 import glob as _glob
 for _wf in ["pi-libero-smoke.yml", "pi-calvin-smoke.yml", "pi0-robotwin-smoke.yml", "pi0-robotwin-full.yml", "pi0-molmo-smoke.yml"]:
     _wt = open(f".github/workflows/{_wf}").read()
-    if _wt.count("actions/checkout") != 1:
-        fails.append(f"{_wf}: checkout 数={_wt.count('actions/checkout')}，应为 1（仅 hw21 start-ecs）")
+    if _wt.count("actions/checkout") != 0:
+        fails.append(f"{_wf}: 含 actions/checkout（HW21 出境限速下必死；开关机已内联，V100 走 payload）")
     if "sparse-checkout" in _wt:
         fails.append(f"{_wf}: 还有 sparse-checkout 残留")
 
