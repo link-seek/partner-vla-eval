@@ -28,7 +28,7 @@ configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
 | 能力 | 考场 | 参考模型 | 状态 |
 |---|---|---|---|
 | 单臂短程基线 | LIBERO | π0.5（LeRobot 桥） | smoke 1/1 全绿 |
-| 单臂长程 | CALVIN | DB-CogACT | smoke 4/5 |
+| 单臂长程 | CALVIN | DB-CogACT | smoke 4/5（5 sequences 全对，success 口径；链长另看） |
 | 双臂基线 | RobotWin 2.0 | DB-CogACT（按 task 分头） | 4 轮出分（见 `quickstart` 对照表） |
 | 双臂长程 / 记忆 / 真机 | DuoBench / RMBench / 真机 | 待定 | 规划位，先 smoke，后放 |
 
