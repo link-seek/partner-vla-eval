@@ -1,7 +1,7 @@
 # 00 总览
 
-> 版本：v1.0（2026-10-14，随 RobotWin 四轮收官）
-> 口径源：本仓 Discussion #1 全帖；版本锁定见各章版本头。
+> 版本：v1.1（2026-11-03，栈差异对照 A-D 收官；v1.0 见 2026-10-14，随 RobotWin 四轮收官）
+> 口径源：本仓 Discussion #1 全帖 + `docs/proposal-stack-effects.md`（A-D）+ `docs/blog-precision-cliff.md`（B）；版本锁定见各章版本头。
 
 ## 我们在干什么
 
