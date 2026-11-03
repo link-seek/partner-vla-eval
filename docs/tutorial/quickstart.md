@@ -8,10 +8,17 @@
 ## 链路全景（30 秒看懂在干什么）
 
 ```text
-serve（DB-CogACT，双臂/GPU，宿主） ←WebSocket/msgpack→ benchmark（RobotWin，CPU，Docker）
-  serve-robotwin-cogact.yaml                        run-robotwin-smoke.yaml
-  1 模型 1 个（chunk 16，三相机）                    1 考场 1 组（grab_roller，seed 0）
+[cogact-serve 容器，GPU] ←WebSocket/msgpack→ [client 容器] —docker.sock→ [env 容器，SAPIEN]
+  vla-serve-cogact:0.8.0                   vla-eval-robotwin:0.8.0-ee-slim 拉起内层环境
+  serve-robotwin-local.yaml                run-robotwin-smoke.yaml（grab_roller，seed 0）
+  chunk 16，三相机                          1 考场 1 组
 ```
+
+> **原理**：数容器是 3 个，不是 2 个。serve 和 client 各是一个容器（都是 SWR
+> 烘焙镜像，host 网络）；client 挂了 `/var/run/docker.sock`，harness 在里面再拉起
+> 真正跑 SAPIEN 环境的 env 容器——`docker ps` 可验证。上游本地开发时 serve 可以
+> 直接跑在宿主（`uv run`，见上游 README 两终端跑法），图上旧字样"宿主"是这个来历；
+> V100 离线跑不动宿主依赖，所以 serve 也进容器（依赖全烘 + `UV_OFFLINE=1`）。
 
 > **原理**：模型和考场互相不知对方存在（上游论文 §II-A，arXiv:2603.13966）。
 > 模型只实现 `predict(观测)→动作`，考场只实现 `reset/step/判分`，中间是标准协议。
