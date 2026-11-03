@@ -9,9 +9,9 @@
 
 ```mermaid
 flowchart LR
-    S["cogact-serve 容器 · GPU<br/>vla-serve-cogact:0.8.0<br/>vla-eval serve"]
-    C["client 容器 · 跑完即焚（--rm）<br/>vla-eval-robotwin:0.8.0-ee-slim<br/>vla-eval run"]
-    E["env 容器 · SAPIEN<br/>跑 grab_roller 环境"]
+    S["模型 serve · cogact-serve 容器 · GPU<br/>vla-serve-cogact:0.8.0<br/>vla-eval serve"]
+    C["考场 client · harness run 编排 · 跑完即焚（--rm）<br/>vla-eval-robotwin:0.8.0-ee-slim<br/>发观测收动作记分"]
+    E["考场 env · SAPIEN 环境 · 判分在此<br/>跑 grab_roller"]
     S <-->|"WebSocket/msgpack<br/>ws://localhost:8000"| C
     C -->|"docker.sock 拉起"| E
 ```
