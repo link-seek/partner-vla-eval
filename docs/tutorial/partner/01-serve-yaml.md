@@ -21,7 +21,9 @@ python3 --version   # 3.8+ 即可
 ## 第一步：跑 probe，看清自己的模型
 
 ```bash
-python3 scripts/spec_probe.py <你的HF-ID>   # 私仓加 --token $HF_TOKEN
+python3 scripts/spec_probe.py <你的HF-ID>   # 权重在 Hub 上；私仓加 --token $HF_TOKEN
+python3 scripts/spec_probe.py <本地目录>    # 伙伴直接给模型文件时用（主情况）：
+                                            # 只读 config.json + safetensors 文件头，不加载权重体
 ```
 
 期望输出（以 `lerobot/pi05_libero_finetuned` 为例，你的模型换上同格式）：
@@ -46,7 +48,8 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 私仓加 --token $HF_TOKEN
 | `仓库不可读` + 401/403 | 私仓没开权限，先给 `link-seek` 授权再跑（打回 Top 2） |
 | `config.json: 读不到` | 仓里没 config，按"人答"走，不卡死 |
 | commits 段缺失 | API 限流，重跑一次即可 |
-| 手里是本地权重、没推 Hub | probe 只认 Hub ID（只调 API 读元数据，一字节权重都不下）；本地请先 push 到 Hub，或跳过 probe 直接人答 6 项 |
+| 本地目录无 commits | 精确版本靠交付时注明（文件夹哈希/时间/自述三选一），否则复现必翻车 |
+| 本地有按 task 分头的子目录 | probe 会逐个报出来，表单第 6 项照抄即可（分头情况机器一次看清） |
 
 > **原理**：probe 只证明三件事——仓库存在且可读（权限）、精确 commit 存在
 > （拒绝"只写分支名"）、dtype/动作维有线索。`config.json` 的数字只能参考：
