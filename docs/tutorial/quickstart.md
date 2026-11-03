@@ -60,7 +60,7 @@ flowchart LR
 
 ## 步骤三：到 OBS 收产物，对照打勾
 
-主路去 OBS：`<obs_prefix>/robotwin-smoke/`（默认
+去 OBS 收：`<obs_prefix>/robotwin-smoke/`（默认
 `obs://so101-sim-pipeline/eval/robotwin-smoke/`，flat 打平无子目录；
 dispatch 自填了前缀就去自填的地址）。
 
