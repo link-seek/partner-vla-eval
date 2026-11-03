@@ -58,16 +58,16 @@ flowchart LR
 > 路径），所以 CI 先 snapshot 再 `sed` 生成 `serve-robotwin-local.yaml`。
 > 手写三段式路径 serve 必起不来（`HFValidationError`，见 `old/08-troubleshooting.md` 第 2 条）。
 
-## 步骤三：收产物，对照打勾
+## 步骤三：到 OBS 收产物，对照打勾
 
-workflow 的 Artifacts（`robotwin-smoke`，即 `results/`）：
+主路去 OBS：`<obs_prefix>/robotwin-smoke/`（默认
+`obs://so101-sim-pipeline/eval/robotwin-smoke/`，flat 打平无子目录；
+dispatch 自填了前缀就去自填的地址）。workflow Artifacts（`robotwin-smoke`，
+即 `results/`）是兜底——保留期短，先下先得。
 
-- [ ] `results/robotwin-smoke.log`：尾部 1/1（只验链路，不计分）。
-- [ ] `results/cogact-serve.log`：serve 端完整日志。
+- [ ] `robotwin-smoke.log`：尾部 1/1（只验链路，不计分）。
+- [ ] `cogact-serve.log`：serve 端完整日志。
 - [ ] 录像 mp4：出 0 分时亲眼看，不要只看数字。
-- [ ] OBS 归档：dispatch 参数 `obs_prefix` 可填自己的地址（默认
- `obs://so101-sim-pipeline/eval`），结果进 `<前缀>/robotwin-smoke/`；
- 开跑前已校验，填错不烧卡。详见 `partner/03-full-and-report.md`。
 
 > **原理·smoke 的定义**：`test_num=1` + `skip_expert_check=true`。专家校验是开跑前
 > 用官方 planner 逐种子验证"这局求解器能解"，50ep 全量必须开（排坏种）；smoke
