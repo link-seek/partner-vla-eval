@@ -119,6 +119,10 @@ args:
 > 所以 CI 先 snapshot 再 `sed` 生成本地路径版——你写三段式一样能发帖，
 > CI 会处理；但 smoke 跑哪个 task 就要用哪个 task 的头（model_path 对上），
 > 这是模板里 `<task>` 占位符的含义。
+> 模板没覆盖你家模型时三条退路：① LeRobot 桥——任意 `PreTrainedPolicy` checkpoint
+> 用同一个 config 即插即用（π0.5/GR00T/SmolVLA/X-VLA 都是这么接的）；
+> ② 照上游 `add-model-server` skill 加一个 server（约 50 行 `predict()`，
+> 我们 #168 就是这么合入上游的）；③ 都不想写就先发帖，表单空着，我们帮你看。
 
 ## 第四步：发帖（交作业）
 
