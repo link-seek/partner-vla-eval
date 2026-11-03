@@ -10,7 +10,7 @@
 | 运维（开卡保链路） | 让 V100 离线跑起来 | `quickstart` → `operator/01-machines-ci` → `02-images` | 按需查，不必通读 |
 | 复现者（对照分数） | 看懂一张分数怎么来的 | `quickstart` → `explanation/` → `reference/` | 30min |
 
-三条路都从同一篇开始：`quickstart.md`（LIBERO smoke，1 task×1ep，只验链路不计分）。
+三条路都从同一篇开始：`quickstart.md`（RobotWin smoke，grab_roller×1ep，只验链路不计分）。
 
 ## 核心概念（3 行，够用即走）
 
@@ -27,9 +27,9 @@ configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
 
 | 能力 | 考场 | 参考模型 | 状态 |
 |---|---|---|---|
-| 单臂短程基线 | LIBERO | π0.5（LeRobot 桥） | smoke 1/1 全绿 |
+| 双臂基线 | RobotWin 2.0 | DB-CogACT（按 task 分头） | smoke + 4 轮出分（见 `quickstart` 对照表） |
+| 单臂短程基线 | LIBERO | π0.5（LeRobot 桥） | smoke 1/1 全绿（链路对照用） |
 | 单臂长程 | CALVIN | DB-CogACT | smoke 4/5（5 sequences 全对，success 口径；链长另看） |
-| 双臂基线 | RobotWin 2.0 | DB-CogACT（按 task 分头） | 4 轮出分（见 `quickstart` 对照表） |
 | 双臂长程 / 记忆 / 真机 | DuoBench / RMBench / 真机 | 待定 | 规划位，先 smoke，后放 |
 
 ## 文档地图（四分法）

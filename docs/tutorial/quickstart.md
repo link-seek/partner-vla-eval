@@ -1,71 +1,73 @@
-# Quickstart：30 分钟跑通第一条链路
+# Quickstart：跑通第一条双臂链路
 
-> 目标：跑通 LIBERO smoke（1 task×1ep），亲眼看到链路是绿的。
+> 目标：跑通 RobotWin smoke（grab_roller×1ep），亲眼看到双臂链路是绿的。
 > 时间：操作 10 分钟 + 等卡 0.5~2 小时 ｜ 前置：无（不用懂镜像，不用装依赖）
 > 你将得到：`smoke_exit=0` + `results/` 落盘 + 一次 spec 对齐确认。
 
-## 为什么从 LIBERO 开始
+## 为什么从 RobotWin 开始
 
-LIBERO 是最便宜的考场：单臂短程、CPU 环境镜像最小、失败跑不满 400 步。
-链路分两段，责任分清：serve 不通是模型侧问题，benchmark 不通是环境侧问题。
-先证明链路本身健康，后面谈分数才有意义。
+我们的主业是双臂伙伴模型，RobotWin 是唯一双臂基线考场。全量也是按 task 逐个跑
+（grab_roller → adjust_bottle → …），smoke 跑的正是全量的第一个 task、同样的 serve
+口径：smoke 绿了，全量只是把 `test_num` 从 1 调到 50。LIBERO 只在"分不清是链路问题
+还是模型问题"时拿来做便宜对照，见 `partner/02-smoke.md`。
 
 ```text
-serve（π0.5，GPU） ←WebSocket/msgpack→ benchmark（LIBERO spatial，Docker）
-  serve-pi05-libero.yaml              run-libero-smoke.yaml（suite spatial，seed 7）
+serve（DB-CogACT 双臂，GPU） ←WebSocket/msgpack→ benchmark（RobotWin grab_roller，Docker）
+  serve-robotwin-cogact.yaml（chunk 16，三相机）   run-robotwin-smoke.yaml（demo_clean，seed 0）
 ```
 
 ## 步骤（只做一件事：在 GitHub 点 dispatch）
 
-V100 是离线卡， Runner 零 checkout（代码经 `vla-payload` 镜像从 SWR 取，不走 GitHub）。
+V100 是离线卡，Runner 零 checkout（代码经 `vla-payload` 镜像从 SWR 取，不走 GitHub）。
 你不需要 SSH、不需要装包。
 
-1. 进本仓 Actions → `LIBERO Smoke (pi05)` → `Run workflow`。
-2. 参数保持默认（共 4 个，含义如下），点绿钮：
+1. 进本仓 Actions → `RobotWin Smoke (DB-CogACT)` → `Run workflow`。无参数，直接点绿钮。
+2. 等：hw21 自动开机 → V100 跑 `scripts/ci_robotwin.sh`（5 步）→ 跑完自动关机。单卡串行，前有队列就排队。
 
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `serve_yaml` | `serve-pi05-libero.yaml` | π0.5 LIBERO 口径：`chunk 10`，`agentview/wrist` 双相机 |
-| `run_yaml` | `run-libero-smoke.yaml` | spatial 1 task×1ep，seed 7 |
-| `serve_image` | `vla-serve-pi05:0.8.0` | 依赖全烘+预热，V100 离线跑 |
-| `bench_image` | `vla-eval-libero:0.8.0` | 以 workflow 输入为准（yaml 内旧 tag 忽略） |
-
-3. 等：hw21 自动开机 → V100 跑 `scripts/ci_libero.sh`（4 步）→ 跑完自动关机。单卡串行，前有队列就排队。
-
-等卡时可读一步：`configs/serve-pi05-libero.yaml`（15 行）。知道 `checkpoint: lerobot/pi05_libero_finetuned` + `chunk_size: 10` 即可，其余先不用懂。
+等卡时可读一步：`configs/serve-robotwin-cogact.yaml`（16 行）。知道三件事即可：
+`chunk_size: 16` + 三相机 `head/left/right` + 权重按 task 分头（smoke 用 grab_roller 头）。
+注意 `from_pretrained` 不认 `repo/subdir` 三段式，CI 会 snapshot 后生成
+本地路径版 `serve-robotwin-local.yaml` 再起 serve——照抄这个做法，不要手拼路径。
 
 ## 期望输出（对照打勾）
 
-跑完在 workflow 的 Artifacts（`libero-smoke`，即 `results/`）里看到：
+跑完在 workflow 的 Artifacts（`robotwin-smoke`，即 `results/`）里看到：
 
 ```text
-[1/4] 拉镜像（SWR 内网）
-[2/4] 预热 pi05 权重（缓存命中则秒过）
-[3/4] 启动 pi05 serve ... serve UP
-[4/4] 跑 LIBERO smoke (spatial 1 task x 1ep)
+[2/5] bench + serve 镜像 (SWR 内网拉取)
+[3/5] verify 镜像
+[4/5] 预热 DB-CogACT 权重 (grab_roller 头, mirror, 带重试)
+[4b/5] 启动 DB-CogACT serve (GPU0, 后台) ... serve UP
+[5/5] 跑 RobotWin smoke (grab_roller 1ep, 用 robotwin 镜像当 client)
 smoke_exit=0
 ```
 
-* `results/libero-smoke.log`：尾部 `1/1 SUCCESS`（只验链路，不计分）。
-* `results/pi05-serve.log`：serve 端完整日志。
-* 落盘 aggregate JSON + 录像：出 0 分时亲眼看录像，不要只看数字。
+* `results/robotwin-smoke.log`：尾部 1/1（只验链路，不计分；录像常开，`RW_VIDEO=1`）。
+* `results/cogact-serve.log`：serve 端完整日志。
+* 出 0 分时亲眼看录像，不要只看数字。
 
-## 检查点（ emulation 出错先看这里，不过再烧卡）
+## 检查点（出错先看这里，不过再烧卡）
 
-- [ ] `serve UP` 在 120 轮探测内出现？没出现 → serve 镜像/权重问题，看 serve log 尾 15 行（脚本已打印），不要先怀疑 benchmark。
-- [ ] 日志头 20 行无 `Spec mismatch`？有 → **停手**。口径错配必 0 分（关节/末端、相机名、chunk 任一错都一样）。对照 `06-model-onboarding.md` 口径映射表（将迁入 `reference/config-fields.md`），不要烧卡硬跑。
-- [ ] `smoke_exit=0` 且 `1/1`？`error ≠ fail`：`fail` 是模型没做出来；`error` 是 infra/坏种子抛异常，单列不怪模型。
+- [ ] `serve UP` 在 120 轮探测内出现？脚本自带 3 次重试，3 次都起不来先看 serve 尾日志
+  （已自动存 `results/serve-debug-attempt*.log`），不要先怀疑 benchmark。
+- [ ] 日志头 20 行无 `Spec mismatch`？有 → **停手**。口径错配必 0 分
+  （14 关节 vs 16 EE、相机名、chunk 任一错都一样）。对照 `06-model-onboarding.md`
+  口径映射表（将迁入 `reference/config-fields.md`），不要烧卡硬跑。
+- [ ] `smoke_exit=0` 且 1/1？`error ≠ fail`：`fail` 是模型没做出来；`error` 是
+  infra/坏种子抛异常，单列不怪模型。
 
 ## 常见卡点（只记一个，其余进 reference）
 
-> `docker -v` 把宿主目录建成 root 导致 `.cache Permission denied`？
-> 脚本里已预建目录+改属主（`workspace_fix`），重跑即好。修不好的完整 15 条表在 `08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
+> 权重预热 `Xet 401`？权重走 Xet，mirror 直连要 token：预热传 token +
+> `HF_HUB_DISABLE_XET=1`（脚本里已有）。修不好的完整 15 条表在
+> `08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
 
 ## 下一步
 
-* 伙伴交模型：去 `partner/01-serve-yaml.md` —— 交权重地址 + 一个 serve yaml（照 `partner-onboarding.md` 表单填，不知道的空着）。
+* 伙伴交模型：去 `partner/01-serve-yaml.md` —— 交权重地址 + 一个 serve yaml
+ （照 `partner-onboarding.md` 表单填，不知道的空着；按 task 分头的逐个列出）。
 * 运维保链路：去 `operator/01-machines-ci.md` —— 开关机、串行队列、runner 掉了怎么修。
-* 想先看分数长什么样：RobotWin 四轮对照（校验种子，零 error 即有效）：
+* 想先看分数长什么样：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）：
 
 | task | 我们 | 官称 |
 |---|---|---|
@@ -74,4 +76,5 @@ smoke_exit=0
 | place_empty_cup | 16%（8/50） | 28% |
 | place_phone_stand | 16%（8/50） | 18% |
 
-差 10pp 以内判同档（n=50 噪声带约 ±6pp），跨榜不比大小。完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异 A-D 在 `explanation/`。
+差 10pp 以内判同档（n=50 噪声带约 ±6pp）；CALVIN 另看平均链长，跨榜不比大小。
+完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异 A-D 在 `explanation/`。
