@@ -14,7 +14,27 @@ cd partner-vla-eval
 python3 --version   # 3.8+ 即可
 ```
 
-## 第一步：跑 probe（认模型的尺子）
+## 第一步：找你的路线（自己判断）
+
+| 模型类型 | 走这条路线 |
+|---|---|
+| LeRobot 系 ckpt（π0.5 / GR00T N1.7 / SmolVLA / MolmoAct2…） | LeRobot 桥模板（第四步 π0.5 例），`checkpoint` 换你的 |
+| DB-CogACT / CogACT | cogact 模板（第四步），`model_path` 按 task 分头 |
+| X-VLA 官方 ckpt | X-VLA 模板（EE 口径，第四步），`domain_id` 按官方 recipe |
+| 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
+| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 `add-model-server` skill 加 server（约 50 行，我们 #168 有先例）→ ③直接发帖，表单空着，我们帮你看 |
+
+定完路线再往下读，别的一行都不用看。
+
+> **原理**：模板是上游 harness 的同名配置（`script` 指向的
+> `src/vla_eval/model_servers/...` 就是上游实现），我们只做钉版适配
+> （镜像、mirror、本地路径）。上游 20+ 模型 server 分两档：✓ 已复现 / ◇ 已接入待复现，
+> 小众模型没有是常态——所以退路①的桥覆盖面最广，③永远兜底。
+
+## 第二步：跑 probe 核对（拿不准时用）
+
+路线定了，这步是核对说法（名字会骗人：config 写 6-D 实测 7-D 的 SmolVLA、
+EE 当关节喂全 0 分的 X-VLA）；路线笃定的可跳过，直接到第三步人答 6 项。
 
 ```bash
 python3 scripts/spec_probe.py <本地目录>    # 主用法：只读 config.json + safetensors 文件头，不加载权重体。
@@ -58,26 +78,6 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 > （拒绝"只写分支名"）、dtype/动作维有线索。`config.json` 的数字只能参考：
 > 上例 `chunk_size: 50` 是训练切分，我们 serve 用 10；SmolVLA 更出现过
 > config 写 6-D 实测 7-D——probe 只是把 smoke 前能排除的错先排掉。
-
-## 第二步：对口径（你说你是啥，我们验的是啥）
-
-你知道自家模型是哪家的，直接找对应行；probe 的 card tags + 架构键是用来
-**验证说法**的——名字会骗人，实测不会（config 写 6-D 实测 7-D 的 SmolVLA、
-EE 当关节喂全 0 分的 X-VLA，都是说法和实测对不上的代价）。说法和实测对上了
-再往下读，别的一行都不用看：
-
-| 你的模型 | 往哪走 |
-|---|---|
-| LeRobot 系 ckpt（π0.5 / GR00T N1.7 / SmolVLA / MolmoAct2…，tags 带 lerobot） | LeRobot 桥模板（下例 π0.5），`checkpoint` 换你的 |
-| DB-CogACT / CogACT | cogact 模板（下例），`model_path` 按 task 分头 |
-| X-VLA 官方 ckpt | X-VLA 模板（EE 口径，下例），`domain_id` 按官方 recipe |
-| 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明，口径照第三步核 |
-| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 `add-model-server` skill 加 server（约 50 行，我们 #168 有先例）→ ③直接发帖，表单空着，我们帮你看 |
-
-> **原理**：模板是上游 harness 的同名配置（`script` 指向的
-> `src/vla_eval/model_servers/...` 就是上游实现），我们只做钉版适配
-> （镜像、mirror、本地路径）。上游 20+ 模型 server 分两档：✓ 已复现 / ◇ 已接入待复现，
-> 小众模型没有是常态——所以退路①的桥覆盖面最广，③永远兜底。
 
 ## 第三步：机器一半 + 人一半，拼出 6 项
 
