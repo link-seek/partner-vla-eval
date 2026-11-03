@@ -46,6 +46,7 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 私仓加 --token $HF_TOKEN
 | `仓库不可读` + 401/403 | 私仓没开权限，先给 `link-seek` 授权再跑（打回 Top 2） |
 | `config.json: 读不到` | 仓里没 config，按"人答"走，不卡死 |
 | commits 段缺失 | API 限流，重跑一次即可 |
+| 手里是本地权重、没推 Hub | probe 只认 Hub ID（只调 API 读元数据，一字节权重都不下）；本地请先 push 到 Hub，或跳过 probe 直接人答 6 项 |
 
 > **原理**：probe 只证明三件事——仓库存在且可读（权限）、精确 commit 存在
 > （拒绝"只写分支名"）、dtype/动作维有线索。`config.json` 的数字只能参考：
