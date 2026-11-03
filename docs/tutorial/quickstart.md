@@ -7,11 +7,13 @@
 
 ## 链路全景（30 秒看懂在干什么）
 
-```text
-[cogact-serve 容器，GPU] ←WebSocket/msgpack→ [client 容器] —docker.sock→ [env 容器，SAPIEN]
-  vla-serve-cogact:0.8.0                   vla-eval-robotwin:0.8.0-ee-slim 拉起内层环境
-  serve-robotwin-local.yaml                run-robotwin-smoke.yaml（grab_roller，seed 0）
-  chunk 16，三相机                          1 考场 1 组
+```mermaid
+flowchart LR
+    S["cogact-serve 容器 · GPU<br/>vla-serve-cogact:0.8.0<br/>vla-eval serve"]
+    C["client 容器 · 跑完即焚（--rm）<br/>vla-eval-robotwin:0.8.0-ee-slim<br/>vla-eval run"]
+    E["env 容器 · SAPIEN<br/>跑 grab_roller 环境"]
+    S <-->|"WebSocket/msgpack<br/>ws://localhost:8000"| C
+    C -->|"docker.sock 拉起"| E
 ```
 
 > **原理**：数容器是 3 个，不是 2 个。serve 和 client 各是一个容器（都是 SWR
