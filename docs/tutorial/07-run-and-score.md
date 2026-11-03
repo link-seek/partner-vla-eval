@@ -66,8 +66,11 @@ E（V100 fp16 vs 官方 H100 bf16，place_empty_cup 16~20% vs 28%）待定档：
 
 ## 分数怎么读（92% 到底在说什么）
 
-- `mean_success` = 成功 ep 数 / 总 ep 数。**二值分**：一个 ep 要么整单完成（1），
-  要么 0，没有“完成一半给 0.5”。400 步没做出来和第一步就崩，都记 0。
+- 各榜分数各榜自己定（上游论文 Table I/II，arXiv:2603.13966）：LIBERO / RobotWin 是单 ep
+  二值分（成或败，`mean_success` = 成功 ep 数 / 总 ep 数）；CALVIN 是一个 ep = 5 连子任务，
+  主指标是平均链长 `completed_subtasks`（0~5，如论文 Table II 的 4.02/4.30），另有 `success`
+ （5/5 全对才算）。看分先确认是哪个指标，不要把链长当成功率读。
+  步数上限各榜也不同（LIBERO 按 suite 220~520，CALVIN 360×5，RobotWin 按 task 到 1700）。
 - 和官称差多少算正常：±5pp 以内算对上（噪声+种子集差异）；
   差 10pp 以上先查口径（08 第 1 条），不要先怀疑模型。
 - `error` ≠ `fail`：`fail` 是模型没做出来；`error` 是 infra/坏种子抛异常，

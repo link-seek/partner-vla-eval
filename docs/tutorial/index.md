@@ -21,7 +21,7 @@ configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
 
 * **考场**：一个 benchmark（环境+任务集+判分规则）。先行三件套：LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（双臂）。
 * **smoke**：1 task×1ep，只验链路。**全量**：1 task×50ep（`test_num` 官方口径），计分。
-* **`mean_success`** = 成功 ep 数 / 总 ep 数。二值分，无 0.5。跨榜只并列，不加权总分。
+* **分数各榜自己定**：harness 不发明分数，只透传各榜原生规则再平均。LIBERO / RobotWin 是单 ep 二值分（成或败）；CALVIN 是一个 ep = 5 连子任务，同时报 `success`（5/5 全对才算）+ `completed_subtasks`（0~5，部分分）。看分先确认是哪个指标。跨榜只并列展示，不加权总分。
 
 ## 覆盖矩阵（一张表）
 
@@ -34,7 +34,7 @@ configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
 
 ## 文档地图（四分法）
 
-* **Tutorial（学）**：`quickstart` + `partner/` —— 跟着跑，保證绿。
+* **Tutorial（学）**：`quickstart` + `partner/` —— 跟着跑，保证绿。
 * **How-to（做）**：`operator/` —— 开机、打镜像、修 runner，按需查。
 * **Reference（查）**：`reference/` —— 口径映射表、镜像 tag、15 条排障表。主线不展开，只给链接。
 * **Explanation（懂）**：`explanation/` —— 栈差异 A-D、精度断崖、种子效应。有结论才进榜，主线一句话带过。
