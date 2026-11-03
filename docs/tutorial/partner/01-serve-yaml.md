@@ -54,11 +54,14 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 | 本地目录无 commits | 精确版本靠交付时注明（文件夹哈希/时间/自述三选一），否则复现必翻车 |
 | 本地有按 task 分头的子目录 | probe 会逐个报出来，表单第 6 项照抄即可（分头情况机器一次看清） |
 
-> **原理**：probe 只证明三件事——仓库存在且可读（权限）、精确 commit 存在
+> **原理**：probe 不假设目录结构——config.json 有就读、没有就过；
+> 顶层 `*.safetensors` 逐个读头；含权重文件的子目录报为疑似分头。
+> 标准只到 safetensors 文件格式为止（8 字节头长 + JSON 头），目录布局每家都不同，
+> 所以 probe 的输出是"发现清单"不是"验收结论"，最终口径以 smoke 为准。
+> 走 Hub 时 probe 顺带证明三件事：仓库可读（权限）、精确 commit 存在
 > （拒绝"只写分支名"）、dtype/动作维有线索。`config.json` 的数字只能参考：
-> 上例 `chunk_size: 50` 是训练切分，我们 serve 用 10（serving 节拍是另一回事）；
-> SmolVLA 更出现过 config 写 6-D 实测 7-D——**最终口径以 smoke 实测为准**，
-> probe 只是把 smoke 前能排除的错先排掉。
+> 上例 `chunk_size: 50` 是训练切分，我们 serve 用 10；SmolVLA 更出现过
+> config 写 6-D 实测 7-D——probe 只是把 smoke 前能排除的错先排掉。
 
 ## 第二步：机器一半 + 人一半，拼出 6 项
 
