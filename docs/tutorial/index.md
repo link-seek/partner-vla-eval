@@ -6,7 +6,7 @@
 
 | 你是 | 目标 | 走法 | 时间 |
 |---|---|---|---|
-| 伙伴（来评测模型） | 交权重+配置，拿到分数 | `quickstart` → `partner/01-serve-yaml` → `02-smoke` → `03-full-and-report` | smoke 0.5~2h，全量 3~7h/task |
+| 伙伴（来评测模型） | 有训好的模型要交，拿分数 | `quickstart` → `partner/01-serve-yaml` → `02-smoke` → `03-full-and-report` | smoke 0.5~2h，全量 3~7h/task |
 | 运维（开卡保链路） | 让 V100 离线跑起来 | `quickstart` → `operator/01-machines-ci` → `02-images` | 按需查，不必通读 |
 | 复现者（对照分数） | 看懂一张分数怎么来的 | `quickstart` → `explanation/` → `reference/` | 30min |
 
