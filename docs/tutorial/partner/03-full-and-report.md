@@ -94,7 +94,7 @@ per-suite 微调与通用单 checkpoint 不可比）。
 
 判分记账：harness 不发明分数，各榜原生规则 + 透传汇总；error 分三类
 （模型失败判 0 / 坏种子 `UnStableError` 单列 / infra 异常重跑）；aggregate JSON +
-SQLite + mp4（开了录像才有）进 workflow Artifacts（`results/`）与 OBS
+SQLite + mp4（开了录像才有）进 OBS
 （`<obs_prefix>/<榜>-<smoke|full>/`，flat 打平无子目录），Discussion 记结论。
 OBS 地址可填：dispatch 参数 `obs_prefix`，默认 `obs://so101-sim-pipeline/eval`。
 开跑前先校验：格式须是 `obs://<bucket>/<path>`，并向目标写探针文件验证可写，

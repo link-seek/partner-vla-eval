@@ -62,8 +62,7 @@ flowchart LR
 
 主路去 OBS：`<obs_prefix>/robotwin-smoke/`（默认
 `obs://so101-sim-pipeline/eval/robotwin-smoke/`，flat 打平无子目录；
-dispatch 自填了前缀就去自填的地址）。workflow Artifacts（`robotwin-smoke`，
-即 `results/`）是兜底——保留期短，先下先得。
+dispatch 自填了前缀就去自填的地址）。
 
 - [ ] `robotwin-smoke.log`：尾部 1/1（只验链路，不计分）。
 - [ ] `cogact-serve.log`：serve 端完整日志。
