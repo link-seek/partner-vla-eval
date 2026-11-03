@@ -36,7 +36,9 @@
 ```
 
 跑分必报的披露清单（缺一个别比）：GPU / dtype / benchmark 镜像 tag（含 slim/补丁说明）
-/ serve 镜像 / 种子（bundled 还是盲）/ 分片 / 资产挂载。
+/ serve 镜像 / 种子（bundled 还是盲）/ 分片 / 资产挂载 /
+checkpoint 与训练说明（权重精确 commit + 按 task 分头情况 + 微调口径：LIBERO 按 suite 出分，
+per-suite 微调与通用单 checkpoint 不可比）。
 
 > **原理·为什么披露清单就是这 7 项**：每一项都对应一张"旋钮×影响"对照表
 > （`docs/proposal-stack-effects.md`，V100 实测 10-14~16）：A 镜像版本（差 6pp，
@@ -47,7 +49,9 @@
 
 ## 原理：排名规则（四条）
 
-1. **同协议才可比**：镜像 tag、`test_num`/种子集、harness 版本全 locked。我们的链路天然保证（配置钉版）。
+1. **同协议才可比**：镜像 tag、`test_num`/种子集、harness 版本全 locked，
+ 再加 checkpoint 与训练口径（同权重 commit、同微调口径）。我们的链路只保证前一半
+ （配置钉版）；后一半靠 `01` 表单锁，单子都不同不能比。
 2. **分榜排名，不合总分**：每个 task 一个榜；跨 task 看画像（并列），不造加权总分
  （权重一拍脑袋就失去公信）。CALVIN 主指标是平均链长（0~5，对齐上游论文 Table II），
   LIBERO/RobotWin 是成功率 %——指标不同，更不能加权。
