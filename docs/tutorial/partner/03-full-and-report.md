@@ -23,8 +23,11 @@
 ```json
 {
   "model": "<模型名+权重地址>",
-  "task": "<考场-任务>",
-  "mean_success": 0.0,
+  "task": "<考场-任务-条件>",   // 条件必写：easy（demo_clean）/ hard（demo_randomized）
+  "mean_success": 0.0,          // Easy 成功率（现有）
+  "hard_success": null,         // Hard 成功率（待补：需 Hard run yaml，见下）
+  "gap": null,                  // robustness 落差 = easy − hard（官方主指标）
+  "steps_success": {"med": null, "mean": null},  // 成功集步数（效率；现有放 note，待转正）
   "n": 50,
   "errors": 0,
   "versions": {"harness": "v0.8.0", "benchmark_image": "<镜像:tag>"},
@@ -34,6 +37,19 @@
   "artifacts": "<OBS/artifact 链接>"
 }
 ```
+
+## 原理：分数不止成功率（官方 §4.5 四列表）
+
+| 列 | 含义 | 现状 |
+|---|---|---|
+| Easy 成功率 | clean 条件成功率（基线） | ✅ 有（四轮对照表） |
+| Hard 成功率 | domain-randomized（clutter/光照/背景/高度/语言）成功率 | ❌ 待补：需加 `demo_randomized` 的 Hard run yaml，无代码改动 |
+| 落差 Easy−Hard | robustness 主指标（官方 Table 5 就这么摆：Pi0 grab_roller 96%→80%，DP 98%→0%） | ❌ 等 Hard |
+| 成功集步数 | 效率（成功 ep 的 med/mean 步数；harness 本就记录 avg steps） | 🔄 有但在 note 里（如 grab_roller med=75 mean=90），待转正为正式字段 |
+
+只报 Easy 会系统性高估：Hard 掉 0 的模型（DP 98%→0%）在单列榜上和 Pi0 看不出区别。
+排名：主排序用 Hard，Easy 作基线参考；同分看成功集步数（又对又快才算好）。
+条件（easy/hard）进 task 身份的一部分，不同条件不上同榜——这是"同协议才可比"的第 0 条。
 
 跑分必报的披露清单（缺一个别比）：GPU / dtype / benchmark 镜像 tag（含 slim/补丁说明）
 / serve 镜像 / 种子（bundled 还是盲）/ 分片 / 资产挂载 /
