@@ -21,11 +21,13 @@ python3 --version   # 3.8+ 即可
 ## 第一步：跑 probe，看清自己的模型
 
 ```bash
-python3 scripts/spec_probe.py <你的HF-ID>   # 权重在 Hub 上；私仓加 --token $HF_TOKEN
-python3 scripts/spec_probe.py <本地目录>    # 伙伴直接给模型文件时用（主情况）：
-                                            # 只读 config.json + safetensors 文件头，不加载权重体
-# 权重在 OBS 上：不用跑 probe，直接把地址贴进表单（我们内网拉取，见下）
+python3 scripts/spec_probe.py <本地目录>    # 主用法：只读 config.json + safetensors 文件头，不加载权重体。
+                                            # 权重先落盘（你给文件 / 我们从 OBS 拉），probe 只验盘上的东西。
+python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；私仓加 --token $HF_TOKEN
 ```
+
+权重在 OBS 上：不用跑 probe，直接把地址贴进表单——我们内网拉到 V100 落盘，
+落盘后跑的还是上面的本地分支（验货同一套）。
 
 期望输出（以 `lerobot/pi05_libero_finetuned` 为例，你的模型换上同格式）：
 
