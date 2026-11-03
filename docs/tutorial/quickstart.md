@@ -92,7 +92,11 @@ workflow 的 Artifacts（`robotwin-smoke`，即 `results/`）：
 * 伙伴交模型：去 `partner/01-serve-yaml.md` —— 交权重地址 + 一个 serve yaml
  （照 `partner-onboarding.md` 表单填，不知道的空着；按 task 分头的逐个列出）。
 * 运维保链路：去 `operator/01-machines-ci.md` —— 开关机、串行队列、runner 掉了怎么修。
-* 想先看分数长什么样：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）：
+* 想先看分数长什么样：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）。
+  官方范式（论文 §4.5）本来就是**单 task 微调后测 Easy/Hard**，报的是 few-shot
+  adaptation + robustness（Hard 落差），不是单一 checkpoint 的通用能力——我们的分头
+  评测与官方范式一致，差的是：100→50 rollouts、只有 Easy（demo_clean）缺 Hard、
+  头的训练数据未知。先对 Easy，再补 Hard。
 
 | task | 我们 | 官称 |
 |---|---|---|

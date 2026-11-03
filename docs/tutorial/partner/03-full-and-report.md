@@ -51,7 +51,9 @@ per-suite 微调与通用单 checkpoint 不可比）。
 
 1. **同协议才可比**：镜像 tag、`test_num`/种子集、harness 版本全 locked，
  再加 checkpoint 与训练口径（同权重 commit、同微调口径）。我们的链路只保证前一半
- （配置钉版）；后一半靠 `01` 表单锁，单子都不同不能比。
+ （配置钉版）；后一半靠 `01` 表单锁，单子都不同不能比。RobotWin 官方协议
+ （论文 §4.5）：单 task 微调（50 demos）→ Easy/Hard 各 100 rollouts；我们现状是
+ Easy（demo_clean）×50ep，Hard 条件与头的训练数据披露待补（见 `old/99-audit.md`）。
 2. **分榜排名，不合总分**：每个 task 一个榜；跨 task 看画像（并列），不造加权总分
  （权重一拍脑袋就失去公信）。CALVIN 主指标是平均链长（0~5，对齐上游论文 Table II），
   LIBERO/RobotWin 是成功率 %——指标不同，更不能加权。
