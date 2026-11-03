@@ -59,10 +59,12 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 > 上例 `chunk_size: 50` 是训练切分，我们 serve 用 10；SmolVLA 更出现过
 > config 写 6-D 实测 7-D——probe 只是把 smoke 前能排除的错先排掉。
 
-## 第二步：对号入座（拿着 probe 输出找你的行）
+## 第二步：对口径（你说你是啥，我们验的是啥）
 
-看 probe 的 card tags（`base_model:`/lerobot 等）+ config 架构键，认出你家模型的家族，
-找到对应行再往下读，别的一行都不用看：
+你知道自家模型是哪家的，直接找对应行；probe 的 card tags + 架构键是用来
+**验证说法**的——名字会骗人，实测不会（config 写 6-D 实测 7-D 的 SmolVLA、
+EE 当关节喂全 0 分的 X-VLA，都是说法和实测对不上的代价）。说法和实测对上了
+再往下读，别的一行都不用看：
 
 | 你的模型 | 往哪走 |
 |---|---|
