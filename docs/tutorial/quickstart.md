@@ -7,13 +7,14 @@
 
 ## 链路全景（30 秒看懂在干什么）
 
-| # | 容器 | 镜像 / 命令 | 存活期 |
-|---|---|---|---|
-| 1 | `cogact-serve`（GPU） | `vla-serve-cogact:0.8.0`，`vla-eval serve` | 常驻到跑完（[4b/5] 起，[5b/5] 收日志后删） |
-| 2 | client（无名） | `vla-eval-robotwin:0.8.0-ee-slim`，`vla-eval run` | 跑完即焚（`--rm`），挂 `docker.sock` |
-| 3 | env（harness 拉起） | SAPIEN 环境，跑 grab_roller | 随 episode 起停，`docker ps` 可见 |
-
-关系：1 ←WebSocket/msgpack（`ws://localhost:8000`）→ 2；2 经 `docker.sock` 拉起 3。
+```mermaid
+flowchart LR
+    S["cogact-serve 容器 · GPU<br/>vla-serve-cogact:0.8.0<br/>vla-eval serve"]
+    C["client 容器 · 跑完即焚（--rm）<br/>vla-eval-robotwin:0.8.0-ee-slim<br/>vla-eval run"]
+    E["env 容器 · SAPIEN<br/>跑 grab_roller 环境"]
+    S <-->|"WebSocket/msgpack<br/>ws://localhost:8000"| C
+    C -->|"docker.sock 拉起"| E
+```
 
 > **原理**：数容器是 3 个，不是 2 个。serve 和 client 各是一个容器（都是 SWR
 > 烘焙镜像，host 网络）；client 挂了 `/var/run/docker.sock`，harness 在里面再拉起
