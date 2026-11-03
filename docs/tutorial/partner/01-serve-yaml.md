@@ -24,6 +24,7 @@ python3 --version   # 3.8+ 即可
 python3 scripts/spec_probe.py <你的HF-ID>   # 权重在 Hub 上；私仓加 --token $HF_TOKEN
 python3 scripts/spec_probe.py <本地目录>    # 伙伴直接给模型文件时用（主情况）：
                                             # 只读 config.json + safetensors 文件头，不加载权重体
+# 权重在 OBS 上：不用跑 probe，直接把地址贴进表单（我们内网拉取，见下）
 ```
 
 期望输出（以 `lerobot/pi05_libero_finetuned` 为例，你的模型换上同格式）：
@@ -68,7 +69,7 @@ probe 输出直接填一半表单，另一半必须人答：
 | 3 | 状态字段 | 给不出 | 关节角 / 末端位姿 / 不需要 |
 | 4 | chunk size | config 参考值 | 和 benchmark 节拍对齐（RobotWin 16，CALVIN 7，LIBERO 10） |
 | 5 | dtype | index.json 线索 | X-VLA 一律 fp32，DB-CogACT 走 fp16（见下） |
-| 6 | 权重确切产物 | commits 列表选一个 + HEAD | 按 task 分头的逐个列出 |
+| 6 | 权重确切产物 | Hub：commits 列表选一个 + HEAD；文件：目录 + 版本注明（哈希/时间/自述）；OBS：地址（bucket/path，权限/有效期要够我们拉取） | 按 task 分头的逐个列出 |
 
 > **原理·第 5 项**：fp16 不是 fp32 廉价版。X-VLA fp16 首推理即崩
 > （`float vs Half bias`，六轮 29/30 vs 0/30，实验 B；官方训练用 bf16）；
