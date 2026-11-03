@@ -96,12 +96,12 @@ dispatch 自填了前缀就去自填的地址）。
 > `HF_HUB_DISABLE_XET=1`（脚本里已有）。修不好的完整 15 条表在
 > `old/08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
 
-## 下一步
+## 下一步（三选一）
 
-* **你是伙伴（来评测模型）**：直接去 `partner/01-serve-yaml.md`，按 01→02→03
- 顺序读完——交配置 → smoke → 全量拿分，不断线。
-* 你是运维（开卡保链路）：去 `operator/01-machines-ci.md`（待写，先看 `old/04-machines-network.md`）。
-* 只想先看分数长什么样：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）。
+* 来评测模型：去 `partner/01-serve-yaml.md`，按 01→02→03 顺序读完
+ （交配置 → smoke → 全量拿分）。
+* 开卡保链路：去 `operator/01-machines-ci.md`（待写，先看 `old/04-machines-network.md`）。
+* 只看分数：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）。
   官方范式（论文 §4.5）本来就是**单 task 微调后测 Easy/Hard**，报的是 few-shot
   adaptation + robustness（Hard 落差），不是单一 checkpoint 的通用能力——我们的分头
   评测与官方范式一致，差的是：100→50 rollouts、只有 Easy（demo_clean）缺 Hard、
