@@ -84,7 +84,10 @@ probe 输出直接填一半表单，另一半必须人答：
 
 ## 第三步：对模板改出 serve yaml
 
-复制最像的一例，只改 6 项对应的字段，别的不动：
+模板是上游 harness 的同名配置（`script` 指向的 `src/vla_eval/model_servers/...`
+就是上游实现），我们只做钉版适配（镜像、mirror、本地路径）。复制最像的一例，
+只改 6 项对应的字段，别的不动——上游发版我们跟进（`docker/versions.yaml` 钉住
+harness 版本），你的 yaml 跟着模板走就行：
 
 ```yaml
 # DB-CogACT（关节口径，双臂+CALVIN）
