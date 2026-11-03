@@ -134,6 +134,10 @@ args:
 > 所以 CI 先 snapshot 再 `sed` 生成本地路径版——你写三段式一样能发帖，
 > CI 会处理；但 smoke 跑哪个 task 就要用哪个 task 的头（model_path 对上），
 > 这是模板里 `<task>` 占位符的含义。
+> 有 GPU 的伙伴可本地先验：`vla-eval test -c <你的serve.yaml>`（上游自带冒烟，
+> 需 uv + 权重 + GPU；无 GPU 直接发帖，smoke 代验）。
+> 上游没有"怎么写兼容文件"的用户教程（只有开发者向的 CONTRIBUTING + 各模型
+> README 参数表）——本篇就是补这一块的，模板与口径表以本篇为准。
 
 ## 第五步：发帖（交作业）
 
