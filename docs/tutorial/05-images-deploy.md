@@ -1,7 +1,9 @@
 # 05 镜像与部署集成
 
-> 版本：v1.1（2026-10-27）。SWR：`swr.cn-north-4.myhuaweicloud.com/link-seek`，
+> 版本：v1.2（2026-11-03，GHCR 公开收官；v1.1 见 2026-10-27）。SWR：`swr.cn-north-4.myhuaweicloud.com/link-seek`，
 > tag 钉版不对 `latest`（与 HARNESS_REF 对齐）；版本唯一真源 `docker/versions.yaml`。
+> 对外可拉：`ghcr.io/link-seek/<名>:<tag>`（SWR→GHCR mirror 全量 success，11 包 public 已验；
+> 论文贴 digest 不贴 tag，digest 锁定见 `docs/reproducibility.md` 待补 sha256）。
 
 ## 镜像清单（4→1 收官，10-27）
 

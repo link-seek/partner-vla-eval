@@ -1,6 +1,16 @@
 # 06 模型接入
 
-> 版本：v1.1。伙伴交两样：权重地址 + 一个 serve yaml。执行统一镜像 `0.8.0-ee-slim`（直连上游主线 EE，已合 #168）；V100 job 零 checkout（payload 镜像 SWR 拉）。
+> 版本：v1.2（2026-11-03，dtype 红线 + B/B2 收官）。伙伴交两样：权重地址 + 一个 serve yaml。执行统一镜像 `0.8.0-ee-slim`（直连上游主线 EE，已合 #168）；V100 job 零 checkout（payload 镜像 SWR 拉）。
+
+## dtype 红线（V100，B/B2 已证伪，必读）
+
+| 模型 | 用什么 | 为什么 |
+|---|---|---|
+| X-VLA | 一律 fp32 | fp16 首推理即崩 `float vs Half bias`，LIBERO 三榜六轮 29/30 vs 0/30 一致；官方训练 `accelerate --mixed_precision bf16`，fp16 属数值越界；bf16 复刻待 H100 |
+| DB-CogACT | fp16 | fp32 首个 forward 即 OOM（31GB，V100 单卡不可行）；全链 fp16 是 V100 限定接受项，见 99 |
+| 通用 | 跑分先报 dtype | fp16 不是 fp32 廉价版（指数位少 3 位）；0 分先查本表 + 08 第 4 条，不要先怀疑模型 |
+
+表单里 dtype 一栏：X-VLA 填 fp16 直接打回（除非指明 H100 复刻）。
 
 ## serve yaml 模板（三例同段式：定位/口径/权重/备注）
 

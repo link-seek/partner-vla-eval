@@ -1,6 +1,8 @@
 # 07 开跑与判分
 
-> 版本：v1.0（2026-10-14）
+> 版本：v1.2（2026-11-03，栈差异对照 A-D 收官；v1.0 见 2026-10-14）。
+> 口径源：`docs/proposal-stack-effects.md` 对照表（V100 实测，10-14~16）+
+> `docs/blog-precision-cliff.md`（B 精度断崖）+ `docs/reports/`。
 
 ## smoke（必经）
 
@@ -10,9 +12,27 @@
 ## 全量（分块战役）
 
 - RobotWin：1 task×50ep/轮（CogACT 一头一 task），`test_num` 官方口径。
-- 分片：2 分片（4 分片以上抢单卡会 hang，见 08），serve 独占卡0、分片放卡1。
-- 超时：自托管上限 5 天，chunk 设 1440（别信 6 小时，那是公有 runner 的）。
-- 耗时参考：单 ep 2~10 分钟，一轮 3~7 小时。
+- 分片：默认 8（workflow 默认；EE 默认 4，见脚本注释——fast_init=false 全量 planner + SAPIEN 抢显存，8 分片 OOM）。
+  实测：2 稳、4 慢、8 在单卡多 SAPIEN 上下文会 hang（C，watchdog 全杀）。生产切法：serve 独占卡0、分片放卡1。
+- 超时：chunk 设 10080（7 天；easy50 完整对照约 2~3 天。旧 1440/24h 帽已退役，见 10-31 commit）。
+- 耗时参考：单 ep 2~10 分钟，一轮（1 task×50ep，2 分片）3~7 小时；easy50 按 task 数线性累加、串行。
+
+## 栈差异对照表（有结论才进榜，E 待定不进）
+
+| # | 变量 | 水平 | 结果 | 结论 |
+|---|---|---|---|---|
+| A | benchmark 镜像 | 0.7.0 vs 0.8.0（同种子 grab_roller×50） | 43/50=86% vs 46/50=92% | 差 6pp，2σ 内，不搬分 |
+| A2 | 资产内置 vs 外置挂载 | 同种子×50 | 46/50 vs 45/50 | 差 1ep，等价（Phase 2 关闭） |
+| A3 | 烘焙 vs 原生 | stock vs slim×20 | 18/20 vs 18/20 | 差 0，自证清白 |
+| B | 模型精度 | X-VLA fp32 vs fp16（LIBERO spatial/object/goal×10 同种子，6 轮） | 29/30 vs 0/30 | fp16 首推理即崩（`float vs Half bias`），跨 task 一致；详见 08 |
+| B2 | 精度 | CogACT fp32 vs fp16（V100） | fp32 首个 forward 即 OOM（31GB） | 单侧不可行本身即证据 |
+| C | 分片 | 2 / 4 / 8 | 2 稳、4 慢、8 hang | 只动速度/稳定性，不动分 |
+| D | 种子 | 盲种子 vs 校验种子 | 35/35 有效+15 坏种 vs 零 error；同集重跑 41 vs 46 | 种子集动 error 率；同集轮间差 ≈1.7σ（噪声） |
+
+E（V100 fp16 vs 官方 H100 bf16，place_empty_cup 16~20% vs 28%）待定档：只写进披露，不硬判，见 99。
+披露清单（跑分必报，缺一个别比）：GPU / dtype / benchmark 镜像 tag（含 slim/补丁说明）/ serve 镜像 /
+种子（bundled 还是盲）/ 分片 / 资产挂载。方法论副产品：阴性对照（/tmp 盖资产秒崩）验证挂载生效；
+挂载=改镜像，版本化+差值单列。
 
 ## 最终报告模板（缺一项不算完整报告）
 
@@ -51,7 +71,8 @@
 - 和官称差多少算正常：±5pp 以内算对上（噪声+种子集差异）；
   差 10pp 以上先查口径（08 第 1 条），不要先怀疑模型。
 - `error` ≠ `fail`：`fail` 是模型没做出来；`error` 是 infra/坏种子抛异常，
-  不怪模型，单列。看分先看 errors，再看 mean。
+  不怪模型，单列。看分先看 errors，再看 mean。B 的反直觉点：0/30 全是 ERROR 不是 FAIL，
+  vla-eval exit code 照样 0，看分不看日志会误判（见 `docs/blog-precision-cliff.md`）。
 - 跨榜不比大小：LIBERO 99% 和 RobotWin 16% 没有可比性，各榜难度和判分标尺不同，
   只并列展示（我们在总表里就是这么列的）。
 

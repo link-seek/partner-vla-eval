@@ -1,6 +1,6 @@
 # 09 社区协作：从发现问题到合入上游
 
-> 版本：v2.1（2026-10-22，#168/#169 全闭环 + JEV 判例；v1.0 只写到“已提 issue”）
+> 版本：v2.2（2026-11-03，投稿改道 RA-L + 精度断崖并入主文；v2.1 见 2026-10-22，#168/#169 全闭环 + JEV 判例；v1.0 只写到“已提 issue”）
 
 ## 标准四步（本仓实测跑通三轮，附证据包清单）
 
@@ -43,3 +43,9 @@ issue 模板（照抄可用）：背景（一句话）→ 复现（镜像 tag + 
 - #169（问题→钥匙→验证→关，附 run）
 - Phase 2 分拆验证数据（资产外置 45/50 vs 46/50）已同步上游讨论。
 - JEV 盲判 20 集全对（AUC=1.0，有物体位姿；无位姿 0.16 反向）——方法见 #5。
+
+## 投稿与归档（有结论才写）
+
+- 改道：NeurIPS RL-WS 9-02 已关且双盲与公开仓冲突（10-17 更正），改投全年开放 IEEE RA-L + arXiv 同步；投稿计划见 `docs/submission-plan.md`。
+- 精度断崖短文取消独立投稿，并入可复现评测系统主文（见 `docs/blog-precision-cliff.md` 尾注）；本教程 07/08 即归档正文，与 proposal（`docs/proposal-stack-effects.md`）互引。
+- 对外可复现：GHCR 11 包 public 已验（`mirror-swr-ghcr.yml` 全量 success）；论文贴 digest（`docs/reproducibility.md` 待补 sha256），第三方权重全公开 Hub 仓、无 gated。
