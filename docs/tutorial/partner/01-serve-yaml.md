@@ -1,10 +1,9 @@
-# 伙伴 01：跑 probe，配准 serve 口径
+# 伙伴 01：认模型，对号入座，配准交付
 
-> 目标：把你训好的模型配准成可上榜形态（不教训模型，只教交模型），
-> 拿着 probe 输出写出一份一次过审的 serve yaml。
+> 目标：把你训好的模型配准成可上榜形态（不教训模型，只教交模型）。
 > 时间：30 分钟 ｜ 前置：读完 `quickstart` ｜ 准备：一台能上网的电脑，python3 即可
 > （无第三方依赖，不下权重，不用 GPU）。
-> 你将得到：probe 输出 + 6 项配准 + serve yaml + 对接帖。
+> 你将得到：probe 输出 + 型号归位 + 6 项配准 + serve yaml + 对接帖。
 > 读法：跟着跑，每段命令下面都贴了期望输出，对不上先停。
 
 ## 准备
@@ -15,10 +14,7 @@ cd partner-vla-eval
 python3 --version   # 3.8+ 即可
 ```
 
-> **原理**：后面跑的是 `scripts/spec_probe.py`，纯标准库，只读 HF 元数据。
-> 它不回答全部问题——它把"机器能读到的"和"必须人答的"分开，6 项配准就是这么来的。
-
-## 第一步：跑 probe，看清自己的模型
+## 第一步：跑 probe（认模型的尺子）
 
 ```bash
 python3 scripts/spec_probe.py <本地目录>    # 主用法：只读 config.json + safetensors 文件头，不加载权重体。
@@ -63,7 +59,25 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 > 上例 `chunk_size: 50` 是训练切分，我们 serve 用 10；SmolVLA 更出现过
 > config 写 6-D 实测 7-D——probe 只是把 smoke 前能排除的错先排掉。
 
-## 第二步：机器一半 + 人一半，拼出 6 项
+## 第二步：对号入座（拿着 probe 输出找你的行）
+
+看 probe 的 card tags（`base_model:`/lerobot 等）+ config 架构键，认出你家模型的家族，
+找到对应行再往下读，别的一行都不用看：
+
+| 你的模型 | 往哪走 |
+|---|---|
+| LeRobot 系 ckpt（π0.5 / GR00T N1.7 / SmolVLA / MolmoAct2…，tags 带 lerobot） | LeRobot 桥模板（下例 π0.5），`checkpoint` 换你的 |
+| DB-CogACT / CogACT | cogact 模板（下例），`model_path` 按 task 分头 |
+| X-VLA 官方 ckpt | X-VLA 模板（EE 口径，下例），`domain_id` 按官方 recipe |
+| 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明，口径照第三步核 |
+| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 `add-model-server` skill 加 server（约 50 行，我们 #168 有先例）→ ③直接发帖，表单空着，我们帮你看 |
+
+> **原理**：模板是上游 harness 的同名配置（`script` 指向的
+> `src/vla_eval/model_servers/...` 就是上游实现），我们只做钉版适配
+> （镜像、mirror、本地路径）。上游 20+ 模型 server 分两档：✓ 已复现 / ◇ 已接入待复现，
+> 小众模型没有是常态——所以退路①的桥覆盖面最广，③永远兜底。
+
+## 第三步：机器一半 + 人一半，拼出 6 项
 
 probe 输出直接填一半表单，另一半必须人答：
 
@@ -82,12 +96,9 @@ probe 输出直接填一半表单，另一半必须人答：
 > **原理·第 1 项**：EE 当关节喂，benchmark 硬截 `act[:14]` 当关节执行——
 > 400 步跑满，全 0 分，零异常。spec warning 是熔断器，见 quickstart 检查点。
 
-## 第三步：对模板改出 serve yaml
+## 第四步：对模板改出 serve yaml
 
-模板是上游 harness 的同名配置（`script` 指向的 `src/vla_eval/model_servers/...`
-就是上游实现），我们只做钉版适配（镜像、mirror、本地路径）。复制最像的一例，
-只改 6 项对应的字段，别的不动——上游发版我们跟进（`docker/versions.yaml` 钉住
-harness 版本），你的 yaml 跟着模板走就行：
+复制第二步定下来的那一例，只改 6 项对应的字段，别的不动：
 
 ```yaml
 # DB-CogACT（关节口径，双臂+CALVIN）
@@ -119,18 +130,14 @@ args:
 > 所以 CI 先 snapshot 再 `sed` 生成本地路径版——你写三段式一样能发帖，
 > CI 会处理；但 smoke 跑哪个 task 就要用哪个 task 的头（model_path 对上），
 > 这是模板里 `<task>` 占位符的含义。
-> 模板没覆盖你家模型时三条退路：① LeRobot 桥——任意 `PreTrainedPolicy` checkpoint
-> 用同一个 config 即插即用（π0.5/GR00T/SmolVLA/X-VLA 都是这么接的）；
-> ② 照上游 `add-model-server` skill 加一个 server（约 50 行 `predict()`，
-> 我们 #168 就是这么合入上游的）；③ 都不想写就先发帖，表单空着，我们帮你看。
 
-## 第四步：发帖（交作业）
+## 第五步：发帖（交作业）
 
 复制 `docs/partner-onboarding.md` 里的对接表单，把 probe 输出 + 6 项贴进去，
 不知道的空着。在本仓 Discussion 发帖，标题 `【评测对接】<模型名>`。
 1 天内给 spec 对齐报告，通过进 smoke。
 
-## 检查点：会被打回的 Top 3（= 第二步第 6 项没做）
+## 检查点：会被打回的 Top 3（= 第三步第 6 项没做）
 
 1. 只给了模型名没给确切 commit（probe 第一步就是干这个的）。2. 权重要授权的没开权限。
 3. 按 task 分头的只给了部分头。
