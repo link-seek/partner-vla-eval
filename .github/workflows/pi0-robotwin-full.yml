@@ -187,12 +187,6 @@ jobs:
           bash scripts/ci_robotwin_full.sh 2>&1 | tee results/ci.log; CODE=${PIPESTATUS[0]}
           echo "chunk_exit=$CODE"
           exit $CODE
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: robotwin-chunk
-          path: results/
       - name: Upload to OBS
         if: always()
         env:
