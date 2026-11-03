@@ -65,6 +65,9 @@ workflow 的 Artifacts（`robotwin-smoke`，即 `results/`）：
 - [ ] `results/robotwin-smoke.log`：尾部 1/1（只验链路，不计分）。
 - [ ] `results/cogact-serve.log`：serve 端完整日志。
 - [ ] 录像 mp4：出 0 分时亲眼看，不要只看数字。
+- [ ] OBS 归档：dispatch 参数 `obs_prefix` 可填自己的地址（默认
+ `obs://so101-sim-pipeline/eval`），结果进 `<前缀>/robotwin-smoke/`；
+ 开跑前已校验，填错不烧卡。详见 `partner/03-full-and-report.md`。
 
 > **原理·smoke 的定义**：`test_num=1` + `skip_expert_check=true`。专家校验是开跑前
 > 用官方 planner 逐种子验证"这局求解器能解"，50ep 全量必须开（排坏种）；smoke
