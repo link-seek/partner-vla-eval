@@ -95,7 +95,8 @@ per-suite 微调与通用单 checkpoint 不可比）。
 判分记账：harness 不发明分数，各榜原生规则 + 透传汇总；error 分三类
 （模型失败判 0 / 坏种子 `UnStableError` 单列 / infra 异常重跑）；aggregate JSON +
 SQLite + mp4（开了录像才有）进 workflow Artifacts（`results/`）与 OBS
-（`obs://so101-sim-pipeline/eval/<榜>-<smoke|full>/`，flat 打平无子目录），
-Discussion 记结论。OBS 路径写死在 workflow 里，dispatch 改不了：
-RobotWin smoke 强制录像（`RW_VIDEO=1`）；全量默认不录像，dispatch 时 `video=1` 打开；
-要换地址走 PR 改 workflow 那一行，或从 Artifacts 自取。
+（`<obs_prefix>/<榜>-<smoke|full>/`，flat 打平无子目录），Discussion 记结论。
+OBS 地址可填：dispatch 参数 `obs_prefix`，默认 `obs://so101-sim-pipeline/eval`。
+开跑前先校验：格式须是 `obs://<bucket>/<path>`，并向目标写探针文件验证可写，
+失败直接退出、不烧卡（GPU 步骤之前的第一步）。
+RobotWin smoke 强制录像（`RW_VIDEO=1`）；全量默认不录像，dispatch 时 `video=1` 打开。

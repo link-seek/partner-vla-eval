@@ -5,6 +5,11 @@ name: RobotWin Smoke (DB-CogACT)
 
 on:
   workflow_dispatch:
+    inputs:
+      obs_prefix:
+        description: "OBS 归档前缀，结果进 <前缀>/robotwin-smoke/（默认 obs://so101-sim-pipeline/eval；填错则开跑前拦截）"
+        required: false
+        default: "obs://so101-sim-pipeline/eval"
 
 # 与 molmo smoke 共用 V100，串行
 concurrency:
@@ -18,7 +23,6 @@ permissions:
 env:
   ECS_SERVER_ID: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
   ECS_REGION: cn-north-4
-  OBS_BUCKET: so101-sim-pipeline
 
 jobs:
   start-ecs:
@@ -51,6 +55,25 @@ jobs:
     runs-on: [self-hosted, Linux, X64, V100-pi0]
     timeout-minutes: 300
     steps:
+      - name: Validate OBS dest (fail fast, no GPU burn)
+        env:
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+          OBS_PREFIX: ${{ inputs.obs_prefix }}
+          OBS_SUBDIR: robotwin-smoke
+          OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
+        run: |
+          set -e
+          case "${OBS_PREFIX:?}" in obs://*/*) ;; *) echo "obs_prefix 非法（形如 obs://<bucket>/<path>）：$OBS_PREFIX" >&2; exit 1;; esac
+          DEST="${OBS_PREFIX%/}/${OBS_SUBDIR}/"
+          echo "OBS_DEST=$DEST" >> "$GITHUB_ENV"
+          echo "validating OBS dest: $DEST"
+          echo vla-eval-write-probe > /tmp/obs-probe
+          PROBE="${DEST}.vla-eval-write-probe"
+          obsutil cp /tmp/obs-probe "$PROBE" -f -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" \
+            || { echo "OBS 不可写，停止（不烧卡）：$DEST" >&2; exit 1; }
+          obsutil rm "$PROBE" -f -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" || true
+          echo "obs-ok: $DEST"
       - name: Fetch payload (SWR, no github)
         env:
           OBS_AK: ${{ secrets.OBS_AK }}
@@ -88,8 +111,12 @@ jobs:
           path: results/
       - name: Upload to OBS
         if: always()
+        env:
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+          OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
         run: |
-          obsutil cp results/ obs://${{ env.OBS_BUCKET }}/eval/robotwin-smoke/ -f -r -flat || true
+          obsutil cp results/ "${OBS_DEST:?}" -f -r -flat -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" || true
 
   stop-ecs:
     needs: smoke
