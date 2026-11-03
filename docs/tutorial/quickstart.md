@@ -16,16 +16,14 @@ flowchart LR
     C -->|"docker.sock 拉起"| E
 ```
 
-> **原理**：数容器是 3 个，不是 2 个。serve 和 client 各是一个容器（都是 SWR
-> 烘焙镜像，host 网络）；client 挂了 `/var/run/docker.sock`，harness 在里面再拉起
-> 真正跑 SAPIEN 环境的 env 容器——`docker ps` 可验证。上游本地开发时 serve 可以
-> 直接跑在宿主（`uv run`，见上游 README 两终端跑法），图上旧字样"宿主"是这个来历；
-> V100 离线跑不动宿主依赖，所以 serve 也进容器（依赖全烘 + `UV_OFFLINE=1`）。
-
 > **原理**：模型和考场互相不知对方存在（上游论文 §II-A，arXiv:2603.13966）。
 > 模型只实现 `predict(观测)→动作`，考场只实现 `reset/step/判分`，中间是标准协议。
 > 这样 N 个模型 × M 个考场只需接 N+M 次，不用每家重写评测；各考场依赖
 > （Python 版本、仿真器）装不到一起，所以每个考场进自己的 Docker 镜像。
+> 落到 V100 上数容器是 3 个：serve 和 client 各一个（SWR 烘焙镜像，host 网络），
+> client 挂 `/var/run/docker.sock` 再拉起真正跑 SAPIEN 的 env 容器——`docker ps`
+> 可验证。上游本地开发时 serve 可直接跑宿主（`uv run`），V100 离线跑不动宿主依赖，
+> 所以 serve 也进容器（依赖全烘 + `UV_OFFLINE=1`）。
 
 ## 步骤一：在 GitHub 点 dispatch（10 分钟操作就这一件）
 
