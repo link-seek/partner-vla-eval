@@ -87,11 +87,15 @@ per-suite 微调与通用单 checkpoint 不可比）。
 ## 原理：分数怎么读
 
 * `mean_success`（LIBERO/RobotWin）= 成功 ep 数 / 总 ep 数，二值平均。
-* 和官称差 ±5pp 以内算对上（噪声+种子集差异）；差 10pp 以上先查口径（08 第 1 条）。
+* 和官称差 ±5pp 以内算对上（噪声+种子集差异）；差 10pp 以上先查口径（`old/08-troubleshooting.md` 第 1 条）。
 * `error` ≠ `fail`：`fail` 模型没做出来；`error` 是 infra/坏种子抛异常，单列。
  看分先看 errors，再看 mean。
 * 跨榜不比大小：LIBERO 99% 和 RobotWin 16% 没有可比性，各榜难度和判分标尺不同。
 
 判分记账：harness 不发明分数，各榜原生规则 + 透传汇总；error 分三类
 （模型失败判 0 / 坏种子 `UnStableError` 单列 / infra 异常重跑）；aggregate JSON +
-SQLite 进 artifact 与 OBS（`eval/<榜>-*/`），Discussion 记结论。
+SQLite + mp4（开了录像才有）进 workflow Artifacts（`results/`）与 OBS
+（`obs://so101-sim-pipeline/eval/<榜>-<smoke|full>/`，flat 打平无子目录），
+Discussion 记结论。OBS 路径写死在 workflow 里，dispatch 改不了：
+RobotWin smoke 强制录像（`RW_VIDEO=1`）；全量默认不录像，dispatch 时 `video=1` 打开；
+要换地址走 PR 改 workflow 那一行，或从 Artifacts 自取。
