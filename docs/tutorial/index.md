@@ -39,4 +39,4 @@ configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
 * **Reference（查）**：`reference/` —— 口径映射表、镜像 tag、15 条排障表。主线不展开，只给链接。
 * **Explanation（懂）**：`explanation/` —— 栈差异 A-D、精度断崖、种子效应。有结论才进榜，主线一句话带过。
 
-旧稿 `00~09/99` 原样保留，迁完再归档。版本历史与口径偏离见 `changelog.md`，正文不写版本号。
+旧稿归档在 `old/`（只读，迁移映射见 `old/README.md`）。版本历史与口径偏离见 `changelog.md`（待写），正文不写版本号。

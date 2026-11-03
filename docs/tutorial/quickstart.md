@@ -49,7 +49,7 @@ serve（DB-CogACT，双臂/GPU，宿主） ←WebSocket/msgpack→ benchmark（R
 > 不是拍脑袋。3 次重试是因为冷启动偶发 CUDA 初始化失败，重试比排错便宜。
 > **原理·本地路径**：`from_pretrained` 不认 `repo/subdir` 三段式（只认单仓或本地
 > 路径），所以 CI 先 snapshot 再 `sed` 生成 `serve-robotwin-local.yaml`。
-> 手写三段式路径 serve 必起不来（`HFValidationError`，见 08 第 2 条）。
+> 手写三段式路径 serve 必起不来（`HFValidationError`，见 `old/08-troubleshooting.md` 第 2 条）。
 
 ## 步骤三：收产物，对照打勾
 
@@ -77,7 +77,7 @@ workflow 的 Artifacts（`robotwin-smoke`，即 `results/`）：
 > **原理·spec 是熔断器**：episode 起点 harness 自动比对观测/动作口径
 > （维度、关节 vs 末端、相机名），错配直接打 warning。最典型的死法：EE 口径
 > 的动作当关节喂，benchmark 硬截 `act[:14]` 当关节执行——400 步跑满，全 0 分，
-> 零异常。看到 warning 先对 `06-model-onboarding.md` 口径映射表，不要烧卡硬跑。
+> 零异常。看到 warning 先对 `old/06-model-onboarding.md` 口径映射表，不要烧卡硬跑。
 > 唯一的例外是 advisory 级 warning（X-VLA 的 `ee_pose` 未声明但动作照通），
 > 真拦路的是 unknown kwarg 类错误。
 
@@ -85,7 +85,7 @@ workflow 的 Artifacts（`robotwin-smoke`，即 `results/`）：
 
 > 权重预热 `Xet 401`？权重走 Xet，mirror 直连要 token：预热传 token +
 > `HF_HUB_DISABLE_XET=1`（脚本里已有）。修不好的完整 15 条表在
-> `08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
+> `old/08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
 
 ## 下一步
 

@@ -12,7 +12,7 @@
 
 > **原理**：我们不碰你的训练代码，只跑分。你要交的就两样——权重地址 + 一个
 > serve yaml（`configs/serve-*.yaml`，见下）。表单的每一项都对应 serve 起不来
-> 或必 0 分的真实死法（见 08 排障表），填得越准，烧的卡越少。
+> 或必 0 分的真实死法（见 `old/08-troubleshooting.md`），填得越准，烧的卡越少。
 
 ## 操作：表单关键项怎么填（含三个模板）
 
@@ -28,7 +28,7 @@
 
 > **原理**：serve 吐什么维度、什么含义，benchmark 就按什么吃。EE 当关节喂，
 > benchmark 硬截 `act[:14]` 当关节执行——400 步跑满，全 0 分，零异常（X-VLA
-> 就是这么发现的，见 08 第 1 条）。`action_dim` / `image_keys` / `state_key` /
+> 就是这么发现的，见 `old/08-troubleshooting.md` 第 1 条）。`action_dim` / `image_keys` / `state_key` /
 > `chunk_size` 四项就是 06 的口径映射表，episode 起点的 `Spec mismatch`
 > warning 是熔断器，看到先停手对表。
 

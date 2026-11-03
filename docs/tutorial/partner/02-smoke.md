@@ -23,7 +23,7 @@ CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）
 > doesn't declare it` 只是 advisory——动作实测照通（X-VLA EE 已验证），400 步
 > 可照常；真拦路的是 unknown kwarg 类错误（旧镜像，已退役）和维度/相机/
 > chunk 错配。分级依据是上游合入的 #168 实测矩阵（6ep 全跑满 400 步零 ERROR），
-> 不是猜的。详见 09 社区协作。
+> 不是猜的。详见 `old/09-community.md`。
 > **原理·为什么 smoke 能省钱**：smoke 与全量是同一套配置，只有 `test_num`
 > 不同（1 vs 50）+ smoke 跳专家校验。smoke 绿 = 口径、权重、serve、落盘四个
 > 变量一次对齐；全量只是加集数，不引入新变量。反过来，跳过 smoke 直接全量，
@@ -37,7 +37,7 @@ CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）
 | 全 0 分但零异常 | 口径错（EE 当关节喂等） | 按 06 口径映射表改 serve yaml，重跑 smoke |
 | 0/30 全 ERROR 但 exit 0 | error 当数据（B 的教训） | 先看 errors 列，infra/坏种子问题单列重跑 |
 
-完整 15 条见 `08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
+完整 15 条见 `old/08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
 
 ## 下一步
 
