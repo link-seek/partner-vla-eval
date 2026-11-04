@@ -11,7 +11,7 @@ has_children: true
 ## 为什么要这么评（先看这段，再决定要不要往下读）
 
 伙伴自测的分数互相不可比，三处不同：**训练口径**不同（per-suite 微调 vs 通用
-单 checkpoint，RoboTwin 2.0 论文 §4.3 Table 3 里换训练口径相对差 30%（RDT 18.8%→24.8%，绝对 6pp））、**环境栈**不同（GPU/精度/镜像/种子，
+单 checkpoint，RoboTwin 2.0 论文 §4.3 [Table 3（Evaluating the Impact of RoboTwin 2.0 on Policy Robustness）](https://arxiv.org/abs/2506.18088)里，换训练口径相对差 30%（RDT 18.8%→24.8%，绝对 6pp））、**环境栈**不同（GPU/精度/镜像/种子，
 栈差异对照里一动 6~97pp（镜像差 6pp，精度差 97pp））、**判分标尺**不同（各榜成功率/链长各说各话）。
 横向评测就是把这三处全固定，只让模型变——这套教程的每一篇，都是在固定其中一处：
 quickstart 证明尺子可信，01~03 交出可比的数，Hard 与训练固定是评测阶段的事。
@@ -75,7 +75,7 @@ flowchart LR
  栈差异对照、披露清单。回答"这个配置下多少分"，**不回答"哪个基模强"**。
 * **评测（未开始）：可比、可解释的基模比较**——固定数据和训练方式（如官方 §4.5 范式：
  单 task 50 demos 微调 → Easy/Hard 各 100 rollouts），横向比较伙伴基模在同训练
- 口径下的成功率（官方 Table 3 范例：用不同微调方法评价基模优劣）。当前阶段只能跑出评分，做不到这一步。这需要训练侧立项（数据+ recipe +算力，
+ 口径下的成功率（[官方 Table 3](https://arxiv.org/abs/2506.18088)：同一模型×三种训练口径比成功率，即用不同微调方法评价基模优劣）。当前阶段只能跑出评分，做不到这一步。这需要训练侧立项（数据+ recipe +算力，
  见 [99-audit.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/99-audit.md) 第 5 条"另立项 finetune"），是新工程，不是本教程的范围。
 
 没有阶段一，可比的阶段二不存在（口径一动几十分点）；但只有阶段一时，

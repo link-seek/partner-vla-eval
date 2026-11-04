@@ -71,7 +71,7 @@ checkpoint 与训练说明（权重精确版本 + 按 task 分头情况 + 微调
 * **分数怎么读**：`mean_success`（RobotWin）= 成功 ep / 总 ep，二值平均；
  和官称 ±5pp 算对上，差 10pp 先查口径（[08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md) 第 1 条）；
  跨榜不比大小。
-* **训练口径是变量**：官方 Table 3 同一模型×三种训练口径并列比成功率——clean 微调
+* **训练口径是变量**：[官方 Table 3](https://arxiv.org/abs/2506.18088) 同一模型×三种训练口径并列比成功率——clean 微调
  几乎无提升，Rand 预训练 +30%。不同口径的分数只许并列，不许排名。
 * **披露清单的来历**：每一项对应一张"旋钮×影响"对照表（[proposal-stack-effects.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/proposal-stack-effects.md)）：
  镜像对照（差 6pp 不搬分）、精度对照（29/30 vs 0/30 搬命）、分片对照（只动速度）、
