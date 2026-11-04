@@ -38,7 +38,7 @@ CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）
 * **warning 分级**：`action [ee_pose]: benchmark expects it but server doesn't
  declare it` 只是 advisory——动作实测照通（X-VLA EE 已验证），400 步可照常；
  真拦路的是 unknown kwarg 类错误和维度/相机/chunk 错配。分级依据是上游合入的
- #168 实测矩阵（6ep 全跑满 400 步零 ERROR），不是猜的。详见 `old/09-community.md`。
+ [#168 实测矩阵](https://github.com/allenai/vla-evaluation-harness/pull/168)（6ep 全跑满 400 步零 ERROR），不是猜的。详见 `old/09-community.md`。
 * **smoke 为什么省钱**：smoke 与全量同一套配置，只差 `test_num`（1 vs 50）+
  smoke 跳专家校验。smoke 绿 = 口径、权重、serve、落盘四个变量一次对齐；
  全量只是加集数，不引入新变量。跳过 smoke 直接全量，口径错了就是 50ep 的卡钱
