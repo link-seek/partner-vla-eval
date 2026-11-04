@@ -9,3 +9,7 @@ heading_anchors: true
 markdown: kramdown
 kramdown:
   input: GFM
+
+# Mermaid 原生渲染（```mermaid 块）
+mermaid:
+  version: "10"
