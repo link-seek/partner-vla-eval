@@ -10,9 +10,6 @@ nav_order: 5
 > 时间：3~7 小时/task（V100 单卡，串行累加） ｜ 前置：`02` smoke 通过。
 > 你将得到：每个 task 的四列表分数 + 录像 + 官方口径对照说明。
 
-* 目录
-{:toc}
-
 ## 操作
 
 1. 排期（smoke 通过后自动进队列）：RobotWin 1 task×50ep/轮（CogACT 一头一 task），
