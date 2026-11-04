@@ -1,0 +1,9 @@
+# GitHub Pages（项目站，发布源：main 分支 /docs）
+title: partner-vla-eval 教程
+description: 伙伴模型横向评测教程（index → quickstart → anatomy → partner/operator）
+theme: minima
+baseurl: "/partner-vla-eval"
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
