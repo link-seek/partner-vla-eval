@@ -1,3 +1,9 @@
+---
+title: 伙伴 02：smoke
+parent: 评测教程
+nav_order: 4
+---
+
 # 伙伴 02：smoke（1 天内，通/不通）
 
 > 目标：拿到 spec 对齐报告，确认链路绿。

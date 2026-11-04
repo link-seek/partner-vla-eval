@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # 06 模型接入
 
 > 版本：v1.2（2026-11-03，dtype 红线 + B/B2 收官）。伙伴交两样：权重地址 + 一个 serve yaml。执行统一镜像 `0.8.0-ee-slim`（直连上游主线 EE，已合 #168）；V100 job 零 checkout（payload 镜像 SWR 拉）。

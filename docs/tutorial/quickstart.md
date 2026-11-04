@@ -1,3 +1,9 @@
+---
+title: Quickstart：跑通第一条双臂链路
+parent: 评测教程
+nav_order: 1
+---
+
 # Quickstart：跑通第一条双臂链路
 
 > 目标：跑通 RobotWin smoke（grab_roller×1ep），亲眼看到双臂链路是绿的。
@@ -92,17 +98,3 @@ smoke_exit=0
 
 差 10pp 以内判同档（n=50 噪声带约 ±6pp）；CALVIN 另看平均链长，跨榜不比大小。
 完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异对照在 `explanation/`。
-
-<!-- Mermaid 渲染：Pages 主题无钩子，有图的页面尾部直贴这段（GH 站内渲染，邮件版忽略） -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('pre code.language-mermaid').forEach(function (el) {
-    var div = document.createElement('div');
-    div.className = 'mermaid';
-    div.textContent = el.textContent;
-    el.parentElement.replaceWith(div);
-  });
-  mermaid.initialize({ startOnLoad: true });
-});
-</script>

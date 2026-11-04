@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # 02 技术架构
 
 > 版本：v1.1（2026-10-27）。上游：`allenai/vla-evaluation-harness`，`vla-eval v0.8.0`

@@ -1,3 +1,9 @@
+---
+title: 评测教程
+nav_order: 1
+has_children: true
+---
+
 # 评测教程：从哪里开始
 
 > 版本唯一真源：`docker/versions.yaml`（harness 全系 `0.8.0`）。本文只给路线，不钉版本号。

@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # 03 harness 本体
 
 > 版本：v1.1（2026-10-27）。serve/bench 全系 `v0.8.0`（10-23 对齐，HARNESS_REF 同值；

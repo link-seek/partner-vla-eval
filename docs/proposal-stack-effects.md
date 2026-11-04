@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # Proposal：VLA 榜单分数里多少是栈差异？
 
 ## 一句话

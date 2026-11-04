@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # 05 镜像与部署集成
 
 > 版本：v1.2（2026-11-03，GHCR 公开收官；v1.1 见 2026-10-27）。SWR：`swr.cn-north-4.myhuaweicloud.com/link-seek`，

@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # How Much of a VLA Leaderboard Score Is the Stack?
 
 ## Abstract

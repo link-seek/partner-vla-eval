@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # Archive
 
 - 精度短文（paper-arxiv.tex / paper-ral.tex / paper-stack-effects.md）：2026-10-17 决策关闭。原因：单模型特例撑不起论文（blog 见 ../blog-precision-cliff.md）。

@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # 投稿计划：arXiv 先行 + IEEE RA-L（全年可投）
 
 > 2026-10-17 更正：NeurIPS RL-WS 投稿 9-02 已关（11-06 是 camera-ready），且双盲与公开仓冲突。改投全年开放的 RA-L。

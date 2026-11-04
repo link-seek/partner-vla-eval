@@ -1,3 +1,7 @@
+---
+nav_exclude: true
+---
+
 # vla-harness + RobotWin 出分
 
 > 按顺序做完为止；卡住了转复盘：是任务难还是方法错，写出来再继续。

@@ -1,9 +1,11 @@
-# GitHub Pages（项目站，发布源：main 分支 /docs）
+# GitHub Pages（项目站，发布源：main 分支 /docs；主题 just-the-docs）
 title: partner-vla-eval 教程
 description: 伙伴模型横向评测教程（index → quickstart → anatomy → partner/operator）
-theme: minima
+remote_theme: just-the-docs/just-the-docs
 baseurl: "/partner-vla-eval"
+color_scheme: light
+search_enabled: true
+heading_anchors: true
 markdown: kramdown
 kramdown:
   input: GFM
-  syntax_highlighter: rouge
