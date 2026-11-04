@@ -12,6 +12,9 @@ nav_order: 3
 > （无第三方依赖，不下权重，不用 GPU）。
 > 你将得到：probe 输出 + 路线归位 + ★项配准 + serve yaml + 对接帖。
 
+* 目录
+{:toc}
+
 ## 开场：同一个 pi0，两条路（先看省在哪）
 
 | 环节 | 官方原生（Robotwin XPolicyLab/`policy/`） | harness（我们） | 省了什么 |

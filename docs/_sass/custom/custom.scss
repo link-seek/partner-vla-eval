@@ -9,3 +9,21 @@
 .main-content li {
   max-width: 75ch;
 }
+
+/* 右侧页内目录：kramdown {:toc} 生成 #markdown-toc，宽屏 fixed 右列 */
+@media (min-width: 1400px) {
+  #markdown-toc {
+    position: fixed;
+    right: max(12px, calc((100vw - 100rem) / 2));
+    top: 120px;
+    width: 200px;
+    font-size: 13px;
+    border-left: 1px solid #e5e7eb;
+    padding-left: 12px;
+    list-style: none;
+  }
+  #markdown-toc ul {
+    list-style: none;
+    padding-left: 12px;
+  }
+}

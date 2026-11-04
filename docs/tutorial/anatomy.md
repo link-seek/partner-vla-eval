@@ -33,6 +33,9 @@ flowchart TB
     C --> O
 ```
 
+* 目录
+{:toc}
+
 ## 第一块：serve yaml（谁来跑）
 
 即 `configs/serve-robotwin-cogact.yaml` 全文（16 行，CI 实际用 snapshot 生成的
