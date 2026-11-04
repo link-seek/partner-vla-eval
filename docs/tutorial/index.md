@@ -41,9 +41,11 @@ quickstart 证明尺子可信，01~03 交出可比的数，Hard 与训练固定�
 
 ## 核心架构
 
-```text
-serve（模型/GPU，WebSocket） ←→ benchmark（环境/CPU，Docker）
-configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
+```mermaid
+flowchart LR
+    S["模型 serve · GPU<br/>1 模型 1 个 yaml"]
+    B["考场 benchmark · CPU/Docker<br/>1 考场 1 组 yaml"]
+    S <-->|"WebSocket/msgpack<br/>标准协议"| B
 ```
 
 模型和考场互相不知对方存在，中间是标准协议——N 个模型 × M 个考场只接 N+M 次。
