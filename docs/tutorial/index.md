@@ -49,7 +49,7 @@ flowchart LR
 ```
 
 模型和考场互相不知对方存在，中间是标准协议——N 个模型 × M 个考场只接 N+M 次。
-各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。逻辑二分，部署三分：考场落地时拆成 client（编排）+ env（SAPIEN 本体）——仿真器独占进程、可多开，crash 不连累编排（见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md) 三容器图）。本教程只讲 RobotWin（双臂基线）。LIBERO/CALVIN 链路已通（smoke），教程待接入，见下表。
+各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。逻辑二分，部署三分：考场落地时拆成 client（编排）+ env（SAPIEN 本体）——仿真器独占进程、可多开，crash 不连累编排（见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md) 三容器图）。本教程只讲 RobotWin（双臂基线）。LIBERO/CALVIN 为规划接入方向，见下表。
 
 ## 关键术语
 
@@ -65,13 +65,13 @@ flowchart LR
 | 方向 | 考场 | 状态 |
 |---|---|---|---|
 | 现状 | RobotWin 2.0（双臂基线，DB-CogACT 按 task 分头） | smoke + 4 轮出分（见 quickstart 对照表） |
-| 规划接入 | LIBERO（单臂短程）/ CALVIN（单臂长程） | 链路已通 smoke，教程待接入 |
+| 规划接入 | LIBERO（单臂短程）/ CALVIN（单臂长程） | 规划中 |
 | 规划位 | DuoBench / RMBench / 真机 | 先 smoke，后放 |
 
 
 ## 我们现在在哪一步（评价 vs 评测，必读以免误读分数）
 
-* **评价（已完成）：跑出可信的分数**——链路跑通、三榜 smoke 全绿、RobotWin 四轮出分、
+* **评价（已完成）：跑出可信的分数**——链路跑通、RobotWin smoke 全绿、四轮出分、
  栈差异对照、披露清单。回答"这个配置下多少分"，**不回答"哪个基模强"**。
 * **评测（未开始）：可比、可解释的基模比较**——固定数据和训练方式（如官方 §4.5 范式：
  单 task 50 demos 微调 → Easy/Hard 各 100 rollouts），横向比较伙伴基模在同训练
