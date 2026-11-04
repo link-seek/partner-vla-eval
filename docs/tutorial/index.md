@@ -39,23 +39,27 @@ quickstart 证明尺子可信，01~03 交出可比的数，Hard 与训练固定�
 
 三条路都从同一篇开始：`quickstart.md`（RobotWin smoke，grab_roller×1ep，只验链路不计分）。
 
-## 核心概念（3 行，够用即走）
+## 核心架构
 
 ```text
 serve（模型/GPU，WebSocket） ←→ benchmark（环境/CPU，Docker）
 configs/serve-*.yaml：1 模型 1 个 ｜ configs/run-*.yaml：1 考场 1 组
 ```
 
-* **考场**：一个 benchmark（环境+任务集+判分规则）。先行三件套：LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（双臂）。
+模型和考场互相不知对方存在，中间是标准协议——N 个模型 × M 个考场只接 N+M 次。
+各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。先行三件套：
+LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（双臂）。
+
+## 关键术语
+
+* **考场**：一个 benchmark（环境+任务集+判分规则）。
 * **smoke**：1 task×1ep，只验链路。**全量**：1 task×50ep（`test_num` 官方口径），计分。
-* **分数各榜自己定**：harness 不发明分数，只透传各榜原生规则再平均。单次 run 内，
- LIBERO / RobotWin 是单 ep 二值平均；CALVIN 是一个 ep = 5 连子任务，同时报 `success`
- （5/5 全对才算）+ `completed_subtasks`（0~5，部分分）。看分先确认是哪个指标。
- 跨榜只并列展示，不加权总分。
-* **LIBERO 的 % 还依赖训练口径**：上游复现全是按 suite 出分（4 suites×10 tasks×50ep），
- 且多为 per-suite 微调 checkpoint（OpenVLA 即 LoRA 分 suite 微调，单 checkpoint 跑不全四榜）。
- per-suite 微调与通用单 checkpoint 的 % 不可比——只看数字会把微调红利当成基模能力。
- 比 LIBERO 必须同时对齐 checkpoint 与训练说明（见 `partner/01` 表单第 2/6 项）。
+* **主指标各榜自己定**：harness 只透传各榜原生规则再平均。LIBERO / RobotWin 是单 ep
+ 二值平均；CALVIN 是一个 ep = 5 连子任务，同时报 `success`（5/5 全对才算）+
+ `completed_subtasks`（0~5，部分分）。看分先确认是哪个指标，跨榜只并列不加权。
+* **训练口径**：LIBERO 的 % 还依赖它——上游复现多为 per-suite 微调 checkpoint，
+ 与通用单 checkpoint 不可比。比 LIBERO 必须同时对齐 checkpoint 与训练说明
+ （见 `partner/01` 表单）。
 
 ## 覆盖矩阵（一张表）
 
