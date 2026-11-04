@@ -1,102 +1,77 @@
 # 伙伴 03：全量与报告（计分、出榜）
 
 > 目标：拿到可上榜的分数和完整报告。
-> 时间：3~7 小时/task（V100 单卡，串行累加） ｜ 前置：`02` smoke 通过 ｜
-> 你将得到：每个 task 的 `mean_success` + 录像 + 官方口径对照说明。
-> 读法：`操作`是排期与交付；`原理`是排名规则与分数读法（看不懂分就白跑了）。
+> 时间：3~7 小时/task（V100 单卡，串行累加） ｜ 前置：`02` smoke 通过。
+> 你将得到：每个 task 的四列表分数 + 录像 + 官方口径对照说明。
 
-## 操作：排期（smoke 通过后自动进队列）
+## 操作
 
-* RobotWin：1 task×50ep/轮（CogACT 一头一 task），`test_num` 官方口径。
-* 分片默认 8（EE 默认 4：`fast_init=false` 全量 planner + SAPIEN 抢显存，8 分片 OOM）。
-  生产切法：serve 独占卡 0、分片放卡 1。
-* 超时 chunk 10080（7 天；easy50 完整对照约 2~3 天）。
-* 耗时参考：单 ep 2~10 分钟（成功短、失败跑满全程）；一轮（1 task×50ep，2 分片）3~7 小时。
+1. 排期（smoke 通过后自动进队列）：RobotWin 1 task×50ep/轮（CogACT 一头一 task），
+ `test_num` 官方口径。分片默认 8（EE 默认 4：`fast_init=false` 全量 planner +
+ SAPIEN 抢显存，8 分片 OOM）；生产切法 serve 独占卡 0、分片放卡 1。
+ 超时 chunk 10080（7 天；easy50 完整对照约 2~3 天）。
+ 耗时参考：单 ep 2~10 分钟；一轮（1 task×50ep，2 分片）3~7 小时。
 
-> **原理·分片只动速度不动分**（实验 C）：2 稳、4 慢、8 在单卡多 SAPIEN 上下文会
-> hang（watchdog 全杀）。分片是环境并行（`run_sharded.sh -n N` 共享同一 SQLite，
-> 跑完 `vla-eval export` 出 aggregate），不改变种子、口径、判分，所以不动分。
-> 上游论文另有 batch 并行（模型侧），我们 V100 单卡只用分片这一轴。
-
-## 操作：交付（缺一项不算完整报告）
+2. 交付（按下表填，缺一项不算完整报告）：
 
 ```json
 {
   "model": "<模型名+权重地址>",
-  "task": "<考场-任务-条件>",   // 条件必写：easy（demo_clean）/ hard（demo_randomized）
-  "mean_success": 0.0,          // Easy 成功率（现有）
-  "hard_success": null,         // Hard 成功率（待补：需 Hard run yaml，见下）
-  "gap": null,                  // robustness 落差 = easy − hard（官方主指标）
-  "steps_success": {"med": null, "mean": null},  // 成功集步数（效率；现有放 note，待转正）
+  "task": "<考场-任务-条件>",
+  "mean_success": 0.0,
+  "hard_success": null,
+  "gap": null,
+  "steps_success": {"med": null, "mean": null},
   "n": 50,
   "errors": 0,
   "versions": {"harness": "v0.8.0", "benchmark_image": "<镜像:tag>"},
   "machine": "<GPU型号>",
   "seeds": "bundled/盲种子说明",
   "date": "YYYY-MM-DD",
-  "artifacts": "<OBS/artifact 链接>"
+  "artifacts": "<OBS 链接>"
 }
 ```
 
-## 原理：分数不止成功率（官方 §4.5 四列表）
+跑分必报的披露清单（缺一个别比）：GPU / dtype / benchmark 镜像 tag
+（含 slim/补丁说明）/ serve 镜像 / 种子（bundled 还是盲）/ 分片 / 资产挂载 /
+checkpoint 与训练说明（权重精确版本 + 按 task 分头情况 + 微调口径）。
 
-| 列 | 含义 | 现状 |
-|---|---|---|
-| Easy 成功率 | clean 条件成功率（基线） | ✅ 有（四轮对照表） |
-| Hard 成功率 | domain-randomized（clutter/光照/背景/高度/语言）成功率 | ❌ 待补：需加 `demo_randomized` 的 Hard run yaml，无代码改动 |
-| 落差 Easy−Hard | robustness 主指标（官方 Table 5 就这么摆：Pi0 grab_roller 96%→80%，DP 98%→0%） | ❌ 等 Hard |
-| 成功集步数 | 效率（成功 ep 的 med/mean 步数；harness 本就记录 avg steps） | 🔄 有但在 note 里（如 grab_roller med=75 mean=90），待转正为正式字段 |
+3. 到 OBS 收：`<obs_prefix>/<榜>-<smoke|full>/`（flat 打平）。
+ dispatch 参数 `obs_prefix` 可自填（默认 `obs://so101-sim-pipeline/eval`），
+ 开跑前写探针校验，失败不烧卡。RobotWin smoke 强制录像；全量 `video=1` 打开。
 
-只报 Easy 会系统性高估：Hard 掉 0 的模型（DP 98%→0%）在单列榜上和 Pi0 看不出区别。
-排名：主排序用 Hard，Easy 作基线参考；同分看成功集步数（又对又快才算好）。
-条件（easy/hard）进 task 身份的一部分，不同条件不上同榜——这是"同协议才可比"的第 0 条。
+## 检查点
 
-跑分必报的披露清单（缺一个别比）：GPU / dtype / benchmark 镜像 tag（含 slim/补丁说明）
-/ serve 镜像 / 种子（bundled 还是盲）/ 分片 / 资产挂载 /
-checkpoint 与训练说明（权重精确 commit + 按 task 分头情况 + 微调口径：LIBERO 按 suite 出分，
-per-suite 微调与通用单 checkpoint 不可比）。
+- [ ] 报告 12 个字段全齐？`hard_success/gap` 暂空必须注明"Hard 待补"，不能删字段。
+- [ ] 披露 8 项全齐？缺一个不上榜。
+- [ ] `errors` 单列了？坏种剔除数公示了？先看 errors 再看 mean。
+- [ ] 条件写进 task 身份了？easy/hard 不同条件不上同榜。
 
-> **原理·为什么披露清单就是这 7 项**：每一项都对应一张"旋钮×影响"对照表
-> （`docs/proposal-stack-effects.md`，V100 实测 10-14~16）：A 镜像版本（差 6pp，
-> 2σ 内，不搬分）、B 精度（29/30 vs 0/30，搬命）、C 分片（只动速度）、
-> D 种子（盲种子 15 坏种 vs 校验种子零 error）。动过分的东西必须披露，
-> 没动过分的东西披露了证明清白。E（V100 fp16 vs 官方 H100 bf16）待定档：
-> 只写进披露，不硬判，见 `old/99-audit.md`。
-> 训练口径本身就是官方实验变量：论文 Table 3 同一模型（RDT/Pi0）×三种训练口径
-> （released 预训练直测 / +clean 微调 / +Rand 预训练）并列比成功率——clean 微调
-> 相对直测几乎无提升（RDT 18.8%→14.6%），Rand 预训练 +30%（→24.8%/29.1%）。
-> 所以披露清单里的训练说明不是摆设：不同口径的分数只许并列展示，不许直接排名。
+## 原理
 
-## 原理：排名规则（四条）
+* **分片只动速度不动分**（分片对照）：2 稳、4 慢、8 在单卡多 SAPIEN 上下文会 hang。
+ 分片是环境并行（共享同一 SQLite，`vla-eval export` 出 aggregate），不改变种子口径判分。
+* **四列表**：Easy 成功率（现有）/ Hard 成功率（待补：`demo_randomized` run yaml，
+ 无代码改动）/ 落差 Easy−Hard（robustness 主指标：Pi0 grab_roller 96%→80%，
+ DP 98%→0%，单列 Easy 会系统性高估）/ 成功集步数 med/mean（效率；现躺 note 里待转正）。
+ 排名主排序用 Hard，Easy 作基线，同分看步数。
+* **排名四条**：①同协议才可比（镜像 tag、`test_num`/种子集、harness 版本、
+ checkpoint 与训练口径全 locked；RobotWin 官方协议 §4.5：单 task 微调 50 demos →
+ Easy/Hard 各 100 rollouts；我们现状 Easy×50ep，Hard 与训练数据披露待补）。
+ ②分榜排名不合总分（CALVIN 主指标是平均链长 0~5，更不能加权）。
+ ③点估计排序区间分档（n=50 噪声带 ±6pp："10pp 同档，10~15pp 待定，15pp 以上分档"；
+ place_empty_cup 16% vs 28% 差 12pp → 待定）。④error 口径一致 + 榜单四要素
+ （分数 + n + 版本日期 + 机器；同卡才可比，换卡重打基线）。
+* **分数怎么读**：`mean_success`（LIBERO/RobotWin）= 成功 ep / 总 ep，二值平均；
+ 和官称 ±5pp 算对上，差 10pp 先查口径（`old/08-troubleshooting.md` 第 1 条）；
+ 跨榜不比大小。
+* **训练口径是变量**：官方 Table 3 同一模型×三种训练口径并列比成功率——clean 微调
+ 几乎无提升，Rand 预训练 +30%。不同口径的分数只许并列，不许排名。
+* **披露清单的来历**：每一项对应一张"旋钮×影响"对照表（`docs/proposal-stack-effects.md`）：
+ 镜像对照（差 6pp 不搬分）、精度对照（29/30 vs 0/30 搬命）、分片对照（只动速度）、
+ 种子对照（盲 15 坏种 vs 校验零 error）、机器精度对照（待定档，只披露不硬判）。
 
-1. **同协议才可比**：镜像 tag、`test_num`/种子集、harness 版本全 locked，
- 再加 checkpoint 与训练口径（同权重 commit、同微调口径）。我们的链路只保证前一半
- （配置钉版）；后一半靠 `01` 表单锁，单子都不同不能比。RobotWin 官方协议
- （论文 §4.5）：单 task 微调（50 demos）→ Easy/Hard 各 100 rollouts；我们现状是
- Easy（demo_clean）×50ep，Hard 条件与头的训练数据披露待补（见 `old/99-audit.md`）。
-2. **分榜排名，不合总分**：每个 task 一个榜；跨 task 看画像（并列），不造加权总分
- （权重一拍脑袋就失去公信）。CALVIN 主指标是平均链长（0~5，对齐上游论文 Table II），
-  LIBERO/RobotWin 是成功率 %——指标不同，更不能加权。
-3. **点估计排序，区间分档**：n=50 时噪声带约 ±6pp，"10pp 以内判同档；
- 10~15pp 待定；15pp 以上分档"。例：place_empty_cup 我们 16% vs 官称 28%
- （差 12pp）→ 待定，不硬判高下。
-4. **error 口径一致 + 榜单四要素**：坏种 error 剔除后比有效成功率，剔除数公示；
- 分数 + n + 版本日期 + **机器**（GPU+dtype+镜像 tag），缺一个不上榜。
- 同卡才可比，换卡重打基线，榜单按机器分组。
+## 下一步
 
-## 原理：分数怎么读
-
-* `mean_success`（LIBERO/RobotWin）= 成功 ep 数 / 总 ep 数，二值平均。
-* 和官称差 ±5pp 以内算对上（噪声+种子集差异）；差 10pp 以上先查口径（`old/08-troubleshooting.md` 第 1 条）。
-* `error` ≠ `fail`：`fail` 模型没做出来；`error` 是 infra/坏种子抛异常，单列。
- 看分先看 errors，再看 mean。
-* 跨榜不比大小：LIBERO 99% 和 RobotWin 16% 没有可比性，各榜难度和判分标尺不同。
-
-判分记账：harness 不发明分数，各榜原生规则 + 透传汇总；error 分三类
-（模型失败判 0 / 坏种子 `UnStableError` 单列 / infra 异常重跑）；aggregate JSON +
-SQLite + mp4（开了录像才有）进 OBS
-（`<obs_prefix>/<榜>-<smoke|full>/`，flat 打平无子目录），Discussion 记结论。
-OBS 地址可填：dispatch 参数 `obs_prefix`，默认 `obs://so101-sim-pipeline/eval`。
-开跑前先校验：格式须是 `obs://<bucket>/<path>`，并向目标写探针文件验证可写，
-失败直接退出、不烧卡（GPU 步骤之前的第一步）。
-RobotWin smoke 强制录像（`RW_VIDEO=1`）；全量默认不录像，dispatch 时 `video=1` 打开。
+* 栈差异对照的完整来龙去脉 → `explanation/`（待写）。
+* 真正的基模评测（固定数据+训练方式横向比）→ 训练侧立项，不在本教程范围（见 `index.md` 评价 vs 评测）。
