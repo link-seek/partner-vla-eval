@@ -75,7 +75,7 @@ flowchart LR
  栈差异对照、披露清单。回答"这个配置下多少分"，**不回答"哪个基模强"**。
 * **评测（未开始）：可比、可解释的基模比较**——固定数据和训练方式（如官方 §4.5 范式：
  单 task 50 demos 微调 → Easy/Hard 各 100 rollouts），横向比较伙伴基模在同训练
- 口径下的成功率（官方 Table 3 范例）。这需要训练侧立项（数据+ recipe +算力，
+ 口径下的成功率（官方 Table 3 范例：用不同微调方法评价基模优劣）。当前阶段只能跑出评分，做不到这一步。这需要训练侧立项（数据+ recipe +算力，
  见 [99-audit.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/99-audit.md) 第 5 条"另立项 finetune"），是新工程，不是本教程的范围。
 
 没有阶段一，可比的阶段二不存在（口径一动几十分点）；但只有阶段一时，
