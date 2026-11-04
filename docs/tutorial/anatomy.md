@@ -45,7 +45,7 @@ args:
   port: 8000                                              # serve 端口（不动）
   chunk_size: 16                                          # ★一次几个动作（RobotWin 16）
   camera_keys: '["head_camera", "left_camera", "right_camera"]'  # ★哪几个相机
-  use_text_template: false                                # RobotWin false（CALVIN true）
+  use_text_template: false                                # RobotWin false
 ```
 
 > **原理**：这个文件回答"把什么权重以什么参数跑起来"——上游"接一次模型"

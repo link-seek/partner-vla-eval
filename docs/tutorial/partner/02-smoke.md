@@ -12,9 +12,7 @@ nav_order: 4
 
 ## 操作
 
-我们按你的表单起 serve，跑 1 个 task×1ep：RobotWin 跑 grab_roller，
-LIBERO 跑 spatial（只在分不清链路/模型问题时加跑，便宜对照），
-CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）。
+我们按你的表单起 serve，跑 RobotWin grab_roller×1ep。录像常开（1ep 体积小，出 0 分时亲眼看；其他考场 smoke 为排障对照，主线只跑 RobotWin）。
 
 输出就两样：**通/不通 + spec 对齐报告**。口径不对这里打回，不烧大钱，
 通过后才进全量排期。报告三行这样读：

@@ -49,28 +49,25 @@ flowchart LR
 ```
 
 模型和考场互相不知对方存在，中间是标准协议——N 个模型 × M 个考场只接 N+M 次。
-各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。逻辑二分，部署三分：考场落地时拆成 client（编排）+ env（SAPIEN 本体）——仿真器独占进程、可多开，crash 不连累编排（见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md) 三容器图）。先行三件套：
-LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（双臂）。
+各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。逻辑二分，部署三分：考场落地时拆成 client（编排）+ env（SAPIEN 本体）——仿真器独占进程、可多开，crash 不连累编排（见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md) 三容器图）。本教程只讲 RobotWin（双臂基线）。LIBERO/CALVIN 链路已通（smoke），教程待接入，见下表。
 
 ## 关键术语
 
 * **考场**：一个 benchmark（环境+任务集+判分规则）。
 * **smoke**：1 task×1ep，只验链路。**全量**：1 task×50ep（`test_num` 官方口径），计分。
-* **主指标各榜自己定**：harness 只透传各榜原生规则再平均。LIBERO / RobotWin 是单 ep
- 二值平均；CALVIN 是一个 ep = 5 连子任务，同时报 `success`（5/5 全对才算）+
- `completed_subtasks`（0~5，部分分）。看分先确认是哪个指标，跨榜只并列不加权。
-* **训练口径**：LIBERO 的 % 还依赖它——上游复现多为 per-suite 微调 checkpoint，
+* **主指标**：harness 只透传 benchmark 原生规则再平均。RobotWin 是单 ep 二值平均；多榜指标（CALVIN 平均链长等）待接入后展开。跨榜只并列展示，不加权总分。
+* **训练口径**（多榜通则，LIBERO 为例）：成功率还依赖训练口径——上游复现多为 per-suite 微调 checkpoint，
  与通用单 checkpoint 不可比。比 LIBERO 必须同时对齐 checkpoint 与训练说明
  （见 `partner/01` 表单）。
 
-## 覆盖矩阵（一张表）
+## 覆盖：现状与规划
 
-| 能力 | 考场 | 参考模型 | 状态 |
+| 方向 | 考场 | 状态 |
 |---|---|---|---|
-| 双臂基线 | RobotWin 2.0 | DB-CogACT（按 task 分头） | smoke + 4 轮出分（见 `quickstart` 对照表） |
-| 单臂短程基线 | LIBERO | π0.5（LeRobot 桥） | smoke 1/1 全绿（链路对照用） |
-| 单臂长程 | CALVIN | DB-CogACT | smoke 4/5（5 sequences 全对，success 口径；链长另看） |
-| 双臂长程 / 记忆 / 真机 | DuoBench / RMBench / 真机 | 待定 | 规划位，先 smoke，后放 |
+| 现状 | RobotWin 2.0（双臂基线，DB-CogACT 按 task 分头） | smoke + 4 轮出分（见 quickstart 对照表） |
+| 规划接入 | LIBERO（单臂短程）/ CALVIN（单臂长程） | 链路已通 smoke，教程待接入 |
+| 规划位 | DuoBench / RMBench / 真机 | 先 smoke，后放 |
+
 
 ## 我们现在在哪一步（评价 vs 评测，必读以免误读分数）
 

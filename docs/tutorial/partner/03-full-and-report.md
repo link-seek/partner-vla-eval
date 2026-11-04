@@ -64,11 +64,11 @@ checkpoint 与训练说明（权重精确版本 + 按 task 分头情况 + 微调
 * **排名四条**：①同协议才可比（镜像 tag、`test_num`/种子集、harness 版本、
  checkpoint 与训练口径全 locked；RobotWin 官方协议 §4.5：单 task 微调 50 demos →
  Easy/Hard 各 100 rollouts；我们现状 Easy×50ep，Hard 与训练数据披露待补）。
- ②分榜排名不合总分（CALVIN 主指标是平均链长 0~5，更不能加权）。
+ ②分榜排名不合总分（多榜指标待接入后展开）。
  ③点估计排序区间分档（n=50 噪声带 ±6pp："10pp 同档，10~15pp 待定，15pp 以上分档"；
  place_empty_cup 16% vs 28% 差 12pp → 待定）。④error 口径一致 + 榜单四要素
  （分数 + n + 版本日期 + 机器；同卡才可比，换卡重打基线）。
-* **分数怎么读**：`mean_success`（LIBERO/RobotWin）= 成功 ep / 总 ep，二值平均；
+* **分数怎么读**：`mean_success`（RobotWin）= 成功 ep / 总 ep，二值平均；
  和官称 ±5pp 算对上，差 10pp 先查口径（[08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md) 第 1 条）；
  跨榜不比大小。
 * **训练口径是变量**：官方 Table 3 同一模型×三种训练口径并列比成功率——clean 微调

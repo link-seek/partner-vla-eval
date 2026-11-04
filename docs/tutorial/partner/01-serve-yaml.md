@@ -41,7 +41,7 @@ python3 --version   # 3.8+ 即可
 
 | 模型类型 | 走这条路线 |
 |---|---|
-| LeRobot 系 ckpt（π0.5 / GR00T N1.7 / SmolVLA / MolmoAct2…） | LeRobot 桥模板（操作四 π0.5 例），`checkpoint` 换你的 |
+| LeRobot 系 ckpt（单臂） | 规划接入方向：字段见上游 lerobot README，桥模板换 checkpoint 即可；当前 smoke/全量只开 RobotWin |
 | DB-CogACT / CogACT | cogact 模板（操作四），`model_path` 按 task 分头 |
 | X-VLA 官方 ckpt | X-VLA 模板（EE 口径，操作四），`domain_id` 按官方 recipe |
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
@@ -81,9 +81,9 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 | script | `src/vla_eval/model_servers/dexbotic/cogact.py`（base 定死） | 不动 |
 | extends | `_base.yaml`（port 8000、use_text_template true 被继承） | 不动 |
 | ★ model_path | `Dexmal/robotwin-db-cogact/<task>`（官方逐 task 覆写） | 按 task 分头逐个列；CI 转本地子目录绝对路径 |
-| ★ chunk_size | 16（robotwin2；其他榜看对应文件，CALVIN 7） | 照抄对应榜文件 |
+| ★ chunk_size | 16（robotwin2） | 照抄对应榜文件 |
 | ★ camera_keys | `["head_camera", "left_camera", "right_camera"]` | 照抄 |
-| use_text_template | base 默认 true；robotwin2 覆写 false（CALVIN 用 true） | 照抄对应榜文件 |
+| use_text_template | base 默认 true；robotwin2 覆写 false | 照抄对应榜文件 |
 | ★ dtype（我方） | 官方 yaml 不写（由镜像定）；V100 单卡走 fp16 | 填 fp16，写进表单 |
 
 **路线 C：X-VLA**（官方 `xvla/_base.yaml` + `robotwin.yaml` 原样）：
@@ -100,17 +100,7 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 
 注意：`fast_init=false` 是 run 侧 benchmark params，不在 serve yaml 里。
 
-**路线 A：LeRobot 桥**（官方 lerobot README 参数表全集，★标必对）：
-
-| 字段 | 官方 | 怎么填 |
-|---|---|---|
-| ★ policy_type | 注册名：pi05 / groot / molmoact2 / smolvla / xvla… | 对表选 |
-| ★ checkpoint | Hub ID 或本地路径 | 你的 ckpt |
-| ★ image_keys | 考场相机→policy 特征；可省（按位置自动映射） | `{agentview: image, wrist: image2}` 或省 |
-| ★ state_key | 本体特征名，或 null | `observation.state` 或 null |
-| ★ chunk_size | 数字，或 null（= checkpoint 自带 n_action_steps） | 10 或 null |
-| device / compile_model | 默认 cuda / 跟 checkpoint 走 | 不动 |
-| policy_kwargs / features / preprocessor_overrides / quat_no_antipodal | 各家特殊需求 | 有特殊才填 |
+**路线 A：LeRobot 桥**（单臂，规划接入方向）：字段见上游 lerobot README 参数表，桥模板换 checkpoint 即可；★项为 policy_type/checkpoint/image_keys/state_key/chunk_size。
 
 4. 对模板改出 serve yaml（复制操作一定下来的那一例，只改★项）：
 
@@ -121,18 +111,7 @@ args:
   model_path: Dexmal/robotwin-db-cogact/<task>   # ★按 task 分头
   chunk_size: 16                                  # ★照抄对应榜文件
   camera_keys: '["head_camera", "left_camera", "right_camera"]'   # ★照抄
-  use_text_template: false                        # robotwin2 覆写；CALVIN 用 true
-```
-
-```yaml
-# π0.5（LeRobot 桥）
-script: "src/vla_eval/model_servers/lerobot.py"
-args:
-  policy_type: pi05                              # ★注册名对照
-  checkpoint: lerobot/pi05_libero_finetuned      # ★你的 ckpt
-  image_keys: {agentview: image, wrist: image2}  # ★可省
-  state_key: observation.state                   # ★或 null
-  chunk_size: 10                                 # ★或 null
+  use_text_template: false                        # robotwin2 覆写
 ```
 
 ```yaml
