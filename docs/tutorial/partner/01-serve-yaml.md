@@ -126,7 +126,7 @@ args:
 ```
 
 5. 发帖（交作业）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
- + ★项贴进去，不知道的空着。在本仓 Discussion 发帖，标题 `【评测对接】<模型名>`。
+ + ★项贴进去，不知道的空着。去[对接区发帖](https://github.com/link-seek/partner-vla-eval/discussions)，标题 `【评测对接】<模型名>`。
  1 天内给 spec 对齐报告，通过进 smoke。
 
 ## 检查点

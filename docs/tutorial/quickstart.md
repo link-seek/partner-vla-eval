@@ -25,8 +25,7 @@ flowchart LR
 
 ## 操作
 
-1. 在 GitHub 点 dispatch：在本仓 Actions → `RobotWin Smoke (DB-CogACT)` →
- `Run workflow`。无参数，直接点绿钮。之后全自动：hw21 开机 → V100 跑
+1. 发起一次评测运行：打开 `RobotWin Smoke (DB-CogACT)`，确认参数后运行（本轮无参数）。之后全自动：hw21 开机 → V100 跑
  `scripts/ci_robotwin.sh`（5 步）→ 跑完自动关机。单卡串行，前有队列就排队。
 
 2. 等 5 步跑完。V100 日志里看到下面 6 行即正常：
@@ -62,7 +61,7 @@ smoke_exit=0
  `predict(观测)→动作`，考场只实现 `reset/step/判分`，N×M 接成 N+M；
  各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。
 * **零 checkout**：V100 平时关机（省卡钱），开机关机走 hw21 调华为云内网 API。
- V100 几乎没有外网，代码经 `vla-payload` 镜像从 SWR 内网取，不走 GitHub。
+ V100 几乎没有外网，代码经 `vla-payload` 镜像从 SWR 内网取，不从代码仓拉取。
  **下载只能发生在有外网处**，这是全仓铁律。
 * **权重不进镜像**：15GB/头传不动。serve 镜像只烘依赖，权重走 mirror 下到
  V100 盘缓存永久有效；运行时 `UV_OFFLINE=1`，缺东西直接失败，不许现场装。
