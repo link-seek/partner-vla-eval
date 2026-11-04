@@ -74,7 +74,7 @@ dispatch 自填了前缀就去自填的地址）。
 > smoke 绿了，全量没有新变量——这就是"先 smoke 后全量省卡钱"的全部含义。
 > **原理·error≠fail**：`fail` 是模型没做出来（记 0 分）；`error` 是 infra/坏种子
 > 抛异常，单列不怪模型。反直觉点：0/30 全 ERROR 时 exit code 照样 0，
-> 看分不看日志会误判（精度断崖的教训：X-VLA fp16 全 ERROR 但 exit 0）。
+> 看分不看日志会误判（B 精度断崖的教训）。
 
 ## 检查点（出错先看这里，不过再烧卡）
 
@@ -115,18 +115,4 @@ dispatch 自填了前缀就去自填的地址）。
 | place_phone_stand | 16%（8/50） | 18% |
 
 差 10pp 以内判同档（n=50 噪声带约 ±6pp）；CALVIN 另看平均链长，跨榜不比大小。
-完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异对照在 `explanation/`。
-
-<!-- Mermaid 渲染：Pages 主题无钩子，有图的页面尾部直贴这段（GH 站内渲染，邮件版忽略） -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('pre code.language-mermaid').forEach(function (el) {
-    var div = document.createElement('div');
-    div.className = 'mermaid';
-    div.textContent = el.textContent;
-    el.parentElement.replaceWith(div);
-  });
-  mermaid.initialize({ startOnLoad: true });
-});
-</script>
+完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异 A-D 在 `explanation/`。

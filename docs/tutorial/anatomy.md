@@ -112,17 +112,3 @@ benchmarks:
 * 伙伴（01）：照第一块的样子写你的 serve yaml，★项换成你的口径。
 * 运维（operator/01）：开跑改的是第二块那几处参数，排障看的是第三块的 log 尾。
 * 看分数（03）：读的是第三块的 aggregate + mp4，对的是第二块的 task_config/seed。
-
-<!-- Mermaid 渲染：Pages 主题无钩子，有图的页面尾部直贴这段（GH 站内渲染，邮件版忽略） -->
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('pre code.language-mermaid').forEach(function (el) {
-    var div = document.createElement('div');
-    div.className = 'mermaid';
-    div.textContent = el.textContent;
-    el.parentElement.replaceWith(div);
-  });
-  mermaid.initialize({ startOnLoad: true });
-});
-</script>
