@@ -10,9 +10,6 @@ nav_order: 1
 > 时间：操作 10 分钟 + 等卡 0.5~2 小时 ｜ 前置：无（不用懂镜像，不用装依赖）
 > 你将得到：`smoke_exit=0` + OBS 落盘 + 一次 spec 对齐确认。
 
-* 目录
-{:toc}
-
 ## 链路全景
 
 ```mermaid
@@ -86,18 +83,4 @@ smoke_exit=0
 * 来评测模型（手里有训好的模型要交上来，才需细看）：去 `partner/01-serve-yaml.md`，
  按 01→02→03 顺序读完（配准交付 → smoke → 全量拿分；不教训模型）。
 * 开卡保链路：去 `operator/01-machines-ci.md`（待写，先看 `old/04-machines-network.md`）。
-* 只看分数：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）。
- 官方范式（论文 §4.5）本来就是**单 task 微调后测 Easy/Hard**，报的是 few-shot
- adaptation + robustness（Hard 落差）——我们的分头评测与官方范式一致，
- 差的是：100→50 rollouts、只有 Easy（demo_clean）缺 Hard、头的训练数据未知。
- 先对 Easy，再补 Hard。
-
-| task | 我们 | 官称 |
-|---|---|---|
-| grab_roller | 92%（46/50） | 89% |
-| adjust_bottle | 100%（35/35 有效，15 坏种已剔） | 99% |
-| place_empty_cup | 16%（8/50） | 28% |
-| place_phone_stand | 16%（8/50） | 18% |
-
-差 10pp 以内判同档（n=50 噪声带约 ±6pp）；CALVIN 另看平均链长，跨榜不比大小。
-完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异对照在 `explanation/`。
+* 只看分数：去 `partner/03-full-and-report.md`（RobotWin 四轮对照与排名规则在那）。

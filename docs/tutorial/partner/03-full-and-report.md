@@ -69,7 +69,16 @@ checkpoint 与训练说明（权重精确版本 + 按 task 分头情况 + 微调
  Easy/Hard 各 100 rollouts；我们现状 Easy×50ep，Hard 与训练数据披露待补）。
  ②分榜排名不合总分（CALVIN 主指标是平均链长 0~5，更不能加权）。
  ③点估计排序区间分档（n=50 噪声带 ±6pp："10pp 同档，10~15pp 待定，15pp 以上分档"；
- place_empty_cup 16% vs 28% 差 12pp → 待定）。④error 口径一致 + 榜单四要素
+ place_empty_cup 16% vs 28% 差 12pp → 待定）。实例（RobotWin 四轮对照，校验种子，
+ 零 error 即有效；单榜 % 口径；CALVIN 另看平均链长，跨榜不比大小）：
+
+| task | 我们 | 官称 |
+|---|---|---|
+| grab_roller | 92%（46/50） | 89% |
+| adjust_bottle | 100%（35/35 有效，15 坏种已剔） | 99% |
+| place_empty_cup | 16%（8/50） | 28% |
+| place_phone_stand | 16%（8/50） | 18% |
+④error 口径一致 + 榜单四要素
  （分数 + n + 版本日期 + 机器；同卡才可比，换卡重打基线）。
 * **分数怎么读**：`mean_success`（LIBERO/RobotWin）= 成功 ep / 总 ep，二值平均；
  和官称 ±5pp 算对上，差 10pp 先查口径（`old/08-troubleshooting.md` 第 1 条）；

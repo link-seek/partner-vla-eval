@@ -10,6 +10,8 @@ nav_order: 4
 > 时间：0.5~2 小时（含排队） ｜ 前置：`01` 对接帖通过。
 > 你将得到：通/不通 + spec 对齐报告。
 
+* 目录
+{:toc}
 ## 操作
 
 我们按你的表单起 serve，跑 1 个 task×1ep：RobotWin 跑 grab_roller，
