@@ -13,3 +13,7 @@ kramdown:
 # Mermaid 原生渲染（```mermaid 块）
 mermaid:
   version: "10"
+
+# 回顶链接（官方）
+back_to_top: true
+back_to_top_text: "回顶"

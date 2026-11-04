@@ -1,9 +1,5 @@
-// 全放开 + 字放大：容器不限宽，正文17px，表15px
-.main {
-  max-width: none;
-}
+// 字放大（官方 custom.scss 机制）
 .main-content {
-  max-width: none;
   font-size: 17px;
 }
 .main-content table {
