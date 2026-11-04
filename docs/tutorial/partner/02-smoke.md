@@ -35,7 +35,7 @@ CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）
 |---|---|---|
 | serve 起不来（`HFValidationError` / 401） | 路径三段式 / 权重无权限 | 回 01 补确切 commit + 开授权 |
 | 全 0 分但零异常 | 口径错（EE 当关节喂等） | 按 06 口径映射表改 serve yaml，重跑 smoke |
-| 0/30 全 ERROR 但 exit 0 | error 当数据（B 的教训） | 先看 errors 列，infra/坏种子问题单列重跑 |
+| 0/30 全 ERROR 但 exit 0 | error 当数据（精度断崖的教训） | 先看 errors 列，infra/坏种子问题单列重跑 |
 
 完整 15 条见 `old/08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
 

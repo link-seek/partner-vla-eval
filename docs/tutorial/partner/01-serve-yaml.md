@@ -119,7 +119,7 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 | ★ chunk_size | 16（robotwin2；其他榜看对应文件，CALVIN 7） | 照抄对应榜文件 |
 | ★ camera_keys | `["head_camera", "left_camera", "right_camera"]` | 照抄 |
 | use_text_template | base 默认 true；robotwin2 覆写 false（CALVIN 用 true） | 照抄对应榜文件 |
-| ★ dtype（我方） | 官方 yaml 不写（由镜像定）；V100 单卡走 fp16（fp32 必 OOM，实验 B2） | 填 fp16，写进表单 |
+| ★ dtype（我方） | 官方 yaml 不写（由镜像定）；V100 单卡走 fp16（fp32 必 OOM，见精度对照） | 填 fp16，写进表单 |
 
 **路线 C：X-VLA**（官方 `xvla/_base.yaml` + `robotwin.yaml` 原样）：
 
@@ -131,7 +131,7 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 | ★ domain_id | 6（官方 recipe 定 embodiment prompt） | 照抄官方 recipe |
 | ★ chunk_size | 30（官方值；不是 16，别按 CogACT 脑补） | 照抄 |
 | denoising_steps | 10（base 默认） | 不动 |
-| ★ dtype（我方） | 官方 yaml 不写；一律 fp32（fp16 首推理即崩，实验 B） | 填 fp32，写进表单 |
+| ★ dtype（我方） | 官方 yaml 不写；一律 fp32（fp16 首推理即崩，见精度对照） | 填 fp32，写进表单 |
 
 注意：`fast_init=false` 是 run 侧（benchmark params），不在 serve yaml 里——
 旧版把这一项写在 serve 模板注释里是错的，已纠正（配 EE run 配置，
