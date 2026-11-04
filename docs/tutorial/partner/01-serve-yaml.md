@@ -146,7 +146,7 @@ args:
   denoising_steps: 10                    # base 默认，不动
 ```
 
-5. 发帖（交作业）：复制 `docs/partner-onboarding.md` 里的对接表单，把 probe 输出
+5. 发帖（交作业）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
  + ★项贴进去，不知道的空着。在本仓 Discussion 发帖，标题 `【评测对接】<模型名>`。
  1 天内给 spec 对齐报告，通过进 smoke。
 
@@ -180,4 +180,4 @@ args:
 
 ## 下一步
 
-帖子通过 → `02-smoke.md`（1 task×1ep，拿 spec 对齐报告）。
+帖子通过 → [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md)（1 task×1ep，拿 spec 对齐报告）。

@@ -37,7 +37,7 @@ quickstart 证明尺子可信，01~03 交出可比的数，Hard 与训练固定�
 | 运维（开卡保链路） | 让 V100 离线跑起来 | `quickstart` → `operator/01-machines-ci` → `02-images` | 按需查，不必通读 |
 | 复现者（对照分数） | 看懂一张分数怎么来的 | `quickstart` → `explanation/` → `reference/` | 30min |
 
-三条路都从同一篇开始：`quickstart.md`（RobotWin smoke，grab_roller×1ep，只验链路不计分）。
+三条路都从同一篇开始：[quickstart.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/quickstart.md)（RobotWin smoke，grab_roller×1ep，只验链路不计分）。
 
 ## 核心架构
 
@@ -49,7 +49,7 @@ flowchart LR
 ```
 
 模型和考场互相不知对方存在，中间是标准协议——N 个模型 × M 个考场只接 N+M 次。
-各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。逻辑二分，部署三分：考场落地时拆成 client（编排）+ env（SAPIEN 本体）——仿真器独占进程、可多开，crash 不连累编排（见 `anatomy.md` 三容器图）。先行三件套：
+各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。逻辑二分，部署三分：考场落地时拆成 client（编排）+ env（SAPIEN 本体）——仿真器独占进程、可多开，crash 不连累编排（见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md) 三容器图）。先行三件套：
 LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（双臂）。
 
 ## 关键术语
@@ -79,7 +79,7 @@ LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（�
 * **评测（未开始）：可比、可解释的基模比较**——固定数据和训练方式（如官方 §4.5 范式：
  单 task 50 demos 微调 → Easy/Hard 各 100 rollouts），横向比较伙伴基模在同训练
  口径下的成功率（官方 Table 3 范例）。这需要训练侧立项（数据+ recipe +算力，
- 见 `old/99-audit.md` 第 5 条"另立项 finetune"），是新工程，不是本教程的范围。
+ 见 [99-audit.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/99-audit.md) 第 5 条"另立项 finetune"），是新工程，不是本教程的范围。
 
 没有阶段一，可比的阶段二不存在（口径一动几十分点）；但只有阶段一时，
 任何"基模排名"式解读都是错的。
@@ -91,4 +91,4 @@ LIBERO（单臂短程，最便宜）→ CALVIN（单臂长程）→ RobotWin（�
 * **Reference（查）**：`reference/` —— 口径映射表、镜像 tag、15 条排障表。主线不展开，只给链接。
 * **Explanation（懂）**：`explanation/` —— 栈差异对照、精度断崖、种子效应。有结论才进榜，主线一句话带过。
 
-旧稿归档在 `old/`（只读，迁移映射见 `old/README.md`）。版本历史与口径偏离见 `changelog.md`（待写），正文不写版本号。
+旧稿归档在 [old/](https://github.com/link-seek/partner-vla-eval/tree/main/docs/tutorial/old)（只读，迁移映射见 [README.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/README.md)）。版本历史与口径偏离见 `changelog.md`（待写），正文不写版本号。

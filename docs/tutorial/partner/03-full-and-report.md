@@ -69,15 +69,15 @@ checkpoint 与训练说明（权重精确版本 + 按 task 分头情况 + 微调
  place_empty_cup 16% vs 28% 差 12pp → 待定）。④error 口径一致 + 榜单四要素
  （分数 + n + 版本日期 + 机器；同卡才可比，换卡重打基线）。
 * **分数怎么读**：`mean_success`（LIBERO/RobotWin）= 成功 ep / 总 ep，二值平均；
- 和官称 ±5pp 算对上，差 10pp 先查口径（`old/08-troubleshooting.md` 第 1 条）；
+ 和官称 ±5pp 算对上，差 10pp 先查口径（[08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md) 第 1 条）；
  跨榜不比大小。
 * **训练口径是变量**：官方 Table 3 同一模型×三种训练口径并列比成功率——clean 微调
  几乎无提升，Rand 预训练 +30%。不同口径的分数只许并列，不许排名。
-* **披露清单的来历**：每一项对应一张"旋钮×影响"对照表（`docs/proposal-stack-effects.md`）：
+* **披露清单的来历**：每一项对应一张"旋钮×影响"对照表（[proposal-stack-effects.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/proposal-stack-effects.md)）：
  镜像对照（差 6pp 不搬分）、精度对照（29/30 vs 0/30 搬命）、分片对照（只动速度）、
  种子对照（盲 15 坏种 vs 校验零 error）、机器精度对照（待定档，只披露不硬判）。
 
 ## 下一步
 
 * 栈差异对照的完整来龙去脉 → `explanation/`（待写）。
-* 真正的基模评测（固定数据+训练方式横向比）→ 训练侧立项，不在本教程范围（见 `index.md` 评价 vs 评测）。
+* 真正的基模评测（固定数据+训练方式横向比）→ 训练侧立项，不在本教程范围（见 [index.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/index.md) 评价 vs 评测）。

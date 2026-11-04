@@ -21,7 +21,7 @@ flowchart LR
     C -->|"docker.sock 拉起"| E
 ```
 
-三容器：模型 serve（权重变服务）←→ 考场 client（发观测收动作记分）→ 经 docker.sock 拉起考场 env（SAPIEN 模拟器，判分在此）。详见 `anatomy.md`。
+三容器：模型 serve（权重变服务）←→ 考场 client（发观测收动作记分）→ 经 docker.sock 拉起考场 env（SAPIEN 模拟器，判分在此）。详见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md)。
 
 ## 操作
 
@@ -52,9 +52,9 @@ smoke_exit=0
 - [ ] `serve UP` 在探测内出现？3 次重试都起不来，先看 serve 尾日志
  （已自动存 `results/serve-debug-attempt*.log`），不要先怀疑 benchmark。
 - [ ] 日志头 20 行无 `Spec mismatch`？有 → **停手**，先对
- `old/06-model-onboarding.md` 口径映射表，不要烧卡硬跑。
+ [06-model-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/06-model-onboarding.md) 口径映射表，不要烧卡硬跑。
 - [ ] 权重预热 `Xet 401`？预热传 token + `HF_HUB_DISABLE_XET=1`（脚本里已有）。
- 修不好的完整 15 条表在 `old/08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
+ 修不好的完整 15 条表在 [08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md)（将迁入 `reference/error-codes.md`）。
 
 ## 原理
 
@@ -80,9 +80,9 @@ smoke_exit=0
 
 ## 下一步（三选一）
 
-* 来评测模型（手里有训好的模型要交上来，才需细看）：去 `partner/01-serve-yaml.md`，
+* 来评测模型（手里有训好的模型要交上来，才需细看）：去 [partner/01-serve-yaml.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/01-serve-yaml.md)，
  按 01→02→03 顺序读完（配准交付 → smoke → 全量拿分；不教训模型）。
-* 开卡保链路：去 `operator/01-machines-ci.md`（待写，先看 `old/04-machines-network.md`）。
+* 开卡保链路：去 `operator/01-machines-ci.md`（待写，先看 [04-machines-network.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/04-machines-network.md)）。
 * 只看分数：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）。
  官方范式（论文 §4.5）本来就是**单 task 微调后测 Easy/Hard**，报的是 few-shot
  adaptation + robustness（Hard 落差）——我们的分头评测与官方范式一致，
@@ -97,4 +97,4 @@ smoke_exit=0
 | place_phone_stand | 16%（8/50） | 18% |
 
 差 10pp 以内判同档（n=50 噪声带约 ±6pp）；CALVIN 另看平均链长，跨榜不比大小。
-完整排名规则与披露清单在 `partner/03-full-and-report.md`，栈差异对照在 `explanation/`。
+完整排名规则与披露清单在 [03-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/03-full-and-report.md)，栈差异对照在 `explanation/`。

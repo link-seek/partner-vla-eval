@@ -31,7 +31,7 @@ CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）
 | 全 0 分但零异常 | 口径错（EE 当关节喂等） | 按官方字段表改 serve yaml，重跑 smoke |
 | 0/30 全 ERROR 但 exit 0 | error 当数据（精度断崖的教训） | 先看 errors 列，infra/坏种子问题单列重跑 |
 
-完整 15 条见 `old/08-troubleshooting.md`（将迁入 `reference/error-codes.md`）。
+完整 15 条见 [08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md)（将迁入 `reference/error-codes.md`）。
 
 ## 原理
 
@@ -46,4 +46,4 @@ CALVIN 跑 5 sequences。录像常开（1ep 体积小，出 0 分时亲眼看）
 
 ## 下一步
 
-通过 → 进 V100 队列等全量（`03-full-and-report.md`，按 task 数排期，串行）。
+通过 → 进 V100 队列等全量（[03-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/03-full-and-report.md)，按 task 数排期，串行）。
