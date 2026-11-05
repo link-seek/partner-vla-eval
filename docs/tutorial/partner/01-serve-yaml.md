@@ -49,7 +49,7 @@ python3 --version   # 3.8+ 即可
 | DB-CogACT / CogACT | cogact 模板（§3），`model_path` 按 task 分头 |
 | X-VLA 官方 ckpt | X-VLA 模板（EE 口径，§3），`domain_id` 按官方 recipe |
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
-| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接发帖，表单空着，我们帮你看 |
+| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接发给对接人，表单空着，我们帮你看 |
 
 ### §2 备权重：跑 probe 核对
 
@@ -137,18 +137,17 @@ args:
 
 chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag` 走 `policy_kwargs`，写进表单备注；`max_rows`/`max_batch_size` 不碰，由 serve 镜像定。
 
-### §5 校验交接：test -c + 发帖
+### §5 校验交接：test -c + 交给对接人
 
-有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；无 GPU 直接发帖，smoke 代验。发帖：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
- + ★项贴进去，不知道的空着。去[对接区发帖](https://github.com/link-seek/partner-vla-eval/discussions)，标题 `【评测对接】<模型名>`。
- 1 天内给 spec 对齐报告，通过进 smoke。
+有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；无 GPU 跳过，smoke 代验。然后把三样发给对接人（[对接人邮箱]，标题 `【评测对接】<模型名>`）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
+ + ★项贴进去，不知道的空着。对接人确认后进 smoke（1 天内给 spec 对齐报告）。
 
 ## 检查点
 
 - [ ] probe 输出无 `仓库不可读`？401/403 = 私仓没开权限，先给 `link-seek` 授权（打回 Top 2）。
 - [ ] 本地目录无 commits？交付时注明版本（文件夹哈希/时间/自述三选一），否则复现翻车。
 - [ ] 分头子目录 probe 报出来了？表单第 6 类（权重）照抄。
-- [ ] 发帖 Top 3 避开：确切 commit（probe 第一步就是干这个的）、权重要授权的开好权限、
+- [ ] 提交 Top 3 避开：确切 commit（probe 第一步就是干这个的）、权重要授权的开好权限、
  按 task 分头的给全（= 权重★项没做）。
 
 ## 原理
@@ -165,7 +164,7 @@ chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embod
 * **口径熔断**：EE 当关节喂，benchmark 硬截 `act[:14]`——400 步跑满全 0 分零异常，
  spec warning 见 quickstart 检查点。
 * **三段式**：`from_pretrained` 不认 `repo/subdir`，CI 先 snapshot 再 `sed` 生成本地版；
- 你写三段式一样能发帖。要跑哪个 task 就用哪个 task 的头。
+ 你写三段式一样能交，CI 会处理。要跑哪个 task 就用哪个 task 的头。
 * **本地校验**：见 §5（`vla-eval test -c` 前置校验）。
 * **骨架对照**：本篇 = CONTRIBUTING 六步的 1:1 填表版（§4 缺省走模板默认）；字段语义以官方 yaml/README 为准，本篇只做准入标记（★）。卡住时按节号去上游问，不用只找我们。
 * **probe 的边界**：不假设目录结构（有什么报什么）；config.json 数字仅参考
@@ -173,4 +172,4 @@ chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embod
 
 ## 下一步
 
-帖子通过 → [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md)（1 task×1ep，拿 spec 对齐报告）。
+对接人确认通过 → [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md)（1 task×1ep，拿 spec 对齐报告）。
