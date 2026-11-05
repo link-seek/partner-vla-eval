@@ -18,10 +18,11 @@ harness 把官方原生要写的（约 200 行适配器 + 两个 env + 十几个
 
 ## 开始前准备
 
+只解决一件事：把模板和表单源文件拿下来（后面照着改、对着填）。
+
 ```bash
 git clone https://github.com/link-seek/partner-vla-eval.git
 cd partner-vla-eval
-python3 --version   # 3.8+ 即可
 ```
 
 ## 操作
