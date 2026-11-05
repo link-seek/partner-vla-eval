@@ -12,20 +12,12 @@ nav_order: 3
 > （无第三方依赖，不下权重，不用 GPU）。
 > 你将得到：probe 输出 + 路线归位 + ★项配准 + serve yaml + 对接帖。
 
-## 开场：同一个 pi0，两条路（先看省在哪）
+## 开场
 
-| 环节 | 官方原生（Robotwin XPolicyLab/`policy/`） | harness（我们） | 省了什么 |
-|---|---|---|---|
-| 模型代码 | 手写 `deploy_policy.py` 六函数（约 200 行） | 0 行（bake 好了） | 写代码 |
-| 模型环境 | 自装 policy conda env | serve 镜像 pull 即用 | 装 env |
-| 仿真环境 | 自装 robotwin env | env 镜像 pull 即用 | 装 env |
-| 跑测循环 | `eval.sh` 十几个参数，循环自己写 | 两个 yaml + dispatch | 写循环+记分 |
-| 口径信息 | 散三处（代码/yml/sh） | 收拢成 serve ★项 | 不省，但收拢了 |
-| 结果 | `eval_result/` 本地 | OBS + aggregate（跨 task 可比） | 可比性 |
-
-合计：200 行代码 + 2 个 env + 10+ 参数 → 2 个 yaml。**省的是实现，不省的是口径**：
-`ckpt_setting`（训的哪份数据）vs `task_config`（测的什么环境）在官方命令行里
-本来就是两个独立参数。
+harness 把官方原生要写的（约 200 行适配器 + 两个 env + 十几个参数）收拢成两个 yaml。
+**省的是实现，不省的是口径**：`ckpt_setting`（训的哪份数据）vs `task_config`
+（测的什么环境）在官方命令行里本来就是两个独立参数——训练口径和评测环境分开填，
+两条路都一样，这就是 03 披露清单的来历。
 
 ## 准备
 
