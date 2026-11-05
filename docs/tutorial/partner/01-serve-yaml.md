@@ -57,14 +57,14 @@ class MyModelServer(PredictModelServer):
 
 对应官方第 3 步（`predict(obs, row) -> dict` 或 `predict_batch`）。
 
-**操作**：二选一，抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)：
+**操作**：在 §2 的类里实现其中一个函数（官方原话 `Implement predict(obs, row) -> dict or predict_batch(obs, rows) -> Batch`），抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)：
 
 ```python
 def predict(self, obs, row):
     # obs: {"images": {...}, "task_description": "..."}；return {"actions": actions}
 ```
 
-批量更快才写 `predict_batch(obs, rows)`（obs 按列切分，一行一 episode）；不写则引擎逐行调 `predict`。
+批量更快才实现 `predict_batch(obs, rows)`（obs 按列切分，一行一 episode）；只实现 `predict` 也行，引擎逐行调它。模型本体的 load 在 `__init__`（见 §2，官方括号里的后半句）。
 
 **检查点**：单步能返回 `[T, D]` 动作；`get_action_spec`/`get_observation_spec` 照抄同族实现。
 
