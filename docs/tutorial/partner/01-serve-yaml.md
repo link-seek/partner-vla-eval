@@ -45,7 +45,7 @@ python3 --version   # 3.8+ 即可
 | DB-CogACT / CogACT | cogact 模板（操作四），`model_path` 按 task 分头 |
 | X-VLA 官方 ckpt | X-VLA 模板（EE 口径，操作四），`domain_id` 按官方 recipe |
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
-| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 `add-model-server` skill 加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接发帖，表单空着，我们帮你看 |
+| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接发帖，表单空着，我们帮你看 |
 
 2. 跑 probe 核对（拿不准时用；路线笃定的可跳过，直接到操作三人答★项）：
 
@@ -152,7 +152,7 @@ args:
  spec warning 见 quickstart 检查点。
 * **三段式**：`from_pretrained` 不认 `repo/subdir`，CI 先 snapshot 再 `sed` 生成本地版；
  你写三段式一样能发帖。要跑哪个 task 就用哪个 task 的头。
-* **本地校验**：有 GPU 可跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；
+* **本地校验**：有 GPU 可跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟，见 [CONTRIBUTING Smoke Tests](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#smoke-tests)）；
  无 GPU 直接发帖，smoke 代验。
 * **probe 的边界**：不假设目录结构（有什么报什么）；config.json 数字仅参考
  （训练切分≠serving 节拍；SmolVLA 6-D/7-D 前车之鉴）。最终口径以 smoke 为准。
