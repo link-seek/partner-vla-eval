@@ -28,7 +28,17 @@ cd partner-vla-eval
 
 对应官方第 1 步（[`src/vla_eval/model_servers/<name>.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)，uv script + PEP 723）。
 
-**操作**：看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件：顶部 PEP 723 依赖块照抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的文件头，类架子见 §2。
+**操作**：先对号入座，再往下读：
+
+| 模型类型 | 走这条路线 |
+|---|---|
+| DB-CogACT / CogACT | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
+| X-VLA 官方 ckpt | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe |
+| LeRobot 系 ckpt（单臂） | 规划接入方向：字段见上游 lerobot README，桥模板换 checkpoint 即可；当前 smoke/全量只开 RobotWin |
+| 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
+| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
+
+然后看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件：顶部 PEP 723 依赖块照抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的文件头，类架子见 §2。
 
 **检查点**：你能说出“我用哪一族、哪一份 yaml”。当前 smoke/全量只开 RobotWin，LIBERO/CALVIN 标注规划中——yaml 里看到 libero/calvin 文件也不用管。
 
@@ -38,7 +48,7 @@ cd partner-vla-eval
 
 对应官方第 2 步（继承 `PredictModelServer`，见 [`src/vla_eval/model_servers/predict.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/predict.py)）。
 
-**操作**：新文件照抄参考实现 [`src/vla_eval/model_servers/cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的类架子：
+**操作**：新文件照抄你这条路线的 server 类架子——B 看 [`dexbotic/cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/dexbotic/cogact.py)，C 看 [`xvla.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/xvla.py)，新族看官方最小例 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)（Microsoft CogACT）：
 
 ```python
 from vla_eval.model_servers.predict import PredictModelServer
@@ -53,46 +63,44 @@ class MyModelServer(PredictModelServer):
 
 **原理**：权重在 `__init__` 里一次 load 好（官方明确 no lazy-load hook）。首推理必须已是稳态延迟，warm up（compile 等）也在 `__init__` 或 `reset_episodes` 里做完——runner 是 `reset_episodes` 一返回就起表计时的。
 
-### §3 实现推理：实现 predict 或 predict_batch 之一
+### §3 实现推理：只实现 predict 或 predict_batch 之一
 
 对应官方第 3 步（`Implement predict(obs, row) -> dict or predict_batch(obs, rows) -> Batch. Load the model inside __init__ (no lazy-load hook)`）。
 
-**操作**：三件事，都照抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)。
+**操作**：不同族写法不同，先按路线选参考实现：
 
-① 实现 `predict`——取图、取语言、调模型、返回 dict：
+| 路线 | 参考文件 | 它怎么出动作 |
+|---|---|---|
+| B DB-CogACT | [`dexbotic/cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/dexbotic/cogact.py) | `CogACTForCausalLM.inference_action`；`_convert_actions` 把累计 delta 转绝对关节（14D） |
+| C X-VLA | [`xvla.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/xvla.py) | `generate_actions`；`benchmark_profile: robotwin` 出 16D EE |
+| 其他/新族 | [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)（Microsoft CogACT，官方指定最小例） | `load_vla` + `predict_action` |
+
+落到代码只有两件事。
+
+① 实现 `predict`——取图、取语言、调模型、返回 dict（调用那行换成你参考文件里的写法）：
 
 ```python
 def predict(self, obs, row):
-    pil_image = self._obs_to_pil(obs)             # obs["images"] 里取一张，转 RGB
+    pil_image = self._obs_to_pil(obs)             # obs["images"] 里取图
     prompt = obs.get("task_description", "")      # 语言指令
-    actions, _ = self._model.predict_action(pil_image, prompt, unnorm_key=..., cfg_scale=...)
-    return {"actions": actions}                   # dict，键名对齐 get_action_spec
+    actions, _ = self._model.predict_action(...)  # B/C 换成 inference_action / generate_actions
+    return {"actions": actions}                   # dict
 ```
 
-② （可选）要合批才实现 `predict_batch`，同样照抄（文件头已有 `from vla_eval import columns`）：
+② （可选）要合批才实现 `predict_batch`，照参考文件的写法（B/C 都有现成实现）；不实现则引擎逐行调 `predict`。
 
-```python
-def predict_batch(self, obs, rows):
-    obs_batch = columns.split(obs, len(rows))     # 按行切开
-    if self.max_batch_size == 1:
-        return columns.stack([self.predict(obs_batch[0], rows[0])])
-    ...                                           # 真合批：一次 predict_action_batch，再 columns.stack
-```
-
-不实现它也能跑：基类默认逐行调 `predict`（官方原文 "default: predict per row"）。
-
-③ 模型加载放 `__init__`：`load_vla(...)` → `.to(device).eval()`，不要留到第一次 `predict`。
+模型加载放 `__init__`（官方原文后半句 no lazy-load hook），照参考文件（B 是 `from_pretrained`，C 是 `AutoModel.from_pretrained`）。
 
 **检查点**：
-- 喂一条 obs 返回 `{"actions": <[T, D]>}`，`T` = §5 填的 `chunk_size`。
-- 参考实现里还有 `get_action_spec` / `get_observation_spec`（返回 `{"actions": RAW}`、`{"image": IMAGE_RGB, "language": LANGUAGE}`）——基类默认抛 `NotImplementedError`，serve 端会静默跳过：不写也能起，但拿不到口径错配的 warning，建议照抄。
-- 类能被 import 且能实例化（下一步 §4 会验）。
+- 返回 `{"actions": <[T, D]>}`，`T` = §5 填的 `chunk_size`。
+- `get_action_spec` / `get_observation_spec` 照你参考文件（B 返回 `{"actions": RAW}`；C 的 robotwin 档返回 `ee_pose`）。基类默认抛 `NotImplementedError`，serve 端静默跳过：不写也能起，但拿不到口径错配 warning。
 
 **原理**：
 - 一行 = 一个 episode。`obs` 是这一行这一帧的观测，`row` 是这一行的句柄（`row.id`/`row.step`/`row.is_first`）。
 - `chunk_size` 是“一次推理出几个动作”：T 个动作里第一个立刻发，其余 T-1 步从 per-episode buffer 发，不再进模型——填错就是动作节奏错（见 §5）。
 - no lazy-load 的原因：runner 在 `reset_episodes` 返回那一刻就起表计时，第一次推理必须已是稳态延迟；warm up（`torch.compile` 等）要在 `__init__` 或 `reset_episodes` 里做完。
 - 所有 hook 在一条模型线程上按到达顺序执行，线程绑定状态（CUDA graph、JAX）也在 `__init__` 或首次 `reset_episodes` 里建。
+- B 的 `_convert_actions` 是口径的关键：模型出的是累计 delta，RoboTwin 要绝对关节——没有它，动作全错但不报错。
 
 ### §4 入口与并发：照抄一段，参数缺省
 
