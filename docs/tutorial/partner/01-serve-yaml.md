@@ -37,7 +37,9 @@ python3 --version   # 3.8+ 即可
 
 ## 操作
 
-1. 找你的路线（自己判断），定完再往下读，别的一行都不用看：
+对照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server) 六步，用户侧（不写代码）只做填表版：①定范围（操作 1，对应 §1）→ ②备权重（操作 2，对应 §2 资产部分）→ ③对口径（操作 3-4，对应 §3 观测/动作映射）→ ④校验交接（test -c/smoke + 发帖，对应 §5）。§4 状态并发由模板默认值覆盖，有特殊才填。
+
+1. 找你的路线（对照 §1 定范围；自己判断），定完再往下读，别的一行都不用看：
 
 | 模型类型 | 走这条路线 |
 |---|---|
@@ -47,7 +49,7 @@ python3 --version   # 3.8+ 即可
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
 | 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接发帖，表单空着，我们帮你看 |
 
-2. 跑 probe 核对（拿不准时用；路线笃定的可跳过，直接到操作三人答★项）：
+2. 跑 probe 核对（对照 §2 备权重；拿不准时用，路线笃定的可跳过）：
 
 ```bash
 python3 scripts/spec_probe.py <本地目录>    # 主用法：只读 config.json + safetensors 文件头，不加载权重体。
@@ -71,7 +73,7 @@ python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；
 - 最终口径以 smoke 实测为准（config.json 会撒谎，见 SmolVLA 6-D/7-D）
 ```
 
-3. 按你的路线表填★项（官方字段是全集，★是准入子集——错一项就 0 分或起不来；
+3. 按你的路线表填★项（对照 §3 对口径；官方字段是全集，★是准入子集——错一项就 0 分或起不来；
  ★之外的抄官方默认，不动）：
 
 **路线 B：DB-CogACT**（官方 `db_cogact/_base.yaml` + `robotwin2.yaml` 原样）：
@@ -125,7 +127,7 @@ args:
   denoising_steps: 10                    # base 默认，不动
 ```
 
-5. 发帖（交作业）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
+5. 发帖（对照 §5 校验交接；交作业）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
  + ★项贴进去，不知道的空着。去[对接区发帖](https://github.com/link-seek/partner-vla-eval/discussions)，标题 `【评测对接】<模型名>`。
  1 天内给 spec 对齐报告，通过进 smoke。
 
@@ -154,6 +156,7 @@ args:
  你写三段式一样能发帖。要跑哪个 task 就用哪个 task 的头。
 * **本地校验**：有 GPU 可跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟，见 [CONTRIBUTING Smoke Tests](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#smoke-tests)）；
  无 GPU 直接发帖，smoke 代验。
+* **骨架对照**：本篇五步 = CONTRIBUTING 六步的用户侧子集（§4 除外）；字段语义以官方 yaml/README 为准，本篇只做准入标记（★）。
 * **probe 的边界**：不假设目录结构（有什么报什么）；config.json 数字仅参考
  （训练切分≠serving 节拍；SmolVLA 6-D/7-D 前车之鉴）。最终口径以 smoke 为准。
 
