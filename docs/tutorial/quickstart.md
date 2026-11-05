@@ -47,7 +47,7 @@ smoke_exit=0
 
 - [ ] `robotwin-smoke.log` 尾部 1/1（只验链路，不计分）。
 - [ ] `cogact-serve.log`：serve 端完整日志。
-- [ ] 录像 mp4：出 0 分时亲眼看，不要只看数字。
+- [ ] 录像 mp4：出 0 分时亲眼看，不要只看数字；成功时看也行——这一集就是原理第一条的现场（双臂抓滚筒全程）。
 - [ ] `serve UP` 在探测内出现？3 次重试都起不来，先看 serve 尾日志
  （已自动存 `results/serve-debug-attempt*.log`），不要先怀疑 benchmark。
 - [ ] 日志头 20 行无 `Spec mismatch`？有 → **停手**，先对
