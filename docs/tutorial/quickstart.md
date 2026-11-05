@@ -21,6 +21,8 @@ flowchart LR
     C -->|"docker.sock 拉起"| E
 ```
 
+为什么点一下就行：DB-CogACT 官方两条路全通——原生 `playground/benchmarks/robotwin2` + harness `dexbotic/cogact.py`，我们的 serve yaml 照抄官方 `robotwin2.yaml`，只换 `model_path` 按 task 分头。我们没写一行模型代码，站在官方肩膀上。
+
 三容器：模型 serve（权重变服务）←→ 考场 client（发观测收动作记分）→ 经 docker.sock 拉起考场 env（SAPIEN 模拟器，判分在此）。详见 [anatomy.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/anatomy.md)。
 
 ## 操作
