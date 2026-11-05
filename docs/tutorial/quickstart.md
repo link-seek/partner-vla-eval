@@ -67,7 +67,6 @@ smoke_exit=0
 * **你点的 dispatch 没有拉代码**——V100 平时关机（省卡钱），开机关机走 hw21 调华为云内网 API；V100 几乎没有外网，代码经 `vla-payload` 镜像从 SWR 内网取，不从代码仓拉取。**下载只能发生在有外网处**，这是全仓铁律。
 * **你等的那几分钟，是在下 grab_roller 的专用权重包**（约 15GB，经 HF 镜像源进 V100 盘永久缓存；mirror 是下别人权重的加速通道，OBS 是存我们产物的仓库，两码事）。权重进不了镜像（传不动），serve 镜像只烘依赖；运行时 `UV_OFFLINE=1`，缺东西直接失败，不许现场装。
 * **serve UP 等了 20 分钟是正常的**——7B 加载分钟级，120 轮×10 秒上限是算过的；3 次重试 cover 冷启动偶发 CUDA 初始化失败，重试完还起不来再看日志。
-* **你没见到路径问题，是因为 CI 替你趟了**——`from_pretrained` 不认 `repo/subdir` 三段式，CI 先 snapshot 再 `sed` 生成本地版；手写三段式必 `HFValidationError`，01 里你会亲手遇到。
 * **你刚跑的是全量的 1/50**——smoke 与全量同一套配置（`test_num=1` + `skip_expert_check=true`），只差集数。绿了 means 口径权重 serve 落盘四个变量一次对齐，再跑 49 遍就行。
 * **你看到的 0 分先别骂模型**——`fail` 才是没做出来，`error`（infra/坏种子抛异常）单列不怪模型。0/30 全 ERROR 但 exit 0（精度断崖的教训），先看 errors 列。
 * **日志头的 warning 是在救你的卡**——episode 起点自动比对口径，`Spec mismatch` 不停手的话，EE 当关节喂能烧完 400 步拿 0 分还零异常。唯一的例外是 advisory 级 warning（X-VLA `ee_pose` 未声明但动作照通）。
