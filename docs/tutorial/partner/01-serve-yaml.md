@@ -40,15 +40,16 @@ python3 --version   # 3.8+ 即可
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
 | 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
 
-### §2 备权重：交付三选一
+### §2 备权重：官方两项 + 我方补充一项
 
-权重怎么来就怎么交，三选一（版本精确到可复现为止）：
+上游原文（SKILL §2 + lerobot README）：权重交 **Hub ID 或本地路径**，版本必须
+**精确 revision**（验文件，不验"有个快照就行"）。照抄：
 
 | 交付方式 | 交什么 | 版本怎么定 |
 |---|---|---|
-| Hub | ID + 精确 commit | `git rev-parse` 那串，分支名不行 |
-| 文件 | 目录 | 文件夹哈希/时间/自述三选一；按 task 分头的逐个列 |
-| OBS 地址 | bucket/path | 权限/有效期要够我们拉取 |
+| Hub ID（官方） | ID + 精确 commit | `git rev-parse` 那串，分支名不行 |
+| 本地路径（官方） | 目录 | 快照哈希；按 task 分头的逐个列 |
+| OBS 地址（我方补充，离线链路用） | bucket/path | 权限/有效期要够我们拉取 |
 
 私仓先给 `link-seek` 开授权。`from_pretrained` 不认 `repo/subdir` 三段式——写了也照收，
 CI 会 snapshot 转本地路径（见原理三段式）。
