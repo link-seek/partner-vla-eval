@@ -137,10 +137,10 @@ args:
 
 chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag` 走 `policy_kwargs`，写进表单备注；`max_rows`/`max_batch_size` 不碰，由 serve 镜像定。
 
-### §5 校验交接：test -c + 交给对接人
+### §5 校验交接：test -c + 联系 xieyucheng
 
-有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；无 GPU 跳过，smoke 代验。然后把三样发给对接人（[对接人邮箱]，标题 `【评测对接】<模型名>`）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
- + ★项贴进去，不知道的空着。对接人确认后进 smoke（1 天内给 spec 对齐报告）。
+有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；无 GPU 跳过，smoke 代验。然后联系 xieyucheng，把三样发过去（标题 `【评测对接】<模型名>`）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
+ + ★项贴进去，不知道的空着。xieyucheng 确认后进 smoke（1 天内给 spec 对齐报告）。
 
 ## 检查点
 
@@ -172,4 +172,4 @@ chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embod
 
 ## 下一步
 
-对接人确认通过 → [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md)（1 task×1ep，拿 spec 对齐报告）。
+xieyucheng 确认通过 → [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md)（1 task×1ep，拿 spec 对齐报告）。
