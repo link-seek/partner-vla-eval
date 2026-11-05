@@ -56,7 +56,7 @@ args:
 
 ## 第二块：run yaml（怎么跑）
 
-即 `configs/run-robotwin-smoke.yaml` 全文：
+即 `configs/run-robotwin-smoke.yaml` 全文（照抄官方 `benchmarks/robotwin/eval.yaml`，只换 SWR 镜像 + 加 `timeout: 600`）：
 
 ```yaml
 server:
