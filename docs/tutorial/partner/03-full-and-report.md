@@ -69,7 +69,7 @@ checkpoint 与训练说明（权重精确版本 + 按 task 分头情况 + 微调
  place_empty_cup 16% vs 28% 差 12pp → 待定）。④error 口径一致 + 榜单四要素
  （分数 + n + 版本日期 + 机器；同卡才可比，换卡重打基线）。
 * **分数怎么读**：`mean_success`（RobotWin）= 成功 ep / 总 ep，二值平均；
- 和官称 ±5pp 算对上，差 10pp 先查口径（[08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md) 第 1 条）；
+ 和官称（[出处](https://github.com/Dexmal/dexbotic#benchmark-results)，Dexbotic 自家链路）±5pp 算对上，差 10pp 先查口径（[08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md) 第 1 条）；
  跨榜不比大小。
 * **训练口径是变量**：[官方 Table 3](https://arxiv.org/abs/2506.18088) 同一模型×三种训练口径并列比成功率——clean 微调
  几乎无提升，Rand 预训练 +30%。不同口径的分数只许并列，不许排名。
