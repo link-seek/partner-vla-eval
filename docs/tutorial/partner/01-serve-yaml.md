@@ -26,9 +26,9 @@ cd partner-vla-eval
 
 ### §1 建文件：先找有没有现成模板，有就不用写代码
 
-对应官方第 1 步（`src/vla_eval/model_servers/<name>.py`，uv script + PEP 723）。
+对应官方第 1 步（[`src/vla_eval/model_servers/<name>.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)，uv script + PEP 723）。
 
-**操作**：看上游 `configs/model_servers/` 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件，文件头照抄参考实现（见 §2）。
+**操作**：看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件，文件头照抄参考实现（见 §2）。
 
 **检查点**：你能说出“我用哪一族、哪一份 yaml”。当前 smoke/全量只开 RobotWin，LIBERO/CALVIN 標规划中——yaml 里看到 libero/calvin 文件也不用管。
 
@@ -36,9 +36,9 @@ cd partner-vla-eval
 
 ### §2 继承：没有现成模板才写，有就跳过
 
-对应官方第 2 步（继承 `PredictModelServer`，见 `src/vla_eval/model_servers/predict.py`）。
+对应官方第 2 步（继承 `PredictModelServer`，见 [`src/vla_eval/model_servers/predict.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/predict.py)）。
 
-**操作**：新文件照抄参考实现 `src/vla_eval/model_servers/cogact.py` 的类架子：
+**操作**：新文件照抄参考实现 [`src/vla_eval/model_servers/cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的类架子：
 
 ```python
 from vla_eval.model_servers.predict import PredictModelServer
@@ -57,7 +57,7 @@ class MyModelServer(PredictModelServer):
 
 对应官方第 3 步（`predict(obs, row) -> dict` 或 `predict_batch`）。
 
-**操作**：二选一，抄 `cogact.py`：
+**操作**：二选一，抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)：
 
 ```python
 def predict(self, obs, row):
@@ -72,7 +72,7 @@ def predict(self, obs, row):
 
 ### §4 入口与并发：照抄三行，参数缺省
 
-对应官方第 4 步（`run_server`）+ 底下并发说明。
+对应官方第 4 步（[`run_server`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/serve.py)）+ 底下并发说明。
 
 **操作**：文件尾只写这三行，不手写 argparse：
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
 **操作**：复制 §1 定下来的那一例，只改★项，其余照抄、不动。
 
-DB-CogACT（官方 `db_cogact/_base.yaml` + `robotwin2.yaml` 原样）：
+DB-CogACT（官方 [`db_cogact/_base.yaml`](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/db_cogact/_base.yaml) + [`robotwin2.yaml`](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/db_cogact/robotwin2.yaml) 原样）：
 
 ```yaml
 # _base.yaml（不动）
@@ -114,7 +114,7 @@ args:
   use_text_template: false                              # robotwin2 覆写，照抄
 ```
 
-X-VLA（官方 `xvla/_base.yaml` + `robotwin.yaml` 原样）：
+X-VLA（官方 [`xvla/_base.yaml`](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/xvla/_base.yaml) + [`robotwin.yaml`](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/xvla/robotwin.yaml) 原样）：
 
 ```yaml
 # _base.yaml（不动）
@@ -134,7 +134,7 @@ args:
   chunk_size: 30                        # ★官方值（不是 16，别按 CogACT 脑补）
 ```
 
-LeRobot 系走桥模板（字段见上游 lerobot README 参数表，换 checkpoint 即可；单臂，规划接入方向）。
+LeRobot 系走桥模板（字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表，换 checkpoint 即可；单臂，规划接入方向）。
 
 **检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init=false` 是 run 侧参数，不在 serve yaml 里找。
 
