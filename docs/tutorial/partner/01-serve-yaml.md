@@ -17,7 +17,7 @@ harness 把官方原生要写的（适配器代码 + 两个 env + 十几个参�
 下文六节与上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server) 1:1 对照：节号即上游节号。卡住时拿着节号去上游问。
 已有现成模板的模型只做 §1（找路）→ §5（填 yaml）→ §6（校验），§2–§4 跳过不写代码。
 
-先把模板和表单源文件拿下来（后面照着改、对着填）：
+先把表单和示例配置拿下来；模板以上游 `configs/model_servers/` 为准（§5 给了两例全文）：
 
 ```bash
 git clone https://github.com/link-seek/partner-vla-eval.git
@@ -32,7 +32,8 @@ cd partner-vla-eval
 
 | 模型类型 | 走这条路线 |
 |---|---|
-| DB-CogACT / CogACT | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
+| DB-CogACT（Dexbotic，RobotWin 权重） | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
+| CogACT（Microsoft 原版，7-DoF） | 上游 `cogact/` 模板（非 RobotWin 口径）；要报 RobotWin 走「以上都不是」 |
 | X-VLA 官方 ckpt | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe |
 | LeRobot 系 ckpt（单臂） | 规划接入方向：字段见上游 lerobot README，桥模板换 checkpoint 即可；当前 smoke/全量只开 RobotWin |
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
@@ -170,7 +171,7 @@ LeRobot 系走桥模板（字段见上游 [lerobot README](https://github.com/al
 
 **检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init` 是 benchmark 侧参数（`action_type: ee` 时自动关，走 CuRobo 规划），不在 serve yaml 里找。
 
-**原理**：serve yaml 定义模型的评测态身份（哪个权重 + 什么参数跑起来），不含训练信息。官方字段是全集，★是准入子集——错一项就 0 分或起不来。dtype 不是 yaml 字段（官方 yaml 都没有），是我们起服务时定的、写进表单：X-VLA 用 fp32（fp16 首推理即崩），CogACT 在 V100 单卡用 fp16（fp32 首 forward 即 31GB OOM）。0 分先查 dtype，不要先怀疑模型。
+**原理**：serve yaml 定义模型的评测态身份（哪个权重 + 什么参数跑起来），不含训练信息。官方字段是全集，★是准入子集——错一项就 0 分或起不来。dtype 不是 yaml 字段（官方 yaml 都没有），是我们起服务时定的、写进表单：X-VLA 用 fp32（fp16 首推理即崩），DB-CogACT 在 V100 单卡用 fp16（fp32 首 forward 即 31GB OOM）。0 分先查 dtype，不要先怀疑模型。
 
 ### §6 校验交接：有 GPU 先 `test -c`，然后联系 xieyucheng
 

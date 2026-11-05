@@ -30,7 +30,7 @@ nav_exclude: true
 
 ### 4. 本体与考场
 - 本体：[ ] 双臂 Aloha 系  [ ] 单臂 Franka 系  [ ] 其它：
-- 想报的榜：[ ] RobotWin（双臂）  [ ] LIBERO（单臂）  [ ] CALVIN（长程）
+- 想报的榜：[ ] RobotWin（双臂，当前开放）  [ ] LIBERO（单臂，规划中）  [ ] CALVIN（长程，规划中）
 
 ### 5. 输入
 - 相机名（照实写，如 head_camera/camera1…，名字对不上直接黑图）：
