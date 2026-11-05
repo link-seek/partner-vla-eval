@@ -70,7 +70,7 @@ benchmarks:
   - benchmark: "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark"
     episodes_per_task: 1          # ★smoke=1，全量=50（就差这一行）
     params:
-      task_name: grab_roller      # ★双臂抓滚筒：最稳最快，smoke 与全量首 task（链路验证要“模型必过的题”）
+      task_name: grab_roller      # ★双臂协作抓滚筒（任务细节见[官方任务页](https://robotwin-platform.github.io/doc/tasks/grab_roller.html)）；最稳最快，smoke 与全量首 task
       task_config: demo_clean     # ★Easy 条件（Hard 用 demo_randomized，待补）
       seed: 0
       instruction_type: seen
