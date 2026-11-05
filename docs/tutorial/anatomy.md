@@ -38,6 +38,8 @@ flowchart TB
 即 `configs/serve-robotwin-cogact.yaml` 全文（16 行，CI 实际用 snapshot 生成的
 `serve-robotwin-local.yaml`，只差 `model_path` 一行）：
 
+照抄官方 `db_cogact/robotwin2.yaml`，只换了 `model_path` 按 task 分头——DB-CogACT 官方原生+harness 两条路全通，所以零模型代码（见 quickstart 链路全景）。
+
 ```yaml
 script: "src/vla_eval/model_servers/dexbotic/cogact.py"   # 跑哪个 server 实现（不动）
 args:
