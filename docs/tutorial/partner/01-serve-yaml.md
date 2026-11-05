@@ -30,14 +30,16 @@ cd partner-vla-eval
 
 **操作**：先对号入座，再往下读：
 
-| 模型类型 | 走这条路线 |
-|---|---|
-| DB-CogACT（Dexbotic，RobotWin 权重） | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
-| CogACT（Microsoft 原版，7-DoF） | 上游 `cogact/` 模板（非 RobotWin 口径）；要报 RobotWin 走「以上都不是」 |
-| X-VLA 官方 ckpt | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe |
-| LeRobot 系 ckpt（单臂） | 规划接入方向：字段见上游 lerobot README，桥模板换 checkpoint 即可；当前 smoke/全量只开 RobotWin |
-| 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
-| 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
+当前只开 RobotWin。上游 `model_servers/` 有 15 个族目录，但**有 RobotWin 配置的只有两份**（`db_cogact/robotwin2.yaml`、`xvla/robotwin.yaml`）：
+
+| 模型类型 | RobotWin 配置 | 走这条路线 |
+|---|---|---|
+| DB-CogACT（Dexbotic） | 有 | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
+| X-VLA 官方 ckpt | 有 | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe |
+| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 无 | 上游 `lerobot/` 桥和配置都在，但全是 LIBERO/base（10 份 yaml），没有 RobotWin 这一份；要报 RobotWin 需先补 RobotWin 适配（规划中） |
+| CogACT（Microsoft 原版，7-DoF） | 无 | 只有 RT-1/Bridge 配置；要报 RobotWin 需适配，走「以上都不是」 |
+| 上游其他（OpenVLA / OFT / Pi0…） | 无 | 上游有 server 不等于有 RobotWin 配置：先查该族目录，没有就走适配 |
+| 以上都不是 | — | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
 
 然后看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件：顶部 PEP 723 依赖块照抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的文件头，类架子见 §2。
 
@@ -167,7 +169,7 @@ args:
   chunk_size: 30                        # ★官方值（不是 16，别按 CogACT 脑补）
 ```
 
-LeRobot 系走桥模板（字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表，换 checkpoint 即可；单臂，规划接入方向）。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
+LeRobot 系：上游 `lerobot/` 桥和 10 份配置都在，但全是 LIBERO/base，没有 RobotWin 的 yaml——要报 RobotWin 需先补这一份（规划中）。字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
 
 **检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init` 是 benchmark 侧参数（`action_type: ee` 时自动关，走 CuRobo 规划），不在 serve yaml 里找。
 
