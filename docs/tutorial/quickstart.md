@@ -61,27 +61,16 @@ smoke_exit=0
 3. 都绿还 0 → 重跑一次（seed 0 是校验种子，剩下的多是 infra 偶发）；
 4. 还 0 → 按 15 条排障表走，这时才值得怀疑人生。
 
-## 原理
+## 原理（你刚才干了什么）
 
-* **解耦**：模型和考场互相不知对方存在（上游论文 §II-A）。模型只实现
- `predict(观测)→动作`，考场只实现 `reset/step/判分`，N×M 接成 N+M；
- 各考场依赖装不到一起，所以每个考场进自己的 Docker 镜像。
-* **零 checkout**：V100 平时关机（省卡钱），开机关机走 hw21 调华为云内网 API。
- V100 几乎没有外网，代码经 `vla-payload` 镜像从 SWR 内网取，不从代码仓拉取。
- **下载只能发生在有外网处**，这是全仓铁律。
-* **权重不进镜像**：15GB/头传不动。serve 镜像只烘依赖，权重走 mirror 下到
- V100 盘缓存永久有效；运行时 `UV_OFFLINE=1`，缺东西直接失败，不许现场装。
-* **预热与探测**：`hf-download` 先下好权重（Xet 要 token）；7B 加载分钟级，
- 120 轮×10 秒上限是算过的；3 次重试 cover 冷启动偶发 CUDA 初始化失败。
-* **本地路径**：`from_pretrained` 不认 `repo/subdir` 三段式，CI 先 snapshot 再
- `sed` 生成 `serve-robotwin-local.yaml`；手写三段式必 `HFValidationError`。
-* **smoke 的定义**：`test_num=1` + `skip_expert_check=true`。与全量同一套配置，
- 只差集数——smoke 绿了，全量没有新变量，这就是省卡钱的全部含义。
-* **error≠fail**：`fail` 模型没做出来；`error` 是 infra/坏种子抛异常，单列。
- 0/30 全 ERROR 时 exit code 照样 0，看分不看日志会误判（精度断崖的教训）。
-* **spec 是熔断器**：episode 起点自动比对口径，EE 当关节喂则硬截 `act[:14]`——
- 400 步跑满全 0 分零异常。唯一的例外是 advisory 级 warning（X-VLA `ee_pose`
- 未声明但动作照通）。
+* **你只点了一下，什么都没填**——两个 yaml 是预置好的，自己填是 01 的事。你之所以点一下就能跑，是因为模型和考场互相不知对方存在（上游论文 §II-A），中间是标准协议：适配器代码和两个 conda env 都 bake 在镜像里了，你不需要写。
+* **你点的 dispatch 没有拉代码**——V100 平时关机（省卡钱），开机关机走 hw21 调华为云内网 API；V100 几乎没有外网，代码经 `vla-payload` 镜像从 SWR 内网取，不从代码仓拉取。**下载只能发生在有外网处**，这是全仓铁律。
+* **你等的那几分钟，是在下 grab_roller 的专用权重包**（约 15GB，走 mirror 进 V100 盘永久缓存）。权重进不了镜像（传不动），serve 镜像只烘依赖；运行时 `UV_OFFLINE=1`，缺东西直接失败，不许现场装。
+* **serve UP 等了 20 分钟是正常的**——7B 加载分钟级，120 轮×10 秒上限是算过的；3 次重试 cover 冷启动偶发 CUDA 初始化失败，重试完还起不来再看日志。
+* **你没见到路径问题，是因为 CI 替你趟了**——`from_pretrained` 不认 `repo/subdir` 三段式，CI 先 snapshot 再 `sed` 生成本地版；手写三段式必 `HFValidationError`，01 里你会亲手遇到。
+* **你刚跑的是全量的 1/50**——smoke 与全量同一套配置（`test_num=1` + `skip_expert_check=true`），只差集数。绿了 means 口径权重 serve 落盘四个变量一次对齐，再跑 49 遍就行。
+* **你看到的 0 分先别骂模型**——`fail` 才是没做出来，`error`（infra/坏种子抛异常）单列不怪模型。0/30 全 ERROR 但 exit 0（精度断崖的教训），先看 errors 列。
+* **日志头的 warning 是在救你的卡**——episode 起点自动比对口径，`Spec mismatch` 不停手的话，EE 当关节喂能烧完 400 步拿 0 分还零异常。唯一的例外是 advisory 级 warning（X-VLA `ee_pose` 未声明但动作照通）。
 
 ## 下一步（三选一）
 
