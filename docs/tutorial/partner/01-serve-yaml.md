@@ -11,9 +11,9 @@ nav_order: 3
 > 时间：30 分钟 ｜ 前置：读完 `quickstart`。
 > 你将得到：路线归位 + serve yaml + 提交包（权重版本 + ★项 + 表单）。
 
-harness 把官方原生要写的（约 200 行适配器 + 两个 env + 十几个参数）收拢成两个 yaml。
-**省的是实现，不省的是口径**：`ckpt_setting`（训的哪份数据）vs `task_config`
-（测的什么环境）在官方命令行里本来就是两个独立参数。
+harness 把官方原生要写的（适配器代码 + 两个 env + 十几个参数）收拢成一份 serve yaml。
+**省的是实现，不省的是口径**：权重（训的哪份 ckpt）和评测环境（测的哪个 task_config）
+本来就是两件事，harness 不在 yaml 里替你合并。
 下文六节与上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server) 1:1 对照：节号即上游节号。卡住时拿着节号去上游问。
 已有现成模板的模型只做 §1（找路）→ §5（填 yaml）→ §6（校验），§2–§4 跳过不写代码。
 
@@ -24,13 +24,13 @@ git clone https://github.com/link-seek/partner-vla-eval.git
 cd partner-vla-eval
 ```
 
-### §1 建文件：先找有没有现成模板，有就不用写代码
+### §1 建文件：先查现成模板，有就不用建
 
 对应官方第 1 步（[`src/vla_eval/model_servers/<name>.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)，uv script + PEP 723）。
 
-**操作**：看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件，文件头照抄参考实现（见 §2）。
+**操作**：看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件：顶部 PEP 723 依赖块照抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的文件头，类架子见 §2。
 
-**检查点**：你能说出“我用哪一族、哪一份 yaml”。当前 smoke/全量只开 RobotWin，LIBERO/CALVIN 標规划中——yaml 里看到 libero/calvin 文件也不用管。
+**检查点**：你能说出“我用哪一族、哪一份 yaml”。当前 smoke/全量只开 RobotWin，LIBERO/CALVIN 标注规划中——yaml 里看到 libero/calvin 文件也不用管。
 
 **原理**：上游按模型族分目录，一族一目录、一考场一 yaml。路线不是我们分的，是货架原样摆过来。
 
@@ -49,7 +49,7 @@ class MyModelServer(PredictModelServer):
         # 在这里 load 模型（不许懒加载，见下）
 ```
 
-**检查点**：类名能被 `run_server` 导入，`__init__` 里模型已 load 完。
+**检查点**：模块 import 无报错、类能实例化（依赖装齐、`__init__` 里模型 load 完）。
 
 **原理**：权重在 `__init__` 里一次 load 好（官方明确 no lazy-load hook）。首推理必须已是稳态延迟，warm up（compile 等）也在 `__init__` 或 `reset_episodes` 里做完——runner 是 `reset_episodes` 一返回就起表计时的。
 
@@ -69,7 +69,7 @@ def predict(self, obs, row):
     return {"actions": actions}                   # dict，键名对齐 get_action_spec
 ```
 
-② （可选）要合批才实现 `predict_batch`，同样照抄：
+② （可选）要合批才实现 `predict_batch`，同样照抄（文件头已有 `from vla_eval import columns`）：
 
 ```python
 def predict_batch(self, obs, rows):
@@ -94,11 +94,11 @@ def predict_batch(self, obs, rows):
 - no lazy-load 的原因：runner 在 `reset_episodes` 返回那一刻就起表计时，第一次推理必须已是稳态延迟；warm up（`torch.compile` 等）要在 `__init__` 或 `reset_episodes` 里做完。
 - 所有 hook 在一条模型线程上按到达顺序执行，线程绑定状态（CUDA graph、JAX）也在 `__init__` 或首次 `reset_episodes` 里建。
 
-### §4 入口与并发：照抄三行，参数缺省
+### §4 入口与并发：照抄一段，参数缺省
 
 对应官方第 4 步（[`run_server`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/serve.py)）+ 底下并发说明。
 
-**操作**：文件尾只写这三行，不手写 argparse：
+**操作**：文件尾只写这段，不手写 argparse：
 
 ```python
 if __name__ == "__main__":
@@ -106,15 +106,15 @@ if __name__ == "__main__":
     run_server(MyModelServer)
 ```
 
-`chunk_size`/`max_batch_size`/`max_rows`/`max_wait_time` 有特殊才填（`policy_kwargs` 走表单备注，如 GR00T 的 `embodiment_tag`），否则抄同族 yaml 默认。有现成模板的本节直接跳过。
+`chunk_size`/`max_batch_size`/`max_rows`/`max_wait_time` 有特殊才填，否则抄同族 yaml 默认。有现成模板的本节直接跳过。
 
-**检查点**：`python <name>.py --help` 是 `run_server` 的统一参数，不是你自己的。
+**检查点**：`python <name>.py --help` 能列出 `run_server` 的统一项（`--config`/`--address`/`--port`）和你的构造参数（`--args.<字段>`）。
 
 **原理**：`max_batch_size` 封顶每次合批几行，`max_wait_time` 等凑批，`max_rows` 封顶并发几 episode。缺省即模板值，调错只影响吞吐不影响分数——分数只看 §5 的口径项。
 
 ### §5 加配置：抄一份 yaml，只改★项
 
-对应官方第 5 步（`configs/model_servers/<name>/`，`extends: _base.yaml` 继承公共项）。**这是没模板之外的所有伙伴都要做的一步。**
+对应官方第 5 步（`configs/model_servers/<name>/`，`extends: _base.yaml` 继承公共项）。**无论有没有现成 server，这一步都要做。**
 
 **操作**：复制 §1 定下来的那一例，只改★项，其余照抄、不动。
 
@@ -158,11 +158,11 @@ args:
   chunk_size: 30                        # ★官方值（不是 16，别按 CogACT 脑补）
 ```
 
-LeRobot 系走桥模板（字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表，换 checkpoint 即可；单臂，规划接入方向）。
+LeRobot 系走桥模板（字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表，换 checkpoint 即可；单臂，规划接入方向）。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
 
-**检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init=false` 是 run 侧参数，不在 serve yaml 里找。
+**检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init` 是 benchmark 侧参数（`action_type: ee` 时自动关，走 CuRobo 规划），不在 serve yaml 里找。
 
-**原理**：serve yaml 定义模型的评测态身份（哪个权重 + 什么参数跑起来），不含训练信息。官方字段是全集，★是准入子集——错一项就 0 分或起不来。dtype 官方 yaml 不写（由镜像定，写进表单）：X-VLA 一律 fp32（fp16 首推理即崩），CogACT 在 V100 单卡走 fp16；0 分先查 dtype，不要先怀疑模型。
+**原理**：serve yaml 定义模型的评测态身份（哪个权重 + 什么参数跑起来），不含训练信息。官方字段是全集，★是准入子集——错一项就 0 分或起不来。dtype 不是 yaml 字段（官方 yaml 都没有），是我们起服务时定的、写进表单：X-VLA 用 fp32（fp16 首推理即崩），CogACT 在 V100 单卡用 fp16（fp32 首 forward 即 31GB OOM）。0 分先查 dtype，不要先怀疑模型。
 
 ### §6 校验交接：有 GPU 先 `test -c`，然后联系 xieyucheng
 
