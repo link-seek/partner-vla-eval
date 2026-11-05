@@ -55,6 +55,12 @@ smoke_exit=0
 - [ ] 权重预热 `Xet 401`？预热传 token + `HF_HUB_DISABLE_XET=1`（脚本里已有）。
  修不好的完整 15 条表在 [08-troubleshooting.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/08-troubleshooting.md)（将迁入 `reference/error-codes.md`）。
 
+**出 0 分先查链路，不查模型**（grab_roller 是已驯服 task，全量 92%，0 分几乎不可能是能力问题）：
+1. 日志头有 `Spec mismatch` → 口径（必现），对表改配置；
+2. 无 `serve UP` → infra/权重，看 serve 尾日志；
+3. 都绿还 0 → 重跑一次（seed 0 是校验种子，剩下的多是 infra 偶发）；
+4. 还 0 → 按 15 条排障表走，这时才值得怀疑人生。
+
 ## 原理
 
 * **解耦**：模型和考场互相不知对方存在（上游论文 §II-A）。模型只实现
