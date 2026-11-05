@@ -23,9 +23,10 @@ git clone https://github.com/link-seek/partner-vla-eval.git
 cd partner-vla-eval
 ```
 
-### §1 定范围：找你的路线
+### §1 定范围：按模型类型找你的路线，定完再往下读。
 
-（自己判断）定完再往下读，别的一行都不用看：
+<details>
+<summary>路线对照表</summary>
 
 | 模型类型 | 走这条路线 |
 |---|---|
@@ -37,8 +38,12 @@ cd partner-vla-eval
 
 模板都是上游 harness 同名配置，我们只做钉版适配（镜像、mirror、本地路径）。
 上游 20+ 模型 server 分 ✓ 已复现 / ◇ 已接入待复现两档。
+</details>
 
-### §2 备权重：官方两项 + 我方补充一项
+### §2 备权重：权重按"Hub ID 或本地路径 + 精确版本"交，OBS 地址另算我方补充。
+
+<details>
+<summary>交付表与版本规则</summary>
 
 上游原文（SKILL §2 + lerobot README）：权重交 **Hub ID 或本地路径**，版本必须
 **精确 revision**（验文件，不验"有个快照就行"）。照抄：
@@ -52,12 +57,12 @@ cd partner-vla-eval
 私仓先给 `link-seek` 开授权。`from_pretrained` 不认 `repo/subdir` 三段式——写了也照收，
 CI 会 snapshot 转本地路径；要跑哪个 task 就用哪个 task 的头。
 交之前自查三行：版本精确？权限开了？分头给全了？缺头的 task 排不上，401/403 直接打回。
+</details>
 
-### §3 对口径：填★表
+### §3 对口径：照你的路线表填★项（官方字段全集的子集），其余抄默认。
 
-按你的路线表填★项（官方字段是全集，★是准入子集——错一项就 0 分或起不来；
-★之外的抄官方默认，不动）。★即 6 项概念（权重/动作/相机/状态/chunk/dtype）：
-概念层统一，字段名按路线走；6 项不是上游标准，是我们的准入子集，全集见各模型 README。
+<details>
+<summary>三路线★表与模板全文</summary>
 
 **路线 B：DB-CogACT**（官方 `db_cogact/_base.yaml` + `robotwin2.yaml` 原样）：
 
@@ -117,11 +122,14 @@ dtype 先查后疑：X-VLA fp16 首推理即崩（六轮 29/30 vs 0/30，精度�
 CogACT fp32 首 forward 即 OOM（31GB）——0 分先查 dtype，不要先怀疑模型。
 口径错配必 0 分：EE 当关节喂，benchmark 硬截 `act[:14]`——400 步跑满全 0 分零异常，
 spec warning 见 quickstart 检查点。
+</details>
 
-### §4 状态并发：缺省
+### §4 状态并发：缺省，有特殊走 `policy_kwargs` 写表单备注。
 
-chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag` 走 `policy_kwargs`，写进表单备注；`max_rows`/`max_batch_size` 不碰，由 serve 镜像定。
+### §5 校验交接：有 GPU 先 `test -c`，然后联系 xieyucheng 交三样。
 
-### §5 校验交接：test -c + 联系 xieyucheng
+<details>
+<summary>提交包与 Top 3</summary>
 
 有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟，见 [CONTRIBUTING Smoke Tests](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#smoke-tests)）；无 GPU 跳过，smoke 代验。然后联系 xieyucheng，把三样（权重版本+★项+表单）发过去（标题 `【评测对接】<模型名>`）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把★项贴进去，不知道的空着。提交 Top 3 避开：确切版本、权重要授权的开好权限、按 task 分头的给全（= 权重★项没做）。xieyucheng 确认后进 smoke（1 天内给 spec 对齐报告）：[02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md)（1 task×1ep，拿 spec 对齐报告）。
+</details>
