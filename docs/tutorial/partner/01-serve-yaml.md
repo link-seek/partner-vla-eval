@@ -10,7 +10,7 @@ nav_order: 3
 > 产出一份 harness 能直接吃掉的 serve yaml。
 > 时间：30 分钟 ｜ 前置：读完 `quickstart` ｜ 准备：一台能上网的电脑，python3 即可
 > （无第三方依赖，不下权重，不用 GPU）。
-> 你将得到：probe 输出 + 路线归位 + ★项配准 + serve yaml + 对接帖。
+> 你将得到：路线归位 + ★项配准 + serve yaml + 提交包（权重版本 + ★项 + 表单）。
 
 harness 把官方原生要写的（约 200 行适配器 + 两个 env + 十几个参数）收拢成两个 yaml。
 **省的是实现，不省的是口径**：`ckpt_setting`（训的哪份数据）vs `task_config`
@@ -40,31 +40,18 @@ python3 --version   # 3.8+ 即可
 | 上游已接入的其他（OpenVLA / OFT / RDT / Pi0…） | 对应上游模板，表单里注明 |
 | 以上都不是 | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
 
-### §2 备权重：跑 probe 核对
+### §2 备权重：交付三选一
 
-（拿不准时用；路线笃定的可跳过，直接人答★项）：
+权重怎么来就怎么交，三选一（版本精确到可复现为止）：
 
-```bash
-python3 scripts/spec_probe.py <本地目录>    # 主用法：只读 config.json + safetensors 文件头，不加载权重体。
-                                            # 权重先落盘（你给文件 / 我们从 OBS 拉），probe 只验盘上的东西。
-python3 scripts/spec_probe.py <你的HF-ID>   # 备用法：权重在 Hub 上；私仓加 --token $HF_TOKEN
-```
+| 交付方式 | 交什么 | 版本怎么定 |
+|---|---|---|
+| Hub | ID + 精确 commit | `git rev-parse` 那串，分支名不行 |
+| 文件 | 目录 | 文件夹哈希/时间/自述三选一；按 task 分头的逐个列 |
+| OBS 地址 | bucket/path | 权限/有效期要够我们拉取 |
 
-权重在 OBS 上：不用跑 probe，直接把地址贴进表单——我们内网拉到 V100 落盘，
-落盘后跑的还是上面的本地分支。期望输出（以 `lerobot/pi05_libero_finetuned` 为例）：
-
-```text
-## spec_probe: lerobot/pi05_libero_finetuned
-- card tags: ['lerobot', 'safetensors', 'vision-language-action', ...]
-- gated: False  private: False
-- main HEAD: 7152f13e34c6
-- config 架构键: {"chunk_size": 50, "n_action_steps": 50, ...}
-- index 文件: 无（单文件 safetensors 或其它格式，需整包看头）
-
-## 仍需人答 / smoke 实测（机器读不到）
-- 相机名、状态字段需求、chunk 语义、特殊依赖（requirements/model card 无则试）
-- 最终口径以 smoke 实测为准（config.json 会撒谎，见 SmolVLA 6-D/7-D）
-```
+私仓先给 `link-seek` 开授权。`from_pretrained` 不认 `repo/subdir` 三段式——写了也照收，
+CI 会 snapshot 转本地路径（见原理三段式）。
 
 ### §3 对口径：填★表
 
@@ -128,15 +115,14 @@ chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embod
 
 ### §5 校验交接：test -c + 联系 xieyucheng
 
-有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；无 GPU 跳过，smoke 代验。然后联系 xieyucheng，把三样发过去（标题 `【评测对接】<模型名>`）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把 probe 输出
- + ★项贴进去，不知道的空着。xieyucheng 确认后进 smoke（1 天内给 spec 对齐报告）。
+有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`（上游自带冒烟）；无 GPU 跳过，smoke 代验。然后联系 xieyucheng，把三样（权重版本+★项+表单）发过去（标题 `【评测对接】<模型名>`）：复制 [partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 里的对接表单，把★项贴进去，不知道的空着。xieyucheng 确认后进 smoke（1 天内给 spec 对齐报告）。
 
 ## 检查点
 
-- [ ] probe 输出无 `仓库不可读`？401/403 = 私仓没开权限，先给 `link-seek` 授权（打回 Top 2）。
-- [ ] 本地目录无 commits？交付时注明版本（文件夹哈希/时间/自述三选一），否则复现翻车。
-- [ ] 分头子目录 probe 报出来了？表单第 6 类（权重）照抄。
-- [ ] 提交 Top 3 避开：确切 commit（probe 第一步就是干这个的）、权重要授权的开好权限、
+- [ ] 权重版本精确？Hub 要 commit，文件要三选一注明，否则复现翻车。
+- [ ] 私仓开了权限？401/403 直接打回（打回 Top 2）。
+- [ ] 分头给全了？缺头的 task 排不上。
+- [ ] 提交 Top 3 避开：确切版本、权重要授权的开好权限、
  按 task 分头的给全（= 权重★项没做）。
 
 ## 原理
@@ -156,8 +142,6 @@ chunk/state 由模板定，不填。有特殊需求才加：如 GR00T 的 `embod
  你写三段式一样能交，CI 会处理。要跑哪个 task 就用哪个 task 的头。
 * **本地校验**：见 §5（`vla-eval test -c` 前置校验）。
 * **骨架对照**：本篇 = CONTRIBUTING 六步的 1:1 填表版（§4 缺省走模板默认）；字段语义以官方 yaml/README 为准，本篇只做准入标记（★）。卡住时按节号去上游问，不用只找我们。
-* **probe 的边界**：不假设目录结构（有什么报什么）；config.json 数字仅参考
- （训练切分≠serving 节拍；SmolVLA 6-D/7-D 前车之鉴）。最终口径以 smoke 为准。
 
 ## 下一步
 
