@@ -12,14 +12,11 @@ nav_order: 3
 > （无第三方依赖，不下权重，不用 GPU）。
 > 你将得到：probe 输出 + 路线归位 + ★项配准 + serve yaml + 对接帖。
 
-## 开场
-
 harness 把官方原生要写的（约 200 行适配器 + 两个 env + 十几个参数）收拢成两个 yaml。
 **省的是实现，不省的是口径**：`ckpt_setting`（训的哪份数据）vs `task_config`
-（测的什么环境）在官方命令行里本来就是两个独立参数——训练口径和评测环境分开填，
-两条路都一样，这就是 03 披露清单的来历。
+（测的什么环境）在官方命令行里本来就是两个独立参数。
 
-## 准备
+## 开始前准备
 
 ```bash
 git clone https://github.com/link-seek/partner-vla-eval.git
