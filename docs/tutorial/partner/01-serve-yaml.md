@@ -15,7 +15,7 @@ harness 把官方原生要写的（适配器代码 + 两个 env + 十几个参�
 **省的是实现，不省的是口径**：权重（训的哪份 ckpt）和评测环境（测的哪个 task_config）
 本来就是两件事，harness 不在 yaml 里替你合并。
 下文六节与上游 [CONTRIBUTING（Adding a Model Server）](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server) 1:1 对照：节号即上游节号。卡住时拿着节号去上游问。
-已有现成模板的模型只做 §1（找路）→ §5（填 yaml）→ §6（校验），§2–§4 跳过不写代码。
+伙伴只做 §1（找路）→ §5（填 yaml）→ §6（校验）。§2–§4 是实现步骤：有现成模板就自动满足；官方没有时由 xieyucheng 按上游 PR 流程补（同 #168），伙伴不用写代码。
 
 先把表单和示例配置拿下来；模板以上游 `configs/model_servers/` 为准（§5 给了两例全文）：
 
@@ -35,23 +35,23 @@ cd partner-vla-eval
 | 模型类型 | RobotWin 配置 | 走这条路线 |
 |---|---|---|
 | DB-CogACT（Dexbotic） | 有 | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
-| X-VLA 官方 ckpt | 有 | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe |
-| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 无 | 上游 `lerobot/` 桥和配置都在，但 10 份全是 LIBERO（单臂 Franka、7 维）口径；RobotWin 是双臂 14D 关节 / 16D EE + 三相机，官方也没提供这一份；桥本身能接（`image_keys`/`state_key`/`chunk_size` 可配），缺的是 yaml + 实测（规划中） |
-| CogACT（Microsoft 原版，7-DoF） | 无 | 只有 RT-1/Bridge 配置；要报 RobotWin 需适配，走「以上都不是」 |
-| 上游其他（OpenVLA / OFT / Pi0…） | 无 | 上游有 server 不等于有 RobotWin 配置：先查该族目录，没有就走适配 |
-| 以上都不是 | — | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
+| X-VLA 官方 ckpt | 有 | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe。RobotWin 支持由 xieyucheng 提交（上游 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168)，已合并） |
+| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 无 | 上游 `lerobot/` 桥和 10 份配置都在，但全是 LIBERO（单臂 Franka、7 维）口径；RobotWin 是双臂 14D 关节 / 16D EE + 三相机，缺这一份。**别自己写**：提需求给 xieyucheng，按 #168 同一套路提 PR 到上游 main，合并后照 §5 填 |
+| CogACT（Microsoft 原版，7-DoF） | 无 | 只有 RT-1/Bridge 配置；要报 RobotWin 提需求，同上 |
+| 上游其他（OpenVLA / OFT / Pi0…） | 无 | 上游有 server 不等于有 RobotWin 配置；没有就提需求，同上 |
+| 以上都不是 | — | 提需求给 xieyucheng：说明模型、权重、目标榜。由我们按 #168 套路补 server + 配置到上游 main，你不用写代码 |
 
-然后看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 才新建文件：顶部 PEP 723 依赖块照抄 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py) 的文件头，类架子见 §2。
+然后看上游 [`configs/model_servers/`](https://github.com/allenai/vla-evaluation-harness/tree/main/configs/model_servers) 下有没有你这一族（cogact、db_cogact、xvla、lerobot、openvla、oft、pi0…共 15 个目录）。有 → 定下来是哪一族、哪一份 yaml，直接去 §5。没有 → 停，别自己新建文件：提需求给 xieyucheng，按 #168 同一套路补到上游 main（合并后你照 §5 填）。§2–§4 是这条流程里我们做的事，伙伴不用动手。
 
 **检查点**：你能说出“我用哪一族、哪一份 yaml”。当前 smoke/全量只开 RobotWin，LIBERO/CALVIN 标注规划中——yaml 里看到 libero/calvin 文件也不用管。
 
 **原理**：上游按模型族分目录，一族一目录、一考场一 yaml。路线不是我们分的，是货架原样摆过来。
 
-### §2 继承：没有现成模板才写，有就跳过
+### §2 继承（官方没有时由我们补；伙伴跳过）
 
 对应官方第 2 步（继承 `PredictModelServer`，见 [`src/vla_eval/model_servers/predict.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/predict.py)）。
 
-**操作**：新文件照抄你这条路线的 server 类架子——B 看 [`dexbotic/cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/dexbotic/cogact.py)，C 看 [`xvla.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/xvla.py)，新族看官方最小例 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)（Microsoft CogACT）：
+**操作**（我们做的参考，伙伴不用执行）：新文件照抄你这条路线的 server 类架子——B 看 [`dexbotic/cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/dexbotic/cogact.py)，C 看 [`xvla.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/xvla.py)，新族看官方最小例 [`cogact.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)（Microsoft CogACT）：
 
 ```python
 from vla_eval.model_servers.predict import PredictModelServer
@@ -66,7 +66,7 @@ class MyModelServer(PredictModelServer):
 
 **原理**：权重在 `__init__` 里一次 load 好（官方明确 no lazy-load hook）。首推理必须已是稳态延迟，warm up（compile 等）也在 `__init__` 或 `reset_episodes` 里做完——runner 是 `reset_episodes` 一返回就起表计时的。
 
-### §3 实现推理：只实现 predict 或 predict_batch 之一
+### §3 实现推理（官方没有时由我们补；伙伴跳过）
 
 对应官方第 3 步（`Implement predict(obs, row) -> dict or predict_batch(obs, rows) -> Batch. Load the model inside __init__ (no lazy-load hook)`）。
 
@@ -105,7 +105,7 @@ def predict(self, obs, row):
 - 所有 hook 在一条模型线程上按到达顺序执行，线程绑定状态（CUDA graph、JAX）也在 `__init__` 或首次 `reset_episodes` 里建。
 - B 的 `_convert_actions` 是口径的关键：模型出的是累计 delta，RoboTwin 要绝对关节——没有它，动作全错但不报错。
 
-### §4 入口与并发：照抄一段，参数缺省
+### §4 入口与并发（官方没有时由我们补；伙伴跳过）
 
 对应官方第 4 步（[`run_server`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/serve.py)）+ 底下并发说明。
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     run_server(MyModelServer)
 ```
 
-`chunk_size`/`max_batch_size`/`max_rows`/`max_wait_time` 有特殊才填，否则抄同族 yaml 默认。有现成模板的本节直接跳过。
+`chunk_size`/`max_batch_size`/`max_rows`/`max_wait_time` 有特殊才填，否则抄同族 yaml 默认。本节由我们做，伙伴跳过。
 
 **检查点**：`python <name>.py --help` 能列出 `run_server` 的统一项（`--config`/`--address`/`--port`）和你的构造参数（`--args.<字段>`）。
 
@@ -169,7 +169,7 @@ args:
   chunk_size: 30                        # ★官方值（不是 16，别按 CogACT 脑补）
 ```
 
-LeRobot 系：上游 `lerobot/` 桥和 10 份配置都在，但全是 LIBERO（单臂 Franka、7 维）口径——RobotWin 要双臂 14D 关节 / 16D EE + 三相机，官方也没提供这一份；桥本身能接（`image_keys`/`state_key`/`chunk_size` 可配），缺的是 yaml + 实测（规划中）。字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
+LeRobot 系：上游 `lerobot/` 桥和 10 份配置都在，但全是 LIBERO（单臂 Franka、7 维）口径——RobotWin 要双臂 14D 关节 / 16D EE + 三相机，官方也没提供这一份；桥本身能接（`image_keys`/`state_key`/`chunk_size` 可配），缺的是 yaml + 实测。**别自己补**：提需求给 xieyucheng，按 #168 同一套路补到上游 main，合并后照本节填。字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
 
 **检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init` 是 benchmark 侧参数（`action_type: ee` 时自动关，走 CuRobo 规划），不在 serve yaml 里找。
 
