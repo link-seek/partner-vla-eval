@@ -95,5 +95,11 @@ smoke_exit=0
 
 官称 = [Dexbotic README Benchmark Results](https://github.com/Dexmal/dexbotic#benchmark-results)（自家 toolbox 链路，非 harness；DB-CogACT 平均 58.5）。
 
+X-VLA EE 画像（easy50，11-04 跑完）：Easy demo_clean × seed 0 × 50 tasks × 100ep = 5000 ep，
+**66.6%，零 error**（[报告](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/xvla_robotwin-easy50.json)）。
+5×100%（adjust_bottle/grab_roller/move_playingcard_away/shake_bottle×2）；
+6 塌（blocks_ranking×2、put_bottles_dustbin、stack_blocks×2 全 0/100，步数跑满，
+疑 gripper 语义，跟踪中）。全 Easy、无 Hard；与上表 CogACT（qpos/50ep）不可比，并列。
+
 差 10pp 以内判同档（n=50 噪声带约 ±6pp）；跨榜不比大小（多榜指标待接入后展开）。
 完整排名规则与披露清单在 [02-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-full-and-report.md)，栈差异对照在 `explanation/`。

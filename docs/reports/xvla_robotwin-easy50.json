@@ -1,0 +1,322 @@
+{
+  "model": "2toINF/X-VLA-WidowX (fp32, EE 16D, domain_id=6, chunk 30)",
+  "task": "RobotWin easy50: 50 tasks x 100ep (Easy demo_clean, seed 0, EE)",
+  "mean_success": 0.6656,
+  "n": 5000,
+  "errors": 0,
+  "versions": {
+    "harness": "v0.8.0 (aggregate内记0.0.0；serve侧 0.1.dev1+g0cd7deb70，即上游EE合入点)",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0 (脚本默认；dispatch未改即此)",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0",
+    "serve_config": "configs/serve-robotwin.yaml",
+    "run_config": "run-robotwin-chunk.yaml (easy50生成，test_num=100, action_type=ee, send_state=true)"
+  },
+  "machine": "V100 (cn-north-4)，serve卡0/分片卡1",
+  "seeds": "seed 0，bundled expert seeds（0 error）",
+  "date": "2026-11-04",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/41377057472",
+  "report_version": "v1",
+  "tasks": [
+    {
+      "task": "adjust_bottle",
+      "success": 100,
+      "n": 100,
+      "avg_steps": 114.0
+    },
+    {
+      "task": "grab_roller",
+      "success": 100,
+      "n": 100,
+      "avg_steps": 97.0
+    },
+    {
+      "task": "move_playingcard_away",
+      "success": 100,
+      "n": 100,
+      "avg_steps": 93.1
+    },
+    {
+      "task": "shake_bottle",
+      "success": 100,
+      "n": 100,
+      "avg_steps": 91.4
+    },
+    {
+      "task": "shake_bottle_horizontally",
+      "success": 100,
+      "n": 100,
+      "avg_steps": 91.2
+    },
+    {
+      "task": "beat_block_hammer",
+      "success": 99,
+      "n": 100,
+      "avg_steps": 119.6
+    },
+    {
+      "task": "handover_mic",
+      "success": 99,
+      "n": 100,
+      "avg_steps": 196.0
+    },
+    {
+      "task": "lift_pot",
+      "success": 99,
+      "n": 100,
+      "avg_steps": 114.0
+    },
+    {
+      "task": "place_container_plate",
+      "success": 99,
+      "n": 100,
+      "avg_steps": 134.8
+    },
+    {
+      "task": "place_burger_fries",
+      "success": 98,
+      "n": 100,
+      "avg_steps": 197.9
+    },
+    {
+      "task": "place_empty_cup",
+      "success": 98,
+      "n": 100,
+      "avg_steps": 146.4
+    },
+    {
+      "task": "place_cans_plasticbox",
+      "success": 97,
+      "n": 100,
+      "avg_steps": 216.4
+    },
+    {
+      "task": "click_bell",
+      "success": 94,
+      "n": 100,
+      "avg_steps": 78.2
+    },
+    {
+      "task": "pick_dual_bottles",
+      "success": 91,
+      "n": 100,
+      "avg_steps": 127.7
+    },
+    {
+      "task": "place_bread_skillet",
+      "success": 89,
+      "n": 100,
+      "avg_steps": 155.3
+    },
+    {
+      "task": "dump_bin_bigbin",
+      "success": 88,
+      "n": 100,
+      "avg_steps": 179.2
+    },
+    {
+      "task": "stack_blocks_two",
+      "success": 88,
+      "n": 100,
+      "avg_steps": 277.8
+    },
+    {
+      "task": "place_bread_basket",
+      "success": 87,
+      "n": 100,
+      "avg_steps": 197.7
+    },
+    {
+      "task": "place_phone_stand",
+      "success": 87,
+      "n": 100,
+      "avg_steps": 128.1
+    },
+    {
+      "task": "open_laptop",
+      "success": 85,
+      "n": 100,
+      "avg_steps": 159.0
+    },
+    {
+      "task": "rotate_qrcode",
+      "success": 85,
+      "n": 100,
+      "avg_steps": 145.4
+    },
+    {
+      "task": "handover_block",
+      "success": 84,
+      "n": 100,
+      "avg_steps": 261.7
+    },
+    {
+      "task": "place_object_stand",
+      "success": 84,
+      "n": 100,
+      "avg_steps": 148.0
+    },
+    {
+      "task": "place_can_basket",
+      "success": 82,
+      "n": 100,
+      "avg_steps": 231.6
+    },
+    {
+      "task": "scan_object",
+      "success": 82,
+      "n": 100,
+      "avg_steps": 193.8
+    },
+    {
+      "task": "place_shoe",
+      "success": 81,
+      "n": 100,
+      "avg_steps": 168.5
+    },
+    {
+      "task": "press_stapler",
+      "success": 80,
+      "n": 100,
+      "avg_steps": 123.9
+    },
+    {
+      "task": "pick_diverse_bottles",
+      "success": 78,
+      "n": 100,
+      "avg_steps": 151.6
+    },
+    {
+      "task": "move_can_pot",
+      "success": 77,
+      "n": 100,
+      "avg_steps": 181.8
+    },
+    {
+      "task": "move_pillbottle_pad",
+      "success": 74,
+      "n": 100,
+      "avg_steps": 175.4
+    },
+    {
+      "task": "place_fan",
+      "success": 74,
+      "n": 100,
+      "avg_steps": 171.0
+    },
+    {
+      "task": "place_dual_shoes",
+      "success": 70,
+      "n": 100,
+      "avg_steps": 243.2
+    },
+    {
+      "task": "stack_bowls_two",
+      "success": 57,
+      "n": 100,
+      "avg_steps": 291.1
+    },
+    {
+      "task": "place_object_basket",
+      "success": 56,
+      "n": 100,
+      "avg_steps": 268.9
+    },
+    {
+      "task": "move_stapler_pad",
+      "success": 49,
+      "n": 100,
+      "avg_steps": 235.1
+    },
+    {
+      "task": "stamp_seal",
+      "success": 46,
+      "n": 100,
+      "avg_steps": 227.6
+    },
+    {
+      "task": "place_object_scale",
+      "success": 41,
+      "n": 100,
+      "avg_steps": 230.1
+    },
+    {
+      "task": "turn_switch",
+      "success": 41,
+      "n": 100,
+      "avg_steps": 210.5
+    },
+    {
+      "task": "place_a2b_right",
+      "success": 39,
+      "n": 100,
+      "avg_steps": 234.8
+    },
+    {
+      "task": "place_a2b_left",
+      "success": 37,
+      "n": 100,
+      "avg_steps": 238.2
+    },
+    {
+      "task": "place_mouse_pad",
+      "success": 37,
+      "n": 100,
+      "avg_steps": 242.1
+    },
+    {
+      "task": "put_object_cabinet",
+      "success": 36,
+      "n": 100,
+      "avg_steps": 276.1
+    },
+    {
+      "task": "hanging_mug",
+      "success": 25,
+      "n": 100,
+      "avg_steps": 297.4
+    },
+    {
+      "task": "click_alarmclock",
+      "success": 14,
+      "n": 100,
+      "avg_steps": 271.1
+    },
+    {
+      "task": "open_microwave",
+      "success": 1,
+      "n": 100,
+      "avg_steps": 297.8
+    },
+    {
+      "task": "blocks_ranking_rgb",
+      "success": 0,
+      "n": 100,
+      "avg_steps": 300.0
+    },
+    {
+      "task": "blocks_ranking_size",
+      "success": 0,
+      "n": 100,
+      "avg_steps": 300.0
+    },
+    {
+      "task": "put_bottles_dustbin",
+      "success": 0,
+      "n": 100,
+      "avg_steps": 300.0
+    },
+    {
+      "task": "stack_blocks_three",
+      "success": 0,
+      "n": 100,
+      "avg_steps": 300.0
+    },
+    {
+      "task": "stack_bowls_three",
+      "success": 0,
+      "n": 100,
+      "avg_steps": 300.0
+    }
+  ],
+  "note": "3328/5000=66.6%。5x100%(adjust_bottle/grab_roller/move_playingcard_away/shake_bottle/horizontally)；6塌：blocks_ranking_rgb/size、put_bottles_dustbin、stack_blocks_three/bowls_three全0/100（avg_steps=300跑满，系统性失败，疑gripper语义，见#168遗留跟踪），open_microwave 1/100，click_alarmclock 14/100。全Easy，无Hard，robustness未知；与CogACT四轮（qpos/50ep）不可比，并列。60.5h，video=0故无mp4。"
+}
