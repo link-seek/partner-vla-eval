@@ -14,12 +14,7 @@ nav_order: 3
 
 与上游的关系：上游 [CONTRIBUTING 六步](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)里，伙伴只涉及第 5 步（`configs/model_servers/<name>/`）；第 1–4 步是实现，官方支持已覆盖；第 6 步由 smoke 代验。卡住时可按节号去上游问。
 
-先把表单拿下来（后面照着填）：
-
-```bash
-git clone https://github.com/link-seek/partner-vla-eval.git
-cd partner-vla-eval
-```
+不用克隆仓库：下面两例 yaml 就是上游原文，照抄改★即可；对接表单在最后一节直接链接。
 
 ## 官方支持哪些
 
@@ -88,7 +83,7 @@ args:
 
 ## 交给我们
 
-有 GPU 先跑 `vla-eval test -c <你的serve.yaml>`；没有 GPU 跳过，smoke 代验。
+有 GPU 且本地装了上游 harness，先跑 `vla-eval test -c <你的serve.yaml>`；没有 GPU 跳过，smoke 代验。
 
 然后联系 xieyucheng，发三样（标题 `【评测对接】<模型名>`）：①权重版本（Hub ID + 精确 commit，分支名不行；本地目录给快照哈希；OBS 地址保证能拉取；私仓先给 `link-seek` 开授权）②★项 ③对接表单（[docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md)，不知道的空着）。
 
