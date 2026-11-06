@@ -20,8 +20,8 @@ nav_order: 3
 
 | 模型族 | 官方支持 | 本教程（RobotWin）怎么走 |
 |---|---|---|
-| DB-CogACT（Dexbotic） | 有：LIBERO / CALVIN / Simpler / RoboTwin / ManiSkill2 | 抄 `db_cogact/robotwin2.yaml`，改★ |
-| X-VLA | 有：LIBERO / CALVIN / Simpler / VLABench / RoboTwin | 抄 `xvla/robotwin.yaml`，改★；RobotWin 支持由 xieyucheng 提供 |
+| DB-CogACT（Dexbotic） | 有：LIBERO / CALVIN / Simpler / RoboTwin / ManiSkill2 | **B**：抄 `db_cogact/robotwin2.yaml`，改★ |
+| X-VLA | 有：LIBERO / CALVIN / Simpler / VLABench / RoboTwin | **C**：抄 `xvla/robotwin.yaml`，改★；RobotWin 支持由 xieyucheng 提供 |
 | LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 有：10 份配置，LIBERO/base 口径 | 没有 RobotWin 配置，要报 RobotWin 提需求 |
 | CogACT（Microsoft 原版，7-DoF） | 有：RT-1/Bridge | 没有 RobotWin 配置，要报 RobotWin 提需求 |
 | 其他（OpenVLA / OFT / Pi0…） | 有对应 server，配置见该族目录 | RobotWin 无配置的提需求 |
