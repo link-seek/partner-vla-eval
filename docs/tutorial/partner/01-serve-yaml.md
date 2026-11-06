@@ -104,7 +104,7 @@ yaml 已经写了的（相机、chunk、profile、domain_id）不用再填表，
 | 本地验（可选） | 你 | 有 GPU 且装了上游 harness：`vla-eval test -c <你的serve.yaml>`；没有就跳过 |
 | 对接 | 你 → xieyucheng | 标题 `【评测对接】<模型名>`，发 yaml + 交接信息 |
 | smoke | 我们 | 1 task×1ep（B `grab_roller` / C `adjust_bottle`），1 天内回 spec 对齐摘要；不过按下面三种打回 |
-| 全量 | 我们 | 进 [03-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/03-full-and-report.md) |
+| 全量 | 我们 | 进 [02-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-full-and-report.md) |
 
 smoke 不过的三种情况：
 

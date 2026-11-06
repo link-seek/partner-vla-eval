@@ -96,4 +96,4 @@ smoke_exit=0
 官称 = [Dexbotic README Benchmark Results](https://github.com/Dexmal/dexbotic#benchmark-results)（自家 toolbox 链路，非 harness；DB-CogACT 平均 58.5）。
 
 差 10pp 以内判同档（n=50 噪声带约 ±6pp）；跨榜不比大小（多榜指标待接入后展开）。
-完整排名规则与披露清单在 [03-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/03-full-and-report.md)，栈差异对照在 `explanation/`。
+完整排名规则与披露清单在 [02-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-full-and-report.md)，栈差异对照在 `explanation/`。
