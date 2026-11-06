@@ -93,6 +93,8 @@ args:
 | 对接表单 | 复制 [docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 填写，不知道的空着 |
 | 权重版本（表单第 2 节） | Hub：ID + 精确 commit（分支名不行）；本地：快照哈希；OBS：保证能拉取；私仓：先给 `link-seek` 授权 |
 
+流程：
+
 | 阶段 | 谁做 | 产出 |
 |---|---|---|
 | 本地验（可选） | 你 | 有 GPU 且装了上游 harness：`vla-eval test -c <你的serve.yaml>`；没有就跳过 |
