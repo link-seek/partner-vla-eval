@@ -34,7 +34,7 @@ quickstart 证明尺子可信，01~03 交出可比的数，Hard 与训练固定�
 | 你是 | 目标 | 走法 | 时间 |
 |---|---|---|---|
 | 伙伴（来评测模型） | 有训好的模型要交，拿分数 | `quickstart` → `partner/01-serve-yaml`（含 smoke）→ `02-full-and-report` | smoke 0.5~2h，全量 3~7h/task |
-| 运维（开卡保链路） | 让 V100 离线跑起来 | `quickstart` → `operator/01-machines-ci` → `02-images` | 按需查，不必通读 |
+| 运维（开卡保链路） | 让 V100 离线跑起来 | `quickstart` → `operator/01-system-and-run` | 20 分钟，按需查 |
 | 复现者（对照分数） | 看懂一张分数怎么来的 | `quickstart` → `explanation/` → `reference/` | 30min |
 
 三条路都从同一篇开始：[quickstart.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/quickstart.md)（RobotWin smoke，grab_roller×1ep，只验链路不计分）。
@@ -84,7 +84,7 @@ flowchart LR
 ## 文档地图（四分法）
 
 * **Tutorial（学）**：`quickstart` + `partner/` —— 跟着跑，保证绿。
-* **How-to（做）**：`operator/` —— 开机、打镜像、修 runner，按需查。
+* **How-to（做）**：`operator/` —— 系统分工、开跑、排障，按需查。
 * **Reference（查）**：`reference/` —— 口径映射表、镜像 tag、15 条排障表。主线不展开，只给链接。
 * **Explanation（懂）**：`explanation/` —— 栈差异对照、精度断崖、种子效应。有结论才进榜，主线一句话带过。
 
