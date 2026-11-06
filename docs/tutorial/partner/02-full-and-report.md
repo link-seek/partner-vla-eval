@@ -49,6 +49,31 @@ Hard 成功率、Easy−Hard 落差、成功步数：现在没有，报告里标
 * **Easy 与 Hard**：官方 §4.5 是单 task 微调 50 demos → Easy/Hard 各 100 rollouts；我们现状 Easy×50ep，Hard 待补。只拿 Easy 解读会高估鲁棒性。
 * **同卡才可比**：换 GPU 要重打基线；报告四要素——分数 + n + 版本日期 + 机器，缺一个不比。
 
+## 报告样例
+
+单 task 长这样（示例数据，非真实分数；Hard/步数没跑时置 `null`，不写 0）：
+
+```json
+{
+  "model": "my-vla / hf:org/my-vla@3f2a1c9",
+  "task": "robotwin-easy/grab_roller",
+  "mean_success": 0.86,
+  "n": 50,
+  "errors": 0,
+  "versions": {
+    "harness": "0.8.0",
+    "benchmark_image": "vla-eval-robotwin:0.8.0-ee-slim"
+  },
+  "machine": "V100 32GB",
+  "seeds": "bundled（expert-checked，从 100000）",
+  "date": "2026-11-06",
+  "artifacts": "obs://<bucket>/<prefix>/robotwin-full/grab_roller/",
+  "hard_success": null,
+  "gap": null,
+  "steps_success": {"med": null, "mean": null}
+}
+```
+
 ## 下一步
 
 基模横向评测（固定数据 + 训练方式比强弱）不在本教程范围，见 [index.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/index.md) 的“评价 vs 评测”。

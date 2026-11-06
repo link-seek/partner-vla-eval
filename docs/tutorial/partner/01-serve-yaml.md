@@ -115,3 +115,11 @@ smoke 不过的三种情况：
 | 全 ERROR 但 exit 0 | error 当数据 | 先看 errors 列；infra / 坏种子单列重跑 |
 
 **评测从哪一步开始**：从你交来可跑的 yaml 开始——smoke 通过 → 全量。模型不在官方支持列表时，先补支持（提需求），补完再交 yaml。
+
+## 提交前自检
+
+- [ ] 权重版本精确：Hub 给 ID + commit（不是分支名），本地给快照哈希，OBS 给可拉取地址；私仓已给 `link-seek` 授权。
+- [ ] 按 task 分头的都列齐了；缺头的 task 不跑。
+- [ ] yaml 只改了★：`script` / `extends` 没动，B 的 `chunk_size` 是 16、C 是 30。
+- [ ] 有 GPU 的话本地 `vla-eval test -c` 过了；没有就注明“无 GPU，等 smoke 代验”。
+- [ ] 发给 xieyucheng，标题 `【评测对接】<模型名>`，附 yaml + 交接信息。
