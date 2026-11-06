@@ -77,17 +77,27 @@ args:
 
 **填★注意**：
 
-- `model_path` 按 task 分头的逐个列齐，缺头的 task 排不上。
-- `chunk_size` 照对应族：B 是 16，C 是 30，别互相套。
-- `script`/`extends` 不动；`fast_init` 是 benchmark 侧参数（`action_type: ee` 时自动关），不在 serve yaml 里。
-- dtype 不是 yaml 字段：X-VLA 固定 fp32，DB-CogACT 在 V100 用 fp16，填进表单备注。
+| 项 | 怎么填 |
+|---|---|
+| `model_path` | 按 task 分头的逐个列齐；缺头的 task 排不上 |
+| `chunk_size` | 照对应族：B 是 16，C 是 30，别互相套 |
+| `script` / `extends` | 不动 |
+| `fast_init` | benchmark 侧参数（`action_type: ee` 时自动关），不在 serve yaml 里 |
+| dtype | 不是 yaml 字段：X-VLA 固定 fp32，DB-CogACT 在 V100 用 fp16；写进表单备注 |
 
 ## 交给我们
 
-有 GPU 且本地装了上游 harness，先跑 `vla-eval test -c <你的serve.yaml>`；没有 GPU 跳过，smoke 代验。
+| 要交的 | 怎么准备 |
+|---|---|
+| serve yaml | 按 B / C 模板改好★ |
+| 对接表单 | 复制 [docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 填写，不知道的空着 |
+| 权重版本（表单第 2 节） | Hub：ID + 精确 commit（分支名不行）；本地：快照哈希；OBS：保证能拉取；私仓：先给 `link-seek` 授权 |
 
-然后联系 xieyucheng，发两样（标题 `【评测对接】<模型名>`）：①改好的 serve yaml；②填好的对接表单（[docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md)，权重版本和★项都在表里填；Hub 权重给精确 commit，本地目录给快照哈希，OBS 地址保证能拉取，私仓先给 `link-seek` 开授权；不知道的空着）。
-
-xieyucheng 确认后进 smoke（1 task×1ep，1 天内给 spec 对齐报告），通过后进 [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md) 的全量。
+| 阶段 | 谁做 | 产出 |
+|---|---|---|
+| 本地验（可选） | 你 | 有 GPU 且装了上游 harness：`vla-eval test -c <你的serve.yaml>`；没有就跳过 |
+| 对接 | 你 → xieyucheng | 标题 `【评测对接】<模型名>`，发上面两样 |
+| smoke | 我们 | 1 task×1ep，1 天内给 spec 对齐报告 |
+| 全量 | 我们 | 进 [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md) |
 
 **评测从哪一步开始**：从你交来可跑的 yaml 开始——smoke 通过 → 全量。模型不在官方支持列表时，先补支持（提需求），补完再交 yaml。
