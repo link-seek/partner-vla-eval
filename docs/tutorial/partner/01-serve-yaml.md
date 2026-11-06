@@ -24,7 +24,7 @@ git clone https://github.com/link-seek/partner-vla-eval.git
 cd partner-vla-eval
 ```
 
-### §1 建文件：先查现成模板，有就不用建
+### §1 建文件：有模板直接抄，没有提需求
 
 对应官方第 1 步（[`src/vla_eval/model_servers/<name>.py`](https://github.com/allenai/vla-evaluation-harness/blob/main/src/vla_eval/model_servers/cogact.py)，uv script + PEP 723）。
 
@@ -70,7 +70,7 @@ class MyModelServer(PredictModelServer):
 
 对应官方第 3 步（`Implement predict(obs, row) -> dict or predict_batch(obs, rows) -> Batch. Load the model inside __init__ (no lazy-load hook)`）。
 
-**操作**：不同族写法不同，先按路线选参考实现：
+**操作**（我们做的参考，伙伴不用执行）：不同族写法不同，先按路线选参考实现：
 
 | 路线 | 参考文件 | 它怎么出动作 |
 |---|---|---|
