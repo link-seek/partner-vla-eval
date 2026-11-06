@@ -34,6 +34,23 @@ serve（GPU0） ←WebSocket→ benchmark client（CPU） → env 容器（GPU1�
 
 serve 独占卡 0，分片/渲染放卡 1；同一时间只跑一个 GPU job，不并发抢卡。
 
+## 镜像从哪来（为什么不是官方原图）
+
+官方 RobotWin 镜像约 28GB（带资产、nvcc、源码），V100 只有内网、不能现场装包。我们在外网构建机重打成生产镜像，V100 只负责拉：
+
+| 镜像 | 作用 | 怎么来的 |
+|---|---|---|
+| `vla-eval-robotwin:0.8.0-ee-slim`（~11GB） | benchmark：client + env 共用 | 官方 base + RoboTwin 源码；slim 三刀（资产外置 / nvcc 多阶段 / curobo 源码清）+ EE 从上游主线烘入 |
+| `vla-serve-<模型>:0.8.0` | 模型 serve | 官方 server + 该族依赖烘入 + uv 暖缓存；权重不进镜像 |
+| `vla-payload:<sha>`（几 MB） | V100 执行代码 | 本仓 `scripts/` + `configs/` + `versions.yaml` 打包，免 checkout |
+| `vla-verify:0.1` | 权重预热 / 下载杂活 | 工具镜像，`hf-download` 钉别名 |
+
+`vla-eval-robotwin:0.8.0`（28GB 原版）保留作回滚位，不跑生产。
+
+**运行是三个容器、两个主镜像**：serve（卡 0）+ client（编排）+ env（SAPIEN，卡 1）；client 和 env 都来自 benchmark 镜像，只是角色不同。别把它理解成三个镜像。
+
+换版流程：改 `docker/versions.yaml` 的 pin → 外网构建机重打 → 推 SWR → V100 拉新 tag。V100 上永远不打镜像、不装包。
+
 ## 怎么开一轮
 
 1. **定版本**：对 `docker/versions.yaml` 选 tag，记下 benchmark 和 serve 两个 tag。
