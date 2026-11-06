@@ -26,13 +26,22 @@ V100 上禁止：`pip/uv` 装包、`git clone`、HF 直连、ghcr 拉取。缺�
 
 运行链路：
 
-```
-serve（GPU0） ←WebSocket→ benchmark client（CPU） → env 容器（GPU1）
-                                      ↓
-                                  results/ → OBS
+```mermaid
+flowchart LR
+    SWR["SWR 镜像仓库"] -->|"docker pull"| S
+    HF["HF mirror"] -->|"权重预热"| S
+    subgraph V100["V100（cn-north-4，内网）"]
+        S["serve 容器<br/>GPU0 · vla-serve-*"]
+        C["benchmark client<br/>CPU · 编排"]
+        E["env 容器<br/>GPU1 · SAPIEN"]
+        S <-->|"WebSocket / msgpack"| C
+        C --> E
+        C --> R["results/"]
+    end
+    R -->|"obsutil cp"| OBS["OBS"]
 ```
 
-serve 独占卡 0，分片/渲染放卡 1；同一时间只跑一个 GPU job，不并发抢卡。
+serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，不并发抢卡。client 和 env 来自同一个 benchmark 镜像。
 
 ## 镜像从哪来（为什么不是官方原图）
 
