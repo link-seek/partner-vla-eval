@@ -103,7 +103,15 @@ yaml 已经写了的（相机、chunk、profile、domain_id）不用再填表，
 |---|---|---|
 | 本地验（可选） | 你 | 有 GPU 且装了上游 harness：`vla-eval test -c <你的serve.yaml>`；没有就跳过 |
 | 对接 | 你 → xieyucheng | 标题 `【评测对接】<模型名>`，发 yaml + 交接信息 |
-| smoke | 我们 | 1 task×1ep，1 天内给 spec 对齐报告 |
-| 全量 | 我们 | 进 [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md) |
+| smoke | 我们 | 1 task×1ep（B `grab_roller` / C `adjust_bottle`），1 天内回 spec 对齐摘要；不过按下面三种打回 |
+| 全量 | 我们 | 进 [03-full-and-report.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/03-full-and-report.md) |
+
+smoke 不过的三种情况：
+
+| 现象 | 根因 | 下一步 |
+|---|---|---|
+| serve 起不来（`HFValidationError` / 401） | 路径三段式 / 权重无权限 | 补精确版本 + 开授权 |
+| 跑满但全 0 分、零异常 | 口径错（EE 当关节喂等） | 按模板改 serve yaml，重交 |
+| 全 ERROR 但 exit 0 | error 当数据 | 先看 errors 列；infra / 坏种子单列重跑 |
 
 **评测从哪一步开始**：从你交来可跑的 yaml 开始——smoke 通过 → 全量。模型不在官方支持列表时，先补支持（提需求），补完再交 yaml。
