@@ -36,7 +36,7 @@ cd partner-vla-eval
 |---|---|---|
 | DB-CogACT（Dexbotic） | 有 | B（官方 `db_cogact/`），`model_path` 按 task 分头 |
 | X-VLA 官方 ckpt | 有 | C（官方 `xvla/`），EE 口径，`domain_id` 按官方 recipe |
-| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 无 | 上游 `lerobot/` 桥和配置都在，但 10 份全是 LIBERO（单臂 Franka、7 维）口径；RobotWin 是双臂 14D 关节 / 16D EE + 三相机，得按这个口径单独补一份（规划中） |
+| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 无 | 上游 `lerobot/` 桥和配置都在，但 10 份全是 LIBERO（单臂 Franka、7 维）口径；RobotWin 是双臂 14D 关节 / 16D EE + 三相机，官方也没提供这一份；桥本身能接（`image_keys`/`state_key`/`chunk_size` 可配），缺的是 yaml + 实测（规划中） |
 | CogACT（Microsoft 原版，7-DoF） | 无 | 只有 RT-1/Bridge 配置；要报 RobotWin 需适配，走「以上都不是」 |
 | 上游其他（OpenVLA / OFT / Pi0…） | 无 | 上游有 server 不等于有 RobotWin 配置：先查该族目录，没有就走适配 |
 | 以上都不是 | — | 三退路：①先套 LeRobot 桥（任意 `PreTrainedPolicy` 即插即用）→ ②照上游 [CONTRIBUTING](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)（人看）/`add-model-server` skill（agent 用）加 server（约 50 行，我们 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168) 有先例）→ ③直接联系 xieyucheng，表单空着，我们帮你看 |
@@ -169,7 +169,7 @@ args:
   chunk_size: 30                        # ★官方值（不是 16，别按 CogACT 脑补）
 ```
 
-LeRobot 系：上游 `lerobot/` 桥和 10 份配置都在，但全是 LIBERO（单臂 Franka、7 维）口径——RobotWin 要双臂 14D 关节 / 16D EE + 三相机，得按这个口径单独补一份 yaml（规划中）。字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
+LeRobot 系：上游 `lerobot/` 桥和 10 份配置都在，但全是 LIBERO（单臂 Franka、7 维）口径——RobotWin 要双臂 14D 关节 / 16D EE + 三相机，官方也没提供这一份；桥本身能接（`image_keys`/`state_key`/`chunk_size` 可配），缺的是 yaml + 实测（规划中）。字段见上游 [lerobot README](https://github.com/allenai/vla-evaluation-harness/blob/main/configs/model_servers/lerobot/README.md) 参数表。同族特有字段走 `args.policy_kwargs`，如 GR00T 的 `embodiment_tag`、MolmoAct2 的 `norm_tag`。
 
 **检查点**：`script`/`extends` 与上游同名文件一致；`model_path` 按 task 分头的逐个列齐（缺头的 task 排不上）；`fast_init` 是 benchmark 侧参数（`action_type: ee` 时自动关，走 CuRobo 规划），不在 serve yaml 里找。
 
