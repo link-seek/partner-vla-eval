@@ -8,7 +8,7 @@ nav_order: 3
 
 > 目标：把你训好的模型改成 harness 能直接跑的 serve yaml（不教训模型，只教交模型）。
 > 时间：30 分钟 ｜ 前置：读完 `quickstart`。
-> 你将得到：改好的 serve yaml + 填好的对接表单。
+> 你将得到：改好的 serve yaml + 交接信息（权重版本等 yaml 里没有的）。
 
 本教程用 RobotWin 做示例，不是只接 RobotWin。官方支持的模型族不少（各榜配置见族目录），但带 RobotWin 配置的只有两份；照着改★即可，其余字段不动。自己的模型还没有官方支持的，先提需求，不要自己写。
 
@@ -87,18 +87,23 @@ args:
 
 ## 交给我们
 
+yaml 已经写了的（相机、chunk、profile、domain_id）不用再填表，只补它写不了的：
+
 | 要交的 | 怎么准备 |
 |---|---|
 | serve yaml | 按 B / C 模板改好★ |
-| 对接表单 | 复制 [docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md) 填写，不知道的空着 |
-| 权重版本（表单第 2 节） | Hub：ID + 精确 commit（分支名不行）；本地：快照哈希；OBS：保证能拉取；私仓：先给 `link-seek` 授权 |
+| 权重版本 | Hub：ID + 精确 commit（分支名不行）+ 访问权限；本地：快照哈希；OBS：保证能拉取。按 task 分头的逐个列 |
+| dtype | yaml 里没有：X-VLA fp32，DB-CogACT 在 V100 用 fp16 |
+| 自测分数（可选） | 你们跑过的分数 + 配置（task/集数/seed），只作对照锚点 |
+
+新族／官方没有的模型：另填 [对接表单](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md)，字段全一些，不知道的空着。
 
 流程：
 
 | 阶段 | 谁做 | 产出 |
 |---|---|---|
 | 本地验（可选） | 你 | 有 GPU 且装了上游 harness：`vla-eval test -c <你的serve.yaml>`；没有就跳过 |
-| 对接 | 你 → xieyucheng | 标题 `【评测对接】<模型名>`，发上面两样 |
+| 对接 | 你 → xieyucheng | 标题 `【评测对接】<模型名>`，发 yaml + 交接信息 |
 | smoke | 我们 | 1 task×1ep，1 天内给 spec 对齐报告 |
 | 全量 | 我们 | 进 [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md) |
 
