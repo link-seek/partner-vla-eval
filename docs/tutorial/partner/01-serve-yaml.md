@@ -10,7 +10,7 @@ nav_order: 3
 > 时间：30 分钟 ｜ 前置：读完 `quickstart`。
 > 你将得到：改好的 serve yaml + 提交包（权重版本 + ★项 + 表单）。
 
-当前只开 RobotWin。官方已有 RobotWin 配置的只有两族，从对应模板改★项即可，其余字段不动；不在表里的模型先提需求，不要自己写。
+本教程用 RobotWin 做示例，不是只接 RobotWin。官方支持的模型族不少（各榜配置见族目录），但带 RobotWin 配置的只有两份；照着改★即可，其余字段不动。自己的模型还没有官方支持的，先提需求，不要自己写。
 
 与上游的关系：上游 [CONTRIBUTING 六步](https://github.com/allenai/vla-evaluation-harness/blob/main/CONTRIBUTING.md#adding-a-model-server)里，伙伴只涉及第 5 步（`configs/model_servers/<name>/`）；第 1–4 步是实现，官方支持已覆盖；第 6 步由 smoke 代验。卡住时可按节号去上游问。
 
@@ -18,15 +18,16 @@ nav_order: 3
 
 ## 官方支持哪些
 
-| 模型族 | 官方 RobotWin 配置 | 备注 |
+| 模型族 | 官方支持 | 本教程（RobotWin）怎么走 |
 |---|---|---|
-| DB-CogACT（Dexbotic） | `db_cogact/robotwin2.yaml` | 上游官方 |
-| X-VLA | `xvla/robotwin.yaml` | RobotWin 支持由 xieyucheng 提供 |
-| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 无 | 上游有桥和 10 份配置，但全是 LIBERO（单臂 Franka、7 维）口径 |
-| CogACT（Microsoft 原版，7-DoF） | 无 | 只有 RT-1/Bridge 配置 |
-| 其他（OpenVLA / OFT / Pi0…） | 无 | 上游有 server，但没有 RobotWin 配置 |
+| DB-CogACT（Dexbotic） | 有：LIBERO / CALVIN / Simpler / RoboTwin / ManiSkill2 | 抄 `db_cogact/robotwin2.yaml`，改★ |
+| X-VLA | 有：LIBERO / CALVIN / Simpler / VLABench / RoboTwin | 抄 `xvla/robotwin.yaml`，改★；RobotWin 支持由 xieyucheng 提供 |
+| LeRobot 系（π0/π0.5/GR00T/SmolVLA…） | 有：10 份配置，LIBERO/base 口径 | 没有 RobotWin 配置，要报 RobotWin 提需求 |
+| CogACT（Microsoft 原版，7-DoF） | 有：RT-1/Bridge | 没有 RobotWin 配置，要报 RobotWin 提需求 |
+| 其他（OpenVLA / OFT / Pi0…） | 有对应 server，配置见该族目录 | RobotWin 无配置的提需求 |
+| 以上都不是 | 无 | 提需求给 xieyucheng（模型、权重、目标榜），官方补上后再回来改 yaml |
 
-没有你的族 → 提需求给 xieyucheng（说明模型、权重、目标榜），官方补上后再回来改 yaml；不要自己写 server 或配置。
+官方支持 ≠ 有 RobotWin 配置：族目录里有 yaml，只代表那个榜能用。RobotWin 目前只有上面两份。
 
 ## 怎么改：B / C 两例
 
