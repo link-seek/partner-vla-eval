@@ -8,7 +8,7 @@ nav_order: 3
 
 > 目标：把你训好的模型改成 harness 能直接跑的 serve yaml（不教训模型，只教交模型）。
 > 时间：30 分钟 ｜ 前置：读完 `quickstart`。
-> 你将得到：改好的 serve yaml + 提交包（权重版本 + ★项 + 表单）。
+> 你将得到：改好的 serve yaml + 填好的对接表单。
 
 本教程用 RobotWin 做示例，不是只接 RobotWin。官方支持的模型族不少（各榜配置见族目录），但带 RobotWin 配置的只有两份；照着改★即可，其余字段不动。自己的模型还没有官方支持的，先提需求，不要自己写。
 
@@ -86,7 +86,7 @@ args:
 
 有 GPU 且本地装了上游 harness，先跑 `vla-eval test -c <你的serve.yaml>`；没有 GPU 跳过，smoke 代验。
 
-然后联系 xieyucheng，发三样（标题 `【评测对接】<模型名>`）：①权重版本（Hub ID + 精确 commit，分支名不行；本地目录给快照哈希；OBS 地址保证能拉取；私仓先给 `link-seek` 开授权）②★项 ③对接表单（[docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md)，不知道的空着）。
+然后联系 xieyucheng，发两样（标题 `【评测对接】<模型名>`）：①改好的 serve yaml；②填好的对接表单（[docs/partner-onboarding.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md)，权重版本和★项都在表里填；Hub 权重给精确 commit，本地目录给快照哈希，OBS 地址保证能拉取，私仓先给 `link-seek` 开授权；不知道的空着）。
 
 xieyucheng 确认后进 smoke（1 task×1ep，1 天内给 spec 对齐报告），通过后进 [02-smoke.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/02-smoke.md) 的全量。
 
