@@ -83,7 +83,7 @@ args:
 | `chunk_size` | 照对应族：B 是 16，C 是 30，别互相套 |
 | `script` / `extends` | 不动 |
 | `fast_init` | benchmark 侧参数（`action_type: ee` 时自动关），不在 serve yaml 里 |
-| dtype | 不是 yaml 字段：X-VLA 固定 fp32，DB-CogACT 在 V100 用 fp16；写进表单备注 |
+| dtype | 不是 yaml 字段，也不用你填：我们按卡型定——V100 上 X-VLA 用 fp32、DB-CogACT 用 fp16；换卡另定 |
 
 ## 交给我们
 
@@ -93,7 +93,6 @@ yaml 已经写了的（相机、chunk、profile、domain_id）不用再填表，
 |---|---|
 | serve yaml | 按 B / C 模板改好★ |
 | 权重版本 | Hub：ID + 精确 commit（分支名不行）+ 访问权限；本地：快照哈希；OBS：保证能拉取。按 task 分头的逐个列 |
-| dtype | yaml 里没有：X-VLA fp32，DB-CogACT 在 V100 用 fp16 |
 | 自测分数（可选） | 你们跑过的分数 + 配置（task/集数/seed），只作对照锚点 |
 
 新族／官方没有的模型：另填 [对接表单](https://github.com/link-seek/partner-vla-eval/blob/main/docs/partner-onboarding.md)，字段全一些，不知道的空着。

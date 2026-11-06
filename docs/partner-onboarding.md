@@ -36,7 +36,7 @@ nav_exclude: true
 - 相机名（照实写，如 head_camera/camera1…，名字对不上直接黑图）：
 - 状态需要：[ ] 关节角  [ ] 末端位姿  [ ] 不需要  [ ] 其它：
 - chunk size（一次出几个动作）：
-- dtype：[ ] fp32  [ ] fp16（注：按模型定，X-VLA 必须 fp32；DB-CogACT 在 V100 用 fp16）
+- dtype：不用填（我们按卡型定；V100 上 X-VLA 用 fp32、DB-CogACT 用 fp16）
 - 特殊依赖（如要新版 transformers，请写版本号）：
 
 ### 6. 自测对照（仅作锚点，我们会独立复测）
