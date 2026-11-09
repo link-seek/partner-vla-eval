@@ -1,0 +1,59 @@
+name: Join V100 to Tailnet
+
+# V100 常驻机进 tailnet：长期 reusable key + --ssh，以后直连不清盘看日志。
+# key 现场 mint（TS_API_KEY 为组织 secret），不落盘不进日志。
+
+on:
+  workflow_dispatch:
+    inputs:
+      hostname:
+        description: "V100 tailnet hostname"
+        required: false
+        default: "v100-pi0"
+
+permissions:
+  contents: read
+
+jobs:
+  join:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 15
+    steps:
+      - name: Mint reusable key + tailscale up V100 (via hw41 jump, keyless)
+        env:
+          V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
+          TS_API_KEY: ${{ secrets.TS_API_KEY }}
+          HN: ${{ inputs.hostname }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh-tsjoin && chmod 700 ~/.ssh-tsjoin
+          cat > ~/.ssh-tsjoin/askpass.sh << 'EOA'
+          #!/bin/sh
+          echo "$V100_SSH_PASS"
+          EOA
+          chmod 700 ~/.ssh-tsjoin/askpass.sh
+          # hw41 跳板免密已通（2026-11-09 实测）；V100 经 hw41 跳
+          # 1. 现场 mint 长期 reusable key（V100 常驻机用，不焚）
+          MINT_RESP=$(mktemp)
+          MINT_CODE=$(curl -sS -m 30 -o "$MINT_RESP" -w '%{http_code}' -X POST \
+            -u "$TS_API_KEY:" -H 'Content-Type: application/json' \
+            -d '{"capabilities":{"devices":{"create":{"reusable":true,"ephemeral":false,"preauthorized":true,"tags":["tag:v100"]}}},"expirySeconds":7776000}' \
+            https://api.tailscale.com/api/v2/tailnet/-/keys 2>/dev/null || true)
+          [ "$MINT_CODE" = "200" ] || [ "$MINT_CODE" = "201" ] || { echo "mint failed: HTTP $MINT_CODE"; head -c 300 "$MINT_RESP"; exit 1; }
+          KEY=$(python3 -c "import json; print(json.load(open('$MINT_RESP')).get('key',''))")
+          rm -f "$MINT_RESP"
+          [ -n "$KEY" ] || { echo "mint empty key"; exit 1; }
+          echo "::add-mask::$KEY"
+          echo "key minted (reusable, 90d, tag:v100)"
+          # 2. hw41 跳板进 V100 tailscale up（V100 已装 tailscale，2026-11-09）
+          export SSH_ASKPASS="$HOME/.ssh-tsjoin/askpass.sh"
+          export SSH_ASKPASS_REQUIRE=force
+          export DISPLAY=:0
+          V100=114.116.228.0
+          # 先经 hw41 测 V100 22 通（V100 关机则直接失败，不烧 key）
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@100.91.222.51 \
+            "(echo > /dev/tcp/$V100/22) 2>/dev/null && echo v100-22-OPEN || { echo v100-22-CLOSED; exit 1; }"
+          # tailscale up 经 hw41 跳板透传 key（命令行传参，不落 V100 盘）
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@100.91.222.51 \
+            "ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 -o BatchMode=yes root@$V100 'tailscale up --authkey=$KEY --hostname=$HN --ssh --accept-routes=false --accept-dns=false && tailscale ip -4'"
+          echo "join done: $HN"
