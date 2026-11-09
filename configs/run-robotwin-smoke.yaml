@@ -7,16 +7,16 @@ server:
   timeout: 600.0
 
 docker:
-  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim
 
-output_dir: "./results"
+output_dir: "/work/results"
 
 benchmarks:
   - benchmark: "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark"
     episodes_per_task: 1
     recording:
       record_video: true
-      output_dir: ./results/episodes
+      output_dir: /work/results/episodes
       filename_stem: "{name}_ep{episode_id:04d}_{status}"
     params:
       task_name: grab_roller
