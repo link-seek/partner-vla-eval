@@ -110,7 +110,9 @@ jobs:
           OBS_SK: ${{ secrets.OBS_SK }}
           OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
         run: |
-          obsutil cp results/ "${OBS_DEST:?}" -f -r -flat -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" || true
+          obsutil cp results/ "${OBS_DEST:?}" -f -r -flat -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK"
+          echo "obs-upload-ok: ${OBS_DEST:?}"
+          [ -n "$(obsutil ls "${OBS_DEST:?}" -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" | grep -cE '\.log|\.json|\.mp4|\.sqlite')" ] || { echo "OBS 上传后验证失败：目标目录无产物" >&2; exit 1; }
 
   stop-ecs:
     needs: smoke

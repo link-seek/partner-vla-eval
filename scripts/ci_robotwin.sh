@@ -1,5 +1,5 @@
 #!/bin/bash
-# RW_VIDEO=1 时录像（诊断用，默认关）。
+# RW_VIDEO 保留兼容（录像已由 run-robotwin-smoke.yaml 的 recording 块控制，此变量不再使用）。
 # RobotWin smoke: host 编排 serve(DB-CogACT 双臂, GPU0) + run(SWR robotwin 镜像当 client)。
 # serve 用 SWR 烘焙镜像（与全量同口径，UV_OFFLINE 零下载）；host 侧 clone 已删（V100 出境限速）。
 # V100 适配（历史记录，現已烘进镜像）：
@@ -97,7 +97,7 @@ docker run --rm --gpus all --network host \
   ${ASSETS_MOUNT:+-v "$ASSETS_MOUNT"} \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$ROBOTWIN_IMAGE" \
-  run --config /work/configs/run-robotwin-smoke.yaml ${RW_VIDEO:+--record-video} 2>&1 | tee results/robotwin-smoke.log
+  run --config /work/configs/run-robotwin-smoke.yaml 2>&1 | tee results/robotwin-smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 echo "[5b/5] 收 serve 日志"

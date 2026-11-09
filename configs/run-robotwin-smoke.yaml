@@ -14,6 +14,10 @@ output_dir: "./results"
 benchmarks:
   - benchmark: "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark"
     episodes_per_task: 1
+    recording:
+      record_video: true
+      output_dir: ./results/episodes
+      filename_stem: "{task_name}_ep{episode_id:04d}_{status}"
     params:
       task_name: grab_roller
       task_config: demo_clean
