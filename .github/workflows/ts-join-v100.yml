@@ -37,7 +37,7 @@ jobs:
           MINT_RESP=$(mktemp)
           MINT_CODE=$(curl -sS -m 30 -o "$MINT_RESP" -w '%{http_code}' -X POST \
             -u "$TS_API_KEY:" -H 'Content-Type: application/json' \
-            -d '{"capabilities":{"devices":{"create":{"reusable":true,"ephemeral":false,"preauthorized":true,"tags":["tag:v100"]}}},"expirySeconds":7776000}' \
+            -d '{"capabilities":{"devices":{"create":{"reusable":true,"ephemeral":false,"preauthorized":true}}},"expirySeconds":7776000}' \
             https://api.tailscale.com/api/v2/tailnet/-/keys 2>/dev/null || true)
           [ "$MINT_CODE" = "200" ] || [ "$MINT_CODE" = "201" ] || { echo "mint failed: HTTP $MINT_CODE"; head -c 300 "$MINT_RESP"; exit 1; }
           KEY=$(python3 -c "import json; print(json.load(open('$MINT_RESP')).get('key',''))")
