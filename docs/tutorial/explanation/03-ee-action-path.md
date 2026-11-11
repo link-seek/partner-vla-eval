@@ -31,7 +31,9 @@ CuRobo 规划每个 pose，所以 `fast_init` 自动关。
 2. serve 侧：X-VLA 输出 20D EE6D → 转 16D（见 [04-20d-to-16d.md](./04-20d-to-16d.html)）。
 3. run 侧：`max_steps: 300`、`render_every: 30`（chunk 开环跑，只在查询处渲染）。
 
-口径错配必 0 分：EE 当关节喂，benchmark 硬截 `act[:14]`——400 步跑满全 0 分零异常。
+口径错配必 0 分：qpos 14 个数和 14 个舵机一一对应，EE 16 个数是任务空间位姿、
+和舵机没有对应关系、必须经 CuRobo IK 解算。EE 当关节喂时 benchmark 硬截
+`act[:14]`——截下来的是位置+四元数混关节角的乱码，400 步跑满全 0 分零异常。
 smoke 遇到 `Spec mismatch` 直接打回，不让它烧卡（见排障表第 1 条）。
 
 ## 复现者怎么复现/避坑
