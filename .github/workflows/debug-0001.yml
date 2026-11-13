@@ -13,8 +13,8 @@ jobs:
     steps:
       - name: Disk audit (read-only)
         run: |
-          df -h / /tmp /data 2>/dev/null
-          echo "=== docker ==="; docker system df 2>&1 | head -8
-          echo "=== images ==="; docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | head -15
-          echo "=== /tmp top ==="; du -sh /tmp/* 2>/dev/null | sort -rh | head -8
-          echo "=== /data top ==="; du -sh /data/* 2>/dev/null | sort -rh | head -8
+          df -h / | tail -2
+          echo "=== ps ==="; docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}' | head -10
+          echo "=== docker root ==="; du -sh /var/lib/docker/* 2>/dev/null | sort -rh | head -6
+          echo "=== who uses dreamidv ==="; docker ps -a --filter ancestor=dreamidv --format '{{.Names}} {{.Status}}' | head -5; echo "(empty=无人用)"
+          echo "=== journal ==="; journalctl --disk-usage 2>/dev/null || true
