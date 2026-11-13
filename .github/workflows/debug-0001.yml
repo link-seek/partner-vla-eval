@@ -11,19 +11,10 @@ jobs:
     runs-on: [self-hosted, Linux, X64, V100-0001]
     timeout-minutes: 20
     steps:
-      - name: Repro prewarm verbosely
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      - name: Disk audit (read-only)
         run: |
-          set -x
-          VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
-          docker images | grep -E "vla-verify" || true
-          mkdir -p /tmp/hfdbg/.cache/hf
-          docker run --rm --network host \
-            -v "/tmp/hfdbg/.cache/hf":/root/.cache/huggingface \
-            -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=info \
-            -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-            "$VERIFY_IMAGE" hf-download download Dexmal/robotwin-db-cogact --include "grab_roller/*"; echo "docker-exit=$?"
-          echo "--- hf-download version ---"
-          docker run --rm "$VERIFY_IMAGE" hf-download --version; echo "ver-exit=$?"
-          echo "--- df ---"; df -h /tmp /data 2>/dev/null | head -5
+          df -h / /tmp /data 2>/dev/null
+          echo "=== docker ==="; docker system df 2>&1 | head -8
+          echo "=== images ==="; docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | head -15
+          echo "=== /tmp top ==="; du -sh /tmp/* 2>/dev/null | sort -rh | head -8
+          echo "=== /data top ==="; du -sh /data/* 2>/dev/null | sort -rh | head -8
