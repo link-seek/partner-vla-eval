@@ -13,6 +13,6 @@ jobs:
     steps:
       - name: Disk audit (read-only)
         run: |
-          ls /data/ | head -20
-          echo "=== robotwin-assets ==="; ls /data/robotwin-assets/ 2>&1 | head -5; du -sh /data/robotwin-assets/* 2>/dev/null | head -5
-          echo "=== objaverse ==="; ls /data/robotwin-assets/c3ddfa8/objects/objaverse/ 2>&1 | head -5
+          echo "=== c3ddfa8 layout ==="; ls /data/robotwin-assets/c3ddfa8/ 2>&1; du -sh /data/robotwin-assets/c3ddfa8/* 2>/dev/null | head -8
+          echo "=== writability ==="; touch /data/robotwin-assets/c3ddfa8/.wtest 2>&1 && { echo WRITABLE; rm -f /data/robotwin-assets/c3ddfa8/.wtest; } || echo "READ-ONLY(for runner)"
+          echo "=== ls -la ==="; ls -ld /data/robotwin-assets /data/robotwin-assets/c3ddfa8 2>&1
