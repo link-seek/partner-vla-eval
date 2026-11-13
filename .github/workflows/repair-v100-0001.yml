@@ -17,10 +17,10 @@ jobs:
       - name: Mint runner registration token (repo)
         id: mint
         env:
-          AGENT_GITHUB_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
+          MINT_TOKEN: ${{ secrets.PROD_GH_TOKEN }}
         run: |
           set -euo pipefail
-          RESP=$(curl -sS -m 30 -X POST -H "Authorization: Bearer $AGENT_GITHUB_TOKEN" \
+          RESP=$(curl -sS -m 30 -X POST -H "Authorization: Bearer $MINT_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/link-seek/partner-vla-eval/actions/runners/registration-token)
           TOKEN=$(echo "$RESP" | python3 -c "import json,sys; print(json.load(sys.stdin).get('token',''))")
