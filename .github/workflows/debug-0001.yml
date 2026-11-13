@@ -13,8 +13,7 @@ jobs:
     steps:
       - name: Disk audit (read-only)
         run: |
-          df -h / | tail -2
-          echo "=== ps ==="; docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}' | head -10
-          echo "=== docker root ==="; du -sh /var/lib/docker/* 2>/dev/null | sort -rh | head -6
-          echo "=== who uses dreamidv ==="; docker ps -a --filter ancestor=dreamidv --format '{{.Names}} {{.Status}}' | head -5; echo "(empty=无人用)"
-          echo "=== journal ==="; journalctl --disk-usage 2>/dev/null || true
+          echo "=== inspect ==="; docker image inspect dreamidv:latest --format '{{.Id}} created={{.Created}} entrypoint={{.Config.Entrypoint}} cmd={{.Config.Cmd}} workdir={{.Config.WorkingDir}}' 2>&1 | head -3
+          echo "=== labels/env ==="; docker image inspect dreamidv:latest --format '{{.Config.Labels}}' 2>&1 | head -3; docker image inspect dreamidv:latest --format '{{.Config.Env}}' 2>&1 | head -c 600; echo
+          echo "=== history ==="; docker history dreamidv:latest --no-trunc 2>&1 | head -12 | cut -c1-200
+          echo "=== /data/dreamidv ==="; ls /data/dreamidv 2>/dev/null | head -10; du -sh /data/dreamidv 2>/dev/null
