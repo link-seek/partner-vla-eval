@@ -13,7 +13,6 @@ jobs:
     steps:
       - name: Disk audit (read-only)
         run: |
-          df -h / /data | tail -3
-          echo "=== rm dreamidv image ==="; docker rmi swr.cn-north-4.myhuaweicloud.com/link-seek/dreamidv:latest 2>&1 | tail -2 || docker rmi dreamidv:latest 2>&1 | tail -2
-          echo "=== rm dreamidv data ==="; rm -rf /data/dreamidv && echo "removed /data/dreamidv"
-          echo "=== after ==="; df -h / /data | tail -3; docker system df 2>&1 | head -6
+          ls /data/ | head -20
+          echo "=== robotwin-assets ==="; ls /data/robotwin-assets/ 2>&1 | head -5; du -sh /data/robotwin-assets/* 2>/dev/null | head -5
+          echo "=== objaverse ==="; ls /data/robotwin-assets/c3ddfa8/objects/objaverse/ 2>&1 | head -5
