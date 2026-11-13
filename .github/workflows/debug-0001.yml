@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Disk audit (read-only)
         run: |
-          echo "=== inspect ==="; docker image inspect dreamidv:latest --format '{{.Id}} created={{.Created}} entrypoint={{.Config.Entrypoint}} cmd={{.Config.Cmd}} workdir={{.Config.WorkingDir}}' 2>&1 | head -3
-          echo "=== labels/env ==="; docker image inspect dreamidv:latest --format '{{.Config.Labels}}' 2>&1 | head -3; docker image inspect dreamidv:latest --format '{{.Config.Env}}' 2>&1 | head -c 600; echo
-          echo "=== history ==="; docker history dreamidv:latest --no-trunc 2>&1 | head -12 | cut -c1-200
-          echo "=== /data/dreamidv ==="; ls /data/dreamidv 2>/dev/null | head -10; du -sh /data/dreamidv 2>/dev/null
+          df -h / /data | tail -3
+          echo "=== rm dreamidv image ==="; docker rmi swr.cn-north-4.myhuaweicloud.com/link-seek/dreamidv:latest 2>&1 | tail -2 || docker rmi dreamidv:latest 2>&1 | tail -2
+          echo "=== rm dreamidv data ==="; rm -rf /data/dreamidv && echo "removed /data/dreamidv"
+          echo "=== after ==="; df -h / /data | tail -3; docker system df 2>&1 | head -6
