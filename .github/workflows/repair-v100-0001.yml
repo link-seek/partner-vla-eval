@@ -50,7 +50,7 @@ jobs:
           REG_TOKEN: ${{ steps.mint.outputs.token }}
         run: |
           set -o pipefail
-          TAG=$(gh api repos/actions/runner/releases/latest --jq .tag_name)
+          TAG=$(curl -sS -m 30 https://api.github.com/repos/actions/runner/releases/latest | python3 -c "import json,sys; print(json.load(sys.stdin)['tag_name'])")
           echo "runner version: $TAG"
           ~/.ssh-runner-0001/ssh.sh root@1.94.192.234 "REG_TOKEN='$REG_TOKEN' RUNNER_TAG='$TAG' bash -s" << 'REMOTE' 2>&1 | tee /tmp/repair-0001.log; CODE=${PIPESTATUS[0]}
           set -e
