@@ -14,7 +14,7 @@ jobs:
     runs-on: [self-hosted, hw21]
     timeout-minutes: 30
     steps:
-      - name: Mint runner registration token (org)
+      - name: Mint runner registration token (repo)
         id: mint
         env:
           AGENT_GITHUB_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
@@ -22,7 +22,7 @@ jobs:
           set -euo pipefail
           RESP=$(curl -sS -m 30 -X POST -H "Authorization: Bearer $AGENT_GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/orgs/link-seek/actions/runners/registration-token)
+            https://api.github.com/repos/link-seek/partner-vla-eval/actions/runners/registration-token)
           TOKEN=$(echo "$RESP" | python3 -c "import json,sys; print(json.load(sys.stdin).get('token',''))")
           [ -n "$TOKEN" ] || { echo "mint failed: $(echo "$RESP" | head -c 300)"; exit 1; }
           echo "::add-mask::$TOKEN"
@@ -64,11 +64,11 @@ jobs:
           ./svc.sh stop || true
           ./svc.sh uninstall || true
           su -s /bin/bash runner -c "cd /data/gh-runner && ./config.sh remove --token '$REG_TOKEN' || true"
-          su -s /bin/bash runner -c "cd /data/gh-runner && ./config.sh --unattended --url https://github.com/link-seek --token '$REG_TOKEN' --name ecs-0001-org --labels V100,V100-0001 --work _work"
+          su -s /bin/bash runner -c "cd /data/gh-runner && ./config.sh --unattended --url https://github.com/link-seek/partner-vla-eval --token '$REG_TOKEN' --name ecs-0001 --labels V100,V100-0001 --work _work"
           ./svc.sh install runner
           ./svc.sh start
           echo "== status =="
-          systemctl is-active "actions.runner.link-seek.ecs-0001-org.service" || true
+          systemctl is-active "actions.runner.link-seek.partner-vla-eval.ecs-0001.service" || true
           sleep 15
           ps aux | grep -c "[R]unner.Listener"
           REMOTE
@@ -80,4 +80,4 @@ jobs:
           GH_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
         run: |
           sleep 20
-          gh api orgs/link-seek/actions/runners --jq '.runners[] | select(.name=="ecs-0001-org") | "\(.name) \(.status) \(.labels[].name)"' | head -5
+          gh api repos/link-seek/partner-vla-eval/actions/runners --jq '.runners[] | select(.name=="ecs-0001") | "\(.name) \(.status) \(.labels[].name)"' | head -5

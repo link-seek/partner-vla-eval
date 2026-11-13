@@ -59,7 +59,7 @@ jobs:
           exit 1
   smoke:
     needs: start-ecs
-    # 组织级 runner ecs-0001-org，标签含 V100-0001，与 so101 彻底隔离
+    # 组织级 runner ecs-0001，标签含 V100-0001，与 so101 彻底隔离
     runs-on: [self-hosted, Linux, X64, V100-0001]
     timeout-minutes: 180
     steps:
