@@ -7,7 +7,7 @@ inputs:
     required: true
   server-id:
     required: false
-    default: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+    default: c5b805bd-5e8d-4ba5-a5ab-7523244da0fa
   region:
     required: false
     default: cn-north-4

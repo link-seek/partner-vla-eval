@@ -88,7 +88,7 @@ permissions:
   packages: read
 
 env:
-  ECS_SERVER_ID: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+  ECS_SERVER_ID: c5b805bd-5e8d-4ba5-a5ab-7523244da0fa
   ECS_REGION: cn-north-4
 
 jobs:
@@ -119,7 +119,7 @@ jobs:
           exit 1
   chunk:
     needs: start-ecs
-    runs-on: [self-hosted, Linux, X64, V100-pi0]
+    runs-on: [self-hosted, Linux, X64, V100-0001]
     # 自托管实际无 6h 限制；easy50 完整对照约 2~3 天，设 7 天（10080min）一次跑完
     timeout-minutes: 10080
     steps:

@@ -31,7 +31,7 @@ permissions:
   packages: read
 
 env:
-  ECS_SERVER_ID: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+  ECS_SERVER_ID: c5b805bd-5e8d-4ba5-a5ab-7523244da0fa
   ECS_REGION: cn-north-4
 
 jobs:
@@ -62,7 +62,7 @@ jobs:
           exit 1
   smoke:
     needs: start-ecs
-    runs-on: [self-hosted, Linux, X64, V100-pi0]
+    runs-on: [self-hosted, Linux, X64, V100-0001]
     timeout-minutes: 180
     steps:
       - name: Validate OBS dest (fail fast, no GPU burn)

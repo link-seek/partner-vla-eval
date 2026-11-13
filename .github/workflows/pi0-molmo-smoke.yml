@@ -26,7 +26,7 @@ permissions:
   packages: read
 
 env:
-  ECS_SERVER_ID: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+  ECS_SERVER_ID: c5b805bd-5e8d-4ba5-a5ab-7523244da0fa
   ECS_REGION: cn-north-4
   MOLMO_IMAGE: ghcr.io/allenai/vla-evaluation-harness/molmospaces:latest
   LIBERO_IMAGE: ghcr.io/allenai/vla-evaluation-harness/libero:latest
@@ -59,8 +59,8 @@ jobs:
           exit 1
   smoke:
     needs: start-ecs
-    # 组织级 runner ecs-0002-org，标签含 V100-pi0，与 so101 彻底隔离
-    runs-on: [self-hosted, Linux, X64, V100-pi0]
+    # 组织级 runner ecs-0001-org，标签含 V100-0001，与 so101 彻底隔离
+    runs-on: [self-hosted, Linux, X64, V100-0001]
     timeout-minutes: 180
     steps:
       - name: Validate OBS dest (fail fast, no GPU burn)
