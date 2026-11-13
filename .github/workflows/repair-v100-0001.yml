@@ -102,3 +102,26 @@ jobs:
         run: |
           sleep 20
           gh api repos/link-seek/partner-vla-eval/actions/runners --jq '.runners[] | select(.name=="ecs-0001") | "\(.name) \(.status) \(.labels[].name)"' | head -5
+      - name: Restore robotwin assets (one-time, idempotent)
+        env:
+          V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
+          OBS_AK: ${{ secrets.OBS_AK }}
+          OBS_SK: ${{ secrets.OBS_SK }}
+        run: |
+          set -o pipefail
+          ~/.ssh-runner-0001/ssh.sh root@1.94.192.234 "OBS_AK='$OBS_AK' OBS_SK='$OBS_SK' bash -s" << 'REMOTE' 2>&1 | tail -n 15; CODE=${PIPESTATUS[0]}
+          set -e
+          DST=/data/robotwin-assets/c3ddfa8
+          [ -f "$DST/objects/objaverse/list.json" ] && { echo "assets already present, skip"; exit 0; }
+          mkdir -p "$DST"
+          cd /tmp
+          curl -sSL -o obsutil.tgz https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz
+          tar -xzf obsutil.tgz
+          BIN=$(echo /tmp/obsutil_linux_amd64_*/obsutil)
+          $BIN ls obs://so101-sim-pipeline/assets/robotwin/c3ddfa8b97d5519efa828b075999bd0006778e5e/assets.tar -e https://obs.cn-north-4.myhuaweicloud.com -i "$OBS_AK" -k "$OBS_SK"
+          $BIN cp obs://so101-sim-pipeline/assets/robotwin/c3ddfa8b97d5519efa828b075999bd0006778e5e/assets.tar /tmp/robotwin-assets.tar -e https://obs.cn-north-4.myhuaweicloud.com -i "$OBS_AK" -k "$OBS_SK" -f
+          tar -xf /tmp/robotwin-assets.tar -C "$DST" && rm -f /tmp/robotwin-assets.tar
+          ls "$DST"; test -f "$DST/objects/objaverse/list.json" && echo "assets-ok"
+          REMOTE
+          echo "remote exit=$CODE"
+          exit $CODE
