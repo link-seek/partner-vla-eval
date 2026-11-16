@@ -45,7 +45,7 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 
 ## 镜像从哪来（为什么不是官方原图）
 
-官方 RobotWin 镜像约 28GB（带资产、nvcc、源码），V100 只有内网、不能现场装包。我们在外网构建机重打成生产镜像，V100 只负责拉：
+官方 RobotWin 镜像约 28GB（带仿真资产和编译工具、源码），V100 只有内网、不能现场装包。我们在外网构建机重打成生产镜像，V100 只负责拉：
 
 | 镜像 | 作用 | 怎么来的 |
 |---|---|---|
@@ -56,7 +56,7 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 
 `vla-eval-robotwin:0.8.0`（28GB 原版）保留作回滚位，不跑生产。
 
-**运行是三个容器、两个主镜像**：serve（卡 0）+ client（编排）+ env（SAPIEN，卡 1）；client 和 env 都来自 benchmark 镜像，只是角色不同。别把它理解成三个镜像。
+一轮跑起来是**三个容器、两个镜像**：serve（卡 0）+ client（编排）+ env（SAPIEN，卡 1）；client 和 env 都来自同一个 benchmark 镜像，只是分工不同。
 
 换版流程：改 `docker/versions.yaml` 的 pin → 外网构建机重打 → 推 SWR → V100 拉新 tag。V100 上永远不打镜像、不装包。
 
@@ -85,15 +85,25 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 
 开跑前必做：OBS 写探针（脚本已内置，失败不烧卡）。跑完必做：确认关机。
 
+## 本地调试（不开 V100）
+
+不想走 CI、先在本地验一遍时，用 `docker-compose.verify.yml`：
+
+1. bridge 网，起 **1 个 serve + 1 个 benchmark**，profile 按榜切换。
+2. server 地址一律用 `--server-url` 覆盖，不改 yaml 里的地址。
+3. benchmark 容器挂 docker.sock——harness `run --docker` 会自己再起 env 容器（上游机制）。
+
+本地跑通再上 V100，省一次来回开卡。
+
 ## 出问题怎么解决
 
 | 症状 | 先看 | 处理 |
 |---|---|---|
 | 开机 15 分钟不到 ACTIVE | hcloud 返回、配额、安全组 | 重试 `BatchStartServers`；看错误码；确认 region |
-| serve 起不来 | `results/serve-debug-attempt*.log`、端口 8000、HF 401、路径三段式 | 开权限 / 改本地路径 / 重试；3 次失败停 |
+| serve 起不来 | `results/serve-debug-attempt*.log`、端口 8000、HF 401、挂载路径要写全三级 | 开权限 / 改本地路径 / 重试；3 次失败停 |
 | 跑满但全 0 分 | `Spec mismatch`、`action_type`、`camera_keys` | 改口径，重跑 smoke |
 | 全 ERROR 但 exit 0 | `errors` 列、OOM、坏种子 | 先看 errors；OOM 降分片；坏种子单列重跑 |
-| OBS 没结果 | prefix 格式、AK/SK、endpoint；upload 的 `\|\| true` 会吞错 | 先跑写探针；修地址后重传 |
+| OBS 没结果 | prefix 格式、AK/SK、endpoint | 先跑写探针；修地址后重传 |
 | 磁盘满 | `docker system df`、HF 缓存 | prune 旧镜像 / 清缓存 |
 | 跑完没关机 | stop 日志 | 手动 hcloud stop；确认 `always` 生效 |
 
@@ -110,4 +120,4 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 
 * **为什么下载只能在外网机**：V100 出境被限速/不通，现场装包 = 不可复现。
 * **为什么 serve 独占卡 0**：SAPIEN 多上下文抢卡会 hang；分片放卡 1 是实测切法。
-* **为什么先 smoke**：1 task×1ep 把权重、serve、口径、落盘一次验掉，比全量便宜两个数量级。
+* **为什么先 smoke**：1 task×1ep 把权重、serve、口径、落盘一次验掉，成本只有全量的百分之一。

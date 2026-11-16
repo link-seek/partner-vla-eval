@@ -27,23 +27,24 @@ nav_order: 6
 修法：dispatch `repair-v100`（token 现开、用完删 secret；流程：安全组放行 →
 跳板 SSH → `svc uninstall` → `config remove` → 新 token 重配 → 重装 service）。
 
-## 原理：三机分工（表见 [01-system-and-run.md](./01-system-and-run.md)，铁律：下载只能发生在有外网处）
+## 原理：三机分工
 
-值班视角补两条实测例外：SWR 同步不走 url2hc
-中转（中转镜像 7 天老化，常驻镜像要活数周，属"中转不适用"，skopeo 直拷）；
-权重不同步 OBS（15GB 跨洋太慢，走 mirror+token 直下 V100）；OBS 只收小结果。
+铁律：**下载只能发生在有外网的地方**。三机各自负责什么，见 [01-system-and-run.md](./01-system-and-run.md#系统长什么样)，本篇不重复。
+
+值班视角只需要多记两条实测例外：
+
+* **SWR 同步不用 url2hc 中转**：中转镜像 7 天老化，常驻镜像要活数周，所以用 skopeo 直拷。
+* **权重不走 OBS**：15GB 跨洋太慢，走 mirror+token 直下 V100；OBS 只收小结果。
 
 ## 原理：超时与串行
 
-* chunk 超时 10080（7 天；easy50 完整对照约 2~3 天；旧 24h 帽已退役）。
-* 单卡串行是故意的：多 SAPIEN 上下文抢单卡会 hang（见分片对照），serve 独占卡 0、
- 分片放卡 1。想快加卡，不加分片。
+* chunk 超时 10080 分钟（7 天，够跑完 easy50 完整对照的 2~3 天）；早年的 24 小时上限已经不够用，退役了。
+* 单卡串行是故意的：多个 SAPIEN 环境同时抢一张卡会 hang（试过，见 [01-system-and-run.md](./01-system-and-run.md#系统长什么样) 的卡分配）。想快加卡，不加分片。
 
 ## 检查点
 
 - [ ] dispatch 后 15 分钟 V100 到 ACTIVE？不到看 start-ecs 日志（hcloud 内网 API）。
-- [ ] 结果没进 OBS？先看 workflow 日志尾（validation 红→地址错；upload `|| true`
-  吞错→去 issue #8 的测试项对）。
+- [ ] 结果没进 OBS？先看 workflow 日志尾部：validation 步骤红 = 地址错了；上传步骤报的错被 `|| true` 吞掉 = 去 issue #8 的测试项对。
 - [ ] 跑完没关机？stop-ecs 是 `if: always()`，除非 hw21 runner 本身掉了。
 
 ## 下一步
