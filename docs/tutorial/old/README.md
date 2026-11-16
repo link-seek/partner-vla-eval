@@ -15,8 +15,8 @@ nav_exclude: true
 | `01-business-coverage.md` | `../index.md` 覆盖矩阵 |
 | `02-architecture.md` | `../quickstart.md` 链路全景 |
 | `03-harness.md` | `../quickstart.md` 原理 + `explanation/`（待写） |
-| `04-machines-network.md` | `operator/01-machines-ci.md`（待写） |
-| `05-images-deploy.md` | `operator/02-images.md`（待写） |
+| `04-machines-network.md` | `operator/02-duty-dispatch.md` |
+| `05-images-deploy.md` | `operator/03-images.md` |
 | `06-model-onboarding.md` | `../partner/01-serve-yaml.md` + `reference/config-fields.md`（待写） |
 | `07-run-and-score.md` | `../partner/03-full-and-report.md` + `explanation/`（待写） |
 | `08-troubleshooting.md` | `reference/error-codes.md`（待写） |
