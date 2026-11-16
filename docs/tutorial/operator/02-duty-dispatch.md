@@ -1,53 +1,51 @@
 ---
-title: 运维 02：开跑、排队、收产物
+title: 运维 02：开跑与收产物
 parent: 评测教程
 nav_order: 6
 ---
 
-# 运维 02：开跑、排队、收产物
+# 运维 02：派完就走，回来收菜
 
-> 解决什么问题：你接手一轮评测，要从 dispatch 一路跟到 OBS 收产物，中途不能掉链子。本篇就是这条路的操作手册。
-> 和 01 的分工：日常开跑都走 CI（本篇）；手动开卡、换镜像这种底层操作见 [01-system-and-run.md](./01-system-and-run.md)。
-> 目标：亲手开一轮评测（dispatch → 等 → 到 OBS 收）。
-> 时间：操作 10 分钟 + 等卡（看队列） ｜ 前置：读完 `quickstart`。
-> 你将得到：一轮跑完的产物（OBS）+ 对"三机分工"的理解。
-> 读法：`操作`是操作手册；`原理`讲为什么机器是这么分的。
+> 解决什么问题：评测是无人值守的——dispatch 之后机器自动开、跑完自动关、产物自动进 OBS。你派完就可以走，回来只做一件事：收菜。
+> 和 01 的分工：日常派活走 CI（本篇）；手动开卡、换镜像这种底层操作见 [01-system-and-run.md](./01-system-and-run.md)。
+> 时间：派活 2 分钟 + 收菜 5 分钟 ｜ 前置：读完 `quickstart`。
 
-## 操作：开一轮（四步）
+## 操作：派活（两分钟）
 
 1. 进 Actions，选 workflow：smoke 选 `*-smoke`（无参数或 few），全量选
- `RobotWin Full (chunked)`（填 tasks/episodes/shards/video/obs_prefix，见 [partner/02-full-and-report.md](../partner/02-full-and-report.md)）。
-2. 点 dispatch，去干别的。hw21 自动开机（~12 分钟内 ACTIVE），V100 开跑。
-3. 前有队列就排队：GPU job 串行（`concurrency: gpu-ecs-pi0-smoke`），
- `gh run list --status in_progress` 看谁在跑。
-4. 跑完到 OBS 收：`<obs_prefix>/<榜>-<smoke|full>/`（flat 打平）。关机自动
- （`if: always()`，跑崩也关，不留空转烧钱）。
+   `RobotWin Full (chunked)`（填 tasks/episodes/shards/video/obs_prefix，见 [partner/02-full-and-report.md](../partner/02-full-and-report.md)）。
+2. 点 dispatch，走人。
 
-## 操作：runner 掉了（修法背下来）
+剩下的它自己干：hw21 自动开机（~12 分钟到 ACTIVE）→ V100 开跑 → 跑完自动关机
+（`if: always()`，跑崩也关，不留空转烧钱）。
 
-症状：开机后 runner 不上线（V100 离线超期被 GitHub 回收注册）。
-修法：dispatch `repair-v100`（token 现开、用完删 secret；流程：安全组放行 →
-跳板 SSH → `svc uninstall` → `config remove` → 新 token 重配 → 重装 service）。
+排队也不用管：GPU job 串行（`concurrency: gpu-ecs-pi0-smoke`），前一个没跑完后一个自己等。
 
-## 原理：三机分工
+## 操作：收菜
 
-铁律：**下载只能发生在有外网的地方**。三机各自负责什么，见 [01-system-and-run.md](./01-system-and-run.md#系统长什么样)，本篇不重复。
+跑完到 OBS 收：`<obs_prefix>/<榜>-<smoke|full>/`（flat 打平）。
 
-操作中最需要多记两条实测例外：
+收的时候看三样：
 
-* **SWR 同步不用 url2hc 中转**：中转镜像 7 天老化，常驻镜像要活数周，所以用 skopeo 直拷。
-* **权重不走 OBS**：15GB 跨洋太慢，走 mirror+token 直下 V100；OBS 只收小结果。
+- 产物齐不齐：aggregate + 逐 episode 的 json / sqlite / mp4。
+- 分数对不对：先看 `errors`，再看 `mean_success`。
+- 机器关了没：stop 日志有记录。
 
-## 原理：超时与串行
+## 例外：只有三种情况需要人动手
 
-* chunk 超时 10080 分钟（7 天，够跑完 easy50 完整对照的 2~3 天）；早年的 24 小时上限已经不够用，退役了。
-* 单卡串行是故意的：多个 SAPIEN 环境同时抢一张卡会 hang（试过，见 [01-system-and-run.md](./01-system-and-run.md#系统长什么样) 的卡分配）。想快加卡，不加分片。
+设计目标是零盯守，所以正常路径上没有"看着"这一步。只有这三种情况会打断你：
 
-## 检查点
+1. **15 分钟没到 ACTIVE** → 看 start-ecs 日志（hcloud 内网 API）：配额、安全组、region。
+2. **runner 不上线** → dispatch `repair-v100`（token 现开、用完删 secret；流程：安全组放行 → 跳板 SSH → `svc uninstall` → `config remove` → 新 token 重配 → 重装 service）。
+3. **结果没进 OBS** → 看 workflow 日志尾部：validation 步骤红 = 地址错；上传报错被 `|| true` 吞掉 = 去 issue #8 的测试项对。
 
-- [ ] dispatch 后 15 分钟 V100 到 ACTIVE？不到看 start-ecs 日志（hcloud 内网 API）。
-- [ ] 结果没进 OBS？先看 workflow 日志尾部：validation 步骤红 = 地址错了；上传步骤报的错被 `|| true` 吞掉 = 去 issue #8 的测试项对。
-- [ ] 跑完没关机？stop-ecs 是 `if: always()`，除非 hw21 runner 本身掉了。
+## 原理：为什么能开完不管
+
+- **关机是兜底的**：stop-ecs 用 `if: always()`，成功失败都关。
+- **串行是排队不是抢占**：同一时刻只跑一个 GPU job，两个 run 不会抢同一张卡。
+- **产物直落 OBS**：结果不在 V100 磁盘上过夜，机器关了也不丢。
+- **超时给足**：chunk 限 10080 分钟（7 天），easy50 完整对照 2~3 天够用。
+- **下载都在外网侧完成**：SWR 用 skopeo 直拷、权重走 mirror 直下，V100 只管跑。
 
 ## 下一步
 
