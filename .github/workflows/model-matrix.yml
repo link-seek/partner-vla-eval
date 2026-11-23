@@ -1,0 +1,128 @@
+name: Model Matrix (base models x exam tasks)
+
+# 基模评测矩阵：同一考场（task 集 + seeds + 栈）只让模型变，逐模型逐 task 出数。
+# 登记表 configs/model-registry.json；口径与准入三条见 docs/tutorial/leaderboard.md。
+# 与全量 chunk 的关系：矩阵内部就是按 task 反复调 ci_robotwin_full.sh（不另起一套跑法）。
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: "模型（registry key，逗号分隔）"
+        required: true
+        default: "db-cogact"
+      tasks:
+        description: "考场 task（逗号分隔）"
+        required: true
+        default: "grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block"
+      episodes:
+        description: "每 task 集数（考场口径 50）"
+        required: false
+        default: "50"
+      shards:
+        description: "分片数"
+        required: false
+        default: "8"
+      video:
+        description: "1=录像，默认关"
+        required: false
+        default: "0"
+      obs_prefix:
+        description: "OBS 前缀，结果进 <前缀>/leaderboard/<model>/<task>/（默认 obs://so101-sim-pipeline/eval）"
+        required: false
+        default: "obs://so101-sim-pipeline/eval"
+
+concurrency:
+  group: gpu-ecs-0002-smoke
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  start-ecs:
+    uses: ./.github/workflows/power.yml
+    with:
+      action: start
+      server-id: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+    secrets:
+      HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+      HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
+
+  matrix:
+    needs: start-ecs
+    runs-on: [self-hosted, Linux, X64, V100-0002]
+    timeout-minutes: 10080
+    steps:
+      - name: Validate OBS dest (fail fast, no GPU burn)
+        env:
+          OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          OBS_PREFIX: ${{ inputs.obs_prefix }}
+          OBS_SUBDIR: leaderboard
+          OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
+        run: |
+          set -e
+          case "${OBS_PREFIX:?}" in obs://*/*) ;; *) echo "obs_prefix 非法（形如 obs://<bucket>/<path>）：$OBS_PREFIX" >&2; exit 1;; esac
+          DEST="${OBS_PREFIX%/}/${OBS_SUBDIR}/"
+          echo "OBS_DEST=$DEST" >> "$GITHUB_ENV"
+          echo "validating OBS dest: $DEST"
+          echo vla-eval-write-probe > /tmp/obs-probe
+          PROBE="${DEST}.vla-eval-write-probe"
+          obsutil cp /tmp/obs-probe "$PROBE" -f -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" \
+            || { echo "OBS 不可写，停止（不烧卡）：$DEST" >&2; exit 1; }
+          obsutil rm "$PROBE" -f -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" || true
+          echo "obs-ok: $DEST"
+      - name: Fetch payload (SWR, no github)
+        env:
+          OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          PAYLOAD_IMAGE: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-payload:latest
+        run: |
+          set -e
+          rm -rf scripts configs docker
+          KEY=$(printf "${OBS_AK:?}" | openssl dgst -binary -sha256 -hmac "${OBS_SK:?}" | od -An -vtx1 | tr -d ' \n')
+          echo "$KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.cn-north-4.myhuaweicloud.com
+          docker pull "$PAYLOAD_IMAGE"
+          docker rm -f payload-tmp 2>/dev/null || true
+          docker create --name payload-tmp "$PAYLOAD_IMAGE"
+          docker cp payload-tmp:/payload/. .
+          docker rm -f payload-tmp
+          ls scripts/ci_robotwin_full.sh configs/model-registry.json docker/versions.yaml
+      - name: Run matrix
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          MM_MODELS: ${{ inputs.models }}
+          MM_TASKS: ${{ inputs.tasks }}
+          MM_EPISODES: ${{ inputs.episodes }}
+          MM_SHARDS: ${{ inputs.shards }}
+          MM_VIDEO: ${{ inputs.video }}
+          ASSETS_MOUNT: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
+          RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
+        run: |
+          mkdir -p matrix
+          chmod +x scripts/ci_model_matrix.sh
+          bash scripts/ci_model_matrix.sh 2>&1 | tee matrix/ci.log; CODE=${PIPESTATUS[0]}
+          echo "matrix_exit=$CODE"
+          exit $CODE
+      - name: Upload to OBS
+        if: always()
+        env:
+          OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
+        run: |
+          obsutil cp matrix/ "${OBS_DEST:?}" -f -r -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" || true
+
+  stop-ecs:
+    needs: matrix
+    if: always()
+    uses: ./.github/workflows/power.yml
+    with:
+      action: stop
+      server-id: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+    secrets:
+      HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+      HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
