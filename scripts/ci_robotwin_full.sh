@@ -147,12 +147,30 @@ if [ "${RW_PREWARM:-cogact}" = "none" ]; then
 fi
 
 if [ -n "${ASSETS_MOUNT:-}" ]; then
-  echo "[4b/6] 资产初始化（_tmp 模板→真正的 curobo_*.yml，rw 跑一次，幂等）"
-  docker run --rm --entrypoint bash \
-    -v "${ASSETS_MOUNT%:ro}:rw" \
-    "$ROBOTWIN_IMAGE" \
-    -c "cd /app/RoboTwin && conda run --no-capture-output -n robotwin python script/update_embodiment_config_path.py" \
-    || { echo "assets init FAILED"; exit 1; }
+  # 资产通道两条：ASSETS_MOUNT(outer -v) / RW_VOLUMES(harness sibling -v)。源路径先硬校验：
+  # 目录缺失时 docker -v 会「静默建空目录」→ 容器里 assets/embodiments 不在 → 初始化脚本问路径 → EOF，
+  # 11-23 首验就是这么挂的（表面报 EOFError，根因是挂载源不可见）。--mount 缺源直接报错。
+  ASSETS_HOST="${ASSETS_MOUNT%%:*}"
+  echo "ASSETS_HOST=$ASSETS_HOST  (ASSETS_MOUNT=$ASSETS_MOUNT)"
+  [ -d "$ASSETS_HOST" ] && [ -d "$ASSETS_HOST/embodiments" ] \
+    || { echo "REFUSE: 资产目录不可用（$ASSETS_HOST/embodiments 不存在）" >&2; exit 1; }
+  echo "[4b/6] 资产挂载校验 + 初始化（_tmp → curobo_*.yml，幂等）"
+  ASSETS_CHECK="ls /app/RoboTwin/assets/embodiments/*/curobo*.yml >/dev/null 2>&1"
+  if docker run --rm --entrypoint bash \
+      --mount "type=bind,src=$ASSETS_HOST,dst=/app/RoboTwin/assets,readonly" \
+      "$ROBOTWIN_IMAGE" -c "$ASSETS_CHECK" </dev/null; then
+    echo "资产已渲染（curobo*.yml 在容器内可见），跳过初始化"
+  else
+    docker run --rm --entrypoint bash \
+      --mount "type=bind,src=$ASSETS_HOST,dst=/app/RoboTwin/assets" \
+      "$ROBOTWIN_IMAGE" \
+      -c "cd /app/RoboTwin && conda run --no-capture-output -n robotwin python script/update_embodiment_config_path.py" </dev/null \
+      || { echo "assets init FAILED" >&2; exit 1; }
+    docker run --rm --entrypoint bash \
+      --mount "type=bind,src=$ASSETS_HOST,dst=/app/RoboTwin/assets,readonly" \
+      "$ROBOTWIN_IMAGE" -c "$ASSETS_CHECK" </dev/null \
+      || { echo "assets init 后仍看不到 curobo*.yml" >&2; exit 1; }
+  fi
 fi
 
 echo "[5/6] 启动 serve (GPU${SERVE_CUDA:-0}，后台；烘焙镜像 + UV_OFFLINE，零下载；配置 $SERVE_YAML)"
