@@ -13,7 +13,7 @@ nav_order: 7
 ## 操作：查版三板斧
 
 1. **看真源**：`docker/versions.yaml` 是唯一版本真源。Dockerfile 只许用 ARG 引用它，不许手写版本号；漂移会被 lint 拦下（`check_versions.py`）。
-2. **对表找 tag**：benchmark 用 `vla-eval-robotwin:0.8.0-ee-slim`（**唯一生产**），serve 按模型用 `vla-serve-<名>:0.8.0`；一律钉版本，不用 `latest`。
+2. **对表找 tag**：benchmark 用 `vla-eval-robotwin:0.8.0-ee-slim`（**唯一生产**），serve 按模型用 `vla-serve-<名>:0.8.0`；**X-VLA 例外，必须用 `vla-serve-xvla:0.8.0-ee16`**——`0.8.0` 是旧适配器（只出 20D），喂给 EE benchmark 会直接报 `action_type='ee' takes a 16D action, got 20D`，这个坑 11-23 已经踩过一次。一律钉版本，不用 `latest`。
 3. **确认离线前提**：V100 只拉不打。要新镜像，走下面「升级流程」，不要在 V100 上动手。
 
 ## 操作：升级流程

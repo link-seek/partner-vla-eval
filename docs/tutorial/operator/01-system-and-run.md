@@ -22,7 +22,7 @@ nav_order: 5
 
 V100 上禁止：`pip/uv` 装包、`git clone`、HF 直连、ghcr 拉取。缺东西回外网机烘进镜像，不要现场装。
 
-版本真源是 `docker/versions.yaml`。镜像在 SWR `swr.cn-north-4.myhuaweicloud.com/link-seek/`：RobotWin 生产 tag `vla-eval-robotwin:0.8.0-ee-slim`，serve 按模型 `vla-serve-<名>:0.8.0`，预热用 `vla-verify:0.1`。不要用 `latest`。
+版本真源是 `docker/versions.yaml`。镜像在 SWR `swr.cn-north-4.myhuaweicloud.com/link-seek/`：RobotWin 生产 tag `vla-eval-robotwin:0.8.0-ee-slim`，serve 按模型 `vla-serve-<名>:0.8.0`（X-VLA 例外：`vla-serve-xvla:0.8.0-ee16`，`0.8.0` 是旧适配器只出 20D），预热用 `vla-verify:0.1`。不要用 `latest`。
 
 运行链路：
 
@@ -50,7 +50,7 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 | 镜像 | 作用 | 怎么来的 |
 |---|---|---|
 | `vla-eval-robotwin:0.8.0-ee-slim`（~11GB） | benchmark：client + env 共用 | 官方 base + RoboTwin 源码；slim 三刀（资产外置 / nvcc 多阶段 / curobo 源码清）+ EE 从上游主线烘入 |
-| `vla-serve-<模型>:0.8.0` | 模型 serve | 官方 server + 该族依赖烘入 + uv 暖缓存；权重不进镜像 |
+| `vla-serve-<模型>:0.8.0` | 模型 serve | 官方 server + 该族依赖烘入 + uv 暖缓存；权重不进镜像；X-VLA 用 `:0.8.0-ee16` |
 | `vla-payload:<sha>`（几 MB） | V100 执行代码 | 本仓 `scripts/` + `configs/` + `versions.yaml` 打包，免 checkout |
 | `vla-verify:0.1` | 权重预热 / 下载杂活 | 工具镜像，`hf-download` 钉别名 |
 
