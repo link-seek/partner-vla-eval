@@ -20,24 +20,14 @@ permissions:
   contents: write
   packages: read
 
-env:
-  ECS_SERVER_ID: c5b805bd-5e8d-4ba5-a5ab-7523244da0fa
-  ECS_REGION: cn-north-4
-
 jobs:
   start-ecs:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      # 开关机只调华为云公网 API，不依赖 hw21；org 密钥对本仓可见（visibility=all）。
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - uses: ./.github/actions/ecs-power
-        with:
-          action: start
-          obs-ak: ${{ secrets.PROD_HCLOUD_AK }}
-          obs-sk: ${{ secrets.PROD_HCLOUD_SK }}
+    uses: ./.github/workflows/power.yml
+    with:
+      action: start
+    secrets:
+      HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+      HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
   smoke:
     needs: start-ecs
     runs-on: [self-hosted, Linux, X64, V100-0001]
@@ -106,15 +96,10 @@ jobs:
 
   stop-ecs:
     needs: smoke
-    runs-on: ubuntu-latest
     if: always()
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - uses: ./.github/actions/ecs-power
-        with:
-          action: stop
-          obs-ak: ${{ secrets.PROD_HCLOUD_AK }}
-          obs-sk: ${{ secrets.PROD_HCLOUD_SK }}
+    uses: ./.github/workflows/power.yml
+    with:
+      action: stop
+    secrets:
+      HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+      HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}

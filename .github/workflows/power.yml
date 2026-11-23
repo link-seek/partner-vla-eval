@@ -1,0 +1,47 @@
+name: Power V100 (reusable)
+
+# 开关机统一入口：只调华为云 ECS 公网 API，跑在 GitHub 托管 runner，
+# 不依赖 hw21（hw21 只保留跳板类用途：repair/ts-join 的 SSH）。
+# 密钥用 org 级 PROD_HCLOUD_AK/SK（visibility=all，本仓可见）。
+
+on:
+  workflow_call:
+    inputs:
+      action:
+        description: "start or stop"
+        required: true
+        type: string
+      server-id:
+        description: "ECS server id"
+        required: false
+        type: string
+        default: c5b805bd-5e8d-4ba5-a5ab-7523244da0fa
+      region:
+        description: "ECS region"
+        required: false
+        type: string
+        default: cn-north-4
+    secrets:
+      HCLOUD_AK:
+        required: true
+      HCLOUD_SK:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  power:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: ./.github/actions/ecs-power
+        with:
+          action: ${{ inputs.action }}
+          server-id: ${{ inputs.server-id }}
+          region: ${{ inputs.region }}
+          obs-ak: ${{ secrets.HCLOUD_AK }}
+          obs-sk: ${{ secrets.HCLOUD_SK }}
