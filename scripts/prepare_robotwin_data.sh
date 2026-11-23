@@ -7,7 +7,7 @@
 set -euo pipefail
 
 TASKS="${TASKS:-grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block}"
-DATA_ROOT="${DATA_ROOT:-/root/robotwin-train}"
+DATA_ROOT="${DATA_ROOT:-/data/robotwin-train}"
 BASE="${HF_MIRROR:-https://hf-mirror.com}/datasets/TianxingChen/RoboTwin2.0/resolve/main/dataset"
 
 mkdir -p "$DATA_ROOT"/{raw,data}

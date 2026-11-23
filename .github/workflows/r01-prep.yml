@@ -12,9 +12,9 @@ on:
         required: false
         default: "grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block"
       data_root:
-        description: "本地落盘目录（跟随机器持久盘）"
+        description: "本地落盘目录（必须是 runner 可写：/data）"
         required: false
-        default: "/root/robotwin-train"
+        default: "/data/robotwin-train"
 
 concurrency:
   group: gpu-ecs-0002-smoke
