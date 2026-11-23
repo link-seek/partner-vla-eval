@@ -67,7 +67,7 @@ Hard 成功率、Easy−Hard 落差、成功步数：现在没有，报告里标
   "machine": "V100 32GB",
   "seeds": "bundled（expert-checked，从 100000）",
   "date": "2026-11-06",
-  "artifacts": "obs://<bucket>/<prefix>/robotwin-full/grab_roller/",
+  "artifacts": "obs://<bucket>/<prefix>/robotwin-full/results/robotwin-<chunk>-x<ep>/",
   "hard_success": null,
   "gap": null,
   "steps_success": {"med": null, "mean": null}

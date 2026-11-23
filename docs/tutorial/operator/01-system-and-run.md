@@ -102,6 +102,8 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 | 开机 15 分钟不到 ACTIVE | hcloud 返回、配额、安全组 | 重试 `BatchStartServers`；看错误码；确认 region |
 | serve 起不来 | `results/serve-debug-attempt*.log`、端口 8000、HF 401、挂载路径要写全三级 | 开权限 / 改本地路径 / 重试；3 次失败停 |
 | 跑满但全 0 分 | `Spec mismatch`、`action_type`、`camera_keys` | 改口径，重跑 smoke |
+| `chunk_exit=127` + `No such file /opt/patches/run_sharded.sh` | `bench_tag` 是不是填了 `0.8.0`（stock 镜像） | 用 `0.8.0-ee-slim`；脚本已内置开跑前预检 |
+| `FileNotFoundError: assets/objects/objaverse/list.json` | `assets_mount` 没给或挂载源不可见 | 给 `assets_mount`（宿主机目录存在）；脚本已内置容器内探针，缺了直接 REFUSE |
 | 全 ERROR 但 exit 0 | `errors` 列、OOM、坏种子 | 先看 errors；OOM 降分片；坏种子单列重跑 |
 | OBS 没结果 | prefix 格式、AK/SK、endpoint | 先跑写探针；修地址后重传 |
 | 磁盘满 | `docker system df`、HF 缓存 | prune 旧镜像 / 清缓存 |

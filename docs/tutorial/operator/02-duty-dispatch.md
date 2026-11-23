@@ -23,7 +23,8 @@ nav_order: 6
 
 ## 操作：收菜
 
-跑完到 OBS 收：`<obs_prefix>/<榜>-<smoke|full>/`（保留 `episodes/` 结构）。
+跑完到 OBS 收：smoke 在 `<obs_prefix>/robotwin-smoke/`，全量在
+`<obs_prefix>/robotwin-full/results/robotwin-<chunk>-x<ep>/`（都保留 `episodes/` 结构）。
 
 收的时候看三样：
 
