@@ -155,11 +155,13 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
   [ -d "$ASSETS_HOST" ] && [ -d "$ASSETS_HOST/embodiments" ] \
     || { echo "REFUSE: 资产目录不可用（$ASSETS_HOST/embodiments 不存在）" >&2; exit 1; }
   echo "[4b/6] 资产挂载校验 + 初始化（_tmp → curobo_*.yml，幂等）"
-  ASSETS_CHECK="ls /app/RoboTwin/assets/embodiments/*/curobo*.yml >/dev/null 2>&1"
+  # 探针必须用「镜像里没有」的文件（objects/objaverse/list.json）；embodiments/*.yml 是烘进镜像的小配置，
+  # 用它当探针会在挂载丢失时误判为「已就绪」（12-04 那次就是这么漏过去的）。
+  ASSETS_CHECK="test -f /app/RoboTwin/assets/objects/objaverse/list.json"
   if docker run --rm --entrypoint bash \
       --mount "type=bind,src=$ASSETS_HOST,dst=/app/RoboTwin/assets,readonly" \
       "$ROBOTWIN_IMAGE" -c "$ASSETS_CHECK" </dev/null; then
-    echo "资产已渲染（curobo*.yml 在容器内可见），跳过初始化"
+    echo "资产挂载就绪（objects/ 在容器内可见），跳过初始化"
   else
     docker run --rm --entrypoint bash \
       --mount "type=bind,src=$ASSETS_HOST,dst=/app/RoboTwin/assets" \
@@ -201,20 +203,18 @@ set +e
 # 分片跑在卡1：serve 独占卡0，8 分片同卡 SAPIEN 会 hang（watchdog 全杀，见 run 38186912836）。
 # V100 双32G，卡1空闲给渲染。
 # 资产/代码外置挂载挂在这里（外层容器），不是 yaml 里——分片是容器内本地进程，
-# yaml 的 docker.volumes 只对 harness 自己起的 sibling 容器有效（阴性对照已证）。
-# ASSETS_MOUNT 形如 /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro（空=不用）。
-# 资产挂载通道（10-26 定稿，以实测为准）：
-# - eval 跑在 harness 起的 sibling 容器里（与外层隔离；铁证：outer 挂了资产 eval 照样 FileNotFound）。
-# - RW_VOLUMES（yaml docker.volumes）：唯一有效通道（sibling 挂载）。EE/planner/curobo 必需。
-# - ASSETS_MOUNT（outer -v）：只进外层（entrypoint 跑 config-path 用）；对 eval 无效，但无害、保留。
-# - 相对路径 assets/...（相对 CWD=/workspace）：靠镜像内 /workspace/assets 软链解析。
-# - place_empty_cup 能跑是因为它不读外部资产（无 clutter、无 planner）；grab_roller 两样都要。
+# 资产挂载两条通道（都带上，按运行模式生效）：
+# - ASSETS_MOUNT：外层容器 --mount（本路径实测 eval 就地在容器内跑，这就是唯一生效通道）+ 4b 的 curobo 渲染。
+# - RW_VOLUMES：写成 yaml docker.volumes，只有 harness 起 sibling 容器时才用（兼容保留，无害）。
+# 历史教训（10-26/11-23）：`-v` 源路径不可见时 docker 会静默建空目录，eval 才在 assets/objects 上炸；
+# 故 [4b] 与 [6/6] 全部改用 --mount + 镜像内不存在的文件做探针。
 MOUNT_FLAGS=()
 if [ -n "${ASSETS_MOUNT:-}" ]; then
-  IFS=';' read -ra VLIST <<< "$ASSETS_MOUNT"
-  for v in "${VLIST[@]}"; do
-    [ -n "$v" ] && MOUNT_FLAGS+=(-v "$v")
-  done
+  # 资产挂载走 --mount（源缺失直接报错，不像 -v 会静默建空目录）
+  ASSETS_ONE="${ASSETS_MOUNT%%;*}"
+  ASSETS_HOST="${ASSETS_ONE%%:*}"
+  ASSETS_DST="${ASSETS_ONE#*:}"; ASSETS_DST="${ASSETS_DST%%:*}"
+  MOUNT_FLAGS+=(--mount "type=bind,src=$ASSETS_HOST,dst=${ASSETS_DST:-/app/RoboTwin/assets},readonly")
 fi
 # 追踪仓拉取（议题 H）：run_sharded 与 P2 补丁一律从 fork 按 REF 取，本仓不 vendoring
 # P2/分片脚本：烘在统一镜像 /opt/patches（构建时从追踪仓拉；V100 出境不认 raw 域名，运行时现拉必死）。
@@ -244,7 +244,7 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -e CUDA_VISIBLE_DEVICES=1 \
   -e STATE_PATCH="${RW_STATE_PATCH:-}" \
   "$ROBOTWIN_IMAGE" \
-  -c "conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
+  -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; exit 1; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
 set -e
 docker logs cogact-serve > "$OUTDIR/cogact-serve.log" 2>&1 || true
