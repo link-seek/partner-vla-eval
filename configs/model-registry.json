@@ -2,7 +2,13 @@
   "_comment": "基模评测登记表：一行一个模型 = ckpt 来源 + serve 适配 + 口径。进榜前置见 docs/tutorial/leaderboard.md 的准入三条。status: verified=本仓已跑出数 / pending=适配或权重未验 / blocked=公开 ckpt 缺失（需训练侧立项）。",
   "exam": {
     "bench": "robotwin",
-    "tasks": ["grab_roller", "adjust_bottle", "place_phone_stand", "click_bell", "handover_block"],
+    "tasks": [
+      "grab_roller",
+      "adjust_bottle",
+      "place_phone_stand",
+      "click_bell",
+      "handover_block"
+    ],
     "episodes": 50,
     "shards": 8,
     "seeds": "bundled（skip_expert=false，从 100000 起）",
@@ -25,7 +31,8 @@
       "evidence": "grab_roller 45/50=90%、place_empty_cup 7/50=14%（docs/reports）",
       "official_ref": "论文 Easy 约 89%（grab_roller 量级）",
       "license": "见上游 ckpt 卡片",
-      "note": "一头一 task，一轮只打一个 task；权重按 task 子目录分头"
+      "note": "一头一 task，一轮只打一个 task；权重按 task 子目录分头",
+      "fast_init": "true"
     },
     "x-vla-robotwin2": {
       "family": "X-VLA",
@@ -38,11 +45,12 @@
       "skip_expert": "false",
       "action_spec": "EE 16D（quat）",
       "precision": "fp32",
-      "status": "pending",
-      "evidence": "本仓早期 EE 口径 0%（park，见 #9）；官方单 ckpt 覆盖全 task",
+      "status": "verified",
+      "evidence": "easy50 全 50 task×100ep = 3328/5000 = 66.6%（docs/reports/xvla_robotwin-easy50.json，run 41377057472，零 error）；本考场 5 task 子集 465/500 = 93.0%",
       "official_ref": "官方 RoboTwin2 权重，论文约 66.7%",
       "license": "见上游 ckpt 卡片",
-      "note": "单 ckpt 全 task；EE 需 fast_init=false + 资产挂载；先 smoke 复现再进榜"
+      "note": "单 ckpt 全 task；EE 需 fast_init=false + 资产挂载（8 分片 OOM，用 4）；历史报告里 ckpt 标注 WidowX/配置名有歧义，50ep 复跑以 registry 为准",
+      "fast_init": "false"
     },
     "pi0-robotwin": {
       "family": "π0",
@@ -59,7 +67,8 @@
       "evidence": "社区 ckpt，训练集为 lerobot fps15_10，5 个 task 未披露",
       "official_ref": "无官方 RoboTwin ckpt（论文自训）",
       "license": "未标",
-      "note": "缺 robotwin 版 serve yaml（相机键/状态维/控制频率）+ 训练 task 清单未披露 → 不进首批"
+      "note": "缺 robotwin 版 serve yaml（相机键/状态维/控制频率）+ 训练 task 清单未披露 → 不进首批",
+      "fast_init": "true"
     },
     "act-baseline": {
       "family": "ACT（官方基线）",
@@ -76,7 +85,8 @@
       "evidence": "官方 ACT 基线，按 task 分 ckpt（.ckpt + dataset_stats.pkl），无 lerobot/HF policy 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "需 ACT serve 适配器（RoboTwin 自带 deploy 脚本口径）；适配后可进第二批"
+      "note": "需 ACT serve 适配器（RoboTwin 自带 deploy 脚本口径）；适配后可进第二批",
+      "fast_init": "true"
     },
     "dp-baseline": {
       "family": "DP（官方基线）",
@@ -93,7 +103,8 @@
       "evidence": "官方 DP 基线，同 ACT 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "同 ACT：缺 serve 适配器"
+      "note": "同 ACT：缺 serve 适配器",
+      "fast_init": "true"
     }
   }
 }

@@ -34,8 +34,8 @@ nav_order: 3
 
 | 模型 | ckpt | 动作 | 精度 | 状态 | 备注 |
 |---|---|---|---|---|---|
-| CogACT（DB-CogACT） | `Dexmal/robotwin-db-cogact/<task>` | qpos 14D | fp16 | 已出数（2 task） | 一头一 task；grab_roller 45/50 |
-| X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | 适配待复现 | 早期 EE 0% 已 park，需先 smoke |
+| CogACT（DB-CogACT） | `Dexmal/robotwin-db-cogact/<task>` | qpos 14D | fp16 | 已出数（2/5 task） | 一头一 task；grab_roller 45/50；本轮补 click_bell / handover_block |
+| X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | 已出数（easy50 66.6%） | 本考场 5 task 子集 465/500=93.0%（100ep 口径）；50ep 复跑进行中 |
 | π0 | `nextbig/pi0-robotwin-30fps-tasks5` | qpos 32D | fp32 | 候选（不可比） | 训练 task 清单/控制频率未披露 |
 | ACT（官方基线） | `Avada11/RoboTwin-Model-AgileX-ACT` | qpos 14D | fp32 | 缺适配 | 需 ACT serve 适配器 |
 | DP（官方基线） | `Avada11/RoboTwin-Model-AgileX-DP` | qpos 14D | fp32 | 缺适配 | 同上 |
