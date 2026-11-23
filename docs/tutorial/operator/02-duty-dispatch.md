@@ -21,6 +21,10 @@ nav_order: 6
 
 排队也不用管：GPU job 串行（`concurrency: gpu-ecs-0002-smoke`），前一个没跑完后一个自己等。
 
+**但同一把锁只留 1 个待跑**：第三个进来时，会把上一个「排队中」的顶掉（GitHub 的 pending 只有一位，
+`cancel-in-progress: false` 只保住正在跑的那个）。所以一次只派一个，等它进入 running（不再是 pending）
+再派下一个——否则前面那个会被静默取消，日志里只有 `cancelled`。
+
 ## 操作：收菜
 
 跑完到 OBS 收：smoke 在 `<obs_prefix>/robotwin-smoke/`，全量在
