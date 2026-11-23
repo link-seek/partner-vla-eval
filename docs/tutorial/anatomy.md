@@ -87,7 +87,7 @@ benchmarks:
 
 ## 第三块：产物（落 OBS 的三样）
 
-`<obs_prefix>/robotwin-smoke/`（flat 打平）：
+`<obs_prefix>/robotwin-smoke/`（保留 `episodes/` 结构）：
 
 1. **`robotwin-smoke.log`**：client 侧全日志，尾部看两行——`serve UP`（serve 活了）
  和 `smoke_exit=0` + 1/1（链路通了）。排障先看尾 15 行，见 02。

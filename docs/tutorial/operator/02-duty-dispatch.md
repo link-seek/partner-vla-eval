@@ -19,11 +19,11 @@ nav_order: 6
 剩下的它自己干：自动开机（GitHub 托管 runner 调华为云 API，~12 分钟到 ACTIVE）→ V100 开跑 → 跑完自动关机
 （`if: always()`，跑崩也关，不留空转烧钱）。
 
-排队也不用管：GPU job 串行（`concurrency: gpu-ecs-pi0-smoke`），前一个没跑完后一个自己等。
+排队也不用管：GPU job 串行（`concurrency: gpu-ecs-0002-smoke`），前一个没跑完后一个自己等。
 
 ## 操作：收菜
 
-跑完到 OBS 收：`<obs_prefix>/<榜>-<smoke|full>/`（flat 打平）。
+跑完到 OBS 收：`<obs_prefix>/<榜>-<smoke|full>/`（保留 `episodes/` 结构）。
 
 收的时候看三样：
 

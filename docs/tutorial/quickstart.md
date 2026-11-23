@@ -42,7 +42,7 @@ smoke_exit=0
 ```
 
 3. 到 OBS 收产物：`<obs_prefix>/robotwin-smoke/`（默认
- `obs://so101-sim-pipeline/eval/robotwin-smoke/`，flat 打平无子目录；
+ `obs://so101-sim-pipeline/eval/robotwin-smoke/`，保留 `episodes/` 子目录；
  dispatch 自填了前缀就去自填的地址）。对着检查点打勾。
 
 ## 检查点
