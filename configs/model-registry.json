@@ -81,11 +81,11 @@
       "skip_expert": "false",
       "action_spec": "qpos 14D",
       "precision": "fp32",
-      "status": "blocked",
+      "status": "dropped",
       "evidence": "官方 ACT 基线，按 task 分 ckpt（.ckpt + dataset_stats.pkl），无 lerobot/HF policy 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "需 ACT serve 适配器（RoboTwin 自带 deploy 脚本口径）；适配后可进第二批",
+      "note": "本轮不做（需另写 ACT/DP serve 适配器，投入产出不划算）；保留登记以便后续想补时按此接入",
       "fast_init": "true"
     },
     "dp-baseline": {
@@ -99,11 +99,11 @@
       "skip_expert": "false",
       "action_spec": "qpos 14D",
       "precision": "fp32",
-      "status": "blocked",
+      "status": "dropped",
       "evidence": "官方 DP 基线，同 ACT 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "同 ACT：缺 serve 适配器",
+      "note": "本轮不做（需另写 ACT/DP serve 适配器，投入产出不划算）；保留登记以便后续想补时按此接入",
       "fast_init": "true"
     }
   }

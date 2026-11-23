@@ -36,9 +36,14 @@ nav_order: 3
 |---|---|---|---|---|---|
 | CogACT（DB-CogACT） | `Dexmal/robotwin-db-cogact/<task>` | qpos 14D | fp16 | 已出数（2/5 task） | 一头一 task；grab_roller 45/50；本轮补 click_bell / handover_block |
 | X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | 已出数（easy50 66.6%） | 本考场 5 task 子集 465/500=93.0%（100ep 口径）；50ep 复跑进行中 |
-| π0 | `nextbig/pi0-robotwin-30fps-tasks5` | qpos 32D | fp32 | 候选（不可比） | 训练 task 清单/控制频率未披露 |
-| ACT（官方基线） | `Avada11/RoboTwin-Model-AgileX-ACT` | qpos 14D | fp32 | 缺适配 | 需 ACT serve 适配器 |
-| DP（官方基线） | `Avada11/RoboTwin-Model-AgileX-DP` | qpos 14D | fp32 | 缺适配 | 同上 |
+
+首版就这两款（同考场、同栈、同种子）。下面这些**登记了但本轮不做**，列出来是为了说明“不是漏了”：
+
+| 模型 | ckpt | 状态 | 原因 |
+|---|---|---|---|
+| ACT（官方基线） | `Avada11/RoboTwin-Model-AgileX-ACT` | dropped | `.ckpt + dataset_stats.pkl` 格式，要另写 ACT serve 适配器（本轮不做） |
+| DP（官方基线） | `Avada11/RoboTwin-Model-AgileX-DP` | dropped | 同上 |
+| π0 | `nextbig/pi0-robotwin-30fps-tasks5` | 候选（不可比） | 训练 task 清单/控制频率未披露 |
 
 真源是 [`configs/model-registry.json`](https://github.com/link-seek/partner-vla-eval/blob/main/configs/model-registry.json)（这一页是它的可读视图）。
 
