@@ -20,7 +20,7 @@ nav_exclude: true
 | `06-model-onboarding.md` | `../partner/01-serve-yaml.md` + `../reference/action-mapping.md` |
 | `07-run-and-score.md` | `../partner/02-full-and-report.md` + `../explanation/` |
 | `08-troubleshooting.md` | `../reference/error-codes.md` |
-| `09-community.md` | 上游贡献指南（待写） |
+| `09-community.md` | `../reference/contribute-upstream.md`（提炼四步流程；投稿计划等历史信息留原稿） |
 | `99-audit.md` | `../changelog.md` + `../index.md` |
 
 旧稿之间的互引（见 06/07/08/99）在本目录内仍然有效。

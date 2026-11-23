@@ -50,3 +50,5 @@ nav_order: 6
 ## 下一步
 
 镜像从哪来、钉哪个版 → `03-images.md`。
+
+链路里发现 harness 本体的 bug（不是配置问题）→ [参考：给上游提 issue/PR](../reference/contribute-upstream.md)。
