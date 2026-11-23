@@ -235,6 +235,7 @@ if [ "${RW_FAST_INIT:-true}" = "false" ] && [ -z "${RW_VOLUMES:-}" ] && [ -z "${
 fi
 echo "ASSETS_MOUNT=${ASSETS_MOUNT:-<未用outer挂载>}"
 echo "outer -v flags: ${MOUNT_FLAGS[*]:-<无>}"
+if [ -n "${ASSETS_HOST:-}" ]; then ls -l "$ASSETS_HOST/objects/objaverse/list.json" 2>&1 | tail -1; fi
 docker run --rm --gpus all --network host --entrypoint bash \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WORK/configs":/work/configs:ro \
@@ -247,10 +248,10 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
 # 挂载抖动（11-23 观察：开机后首轮偶发同一 --mount 在后一次容器里为空）→ 只对预检失败重试，最多 3 次
-for attempt in 1 2 3; do
+for attempt in 1 2 3 4 5; do
   [ "$CODE" = "9" ] || break
-  echo "assets 预检失败（退出码 9），第 $attempt 次重试（5s）" >&2
-  sleep 5
+  echo "assets 预检失败（退出码 9），第 $attempt 次重试（10s）" >&2
+  sleep 10
   docker run --rm --gpus all --network host --entrypoint bash \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v "$WORK/configs":/work/configs:ro \
