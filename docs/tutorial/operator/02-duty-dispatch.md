@@ -16,7 +16,7 @@ nav_order: 6
    `RobotWin Full (chunked)`（填 tasks/episodes/shards/video/obs_prefix，见 [partner/02-full-and-report.md](../partner/02-full-and-report.md)）。
 2. 点 dispatch，走人。
 
-剩下的它自己干：hw21 自动开机（~12 分钟到 ACTIVE）→ V100 开跑 → 跑完自动关机
+剩下的它自己干：自动开机（GitHub 托管 runner 调华为云 API，~12 分钟到 ACTIVE）→ V100 开跑 → 跑完自动关机
 （`if: always()`，跑崩也关，不留空转烧钱）。
 
 排队也不用管：GPU job 串行（`concurrency: gpu-ecs-pi0-smoke`），前一个没跑完后一个自己等。

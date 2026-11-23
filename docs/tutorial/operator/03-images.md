@@ -45,5 +45,5 @@ V100 上永远不打镜像、不装包——现场装 = 不可复现。
 ## 下一步
 
 * 对外分发：`ghcr.io/link-seek/<名>:<tag>`（镜像已全部转 public）；论文里贴 digest 不贴 tag，sha256 记在 `docs/reproducibility.md`。
-* 栈差异对照的来龙去脉 → `explanation/`（待写）。
-* 15 条排障 → `reference/error-codes.md`（待写）。
+* 栈差异对照的来龙去脉 → [explanation/01-stack-effects.md](../explanation/01-stack-effects.md)。
+* 15 条排障 → [reference/error-codes.md](../reference/error-codes.md)。

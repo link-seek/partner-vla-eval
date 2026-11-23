@@ -88,4 +88,4 @@ flowchart LR
 * **Reference（查）**：`reference/` —— 口径映射表、镜像 tag、15 条排障表。主线不展开，只给链接。
 * **Explanation（懂）**：`explanation/` —— 栈差异对照、精度断崖、种子效应。有结论才进榜，主线一句话带过。
 
-旧稿归档在 [old/](https://github.com/link-seek/partner-vla-eval/tree/main/docs/tutorial/old)（只读，迁移映射见 [README.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/README.md)）。版本历史与口径偏离见 `changelog.md`（待写），正文不写版本号。
+旧稿归档在 [old/](https://github.com/link-seek/partner-vla-eval/tree/main/docs/tutorial/old)（只读，迁移映射见 [README.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/README.md)）。版本历史与口径偏离见 [changelog.md](./changelog.md)，正文不写版本号。

@@ -17,7 +17,7 @@ nav_order: 5
 | 机器 | 网络 | 只干 |
 |---|---|---|
 | 外网构建机（临时） | 外网 | 打镜像 → SWR；一次性下载；不跑生产 |
-| hw21 常驻机 | 近内网 | hcloud 开关 V100；跳板 |
+| hw21 常驻机 | 近内网 | 跳板（SSH 修 runner）；开关机已移到 GitHub 托管 runner |
 | V100（cn-north-4） | 近内网 | 离线跑：SWR 拉镜像、mirror 拖权重、`UV_OFFLINE=1` |
 
 V100 上禁止：`pip/uv` 装包、`git clone`、HF 直连、ghcr 拉取。缺东西回外网机烘进镜像，不要现场装。

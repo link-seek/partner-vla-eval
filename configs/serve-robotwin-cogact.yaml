@@ -1,6 +1,7 @@
 # DB-CogACT serve 配置（RobotWin 双臂口径，自包含，不用 extends）
-# 状态：PARKED——vision tower fp16 与 harness bf16 cast 冲突（observation_failed），
-# 待修；smoke 参考模型已切 X-VLA（见 serve-robotwin.yaml）
+# 状态：可用（smoke/全量默认模型）——qpos 14D 链路 10-28 ×50 与 11-23 smoke 均全绿。
+# 历史：早期 B 路线曾因 vision tower fp16 / bf16 cast 冲突（observation_failed）标 PARKED；
+# 现 qpos 链路不受影响，EE 对照用 X-VLA（serve-robotwin.yaml）。
 # 上游参考：configs/model_servers/db_cogact/robotwin2.yaml
 # 权重 Dexmal/robotwin-db-cogact 按 task 分头；model_path 必须和所跑 task 对上
 # （smoke 跑 grab_roller 就用 grab_roller 头，全量按 task 逐个换）。

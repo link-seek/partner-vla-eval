@@ -8,7 +8,7 @@ nav_order: 2
 
 > 给复现者：同一套代码、同一权重、同一 task，只换推理精度，一边满分一边零分。
 > 时间：10 分钟 ｜ 前置：`quickstart`。
-> 你将得到：报错原文、两份报告、机理、复现方法。
+> 你将得到：报错原文、三份报告、机理、复现方法。
 
 ## 现象（一句话）
 
@@ -21,6 +21,7 @@ X-VLA 在 LIBERO 上跑 fp16，每个 episode 死在第一个 action：10/10 ERR
 |---|---|---|
 | fp16 | [`x-vla_libero-spatial_fp16.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-spatial_fp16.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/38990222346)） | 0/10，全 ERROR：`首个 act 即崩 RuntimeError float vs Half` |
 | fp32 | [`x-vla_libero-spatial_fp32.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-spatial_fp32.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/38981477153)） | 9/10，零 ERROR |
+| fp32 三榜 | [`object`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-object_fp32.json) / [`goal`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-goal_fp32.json) 各 10ep | 10/10 + 10/10，三榜合计 29/30 |
 | fp32 整榜 | [`x-vla_libero-spatial50_fp32.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-spatial50_fp32.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/40552080571)） | 487/500 |
 
 报错原文：
@@ -36,7 +37,7 @@ RuntimeError: Input type (float) and bias type (c10::Half) should be the same
 不是性能降级。V100 无 bf16，所以 V100 上 X-VLA 一律 fp32。
 
 另一面是显存墙：CogACT fp32 在 V100 上首个 forward 即 OOM（31GB），只能走 fp16
-（见 [proposal-stack-effects.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/proposal-stack-effects.md) B2）。
+（见 [栈差异 01](./01-stack-effects.md) B2）。
 精度和显存是同一枚硬币的两面，选哪边由模型+卡型共同决定，见下表：
 
 | 模型 | V100 精度 | 原因 |
@@ -52,5 +53,5 @@ RuntimeError: Input type (float) and bias type (c10::Half) should be the same
 
 ## 下一步
 
-- EE 通路为什么能跑：[03-ee-action-path.md](./03-ee-action-path.html)。
-- 栈差异全表：[proposal-stack-effects.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/proposal-stack-effects.md)。
+- EE 通路为什么能跑：[03-ee-action-path.md](./03-ee-action-path.md)。
+- 栈差异全表：[01-stack-effects.md](./01-stack-effects.md)。

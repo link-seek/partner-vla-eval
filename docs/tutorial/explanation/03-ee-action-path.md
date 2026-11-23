@@ -28,23 +28,23 @@ CuRobo 规划每个 pose，所以 `fast_init` 自动关。
 上游 [#168](https://github.com/allenai/vla-evaluation-harness/pull/168)（已合入主线）补了三件：
 
 1. benchmark 侧：`action_type: ee` + `send_state`（16D 末端位姿进 obs）。
-2. serve 侧：X-VLA 输出 20D EE6D → 转 16D（见 [04-20d-to-16d.md](./04-20d-to-16d.html)）。
-3. run 侧：`max_steps: 300`、`render_every: 30`（chunk 开环跑，只在查询处渲染）。
+2. serve 侧：X-VLA 输出 20D EE6D → 转 16D（见 [04-20d-to-16d.md](./04-20d-to-16d.md)）。
+3. run 侧：`max_steps: 300`、`render_every: 30`（chunk 开环跑，只在查询处渲染；10-27 验证那轮是 400，easy50 起按上游 300）。
 
 口径错配必 0 分：qpos 14 个数和 14 个舵机一一对应，EE 16 个数是任务空间位姿、
 和舵机没有对应关系、必须经 CuRobo IK 解算。EE 当关节喂时 benchmark 硬截
-`act[:14]`——截下来的是位置+四元数混关节角的乱码，400 步跑满全 0 分零异常。
+`act[:14]`——截下来的是位置+四元数混关节角的乱码，300 步跑满全 0 分零异常。
 smoke 遇到 `Spec mismatch` 直接打回，不让它烧卡（见排障表第 1 条）。
 
 ## 复现者怎么复现/避坑
 
 1. **EE 配置三件套**：`action_type: ee` + `send_state: true` + `fast_init: false`
    （PPO 那套 `fast_init=true` 在 EE 下非法，IK 走 `plan_path`）。
-2. **分片降到 4**：EE 全量 planner + SAPIEN 抢显存，8 分片 OOM（10-27 实测 3/10
+2. **分片降到 4**：EE 全量 planner + SAPIEN 抢显存，8 分片 OOM（10-27 实测 2 例
    `env_start`）。qpos 保持 8。
-3. **看步数**：EE 跑满 400 步零 error 但 0 分，先查口径（是不是截错了），再查任务难度。
+3. **看步数**：EE 跑满步数零 error 但 0 分，先查口径（是不是截错了），再查任务难度。
 
 ## 下一步
 
-- 20D 怎么转成 16D：[04-20d-to-16d.md](./04-20d-to-16d.html)。
-- 精度为什么选 fp32：[02-precision-cliff.md](./02-precision-cliff.html)。
+- 20D 怎么转成 16D：[04-20d-to-16d.md](./04-20d-to-16d.md)。
+- 精度为什么选 fp32：[02-precision-cliff.md](./02-precision-cliff.md)。
