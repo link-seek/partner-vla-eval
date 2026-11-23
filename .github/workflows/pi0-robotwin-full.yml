@@ -23,9 +23,9 @@ on:
         required: false
         default: "0"
       bench_tag:
-        description: "benchmark 镜像 tag（0.8.0 含 expert_seeds+warp 修，已验证）"
+        description: "benchmark 镜像 tag（统一镜像 0.8.0-ee-slim 含 /opt/patches/run_sharded.sh；0.8.0 是 stock 无分片脚本，跑必 127）"
         required: false
-        default: "0.8.0"
+        default: "0.8.0-ee-slim"
       skip_expert:
         description: "true=盲种子，false=校验种子（0.8.0 默认）"
         required: false

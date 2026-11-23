@@ -64,7 +64,7 @@ server:
   timeout: 600.0
 
 docker:
-  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim
 
 output_dir: "./results"
 

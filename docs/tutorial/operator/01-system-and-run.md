@@ -79,7 +79,7 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 | `RW_SHARDS` | 分片数 | qpos 8 / ee 4 |
 | `RW_VIDEO` | 1 = 录像 | 0 |
 | `SERVE_IMAGE` | serve 镜像 | `vla-serve-cogact:0.8.0` |
-| `RW_BENCH_TAG` | benchmark tag | 0.8.0 |
+| `RW_BENCH_TAG` | benchmark tag | `0.8.0-ee-slim`（`0.8.0` 是 stock 无分片脚本，全量必 127） |
 
 脚本默认参考模型还在收敛（CogACT / X-VLA），换模型时用 `SERVE_IMAGE` + 对应 serve yaml 覆盖，不要改脚本。
 

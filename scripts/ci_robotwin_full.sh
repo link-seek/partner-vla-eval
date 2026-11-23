@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 WORK="$PWD"
 source "$WORK/scripts/lib/common.sh"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
-ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0}"
+ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
 RW_TASKS="${RW_TASKS:-grab_roller,adjust_bottle,click_bell,handover_block,stack_blocks_two}"
 RW_EPISODES="${RW_EPISODES:-50}"
@@ -96,6 +96,9 @@ echo "$LOGIN_KEY" | docker login -u "cn-north-4@${OBS_AK}" --password-stdin swr.
 docker pull "$ROBOTWIN_IMAGE"
 docker pull "$SERVE_IMAGE"
 docker pull "$VERIFY_IMAGE"
+# 预检：stock tag（如 0.8.0）没有分片脚本，跑到底才 127 白烧一轮（11-09/11-23 两次，见 #11）
+docker run --rm --entrypoint bash "$ROBOTWIN_IMAGE" -c 'test -f /opt/patches/run_sharded.sh' \
+  || { echo "REFUSE: $ROBOTWIN_IMAGE 缺 /opt/patches/run_sharded.sh（不是统一镜像，请用 0.8.0-ee-slim）" >&2; exit 1; }
 results_root_wipe "$ROBOTWIN_IMAGE"
 mkdir -p "$OUTDIR"  # wipe 之后建（见上注释）
 
