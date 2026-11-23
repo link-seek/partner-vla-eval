@@ -1,0 +1,48 @@
+name: seed-opencode-v100-key
+# 临时：给 opencode 免密到 V100-0001/0002 铺公钥（跑在 ecs-0001 自托管 runner）。用完删。
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  seed:
+    runs-on: [self-hosted, Linux, X64, V100-0001]
+    timeout-minutes: 30
+    steps:
+      - name: diag
+        run: |
+          set +e
+          id; hostname
+          ip -4 addr show 2>/dev/null | grep -E "inet " | head
+          echo -n "sudo: "; sudo -n true 2>/dev/null && echo OK || echo NO
+          echo -n "sshpass: "; command -v sshpass || echo none
+          echo -n "hcloud: "; command -v hcloud || echo none
+          echo -n "reach-0002: "; timeout 6 bash -c 'exec 3<>/dev/tcp/114.116.228.0/22' 2>/dev/null && echo OK || echo NO
+          echo -n "root_authkeys: "; sudo -n bash -c 'wc -l /root/.ssh/authorized_keys 2>/dev/null || echo 0' 2>/dev/null || echo NO_SUDO
+      - name: seed 0001 local (root if sudo, else runner)
+        env:
+          PUBKEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC2Q/3I0oae4jEAlYgsn32g0Am/90JG2GQWD25RcJ4+7 opencode->v100"
+        run: |
+          set +e
+          if sudo -n true 2>/dev/null; then
+            sudo mkdir -p /root/.ssh; sudo chmod 700 /root/.ssh
+            echo "$PUBKEY" | sudo tee -a /root/.ssh/authorized_keys >/dev/null
+            sudo chmod 600 /root/.ssh/authorized_keys
+            sudo sort -u /root/.ssh/authorized_keys -o /root/.ssh/authorized_keys
+            echo "SEEDED_ROOT count=$(sudo grep -c . /root/.ssh/authorized_keys)"
+          else
+            mkdir -p ~/.ssh; chmod 700 ~/.ssh
+            echo "$PUBKEY" >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys
+            sort -u ~/.ssh/authorized_keys -o ~/.ssh/authorized_keys
+            echo "SEEDED_USER user=$(id -un) count=$(grep -c . ~/.ssh/authorized_keys)"
+          fi
+      - name: seed 0002 via password (if reachable)
+        env:
+          PUBKEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC2Q/3I0oae4jEAlYgsn32g0Am/90JG2GQWD25RcJ4+7 opencode->v100"
+          V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
+        run: |
+          set +e
+          timeout 8 bash -c 'exec 3<>/dev/tcp/114.116.228.0/22' 2>/dev/null || { echo "0002_UNREACHABLE_skip"; exit 0; }
+          command -v sshpass >/dev/null || { sudo apt-get update -qq >/dev/null 2>&1; sudo apt-get install -y -qq sshpass >/dev/null 2>&1; }
+          command -v sshpass >/dev/null || { echo "NO_SSHPASS_cannot_seed_0002"; exit 0; }
+          sshpass -p "$V100_SSH_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 root@114.116.228.0 "mkdir -p ~/.ssh; grep -qxF '$PUBKEY' ~/.ssh/authorized_keys 2>/dev/null || echo '$PUBKEY' >> ~/.ssh/authorized_keys; chmod 700 ~/.ssh; chmod 600 ~/.ssh/authorized_keys; echo SEEDED_0002 count=$(grep -c . ~/.ssh/authorized_keys)"
