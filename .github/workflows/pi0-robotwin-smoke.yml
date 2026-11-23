@@ -13,7 +13,7 @@ on:
 
 # 与 molmo smoke 共用 V100，串行
 concurrency:
-  group: gpu-ecs-pi0-smoke
+  group: gpu-ecs-0002-smoke
   cancel-in-progress: false
 
 permissions:
@@ -25,12 +25,13 @@ jobs:
     uses: ./.github/workflows/power.yml
     with:
       action: start
+      server-id: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
     secrets:
       HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
       HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
   smoke:
     needs: start-ecs
-    runs-on: [self-hosted, Linux, X64, V100-0001]
+    runs-on: [self-hosted, Linux, X64, V100-0002]
     timeout-minutes: 300
     steps:
       - name: Validate OBS dest (fail fast, no GPU burn)
@@ -88,10 +89,10 @@ jobs:
           OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
           OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
         run: |
-          # 产出 flat 打平：upload 用 -flat，校验数三类文件
-          obsutil cp results/ "${OBS_DEST:?}" -f -r -flat -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK"
+          # 保留目录结构：results/episodes/*.mp4 进 <DEST>/episodes/，校验递归数三类文件
+          obsutil cp results/ "${OBS_DEST:?}" -f -r -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK"
           echo "obs-upload-ok: ${OBS_DEST:?}"
-          N=$(obsutil ls "${OBS_DEST:?}" -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" | grep -cE '\.log|\.json|\.mp4|\.sqlite' || true)
+          N=$(obsutil ls "${OBS_DEST:?}" -r -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" | grep -cE '\.log|\.json|\.mp4|\.sqlite' || true)
           [ "$N" -ge 3 ] || { echo "OBS 上传后验证失败：目标目录产物不足（$N，期望≥3：log+json+mp4）" >&2; exit 1; }
 
   stop-ecs:
@@ -100,6 +101,7 @@ jobs:
     uses: ./.github/workflows/power.yml
     with:
       action: stop
+      server-id: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
     secrets:
       HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
       HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
