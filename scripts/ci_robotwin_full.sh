@@ -244,8 +244,25 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -e CUDA_VISIBLE_DEVICES=1 \
   -e STATE_PATCH="${RW_STATE_PATCH:-}" \
   "$ROBOTWIN_IMAGE" \
-  -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; exit 1; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
+  -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
+# 挂载抖动（11-23 观察：开机后首轮偶发同一 --mount 在后一次容器里为空）→ 只对预检失败重试，最多 3 次
+for attempt in 1 2 3; do
+  [ "$CODE" = "9" ] || break
+  echo "assets 预检失败（退出码 9），第 $attempt 次重试（5s）" >&2
+  sleep 5
+  docker run --rm --gpus all --network host --entrypoint bash \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$WORK/configs":/work/configs:ro \
+    -v "$WORK/results":/work/results \
+    -v "$WORK/.cache/hf":/root/.cache/huggingface \
+    "${MOUNT_FLAGS[@]}" \
+    -e CUDA_VISIBLE_DEVICES=1 \
+    -e STATE_PATCH="${RW_STATE_PATCH:-}" \
+    "$ROBOTWIN_IMAGE" \
+    -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（重试仍失败）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
+  CODE=${PIPESTATUS[0]}
+done
 set -e
 docker logs cogact-serve > "$OUTDIR/cogact-serve.log" 2>&1 || true
 docker rm -f cogact-serve 2>/dev/null || true
