@@ -35,7 +35,7 @@ nav_order: 3
 | 模型 | ckpt | 动作 | 精度 | 覆盖 | 备注 |
 |---|---|---|---|---|---|
 | CogACT（DB-CogACT） | `Dexmal/robotwin-db-cogact/<task>` | qpos 14D | fp16 | **3/5 task** | 公开仓只发 4 个 task（含本考场外 1 个）；`click_bell` / `handover_block` 无公开 ckpt，按准入第 1 条不计入缺失，表中记 `—` |
-| X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | **5/5 task** | 单 ckpt 全 task；easy50 66.6%（5000ep）；本考场 5 task×50ep 为 194/200=97.0%（4 task 已收，handover_block 收尾中） |
+| X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | **5/5 task** | 单 ckpt 全 task；easy50 66.6%（5000ep）；本考场 5 task×50ep 已收齐：**233/250 = 93.2%**（95% CI [89.4, 95.7]），零 error |
 
 **覆盖率差异是本次最需要披露的一条**：CogACT 是"一头一 task"，作者只发了 4 个头；X-VLA 是单 ckpt 通用。所以两者在本考场的可比格数不同（3 vs 5），**不能把 5 task 均值当同一口径比**。
 
@@ -47,13 +47,13 @@ nav_order: 3
 | adjust_bottle | 49/50 = **98.0%** | 50/50 = **100%** | −2.0pp | 同档 |
 | place_phone_stand | 48/50 = **96.0%** | 6/50 = **12.0%** | +84.0pp | 跨档（X-VLA 高） |
 | click_bell | 48/50 = **96.0%** | — 无公开 ckpt | — | 不可比 |
-| handover_block | 收尾中 | — 无公开 ckpt | — | 不可比 |
+| handover_block | 39/50 = **78.0%** | — 无公开 ckpt | — | 不可比 |
 
-> **不给跨模型总分**：两边覆盖的 task 不同（X-VLA 4 格已收 / CogACT 3 格），且 `grab_roller` 取自不同 run，相加没有意义。
+> **不给跨模型总分**：两边覆盖的 task 不同（X-VLA 5 格已收 / CogACT 3 格），且 `grab_roller` 取自不同 run，相加没有意义。
 >
 > **两轮差异已披露**：CogACT `place_phone_stand` 早前一轮 8/50=16%，本轮 6/50=12%，差 4pp 在 n=50 噪声带（±≈10pp）内，本轮为准。
 >
-> 95% Wilson 区间：X-VLA 4 task 合计 194/200 = 97.0%，[93.6%, 98.6%]；单 task n=50 约 ±5–6pp。
+> 95% Wilson 区间：X-VLA 5 task 合计 233/250 = 93.2%，[89.4%, 95.7%]；单 task n=50 约 ±5–11pp（handover_block 39/50 为 [64.8%, 87.2%]）。
 
 
 
