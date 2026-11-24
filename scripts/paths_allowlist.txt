@@ -1,0 +1,38 @@
+# 允许"引用了但暂不存在"的路径（一行一个 glob）
+# 只登记两类，其余一律必须真实存在：
+#   1) 计划中、尚未创建的产物（创建后请删除对应行）
+#   2) 描述上游仓结构的路径（不是本仓路径）
+#
+# 1) 计划中产物
+configs/serve-robotwin-act.yaml
+configs/serve-robotwin-dp.yaml
+configs/registry/model-registry.schema.json
+docs/archive/tutorial-v1/*
+docs/data/*
+docs/internal/*
+scripts/gates/*
+scripts/ci/*
+scripts/data/*
+leaderboard/data/*
+leaderboard/schemas/*
+leaderboard/scripts/*
+docker/compose/*
+
+# 2) 上游仓（allenai/vla-evaluation-harness）的路径，仅出现在对照文档里
+configs/model_servers
+configs/benchmarks
+leaderboard/tests
+.github/workflows/leaderboard-validate.yml
+
+# 1b) 检视文档里描述"目标布局"的目录（尚未创建）
+docs/internal
+docs/data
+docs/archive/tutorial-v1
+configs/registry
+scripts/ci
+scripts/gates
+scripts/data
+leaderboard/data
+leaderboard/schemas
+leaderboard/scripts
+docker/compose

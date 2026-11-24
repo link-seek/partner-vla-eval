@@ -1,6 +1,6 @@
 # partner-vla-eval
 
-伙伴模型评测：`vla-evaluation-harness`（`v0.7.0`）统一执行，
+伙伴模型评测：`vla-evaluation-harness`（`v0.8.0`）统一执行，
 `RobotWin（双臂基线）+ LIBERO（单臂基线）+ CALVIN（单臂长程）` 三件套。
 方案与口径见 [Discussion #1](https://github.com/link-seek/partner-vla-eval/discussions/1)（过程问题记评论，教程后统稿）。
 
@@ -18,18 +18,34 @@ V100 上禁止：`pip/uv` 装包、git clone、HF 下载、ghcr 拉取。缺东�
 
 ## 仓库结构
 
+> 划分现状与改进方案见 [docs/reports/layout-review.md](docs/reports/layout-review.md)。
+> 本节由 CI 的 `scripts/check_paths.py` 兜底：这里写的路径必须真实存在，否则 lint 红。
+
 ```
-configs/                  serve-*.yaml（模型）+ run-*.yaml（考场）
-  serve-robotwin-cogact.yaml   DB-CogACT 双臂（当前参考模型，关节口径）
-  serve-robotwin.yaml          X-VLA（EE 口径，benchmark 未接，parked）
+configs/                  serve-*.yaml（8，模型侧）+ run-*.yaml（13，考场侧）+ model-registry.json（榜单真源）
 docker/
-  Dockerfile.verify       通用底座（torch/lerobot/vla-eval CLI）
-  Dockerfile.serve-cogact DB-CogACT serve 镜像（依赖全烘，uv 预热，V100 离线跑）
+  Dockerfile.*            基座/benchmark/serve/payload 镜像（版本钉死走 docker/versions.yaml）
+  versions.yaml           唯一版本真源（harness 0.8.0 / torch 2.6.0+cu126 / 上游 ref 40-hex）
+  entrypoint-robotwin.sh  统一镜像入口（STATE_PATCH 激活补丁）
+  robotwin-ee.patch       EE 通路补丁（上游 #168 合入前的本地兜底）
 scripts/
-  ci_smoke.sh / ci_robotwin.sh / ci_robotwin_full.sh   三条 CI 编排（bash 只编排）
-  upstream/run_sharded.sh                              上游分片脚本（v0.7.0 vendor）
-.github/workflows/       smoke/full/sync/repair 四类 workflow
+  ci_*.sh                 6 条 CI 编排（bash 只编排，不写业务）
+  lib/common.sh           workspace 修复 / SWR 登录 / results 清场
+  check_versions.py       门禁：versions.yaml ↔ Dockerfile pin 不许漂移
+  check_leaderboard.py    门禁：榜单 schema + 与 docs/reports 对账
+  check_paths.py          门禁：文档/workflow 引用的仓内路径必须存在
+  prepare_robotwin_data.sh  R01 训练数据下载/解包/manifest
+leaderboard/
+  leaderboard.json        榜单条目（一行一个 model×task×protocol）
+  leaderboard.schema.json 结构约束（必填 ckpt_revision / weight_type / n / success）
+docs/                     GitHub Pages 源（just-the-docs）
+  tutorial/               对外教程（Diátaxis：quickstart / operator / partner / reference / explanation）
+  reports/                叙事报告（R01、工程化检视、目录检视）+ deck/
+  archive/                论文 tex 等历史归档
+.github/workflows/        25 个 workflow（生产 + 镜像构建 + 一次性排障）
 ```
+
+**约定**：`README` 里出现的每个路径都受 lint 校验；新增目录请同步本节，否则 `check_paths.py` 会报 `PATH-DRIFT`。
 
 ## 跑法
 
@@ -40,6 +56,6 @@ scripts/
 
 ## Pin
 
-- `vla-eval`: `v0.7.0`（镜像 tag 对齐 `0.7.0`，不跟 `latest`）
-- 基准镜像：`swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-<libero|calvin|robotwin>:0.7.0`
+- `vla-eval`: `0.8.0`（唯一真源 `docker/versions.yaml`，镜像 tag 对齐，不跟 `latest`）
+- 基准镜像：`swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-<libero|calvin|robotwin>:0.8.0`（RobotWin 生产用 `0.8.0-ee-slim`）
 - 权重：OBS 标准桶（V100 内网 endpoint 拖）

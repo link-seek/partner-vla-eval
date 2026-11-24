@@ -41,6 +41,11 @@ jobs:
         run: |
           python3 -m pip install --quiet jsonschema
           python3 scripts/check_leaderboard.py
+      - name: Referenced paths must exist
+        # 漂移实例：README 曾引用 scripts/upstream/run_sharded.sh（已删）、
+        # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。
+        # 计划中/上游仓路径登记在 scripts/paths_allowlist.txt。
+        run: python3 scripts/check_paths.py
       - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
         run: |
           ! grep -rn "rm -rf /\s*$\|rm -rf /\*" scripts/ || { echo "DANGEROUS rm FOUND"; exit 1; }
