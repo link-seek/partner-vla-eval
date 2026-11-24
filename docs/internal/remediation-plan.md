@@ -239,3 +239,21 @@ C 目录归位（会改路径，最后做）
 | 一个改动一个 PR，不再直推 main | 本轮 37 个提交全是直推，没有 review 记录 |
 | issue 关闭必须附证据（run id / 文件路径 / 数字） | #11 是"详情待补"挂了 15 天，实际早就该关 |
 | 分支生命周期 ≤ 1 周，超期要么合并要么删 | 两个分支分别滞后 170/171 个提交，等于死分支 |
+
+---
+
+## 10. 执行进度（滚动更新）
+
+| 项 | 状态 | 证据 |
+|---|---|---|
+| A1 权重钉 revision | ✅ 完成 | registry 加 `ckpt_revision`（真实 sha）；预热 `--revision`；`check_registry.py` 拦 verified 缺版本 |
+| A2 版本取自 aggregate | ✅ 完成 | 5 份 X-VLA 报告改为实测 `0.0.0` + `harness_note` |
+| A3 覆盖检查前置 | ✅ 完成 | `check_coverage.py`；`model-matrix.yml` 新增 Coverage check；CI 反例返回 2 |
+| A4 报告自洽 | ✅ 完成 | `check_reports.py`（19 份报告，mean_success vs success/n、镜像必填） |
+| A5 重复轮 | ⏳ 待 GPU | — |
+| B1 Hard | ⏳ 待批准（8–12h GPU） | 已确认 `demo_randomized.yml` 存在，非代码风险 |
+| B2/B3 | ⏳ 与 5b 一起 | — |
+| C1–C7 | ⏳ 未开始（会改路径） | 每步必跑 `check_paths.py` |
+| D 收口 | ✅ 部分 | #11 关、#14/#8 更新、2 分支删；D1 git 分叉待外部环境 fetch |
+
+**CI 证据**：run `45432762112` —— SYNTAX / VERSIONS / LEADERBOARD / PATHS / REPORTS / REGISTRY / COVERAGE 七道全绿。
