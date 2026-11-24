@@ -301,7 +301,10 @@ bash scripts/data/collect_matrix.sh x-vla-robotwin2 hard > /tmp/hard.json
 # 2) 生成报告：easy 新建；hard 在既有 easy 报告上回填 hard_success / gap
 python3 scripts/data/gen_reports.py /tmp/hard.json hard
 
-# 3) 门禁
+# 3) 建榜单（easy/hard 各一份，值全部从 collected+registry 取，不许手写）
+python3 scripts/data/make_leaderboard.py /tmp/hard.json hard --run <run_id>
+
+# 4) 门禁（含"报告有 hard_success 但榜单缺行"的交叉校验）
 python3 scripts/gates/check_reports.py && python3 leaderboard/scripts/check_leaderboard.py
 ```
 

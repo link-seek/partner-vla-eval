@@ -100,6 +100,37 @@ def main() -> int:
             if rel and not (ROOT / rel).exists():
                 errors.append(f"leaderboard 指向不存在的报告：{rel}")
 
+    # 交叉一致性：报告里有 hard_success，就必须在某个 hard 榜单里有一行；
+    # 反之榜单有 hard 行，报告必须有 hard_success。防"数出了但榜单没更新"。
+    hard_lb = set()
+    for lbf in ROOT.glob("leaderboard/leaderboard*.json"):
+        if lbf.name.endswith(".schema.json"):
+            continue
+        try:
+            lbd = json.loads(lbf.read_text())
+        except json.JSONDecodeError:
+            continue
+        if not str(lbd.get("protocol", "")).startswith("hard"):
+            continue
+        for e in lbd.get("entries", []):
+            hard_lb.add((e.get("model"), e.get("task")))
+
+    reports_with_hard = set()
+    for fname, d in results.items():
+        if d.get("hard_success") is None:
+            continue
+        task = str(d.get("task", ""))
+        for t in ("grab_roller", "adjust_bottle", "place_phone_stand", "click_bell", "handover_block"):
+            if t in task:
+                # 报告文件名前缀是 xvla/cogact；榜单 model 是 registry key，用宽松匹配
+                prefix = "xvla" if "xvla" in fname else ("db-cogact" if "cogact" in fname else None)
+                reports_with_hard.add((prefix, t))
+    if reports_with_hard and not hard_lb:
+        errors.append(
+            f"{len(reports_with_hard)} 份报告已回填 hard_success，但没有 hard 榜单文件"
+            "（跑 scripts/data/make_leaderboard.py <json> hard --run <id>）"
+        )
+
     for w in warnings:
         print("WARN:", w)
     if errors:
