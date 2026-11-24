@@ -31,8 +31,17 @@
       "evidence": "grab_roller 45/50=90%、place_empty_cup 7/50=14%（docs/reports）",
       "official_ref": "论文 Easy 约 89%（grab_roller 量级）",
       "license": "见上游 ckpt 卡片",
-      "note": "一头一 task，一轮只打一个 task；权重按 task 子目录分头",
-      "fast_init": "true"
+      "note": "一头一 task，一轮只打一个 task；权重按 task 子目录分头。**公开仓只发 4 个 task**（adjust_bottle / grab_roller / place_empty_cup / place_phone_stand，2026-11-24 核 HF 文件清单：58 文件，无 click_bell / handover_block）→ 本考场 5 task 里只能覆盖 3 个，剩 2 个无公开 ckpt，不是 infra 故障。",
+      "fast_init": "true",
+      "covered_tasks": [
+        "grab_roller",
+        "adjust_bottle",
+        "place_phone_stand"
+      ],
+      "missing_tasks": {
+        "click_bell": "无公开 ckpt（HF 仓无该 task 目录）",
+        "handover_block": "无公开 ckpt（HF 仓无该 task 目录）"
+      }
     },
     "x-vla-robotwin2": {
       "family": "X-VLA",

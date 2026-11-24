@@ -8,7 +8,7 @@ nav_order: 3
 
 > 这一页回答一个教程前面没回答的问题：**哪个基模强**。
 > 前置：`quickstart`（能跑一轮）+ `explanation/01-stack-effects`（知道栈会差多少分）。
-> 状态：机制就绪，首批未出数（表格里 `status=pending/blocked` 的还没资格进榜）。
+> 状态：首批已出数（X-VLA Easy×50ep 5 task；CogACT Easy×50ep 按公开覆盖 3 task）；Hard 待补。
 
 ## 考场（固定这四项，缺一项就不进榜）
 
@@ -32,10 +32,13 @@ nav_order: 3
 
 ## 首批（2026-11 起）
 
-| 模型 | ckpt | 动作 | 精度 | 状态 | 备注 |
+| 模型 | ckpt | 动作 | 精度 | 覆盖 | 备注 |
 |---|---|---|---|---|---|
-| CogACT（DB-CogACT） | `Dexmal/robotwin-db-cogact/<task>` | qpos 14D | fp16 | 已出数（2/5 task） | 一头一 task；grab_roller 45/50；本轮补 click_bell / handover_block |
-| X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | 已出数（easy50 66.6%） | 本考场 5 task 子集 465/500=93.0%（100ep 口径）；50ep 复跑进行中 |
+| CogACT（DB-CogACT） | `Dexmal/robotwin-db-cogact/<task>` | qpos 14D | fp16 | **3/5 task** | 公开仓只发 4 个 task（含本考场外 1 个）；`click_bell` / `handover_block` 无公开 ckpt，按准入第 1 条不计入缺失，表中记 `—` |
+| X-VLA | `2toINF/X-VLA-RoboTwin2` | EE 16D | fp32 | **5/5 task** | 单 ckpt 全 task；easy50 66.6%（5000ep）；本考场 5 task×50ep 为 194/200=97.0%（4 task 已收，handover_block 收尾中） |
+
+**覆盖率差异是本次最需要披露的一条**：CogACT 是"一头一 task"，作者只发了 4 个头；X-VLA 是单 ckpt 通用。所以两者在本考场的可比格数不同（3 vs 5），**不能把 5 task 均值当同一口径比**。
+
 
 首版就这两款（同考场、同栈、同种子）。下面这些**登记了但本轮不做**，列出来是为了说明“不是漏了”：
 
