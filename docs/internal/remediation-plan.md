@@ -144,7 +144,7 @@ C 目录归位（会改路径，最后做）
 | C3 | ✅ 已完成：旧教程稿 → `docs/archive/tutorial-v1/`，论文 → `docs/archive/papers/` | 12 + 互引已改 | 1h |
 | C4 | `configs/{benchmarks,model_servers,registry}/`；`docker-compose.*` → `docker/compose/` | 3 + payload 清单 | 1.5h |
 | C5 | ✅ 已完成（方案修正）：**GitHub 不支持 workflow 子目录**，改为 `.github/workflows/README.md` 分类索引 | 1 文档 | 0.5h |
-| C6 | `obsutil cp` 后回读校验；`idle-guard` cron 兜底关机 | 6 workflow + 1 新 workflow | 2h |
+| C6 | ✅ 已完成：5 workflow 回读校验 + `idle-guard.yml` + lint 回归门 | 6 workflow | 2h |
 | C7 | 队列拆组，或 `r01.yml` 串 `prep→train→eval` job 链 | 2–3 workflow | 2h |
 
 **每步做完必须跑**：`python3 scripts/gates/check_paths.py`（今天新增的门禁，专门防改断链接）。
@@ -258,7 +258,7 @@ C 目录归位（会改路径，最后做）
 | C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |
 | C4 configs 三分 | ✅ 完成 | benchmarks 13 / model_servers 9 / registry 1；脚本与 workflow 同步 |
 | C5 workflows 分类 | ✅ 完成（方案修正） | GitHub 不支持子目录 → `.github/workflows/README.md` 索引（25 个全覆盖） |
-| C6 上传回读 + idle-guard | ⏳ 未开始 | — |
+| C6 上传回读 + idle-guard | ✅ 完成 | 5 个 workflow 去掉 `\|\| true` 改回读计数；新增 `idle-guard.yml`（30min cron，三条件全满足才关）；lint 加回归门 |
 | C7 队列拆组 / job 链 | ⏳ 未开始 | — |
 | D 收口 | ✅ 部分 | #11 关、#14/#8 更新、2 分支删；D1 git 分叉待外部环境 fetch |
 

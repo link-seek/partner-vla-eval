@@ -68,6 +68,19 @@ jobs:
           echo "coverage negative case OK (refused with 2)"
           python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 \
             --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
+      - name: OBS uploads must not swallow failures
+        # C6 回归门：`obsutil cp ... || true` 会让"上传失败但产物只留在机器上"变成静默事故。
+        # 现在的写法是 cp 不带 || true + 回读计数，见各 workflow 的 Upload to OBS 步骤。
+        run: |
+          # 只查真正的命令行（行首 obsutil），并排除本文件自身（下面就是这条规则的文字）
+          hits=$(grep -rnE '^[[:space:]]*obsutil cp .*\|\|[[:space:]]*true' .github/workflows/*.yml \
+                 | grep -v '/lint.yml:' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "FAIL: 上传失败被 || true 吞掉，改用回读校验" >&2
+            exit 1
+          fi
+          echo "OBS-UPLOAD-GUARD OK"
       - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
         run: |
           ! grep -rn "rm -rf /\s*$\|rm -rf /\*" scripts/ || { echo "DANGEROUS rm FOUND"; exit 1; }

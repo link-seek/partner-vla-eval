@@ -1,0 +1,98 @@
+name: Idle Guard (stop 0002 if idle)
+
+# C6 兜底：run 被 cancelled 时 stop-ecs 可能不执行，机器会留下空烧。
+# 每 30 分钟判断三件事，全满足才关机：
+#   1) ECS 0002 状态 = ACTIVE
+#   2) 本仓没有 queued / pending / in_progress 的 run（排除自己）
+#   3) org runner ecs-0002 不在 busy
+# 误杀风险：最多空烧 30 分钟；不会在跑批期间关（三条同时满足才动）。
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: idle-guard
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      idle: ${{ steps.decide.outputs.idle }}
+      why: ${{ steps.decide.outputs.why }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Setup hcloud CLI (pinned, same as ecs-power action)
+        run: |
+          HCLOUD_VER="7.3.12"
+          curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/${HCLOUD_VER}/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz \
+            || curl -sSL "https://cn-north-4-hdn-koocli.obs.cn-north-4.myhuaweicloud.com/cli/latest/huaweicloud-cli-linux-amd64.tar.gz" -o /tmp/hcloud.tar.gz
+          tar -xzf /tmp/hcloud.tar.gz -C /tmp/
+          sudo mv -f /tmp/hcloud /usr/local/bin/hcloud
+          hcloud version 2>&1 | head -n 1 || true
+      - name: Decide
+        id: decide
+        env:
+          HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SERVER_ID: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+          SELF_RUN: ${{ github.run_id }}
+        run: |
+          set -e
+          export HCLOUD_AGREE_PRIVACY=true
+
+          ST=$(hcloud ECS ListServersDetails --cli-region=cn-north-4 \
+                 --cli-access-key="$HCLOUD_AK" --cli-secret-key="$HCLOUD_SK" --limit=25 2>/dev/null \
+               | python3 -c "import json,sys; d=json.load(sys.stdin); print(next((s['status'] for s in d['servers'] if s['id']=='$SERVER_ID'), 'UNKNOWN'))")
+          echo "ecs=$ST"
+
+          # 排除自己这条 run，否则永远算"有活"
+          ACTIVE=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?per_page=100" \
+            --jq "[.workflow_runs[] | select(.id|tostring != \"$SELF_RUN\") | select(.status==\"queued\" or .status==\"pending\" or .status==\"in_progress\" or .status==\"waiting\")] | length")
+          echo "other_active_runs=$ACTIVE"
+
+          BUSY=$(gh api orgs/link-seek/actions/runners \
+            --jq '[.runners[] | select(.name=="ecs-0002" and .busy==true)] | length')
+          echo "runner_busy=$BUSY"
+
+          if [ "$ST" = "ACTIVE" ] && [ "$ACTIVE" = "0" ] && [ "$BUSY" = "0" ]; then
+            echo "idle=true" >> "$GITHUB_OUTPUT"
+            echo "why=ACTIVE 且无其他 run、runner 空闲" >> "$GITHUB_OUTPUT"
+            echo "=> 判定空闲，将关机"
+          else
+            echo "idle=false" >> "$GITHUB_OUTPUT"
+            echo "why=ecs=$ST other_runs=$ACTIVE runner_busy=$BUSY" >> "$GITHUB_OUTPUT"
+            echo "=> 不动（ecs=$ST other_runs=$ACTIVE runner_busy=$BUSY）"
+          fi
+
+  stop:
+    needs: check
+    if: needs.check.outputs.idle == 'true'
+    uses: ./.github/workflows/power.yml
+    with:
+      action: stop
+      server-id: 7f39cb83-1a5c-4792-b65e-e578d7ddb88d
+    secrets:
+      HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+      HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
+
+  report:
+    needs: [check, stop]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "idle=${{ needs.check.outputs.idle }}"
+          echo "why=${{ needs.check.outputs.why }}"
+          echo "stop_result=${{ needs.stop.result }}"

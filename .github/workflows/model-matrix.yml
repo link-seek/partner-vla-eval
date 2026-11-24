@@ -121,8 +121,12 @@ jobs:
           OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
           OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
         run: |
-          obsutil cp matrix/ "${OBS_DEST:?}" -f -r -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" || true
-
+          set -e
+          obsutil cp matrix/ "${OBS_DEST:?}" -f -r -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK"
+          # C6 回读校验：以前 `|| true` 会吞掉上传失败，产物只在机器上、OBS 空着也没人知道
+          CNT=$(obsutil ls "${OBS_DEST}" -e "$OBS_ENDPOINT" -i "$OBS_AK" -k "$OBS_SK" 2>/dev/null | grep -c 'obs://' || true)
+          echo "OBS 回读对象数: $CNT"
+          if [ "${CNT:-0}" -lt 1 ]; then echo "REFUSE: OBS 回读为空，上传实际失败: ${OBS_DEST}" >&2; exit 1; fi
   stop-ecs:
     needs: matrix
     if: always()
