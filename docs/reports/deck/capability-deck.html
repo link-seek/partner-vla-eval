@@ -222,14 +222,14 @@
       <tr><th style="width:18%">模型</th><th style="width:22%">动作 / 精度</th><th>已出数</th></tr>
       <tr>
         <td>DB-CogACT</td><td>qpos 14D / fp16</td>
-        <td class="num">grab_roller 45/50=90% · adjust_bottle 100%* · place_phone_stand 8/50=16% · place_empty_cup 7/50=14%</td>
+        <td class="num">grab_roller 45/50=90% · adjust_bottle 50/50=100% · place_phone_stand 6/50=12% · place_empty_cup 7/50=14%</td>
       </tr>
       <tr>
         <td>X-VLA</td><td>EE 16D / fp32</td>
         <td class="num">easy50 全量 3328/5000=66.6%，零 error</td>
       </tr>
     </table>
-    <p class="sub" style="margin-top:20px">* adjust_bottle 为 35/35 有效（15 个坏种已剔）。</p>
+    <p class="sub" style="margin-top:20px">`adjust_bottle` / `place_phone_stand` 为本轮实测（run 45188046221）；`grab_roller` / `place_empty_cup` 为历史轮次，跨轮次不加总。</p>
     <p class="sub" style="margin-top:10px"><strong>边界</strong>：这一栏不回答"哪个基模强"——因为训练口径还没固定。</p>
   </section>
 
@@ -245,12 +245,12 @@
     <table style="margin-top:24px">
       <tr><th>task</th><th>X-VLA（EE 16D）</th><th>CogACT（qpos 14D）</th></tr>
       <tr><td>grab_roller</td><td class="num">49/50</td><td class="num">45/50</td></tr>
-      <tr><td>adjust_bottle</td><td class="num">49/50</td><td class="num">100%*</td></tr>
-      <tr><td>place_phone_stand</td><td class="num">48/50</td><td class="num">8/50</td></tr>
+      <tr><td>adjust_bottle</td><td class="num">49/50</td><td class="num">50/50</td></tr>
+      <tr><td>place_phone_stand</td><td class="num">48/50</td><td class="num">6/50</td></tr>
       <tr><td>click_bell</td><td class="num">48/50</td><td class="num muted">— 无公开 ckpt</td></tr>
       <tr><td>handover_block</td><td class="num muted">收尾中</td><td class="num muted">— 无公开 ckpt</td></tr>
     </table>
-    <p class="sub" style="margin-top:16px"><strong>不能拿 5 task 均值当同一口径比</strong>：3 格 vs 5 格，横向只在共同覆盖的 task 上成立。</p>
+    <p class="sub" style="margin-top:16px"><strong>不给跨模型总分</strong>：覆盖格数不同（4 vs 3）且 grab_roller 取自不同 run；横向只在共同覆盖的 task 上成立。</p>
   </section>
 
   <!-- 09 5b -->
@@ -351,8 +351,8 @@
       <tr><td>X-VLA</td><td>place_phone_stand</td><td class="num">48/50</td><td class="num">96.0%</td><td class="num">[86.5, 98.9]</td><td class="num">124.1</td><td class="num">0</td></tr>
       <tr><td>X-VLA</td><td>click_bell</td><td class="num">48/50</td><td class="num">96.0%</td><td class="num">[86.5, 98.9]</td><td class="num">77.1</td><td class="num">0</td></tr>
       <tr><td>CogACT</td><td>grab_roller</td><td class="num">45/50</td><td class="num">90.0%</td><td class="num">[78.6, 95.7]</td><td class="num">90.0</td><td class="num">0</td></tr>
-      <tr><td>CogACT</td><td>adjust_bottle</td><td class="num">35/35</td><td class="num">100%</td><td class="num">[90.1, 100]</td><td class="num">94.5</td><td class="num">15 坏种已剔</td></tr>
-      <tr><td>CogACT</td><td>place_phone_stand</td><td class="num">8/50</td><td class="num">16.0%</td><td class="num">[8.3, 28.5]</td><td class="num">—</td><td class="num">0</td></tr>
+      <tr><td>CogACT</td><td>adjust_bottle</td><td class="num">50/50</td><td class="num">100%</td><td class="num">[92.9, 100]</td><td class="num">94.5</td><td class="num">0</td></tr>
+      <tr><td>CogACT</td><td>place_phone_stand</td><td class="num">6/50</td><td class="num">12.0%</td><td class="num">[5.6, 23.8]</td><td class="num">365.1</td><td class="num">0</td></tr>
     </table>
     <p class="sub" style="margin-top:16px">n=50 时 Wilson 区间宽约 ±5–10pp；<strong>差异小于 ±7pp 不下结论</strong>。</p>
   </section>
