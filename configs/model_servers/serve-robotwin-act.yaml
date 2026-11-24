@@ -1,0 +1,13 @@
+# ACT（RoboTwin 官方 policy/ACT）serve 配置
+# ⚠️ 未验证：2026-11-24 写就，机器被 Hard 评测占用，尚未 smoke。
+# 首次使用前按 docs/internal/act-dp-adapter-runbook.md 跑 1 task×1ep。
+script: "scripts/model_servers/robotwin_policy.py"
+args:
+  policy: act
+  # ACT 从 ckpt_dir 读 policy_last.ckpt + dataset_stats.pkl（官方约定）
+  ckpt_dir: /root/robotwin-train/ckpt/grab_roller-clean50-seed0
+  action_dim: 14
+  chunk_size: 50
+  kl_weight: 10.0
+  temporal_agg: false
+  device: cuda:0

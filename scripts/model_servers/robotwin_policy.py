@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+"""RoboTwin 官方 ACT / DP 的 serve 适配器（一个文件，`--policy act|dp` 切换）。
+
+背景
+----
+RoboTwin 官方 `policy/ACT`、`policy/DP` 自带训练与部署代码，但部署入口是
+`deploy_policy.py` 里的 `eval(TASK_ENV, model, observation)`——它自己驱动环境。
+harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval()`，直接用：
+
+    model = get_model(usr_args)      # ACT(usr_args, Namespace(**usr_args)) / DP(ckpt, ...)
+    actions = model.get_action(obs)  # 内部自带 chunk / 动作队列复用
+
+`obs` 的键由官方 `encode_obs()` 决定：
+    ACT: {head_cam, left_cam, right_cam} (CHW, 640x480, 0..1) + qpos(14)
+    DP : {head_cam, left_cam, right_cam} (CHW, 0..1)            + agent_pos(14)
+
+状态性
+------
+两个策略都**自带时序状态**（ACT 的 `query_frequency` / `temporal_agg`，DP 的
+`n_action_steps` 动作队列）。所以这里绝不能设 chunk_size（否则双重缓冲，动作错位），
+每步只调一次 `get_action`，并在 episode 开始时 `reset_model`。
+
+⚠️ 状态：**未验证**（2026-11-24 写就，机器被 Hard 评测占用，未做 smoke）。
+首次使用前必须按 `docs/internal/act-dp-adapter-runbook.md` 跑 1 task×1ep smoke。
+
+用法（serve yaml 里）：
+    script: "scripts/model_servers/robotwin_policy.py"
+    args:
+      policy: act
+      ckpt_dir: /root/robotwin-train/ckpt/grab_roller-clean50-seed0
+      task_name: grab_roller
+"""
+from __future__ import annotations
+
+import sys
+from typing import Any
+
+import numpy as np
+
+from vla_eval.model_servers.base import SessionContext
+from vla_eval.model_servers.predict import PredictModelServer
+from vla_eval.specs import IMAGE_RGB, RAW
+from vla_eval.types import Action, Observation
+
+# 官方 deploy_policy.yml 的默认值（ACT / DP 两份合并；未用到的键会被忽略）
+_ROBOTWIN_DEFAULTS: dict[str, Any] = {
+    # 通用
+    "task_name": None,
+    "task_config": None,
+    "ckpt_setting": None,
+    "seed": 0,
+    "instruction_type": "unseen",
+    "action_dim": 14,
+    # ACT
+    "kl_weight": 10.0,
+    "chunk_size": 50,
+    "hidden_dim": 512,
+    "dim_feedforward": 3200,
+    "temporal_agg": False,
+    "ckpt_dir": None,
+    "policy_class": "ACT",
+    "num_epochs": 2000,
+    "position_embedding": "sine",
+    "lr_backbone": 1e-5,
+    "weight_decay": 1e-4,
+    "lr": 1e-5,
+    "masks": False,
+    "dilation": False,
+    "backbone": "resnet18",
+    # DP
+    "expert_data_num": None,
+    "checkpoint_num": 600,
+    "head_camera_type": "D435",
+    "left_arm_dim": 6,
+    "right_arm_dim": 6,
+}
+
+_CAMERAS = ("head_camera", "left_camera", "right_camera")
+
+
+class RoboTwinPolicyServer(PredictModelServer):
+    """官方 ACT/DP 的薄适配层（不做任何模型侧改动）。"""
+
+    def __init__(
+        self,
+        policy: str = "act",
+        ckpt_dir: str | None = None,
+        device: str = "cuda:0",
+        robotwin_root: str = "/app/RoboTwin",
+        **overrides: Any,
+    ) -> None:
+        policy = policy.lower()
+        if policy not in ("act", "dp"):
+            raise ValueError(f"policy 只允许 act|dp（实际 {policy!r}）")
+        # 策略自带时序缓冲，harness 层不得再切 chunk
+        super().__init__(chunk_size=None, action_ensemble="newest")
+        self.policy_kind = policy
+        self.ckpt_dir = ckpt_dir
+        self.device = device
+        self.robotwin_root = robotwin_root
+
+        self._usr_args = dict(_ROBOTWIN_DEFAULTS)
+        self._usr_args.update({k: v for k, v in overrides.items() if v is not None})
+        if ckpt_dir:
+            self._usr_args["ckpt_dir"] = ckpt_dir
+        self._usr_args["device"] = device
+
+        self._module = None
+        self._model = None
+
+    # ---------------------------------------------------------------- specs
+    def get_action_spec(self) -> dict[str, Any]:
+        return {"actions": RAW}
+
+    def get_observation_spec(self) -> dict[str, Any]:
+        return {"image": IMAGE_RGB, "left_camera": IMAGE_RGB, "right_camera": IMAGE_RGB}
+
+    # -------------------------------------------------------------- loading
+    def _load(self) -> None:
+        if self._model is not None:
+            return
+        # 官方代码是 package 形式（`from .act_policy import ACT`），
+        # 所以把 RoboTwin 根目录加进 sys.path，按 package 导入。
+        if self.robotwin_root not in sys.path:
+            sys.path.insert(0, self.robotwin_root)
+
+        if self.policy_kind == "act":
+            from policy.ACT import deploy_policy as dp  # type: ignore
+        else:
+            from policy.DP import deploy_policy as dp  # type: ignore
+
+        if self.policy_kind == "dp":
+            # DP 的 get_model 从 ckpt_dir 约定拼路径，需要 task_name/expert_data_num 等
+            missing = [k for k in ("task_name", "expert_data_num") if not self._usr_args.get(k)]
+            if missing:
+                raise ValueError(
+                    f"DP 需要 usr_args 里的 {missing}（官方按 <task>-<setting>-<num>-<seed> 拼 ckpt 路径）；"
+                    f"当前只有 {sorted(k for k, v in self._usr_args.items() if v is not None)}"
+                )
+
+        self._dp = dp
+        self._model = dp.get_model(self._usr_args)
+        self._module = dp
+
+    def _reset(self) -> None:
+        if self._model is not None and self._module is not None:
+            self._module.reset_model(self._model)
+
+    # ------------------------------------------------------------ inference
+    def _to_robotwin_obs(self, obs: Observation) -> dict[str, Any]:
+        """harness Observation → 官方 encode_obs 的产物。"""
+        images = obs.get("images") or {}
+        if not isinstance(images, dict):
+            images = {"head_camera": images}
+        out: dict[str, Any] = {}
+        for name, short in zip(_CAMERAS, ("head_cam", "left_cam", "right_cam")):
+            if name not in images:
+                raise KeyError(
+                    f"观测缺相机 {name}（拿到 {sorted(images)}）；"
+                    "serve yaml 的 camera_keys 与考场不一致"
+                )
+            img = np.asarray(images[name])
+            # harness 给 HWC(uint8 或 float)；官方要 CHW 且 0..1
+            if img.ndim == 3 and img.shape[-1] in (3, 4):
+                img = img[..., :3]
+                img = np.moveaxis(img, -1, 0)
+            if img.dtype != np.float32:
+                img = img.astype(np.float32)
+            if img.max() > 1.5:
+                img /= 255.0
+            out[short] = img
+
+        js = obs.get("joint_state")
+        if js is None:
+            raise KeyError("观测缺 joint_state（ACT 要 qpos / DP 要 agent_pos，都是 14 维）")
+        js = np.asarray(js, dtype=np.float32).reshape(-1)
+        if js.size != self._usr_args.get("action_dim", 14):
+            raise ValueError(
+                f"joint_state 维度 {js.size} 与 action_dim {self._usr_args.get('action_dim')} 不符"
+            )
+        if self.policy_kind == "act":
+            out["qpos"] = js.tolist()
+        else:
+            out["agent_pos"] = js
+        return out
+
+    def predict(self, obs: Observation, ctx: SessionContext) -> Action:
+        self._load()
+        rw_obs = self._to_robotwin_obs(obs)
+        act = self._model.get_action(rw_obs)
+        arr = np.asarray(act, dtype=np.float32).reshape(-1)
+        dim = int(self._usr_args.get("action_dim", 14))
+        if arr.size != dim:
+            raise ValueError(f"策略返回 {arr.size} 维动作，与 action_dim={dim} 不符")
+        return {"actions": arr.reshape(1, dim)}
+
+    async def on_episode_start(self, config: dict[str, Any], ctx: SessionContext) -> None:
+        # 每个 episode 清一次时序状态（ACT 的 all_time_actions / DP 的动作队列）
+        if self.ckpt_dir is None and not self._usr_args.get("task_name"):
+            raise ValueError(
+                "serve yaml 必须给 ckpt_dir（ACT）或 task_name+expert_data_num（DP），"
+                f"当前只有 {sorted(k for k, v in self._usr_args.items() if v is not None)}"
+            )
+        self._reset()
+        await super().on_episode_start(config, ctx)
+
+
+if __name__ == "__main__":
+    from vla_eval.model_servers.serve import run_server
+
+    run_server(RoboTwinPolicyServer)

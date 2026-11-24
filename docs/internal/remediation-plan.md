@@ -253,7 +253,7 @@ C 目录归位（会改路径，最后做）
 | A5 重复轮 | ⏳ 待 GPU | — |
 | B1 Hard | 🔄 运行中（run 45503556969，X-VLA 5 task） | `task_config: demo_randomized` 已确认；按实测吞吐 250ep ≈ 15.8h ≈ ¥521 |
 | B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
-| B3 ACT/DP 适配器 | ⏳ 需开机在 0002 镜像内开发 | — |
+| B3 ACT/DP 适配器 | 🟡 代码已完成、**未 smoke** | `scripts/model_servers/robotwin_policy.py` + 2 个 serve yaml + runbook；registry 标 `pending` |
 | C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
 | C2 结果 JSON → docs/data | ✅ 完成 | 19 JSON + deck → docs/decks；registry/leaderboard/schema 同步 |
 | C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |
@@ -306,3 +306,17 @@ python3 scripts/gates/check_reports.py && python3 leaderboard/scripts/check_lead
 ```
 
 `hard` 模式实测（mock）：easy 0.96 / hard 0.40 → `gap: 0.56`，写进同一份报告，不覆盖 Easy 数。
+
+---
+
+## 13. B3 交付（2026-11-24，未验证）
+
+| 产物 | 说明 |
+|---|---|
+| `scripts/model_servers/robotwin_policy.py` | 一个文件切 `act\|dp`；绕开官方 `eval()` 直接用 `get_model()`+`get_action()`；策略自带时序状态，故 harness 层 `chunk_size=None` 防双重缓冲 |
+| `configs/model_servers/serve-robotwin-act.yaml` / `-dp.yaml` | 按官方 `deploy_policy.yml` 默认值填；ACT 用 `ckpt_dir`，DP 用 `task_name+ckpt_setting+expert_data_num+seed` |
+| `docs/internal/act-dp-adapter-runbook.md` | 首次 smoke 手册：起服 → 1ep → 三条通过标准 → 常见失败表 |
+| registry | `act-baseline` / `dp-baseline` 从 `dropped` 改 `pending`（有适配器但未验证；`verified` 必须等 smoke 过） |
+
+**为什么现在不能标 verified**：verified 的含义是"本仓已跑出数"。适配器只是能加载，
+动作维度/相机通道/归一化这三处都可能错，必须 1ep smoke 才能定。

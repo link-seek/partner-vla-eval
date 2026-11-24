@@ -1,0 +1,13 @@
+# DP（RoboTwin 官方 policy/DP）serve 配置
+# ⚠️ 未验证：同上。
+script: "scripts/model_servers/robotwin_policy.py"
+args:
+  policy: dp
+  # DP 官方按 <task>-<ckpt_setting>-<expert_data_num>-<seed>/<checkpoint_num>.ckpt 拼路径
+  task_name: grab_roller
+  ckpt_setting: clean50
+  expert_data_num: 50
+  seed: 0
+  checkpoint_num: 600
+  action_dim: 14
+  device: cuda:0
