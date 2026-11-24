@@ -19,7 +19,7 @@ V100 上禁止：`pip/uv` 装包、git clone、HF 下载、ghcr 拉取。缺东�
 ## 仓库结构
 
 > 划分现状与改进方案见 [docs/reports/layout-review.md](docs/reports/layout-review.md)。
-> 本节由 CI 的 `scripts/check_paths.py` 兜底：这里写的路径必须真实存在，否则 lint 红。
+> 本节由 CI 的 `scripts/gates/check_paths.py` 兜底：这里写的路径必须真实存在，否则 lint 红。
 
 ```
 configs/                  serve-*.yaml（8，模型侧）+ run-*.yaml（13，考场侧）+ model-registry.json（榜单真源）
@@ -29,15 +29,15 @@ docker/
   entrypoint-robotwin.sh  统一镜像入口（STATE_PATCH 激活补丁）
   robotwin-ee.patch       EE 通路补丁（上游 #168 合入前的本地兜底）
 scripts/
-  ci_*.sh                 6 条 CI 编排（bash 只编排，不写业务）
-  lib/common.sh           workspace 修复 / SWR 登录 / results 清场
-  check_versions.py       门禁：versions.yaml ↔ Dockerfile pin 不许漂移
-  check_leaderboard.py    门禁：榜单 schema + 与 docs/reports 对账
-  check_paths.py          门禁：文档/workflow 引用的仓内路径必须存在
-  prepare_robotwin_data.sh  R01 训练数据下载/解包/manifest
-leaderboard/
+  ci/                     6 条 CI 编排（bash 只编排，不写业务）+ ci/lib/common.sh
+  gates/                  5 道门禁：check_versions / check_paths / check_registry /
+                          check_reports / check_coverage
+  data/                   prepare_robotwin_data.sh（R01 数据下载/解包/manifest）
+  paths_allowlist.txt     允许"计划中/上游仓"路径的白名单
+leaderboard/              自包含（对齐上游布局）
   leaderboard.json        榜单条目（一行一个 model×task×protocol）
   leaderboard.schema.json 结构约束（必填 ckpt_revision / weight_type / n / success）
+  scripts/check_leaderboard.py  门禁：schema + 与 docs/data 对账
 docs/                     GitHub Pages 源（just-the-docs）
   tutorial/               对外教程（Diátaxis：quickstart / operator / partner / reference / explanation）
   reports/                叙事报告（R01、工程化检视、目录检视）

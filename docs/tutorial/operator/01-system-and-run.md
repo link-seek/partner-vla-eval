@@ -68,7 +68,7 @@ serve 独占卡 0，分片/渲染放卡 1；同一时刻只跑一个 GPU job，�
 4. **登录 SWR + 拉镜像**：AK/SK 派生登录，拉 benchmark、serve、verify 三个镜像。
 5. **预热权重**：verify 镜像跑 `hf-download`（`HF_ENDPOINT` 走 mirror，带 token）。
 6. **起 serve**：`docker run -d --gpus device=0 ... vla-eval serve -c <serve.yaml>`，等 8000 端口通（脚本内 3 次重试）。
-7. **跑 + 收**：smoke 跑 `bash scripts/ci_robotwin.sh`；全量跑 `bash scripts/ci_robotwin_full.sh`。结果在 `results/`，`obsutil cp` 传到 `<obs_prefix>/robotwin-<smoke|full>/`。
+7. **跑 + 收**：smoke 跑 `bash scripts/ci/ci_robotwin.sh`；全量跑 `bash scripts/ci/ci_robotwin_full.sh`。结果在 `results/`，`obsutil cp` 传到 `<obs_prefix>/robotwin-<smoke|full>/`。
 
 全量常用变量（脚本当前默认值）：
 

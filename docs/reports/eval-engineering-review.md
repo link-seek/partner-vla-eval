@@ -58,7 +58,7 @@
    "ckpt_repo":"2toINF/X-VLA-RoboTwin2","ckpt_revision":"<40-hex>"}
   ```
 - `leaderboard/leaderboard.schema.json`：`required` 含 `protocol / weight_type / n / success / run / ckpt_revision`。
-- `scripts/check_leaderboard.py`：schema 校验 + `success<=n` + `n` 与 `protocol` 白名单一致 + 同 `(model,task,protocol)` 不得重复。
+- `leaderboard/scripts/check_leaderboard.py`：schema 校验 + `success<=n` + `n` 与 `protocol` 白名单一致 + 同 `(model,task,protocol)` 不得重复。
 - `lint.yml` 加一步跑它。
 
 **验收**：把 `success` 改成 `60`（n=50）→ lint 红；删 `ckpt_revision` → lint 红。

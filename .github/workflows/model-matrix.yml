@@ -88,12 +88,14 @@ jobs:
           docker create --name payload-tmp "$PAYLOAD_IMAGE"
           docker cp payload-tmp:/payload/. .
           docker rm -f payload-tmp
-          ls scripts/ci_robotwin_full.sh configs/registry/model-registry.json docker/versions.yaml
+          ls scripts/ci/ci_robotwin_full.sh configs/registry/model-registry.json docker/versions.yaml
       - name: Coverage check (fail fast, no GPU burn)
         # A3：缺格模型（如 CogACT 只有 4 个头）在 dispatch 时就拒跑，
         # 不再等预热报 "Fetching 0 files" 才发现。
         run: |
-          python3 scripts/check_coverage.py             --models "${{ inputs.models }}"             --tasks "${{ inputs.tasks }}"
+          python3 scripts/gates/check_coverage.py \
+            --models "${{ inputs.models }}" \
+            --tasks "${{ inputs.tasks }}"
       - name: Run matrix
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -108,8 +110,8 @@ jobs:
           RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
         run: |
           mkdir -p matrix
-          chmod +x scripts/ci_model_matrix.sh
-          bash scripts/ci_model_matrix.sh 2>&1 | tee matrix/ci.log; CODE=${PIPESTATUS[0]}
+          chmod +x scripts/ci/ci_model_matrix.sh
+          bash scripts/ci/ci_model_matrix.sh 2>&1 | tee matrix/ci.log; CODE=${PIPESTATUS[0]}
           echo "matrix_exit=$CODE"
           exit $CODE
       - name: Upload to OBS

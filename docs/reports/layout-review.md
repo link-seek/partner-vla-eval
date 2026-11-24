@@ -192,7 +192,7 @@ partner-vla-eval/
 
 | 阶段 | 动作 | 影响面 | 可独立回滚 |
 |---|---|---|---|
-| **S1（已完成）** | 重写 README"仓库结构"（修正 3 处过期）；孤儿目录收编进 `docs/internal/`；`scripts/check_paths.py` 进 lint | 4 文件 | 是 |
+| **S1（已完成）** | 重写 README"仓库结构"（修正 3 处过期）；孤儿目录收编进 `docs/internal/`；`scripts/gates/check_paths.py` 进 lint | 4 文件 | 是 |
 | **S2** | `docs/reports/*.json` → `docs/data/`；`leaderboard.json` 的 `report` 字段同步 | 1 JSON + 2 文档 | 是 |
 | **S3（已完成）** | 旧教程稿 → `docs/archive/tutorial-v1/`；论文 → `docs/archive/papers/` | 12 + 链接 | 是 |
 | **S4** | `scripts/` 三分（ci/gates/data）；`leaderboard/` 自包含 | 6 workflow + 2 脚本 | 是 |

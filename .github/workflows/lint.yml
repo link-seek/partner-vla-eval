@@ -34,30 +34,30 @@ jobs:
         run: |
           python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + glob.glob('.github/actions/*/action.yml')]; print('YAML OK')"
       - name: versions.yaml consistency (no silent pin drift)
-        run: python3 scripts/check_versions.py
+        run: python3 scripts/gates/check_versions.py
       - name: Leaderboard schema + report reconciliation
         # 对照上游 leaderboard-validate.yml：榜单数据必须机器可验。
         # 额外两条本仓规则：数字要与 docs/reports 对账；shared/finetuned 不许混排。
         run: |
           python3 -m pip install --quiet jsonschema
-          python3 scripts/check_leaderboard.py
+          python3 leaderboard/scripts/check_leaderboard.py
       - name: Referenced paths must exist
         # 漂移实例：README 曾引用 scripts/upstream/run_sharded.sh（已删）、
         # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。
         # 计划中/上游仓路径登记在 scripts/paths_allowlist.txt。
-        run: python3 scripts/check_paths.py
+        run: python3 scripts/gates/check_paths.py
       - name: Report self-consistency (mean_success vs success/n, image present)
         # A4：拦住"报告写 0.8.0 而 aggregate 是 0.0.0"、"mean_success 与 success/n 对不上"。
-        run: python3 scripts/check_reports.py
+        run: python3 scripts/gates/check_reports.py
       - name: Model registry reproducibility gate
         # A1：status=verified 必须能钉住权重（ckpt_revision 40-hex），否则复现必翻车。
-        run: python3 scripts/check_registry.py
+        run: python3 scripts/gates/check_registry.py
       - name: Coverage gate (must refuse partial models)
         # A3：缺格模型 dispatch 时就拒跑，不等到预热报 "Fetching 0 files"。
         # 这里同时测反例（CogACT 只有 3 头）与正例（X-VLA 全 5）。
         run: |
           set +e
-          python3 scripts/check_coverage.py --models db-cogact \
+          python3 scripts/gates/check_coverage.py --models db-cogact \
             --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
           rc=$?
           set -e
@@ -66,7 +66,7 @@ jobs:
             exit 1
           fi
           echo "coverage negative case OK (refused with 2)"
-          python3 scripts/check_coverage.py --models x-vla-robotwin2 \
+          python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 \
             --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
       - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
         run: |

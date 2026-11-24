@@ -78,7 +78,7 @@ jobs:
           docker create --name payload-tmp "$PAYLOAD_IMAGE"
           docker cp payload-tmp:/payload/. .
           docker rm -f payload-tmp
-          ls scripts/lib/common.sh configs/ docker/versions.yaml
+          ls scripts/ci/lib/common.sh configs/ docker/versions.yaml
       - name: Run smoke via Docker (host orchestration)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -87,8 +87,8 @@ jobs:
           OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
         run: |
           mkdir -p results
-          chmod +x scripts/ci_smoke.sh
-          bash scripts/ci_smoke.sh 2>&1 | tee results/ci.log; CODE=${PIPESTATUS[0]}
+          chmod +x scripts/ci/ci_smoke.sh
+          bash scripts/ci/ci_smoke.sh 2>&1 | tee results/ci.log; CODE=${PIPESTATUS[0]}
           echo "smoke_exit=$CODE"
           exit $CODE
       - name: Upload to OBS

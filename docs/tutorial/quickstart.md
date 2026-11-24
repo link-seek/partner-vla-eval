@@ -28,7 +28,7 @@ flowchart LR
 ## 操作
 
 1. 发起一次评测运行：打开 `RobotWin Smoke (DB-CogACT)`，确认参数后运行（本轮无参数）。之后全自动：自动开机（GitHub 托管 runner 调华为云 API）→ V100 跑
- `scripts/ci_robotwin.sh`（5 步）→ 跑完自动关机。单卡串行，前有队列就排队。
+ `scripts/ci/ci_robotwin.sh`（5 步）→ 跑完自动关机。单卡串行，前有队列就排队。
 
 2. 等 5 步跑完。V100 日志里看到下面 6 行即正常：
 

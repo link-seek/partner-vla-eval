@@ -12,9 +12,9 @@
 
 | 线 | 完成定义 | 验收命令 |
 |---|---|---|
-| A 可信度 | 任取一条榜单数，能顺着 `run id → aggregate → report → leaderboard` 全部对上，且权重/镜像可钉到 revision/digest | `python3 scripts/check_leaderboard.py && python3 scripts/check_reports.py && python3 scripts/check_coverage.py` |
-| B 实验 | 5 task 有 Easy+Hard 双列；每格 `replicate_count>=2` 且有区间 | `python3 scripts/check_leaderboard.py` 无"单轮"警告 |
-| C 目录 | 无归档混在现货、无校验器与数据分离、README 结构块 100% 可达 | `python3 scripts/check_paths.py && test -z "$(git status --porcelain)"` |
+| A 可信度 | 任取一条榜单数，能顺着 `run id → aggregate → report → leaderboard` 全部对上，且权重/镜像可钉到 revision/digest | `python3 leaderboard/scripts/check_leaderboard.py && python3 scripts/gates/check_reports.py && python3 scripts/gates/check_coverage.py` |
+| B 实验 | 5 task 有 Easy+Hard 双列；每格 `replicate_count>=2` 且有区间 | `python3 leaderboard/scripts/check_leaderboard.py` 无"单轮"警告 |
+| C 目录 | 无归档混在现货、无校验器与数据分离、README 结构块 100% 可达 | `python3 scripts/gates/check_paths.py && test -z "$(git status --porcelain)"` |
 
 ---
 
@@ -55,7 +55,7 @@ C 目录归位（会改路径，最后做）
 |---|---|
 | 问题 | `configs/registry/model-registry.json` 只有 `"ckpt": "2toINF/X-VLA-RoboTwin2"`，无 revision；预热 `hf-download download ...` 无 `--revision` → 永远拉 main。镜像只有 tag 无 digest，而 `docs/reproducibility.md:33` 自己把 digest 列为未完成 |
 | 动作 | ①registry 加 `ckpt_revision`（40-hex）+ `serve_image_digest`；②`ci_robotwin_full.sh` 预热加 `--revision "$CKPT_REV"`；③报告生成时写入；④`check_leaderboard.py` 已有 40-hex 校验，改为对 registry 也生效 |
-| 影响面 | `configs/registry/model-registry.json`、`scripts/ci_robotwin_full.sh`、`scripts/ci_model_matrix.sh`、新增 `check_registry.py` |
+| 影响面 | `configs/registry/model-registry.json`、`scripts/ci/ci_robotwin_full.sh`、`scripts/ci/ci_model_matrix.sh`、新增 `check_registry.py` |
 | 工时 | 半天 |
 | 验收 | `status=verified` 的模型缺 revision → lint 红；两次跑的报告 revision 相同 |
 | 回滚 | 单 PR，revert 即回 |
@@ -75,7 +75,7 @@ C 目录归位（会改路径，最后做）
 | 项 | 内容 |
 |---|---|
 | 问题 | CogACT 只发 4 个头，按 5 task 排期，跑到第 3 个才发现 |
-| 动作 | `scripts/check_coverage.py`：registry 的 `covered_tasks` ∩ 输入 tasks，差集打印并 `exit 1`；`model-matrix.yml` 在 `Run matrix` 前调用 |
+| 动作 | `scripts/gates/check_coverage.py`：registry 的 `covered_tasks` ∩ 输入 tasks，差集打印并 `exit 1`；`model-matrix.yml` 在 `Run matrix` 前调用 |
 | 影响面 | 新脚本 + `model-matrix.yml` 一步 |
 | 工时 | 2 小时 |
 | 验收 | dispatch `db-cogact` + 5 task → 日志 `COVERAGE 3/5 missing=click_bell,handover_block` 并以非 0 退出 |
@@ -147,7 +147,7 @@ C 目录归位（会改路径，最后做）
 | C6 | `obsutil cp` 后回读校验；`idle-guard` cron 兜底关机 | 6 workflow + 1 新 workflow | 2h |
 | C7 | 队列拆组，或 `r01.yml` 串 `prep→train→eval` job 链 | 2–3 workflow | 2h |
 
-**每步做完必须跑**：`python3 scripts/check_paths.py`（今天新增的门禁，专门防改断链接）。
+**每步做完必须跑**：`python3 scripts/gates/check_paths.py`（今天新增的门禁，专门防改断链接）。
 
 ---
 

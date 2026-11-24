@@ -53,7 +53,7 @@ jobs:
           docker create --name payload-tmp "$PAYLOAD_IMAGE"
           docker cp payload-tmp:/payload/. .
           docker rm -f payload-tmp
-          ls scripts/prepare_robotwin_data.sh
+          ls scripts/data/prepare_robotwin_data.sh
       - name: 修复数据目录属主（历史 root 残留，runner 写不进）
         env:
           PAYLOAD_IMAGE: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-payload:latest
@@ -70,7 +70,7 @@ jobs:
           DATA_ROOT: ${{ inputs.data_root }}
         run: |
           df -h / | tail -1
-          bash scripts/prepare_robotwin_data.sh 2>&1 | tail -60
+          bash scripts/data/prepare_robotwin_data.sh 2>&1 | tail -60
           echo "--- manifest ---"
           cat "$DATA_ROOT/manifest.json"
       - name: Upload manifest to OBS (trace)
