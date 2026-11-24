@@ -48,8 +48,8 @@ for i in 1 2 3; do
   [ "$i" = "3" ] && exit 1
 done
 echo "[4a/5] 生成本地路径 serve 配置 (from_pretrained 不认三段式 repo/subdir，只能本地路径)"
-sed "s|model_path: .*|model_path: $SNAP/grab_roller|" "$WORK/configs/serve-robotwin-cogact.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
-grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
+sed "s|model_path: .*|model_path: $SNAP/grab_roller|" "$WORK/configs/model_servers/serve-robotwin-cogact.yaml" > "$WORK/configs/model_servers/serve-robotwin-local.yaml"
+grep -n "model_path" "$WORK/configs/model_servers/serve-robotwin-local.yaml"
 
 echo "[4b/5] 启动 DB-CogACT serve (GPU0, 后台)"
 docker rm -f cogact-serve 2>/dev/null || true
@@ -65,7 +65,7 @@ docker run -d --name cogact-serve --gpus '"device=0"' --network host \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
   "$SERVE_IMAGE" \
-  vla-eval serve -c /work/configs/serve-robotwin-local.yaml
+  vla-eval serve -c /work/configs/model_servers/serve-robotwin-local.yaml
 }
 wait_serve() {
   for i in $(seq 1 120); do
@@ -97,7 +97,7 @@ docker run --rm --gpus all --network host \
   ${ASSETS_MOUNT:+-v "$ASSETS_MOUNT"} \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$ROBOTWIN_IMAGE" \
-  run --config /work/configs/run-robotwin-smoke.yaml 2>&1 | tee results/robotwin-smoke.log
+  run --config /work/configs/benchmarks/run-robotwin-smoke.yaml 2>&1 | tee results/robotwin-smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 echo "[5b/5] 收 serve 日志"

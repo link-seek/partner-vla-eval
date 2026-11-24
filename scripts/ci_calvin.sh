@@ -1,6 +1,6 @@
 #!/bin/bash
 # CALVIN smoke: host 编排 serve(DB-CogACT) + run(SWR calvin 镜像当 client)。
-# serve 用 configs/serve-cogact-calvin.yaml（Dexmal/calvin-db-cogact 单仓，chunk 7）。
+# serve 用 configs/model_servers/serve-cogact-calvin.yaml（Dexmal/calvin-db-cogact 单仓，chunk 7）。
 # 5 sequences，只验链路。
 set -e
 cd "$(dirname "$0")/.."
@@ -45,7 +45,7 @@ docker run -d --name cogact-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
   "$SERVE_IMAGE" \
-  vla-eval serve -c /work/configs/serve-cogact-calvin.yaml
+  vla-eval serve -c /work/configs/model_servers/serve-cogact-calvin.yaml
 for i in $(seq 1 120); do
   [ "$(docker inspect -f '{{.State.Running}}' cogact-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
   if (echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null; then echo "serve UP"; break; fi
@@ -62,7 +62,7 @@ docker run --rm --gpus all --network host \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$CALVIN_IMAGE" \
-  run --config /work/configs/run-calvin-smoke.yaml --server-url ws://localhost:8000 --output-dir /work/results/calvin-smoke 2>&1 | tee results/calvin-smoke.log
+  run --config /work/configs/benchmarks/run-calvin-smoke.yaml --server-url ws://localhost:8000 --output-dir /work/results/calvin-smoke 2>&1 | tee results/calvin-smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 docker logs cogact-serve > results/cogact-calvin-serve.log 2>&1 || true

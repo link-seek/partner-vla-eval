@@ -1,0 +1,19 @@
+# LIBERO 对照 smoke（上游 smoke_test.yaml 口径，镜像切 SWR 0.7.0）
+# 1 task x 1ep：只验 serve 链路，不计分。
+
+server:
+  url: "ws://localhost:8000"
+
+docker:
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.7.0
+
+output_dir: "./results"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.libero.benchmark:LIBEROBenchmark"
+    episodes_per_task: 1
+    max_tasks: 1
+    params:
+      suite: libero_spatial
+      seed: 7
+      num_steps_wait: 10

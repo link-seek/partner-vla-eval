@@ -1,0 +1,17 @@
+# LIBERO 官方协议：goal 10 tasks x 50ep（整榜 500ep）。
+server:
+  url: "ws://localhost:8000"
+
+docker:
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0
+
+output_dir: "./results"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.libero.benchmark:LIBEROBenchmark"
+    episodes_per_task: 50
+    max_tasks: 10
+    params:
+      suite: libero_goal
+      seed: 7
+      num_steps_wait: 10

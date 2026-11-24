@@ -1,6 +1,6 @@
 #!/bin/bash
 # CI smoke: host 编排 serve(verify 容器, GPU0) + run(molmo 镜像当 client)。
-# serve 用自研配置 configs/serve-pi05.yaml (Franka 相机映射), 不用上游 LIBERO 版。
+# serve 用自研配置 configs/model_servers/serve-pi05.yaml (Franka 相机映射), 不用上游 LIBERO 版。
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
@@ -90,7 +90,7 @@ docker run -d --name pi0-serve --gpus '"device=0"' --network host \
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" \
   "$VERIFY_IMAGE" \
-  vla-eval serve -c /work/configs/serve-pi05.yaml
+  vla-eval serve -c /work/configs/model_servers/serve-pi05.yaml
 }
 wait_serve() {
   # 返回 0=UP, 1=容器退出(看日志), 2=超时
@@ -122,7 +122,7 @@ docker run --rm --gpus all --network host \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   -e CUDA_VISIBLE_DEVICES=0 \
   "$MOLMO_IMAGE" \
-  run --config /work/configs/run-molmo-smoke10.yaml --shard-id 0 --num-shards 20 2>&1 | tee results/smoke.log
+  run --config /work/configs/benchmarks/run-molmo-smoke10.yaml --shard-id 0 --num-shards 20 2>&1 | tee results/smoke.log
 CODE=${PIPESTATUS[0]}
 set -e
 echo "[5b/5] 收 serve 日志 (定位 observation_failed 必备)"

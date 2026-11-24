@@ -1,5 +1,5 @@
 #!/bin/bash
-# 基模评测矩阵：按 configs/model-registry.json 逐模型 × 逐 task 调 ci_robotwin_full.sh，
+# 基模评测矩阵：按 configs/registry/model-registry.json 逐模型 × 逐 task 调 ci_robotwin_full.sh，
 # 每 task 一轮独立 chunk（CogACT 一头一 task），产物收拢到 matrix/<model>/<task>/ 后整包传 OBS。
 # 输入（环境变量）：
 #   MM_MODELS   逗号分隔模型名（registry key）
@@ -7,12 +7,12 @@
 #   MM_EPISODES 每 task 集数（默认 50，考场口径）
 #   MM_SHARDS   分片数（默认 8）
 #   MM_VIDEO    1=录像（默认 0）
-#   MODEL_REGISTRY 默认 configs/model-registry.json
+#   MODEL_REGISTRY 默认 configs/registry/model-registry.json
 # 约定：matrix/ 独立于 results/（results/ 每轮会被 results_fresh 清空）。
 set -e
 cd "$(dirname "$0")/.."
 WORK="$PWD"
-REG="${MODEL_REGISTRY:-configs/model-registry.json}"
+REG="${MODEL_REGISTRY:-configs/registry/model-registry.json}"
 MODELS="${MM_MODELS:?MM_MODELS 必填（逗号分隔 registry key）}"
 TASKS="${MM_TASKS:?MM_TASKS 必填（逗号分隔 task）}"
 EP="${MM_EPISODES:-50}"

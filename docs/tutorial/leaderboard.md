@@ -21,7 +21,7 @@ nav_order: 3
 
 **准入三条**（缺一条只能进"候选"，不能进表）：
 
-1. ckpt 公开可下（HF / OBS 直链，能写进 `configs/model-registry.json`）。
+1. ckpt 公开可下（HF / OBS 直链，能写进 `configs/registry/model-registry.json`）。
 2. 训练口径可述：训练数据（哪 50 demos/多少 ep）、控制频率、动作空间（qpos 14D / EE 16D）至少能从作者文档或 ckpt 卡片确认。
 3. 适配已验：本仓能起 serve 并跑通 1 task smoke（否则只是"能下载"）。
 
@@ -66,7 +66,7 @@ nav_order: 3
 | DP（官方基线） | `Avada11/RoboTwin-Model-AgileX-DP` | dropped | 同上 |
 | π0 | `nextbig/pi0-robotwin-30fps-tasks5` | 候选（不可比） | 训练 task 清单/控制频率未披露 |
 
-真源是 [`configs/model-registry.json`](https://github.com/link-seek/partner-vla-eval/blob/main/configs/model-registry.json)（这一页是它的可读视图）。
+真源是 [`configs/registry/model-registry.json`](https://github.com/link-seek/partner-vla-eval/blob/main/configs/registry/model-registry.json)（这一页是它的可读视图）。
 
 ## 怎么跑一轮矩阵
 

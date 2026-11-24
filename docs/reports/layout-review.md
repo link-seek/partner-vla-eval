@@ -177,7 +177,7 @@ partner-vla-eval/
 | 动作 | 引用它的文件数 | 必须同步改 |
 |---|---|---|
 | `configs/*.yaml` → `configs/{benchmarks,model_servers}/` | 3 | `ci_robotwin_full.sh`（`$WORK/configs/$SERVE_YAML`）、`ci_model_matrix.sh`、README |
-| `configs/model-registry.json` → `configs/registry/` | 3 | `ci_model_matrix.sh:15`、`model-matrix.yml:91`、`build-payload` 清单 |
+| `configs/registry/model-registry.json` → `configs/registry/` | 3 | `ci_model_matrix.sh:15`、`model-matrix.yml:91`、`build-payload` 清单 |
 | `scripts/ci_*.sh` → `scripts/ci/` | 3 | 6 个 workflow 的 `bash scripts/...`、payload build 清单 |
 | `scripts/check_*.py` → `scripts/gates/` | 0（CI 里用路径调用） | `lint.yml` 两步 |
 | `docs/reports/*.json` → `docs/data/` | 1（deck/README 引用） | `REPORT-PLAN.md`、`leaderboard.json` 的 `report` 字段、`eval-engineering-review.md` |

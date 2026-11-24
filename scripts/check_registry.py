@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """registry 门禁：verified 模型必须可复现（权重 pin revision、覆盖声明齐全）。
 
-背景：`configs/model-registry.json` 是全仓唯一模型真源，但此前没有任何结构校验。
+背景：`configs/registry/model-registry.json` 是全仓唯一模型真源，但此前没有任何结构校验。
 表现过的两个事故：
   1) ckpt 只写 repo 名 → 预热永远拉 main，别人复现不出同一份权重
   2) 没有 covered_tasks → 按 5 task 排期，跑到第 3 个才发现只有 3 个头
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REG = ROOT / "configs" / "model-registry.json"
+REG = ROOT / "configs" / "registry" / "model-registry.json"
 
 REQUIRED = ("family", "ckpt", "action_spec", "precision", "status", "bench_tag")
 STATUSES = ("verified", "pending", "dropped", "blocked")

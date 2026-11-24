@@ -53,9 +53,9 @@ C 目录归位（会改路径，最后做）
 
 | 项 | 内容 |
 |---|---|
-| 问题 | `configs/model-registry.json` 只有 `"ckpt": "2toINF/X-VLA-RoboTwin2"`，无 revision；预热 `hf-download download ...` 无 `--revision` → 永远拉 main。镜像只有 tag 无 digest，而 `docs/reproducibility.md:33` 自己把 digest 列为未完成 |
+| 问题 | `configs/registry/model-registry.json` 只有 `"ckpt": "2toINF/X-VLA-RoboTwin2"`，无 revision；预热 `hf-download download ...` 无 `--revision` → 永远拉 main。镜像只有 tag 无 digest，而 `docs/reproducibility.md:33` 自己把 digest 列为未完成 |
 | 动作 | ①registry 加 `ckpt_revision`（40-hex）+ `serve_image_digest`；②`ci_robotwin_full.sh` 预热加 `--revision "$CKPT_REV"`；③报告生成时写入；④`check_leaderboard.py` 已有 40-hex 校验，改为对 registry 也生效 |
-| 影响面 | `configs/model-registry.json`、`scripts/ci_robotwin_full.sh`、`scripts/ci_model_matrix.sh`、新增 `check_registry.py` |
+| 影响面 | `configs/registry/model-registry.json`、`scripts/ci_robotwin_full.sh`、`scripts/ci_model_matrix.sh`、新增 `check_registry.py` |
 | 工时 | 半天 |
 | 验收 | `status=verified` 的模型缺 revision → lint 红；两次跑的报告 revision 相同 |
 | 回滚 | 单 PR，revert 即回 |

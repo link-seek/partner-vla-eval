@@ -35,7 +35,7 @@ flowchart TB
 
 ## 第一块：serve yaml（谁来跑）
 
-即 `configs/serve-robotwin-cogact.yaml` 全文（16 行，CI 实际用 snapshot 生成的
+即 `configs/model_servers/serve-robotwin-cogact.yaml` 全文（16 行，CI 实际用 snapshot 生成的
 `serve-robotwin-local.yaml`，只差 `model_path` 一行）：
 
 照抄官方 `db_cogact/robotwin2.yaml`，只换了 `model_path` 按 task 分头——DB-CogACT 官方原生+harness 两条路全通，所以零模型代码（见 quickstart 链路全景）。
@@ -56,7 +56,7 @@ args:
 
 ## 第二块：run yaml（怎么跑）
 
-即 `configs/run-robotwin-smoke.yaml` 全文（照抄官方 `benchmarks/robotwin/eval.yaml`，只换 SWR 镜像 + 加 `timeout: 600`）：
+即 `configs/benchmarks/run-robotwin-smoke.yaml` 全文（照抄官方 `benchmarks/robotwin/eval.yaml`，只换 SWR 镜像 + 加 `timeout: 600`）：
 
 ```yaml
 server:

@@ -50,7 +50,7 @@
 
 ## 5. 评测怎么跑（我们这一侧）
 
-1. 训练产出的 ckpt 走 **serve 适配器**（`configs/serve-robotwin-act.yaml` / `-dp.yaml`），
+1. 训练产出的 ckpt 走 **serve 适配器**（`configs/model_servers/serve-robotwin-act.yaml` / `-dp.yaml`），
    由 `vla-eval serve` 起 WS 服务，暴露 `obs(三相机 + qpos14) → action chunk(14D)`。
 2. 客户端跑本仓 `RoboTwinBenchmark`（`action_type: qpos`，`max_steps 300`，`send_state`），
    每 task 独立 chunk，50 ep，Easy/Hard 各一轮。

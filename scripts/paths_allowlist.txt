@@ -4,8 +4,8 @@
 #   2) 描述上游仓结构的路径（不是本仓路径）
 #
 # 1) 计划中产物
-configs/serve-robotwin-act.yaml
-configs/serve-robotwin-dp.yaml
+configs/model_servers/serve-robotwin-act.yaml
+configs/model_servers/serve-robotwin-dp.yaml
 configs/registry/model-registry.schema.json
 docs/archive/tutorial-v1/*
 docs/data/*

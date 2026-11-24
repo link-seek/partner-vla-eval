@@ -39,10 +39,10 @@ VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
 echo "[1/6] harness 代码已烘进 serve 镜像，无 clone（V100 离线要求）"
 
 echo "[2/6] 生成本块 run 配置（每 task 一个 entry）"
-GEN="$WORK/configs/run-robotwin-chunk.yaml"
+GEN="$WORK/configs/benchmarks/run-robotwin-chunk.yaml"
 if [ -n "${RW_RUN_YAML:-}" ]; then
   echo "run 配置直用 $RW_RUN_YAML（对照实验，不自动生成）"
-  cp "$WORK/configs/$RW_RUN_YAML" "$GEN"
+  cp "$WORK/configs/benchmarks/$RW_RUN_YAML" "$GEN"
   grep -c "subname:\|task_name:" "$GEN"
 else
 {
@@ -141,12 +141,12 @@ for i in 1 2 3; do
   [ "$i" = "3" ] && exit 1
 done
 # from_pretrained 不认 repo/subdir，用本地子目录绝对路径。
-sed "s|model_path: .*|model_path: $SNAP/$FIRST_TASK|" "$WORK/configs/serve-robotwin-cogact.yaml" > "$WORK/configs/serve-robotwin-local.yaml"
-grep -n "model_path" "$WORK/configs/serve-robotwin-local.yaml"
+sed "s|model_path: .*|model_path: $SNAP/$FIRST_TASK|" "$WORK/configs/model_servers/serve-robotwin-cogact.yaml" > "$WORK/configs/model_servers/serve-robotwin-local.yaml"
+grep -n "model_path" "$WORK/configs/model_servers/serve-robotwin-local.yaml"
 fi
 # 非 CogACT 路（RW_PREWARM=none，如 X-VLA）：serve 配置直用 $SERVE_YAML，不生成 local。
 if [ "${RW_PREWARM:-cogact}" = "none" ]; then
-  cp "$WORK/configs/$SERVE_YAML" "$WORK/configs/serve-robotwin-local.yaml"
+  cp "$WORK/configs/model_servers/$SERVE_YAML" "$WORK/configs/model_servers/serve-robotwin-local.yaml"
 fi
 
 if [ -n "${ASSETS_MOUNT:-}" ]; then
@@ -190,7 +190,7 @@ docker run -d --name cogact-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network
   -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
   -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
   "$SERVE_IMAGE" \
-  vla-eval serve -c /work/configs/serve-robotwin-local.yaml
+  vla-eval serve -c /work/configs/model_servers/serve-robotwin-local.yaml
 for i in $(seq 1 120); do
   [ "$(docker inspect -f '{{.State.Running}}' cogact-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
   if (echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null; then echo "serve UP"; break; fi
@@ -248,7 +248,7 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -e CUDA_VISIBLE_DEVICES=1 \
   -e STATE_PATCH="${RW_STATE_PATCH:-}" \
   "$ROBOTWIN_IMAGE" \
-  -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
+  -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/benchmarks/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
 CODE=${PIPESTATUS[0]}
 # 挂载抖动（11-23 观察：开机后首轮偶发同一 --mount 在后一次容器里为空）→ 只对预检失败重试，最多 3 次
 for attempt in 1 2 3 4 5; do
@@ -264,7 +264,7 @@ for attempt in 1 2 3 4 5; do
     -e CUDA_VISIBLE_DEVICES=1 \
     -e STATE_PATCH="${RW_STATE_PATCH:-}" \
     "$ROBOTWIN_IMAGE" \
-    -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（重试仍失败）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
+    -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（重试仍失败）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/benchmarks/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
   CODE=${PIPESTATUS[0]}
 done
 set -e

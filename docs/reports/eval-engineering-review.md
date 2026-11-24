@@ -82,7 +82,7 @@
 
 ### P0-3　版本钉死：ckpt revision + 镜像 digest
 
-**现状证据**：`configs/model-registry.json:39` 只有 `"ckpt": "2toINF/X-VLA-RoboTwin2"`；`docs/reproducibility.md:33` 把 digest 列为未完成；而 `leaderboard.md:30` 的披露规则要求"checkpoint 精确版本"——**自己违反自己**。
+**现状证据**：`configs/registry/model-registry.json:39` 只有 `"ckpt": "2toINF/X-VLA-RoboTwin2"`；`docs/reproducibility.md:33` 把 digest 列为未完成；而 `leaderboard.md:30` 的披露规则要求"checkpoint 精确版本"——**自己违反自己**。
 
 **改法**：
 - registry 增加 `ckpt_revision`（40-hex）与 `serve_image_digest`，`check_versions.py` 风格加校验：有 `status=verified` 就必须有 revision。

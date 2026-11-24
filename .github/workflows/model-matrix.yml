@@ -1,7 +1,7 @@
 name: Model Matrix (base models x exam tasks)
 
 # 基模评测矩阵：同一考场（task 集 + seeds + 栈）只让模型变，逐模型逐 task 出数。
-# 登记表 configs/model-registry.json；口径与准入三条见 docs/tutorial/leaderboard.md。
+# 登记表 configs/registry/model-registry.json；口径与准入三条见 docs/tutorial/leaderboard.md。
 # 与全量 chunk 的关系：矩阵内部就是按 task 反复调 ci_robotwin_full.sh（不另起一套跑法）。
 
 on:
@@ -88,7 +88,7 @@ jobs:
           docker create --name payload-tmp "$PAYLOAD_IMAGE"
           docker cp payload-tmp:/payload/. .
           docker rm -f payload-tmp
-          ls scripts/ci_robotwin_full.sh configs/model-registry.json docker/versions.yaml
+          ls scripts/ci_robotwin_full.sh configs/registry/model-registry.json docker/versions.yaml
       - name: Coverage check (fail fast, no GPU burn)
         # A3：缺格模型（如 CogACT 只有 4 个头）在 dispatch 时就拒跑，
         # 不再等预热报 "Fetching 0 files" 才发现。

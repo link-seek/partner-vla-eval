@@ -1,0 +1,21 @@
+# CALVIN smoke（上游 eval.yaml 口径裁剪：5 sequences，镜像切 SWR 0.7.0）
+# serve 用 DB-CogACT CALVIN 头（Dexmal/calvin-db-cogact，单仓无子目录，官称 ABC-D 4.06）。
+# 全量是 1000 sequences，smoke 只跑 5 条验链路。
+
+server:
+  url: "ws://localhost:8000"
+
+docker:
+  image: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-calvin:0.7.0
+  env:
+    - "NVIDIA_DRIVER_CAPABILITIES=all"
+
+output_dir: "./results"
+
+benchmarks:
+  - benchmark: "vla_eval.benchmarks.calvin.benchmark:CALVINBenchmark"
+    episodes_per_task: 1
+    params:
+      dataset_path: "/data/calvin/dataset/validation"
+      num_sequences: 5
+      seed: 0
