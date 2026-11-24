@@ -104,10 +104,18 @@ def check_reports(data):
         except json.JSONDecodeError:
             errors.append(f"{tag}: report 非法 JSON {rel}")
             continue
-        rn = d.get("n")
-        rs = d.get("success")
-        if rs is None and d.get("mean_success") is not None and rn:
-            rs = round(d["mean_success"] * rn)
+        # 一份报告同时存 Easy 与 Hard：按榜单协议取对应字段。
+        # 不看 protocol 会拿 Easy 的 success 去比 Hard 的条目，必然误报
+        # （2026-11-24 预演实测）。
+        proto = str(data.get("protocol", ""))
+        if proto.startswith("hard"):
+            rn = d.get("hard_n")
+            rs = d.get("hard_success_count")
+        else:
+            rn = d.get("n")
+            rs = d.get("success")
+            if rs is None and d.get("mean_success") is not None and rn:
+                rs = round(d["mean_success"] * rn)
         if rn != r.get("n") or rs != r.get("success"):
             errors.append(
                 f"{tag}: leaderboard 写 {r.get('success')}/{r.get('n')}，"
@@ -142,7 +150,15 @@ def load_file(path: Path):
 
 
 def main() -> int:
-    files = sorted(f for f in ROOT.glob(LB_GLOB) if not f.name.endswith(".schema.json"))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--file", action="append", help="只校验指定榜单文件（可多次；默认扫 leaderboard/leaderboard*.json）")
+    args = ap.parse_args()
+
+    if args.file:
+        files = [Path(f) for f in args.file]
+    else:
+        files = sorted(f for f in ROOT.glob(LB_GLOB) if not f.name.endswith(".schema.json"))
     if not files:
         errors.append(f"没有找到任何榜单文件（{LB_GLOB}）")
         for e in errors:
@@ -150,7 +166,11 @@ def main() -> int:
         return 1
     rc = 0
     for f in files:
-        print(f"-- {f.name} ({f.relative_to(ROOT)})")
+        try:
+            shown = f.relative_to(ROOT)
+        except ValueError:
+            shown = f          # 预演时可指向仓外文件
+        print(f"-- {f.name} ({shown})")
         data = load_file(f)
         if data is None:
             rc = 1

@@ -386,3 +386,29 @@ reset_model → 仍 14 维
 对比 Easy 的 49/50 = 98%。这正是 Hard 该体现的落差，且失败都是 `steps=400` 跑满（不是 ERROR）。
 
 **结论**：B1 完成约在 2026-11-25 19:30Z。A5 第二轮再需约 16h，两者串行总成本约 ¥1200。
+
+---
+
+## 17. 收数流程预演（2026-11-24，mock 数据全流程跑通）
+
+在仓库副本里用 5 task mock（Hard 41/45/33/44/19）跑完整四步，验证落地时不会卡：
+
+```
+1) gen_reports.py <json> hard   → 5 份报告回填
+   adjust_bottle   easy=0.98 hard=0.90 gap=0.08
+   click_bell      easy=0.96 hard=0.88 gap=0.08
+   grab_roller     easy=0.98 hard=0.82 gap=0.16
+   handover_block  easy=0.78 hard=0.38 gap=0.40
+   place_phone_stand easy=0.96 hard=0.66 gap=0.30
+2) make_leaderboard.py <json> hard --run <id> → leaderboard.hard.json（5 条，182/250=72.8%）
+3) check_reports.py    → REPORTS OK（19 份）
+4) check_leaderboard.py → LEADERBOARD OK（2 files: easy + hard）
+```
+
+**预演抓到两个必须按顺序/按协议处理的点**：
+
+1. **顺序不能反**：先建榜单再回填报告 → 门禁报 "leaderboard 写 47/50，report 是 49/50"。
+2. **校验要按协议取值**：一份报告同时存 Easy 与 Hard，hard 榜单必须比 `hard_success_count`/`hard_n`，
+   而不是顶层 `success`/`n`（已修 `check_leaderboard.py`）。
+
+顺带给 `check_leaderboard.py` 加了 `--file`，可校验仓外文件（预演用）。
