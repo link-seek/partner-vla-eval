@@ -80,7 +80,32 @@ lift_pot / open_laptop / open_microwave / place_container_plate / place_empty_cu
 
 → ACT 在榜上最多 2/5 格，且与 CogACT 的 3 格、X-VLA 的 5 格都不同，**三家覆盖各不相同**。
 
-**仍未验证**：跑满一整集（本机 GPU 被 Hard 评测占用）。
+### GPU 上真实加载 + 前向（2026-11-24，直接在 GPU0 验，不跑环境）
+
+```
+GPU load: 10.5s
+model device: cuda:0
+predict: shape=(1, 14) dtype=float32 0.73s finite=True
+act_ckpt 加载: missing=0 unexpected=0（适配器内 strict 断言通过）
+```
+
+所以 ACT 侧**只剩"跑满一整集"没验**（要 SAPIEN 环境，会与正在跑的 Hard 评测抢 GPU）。
+
+### 关于 `vla-eval test -c`：不适用（重要）
+
+试过用 `vla-eval test -c <serve yaml>` 做快速 smoke，**跑不通，且不是我们的 bug**：
+
+```
+observation_failed: KeyError: '观测缺 joint_state'
+```
+
+原因：该命令造的是**通用**观测 `{"state": zeros(8)}`（`cli/smoke.py:314`），
+与 aloha 的 14 维无关。所以 14 维机器人策略**不能用它做 smoke**，
+唯一有效路径是 1 task × 1ep 真跑（runbook §3）。
+
+顺带修正一条接口细节：`get_observation_params() → {"send_state": True}`
+在**评测路径**生效（日志会出现 `Auto-configured from model server: send_state=True`），
+但 `test` 路径不看它；两种都写上最稳（spec 里也加了 `joint_state`）。
 
 ## 0.2 前置
 

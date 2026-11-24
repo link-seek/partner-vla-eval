@@ -100,6 +100,23 @@ class RoboTwinPolicyServer(PredictModelServer):
         ckpt_file: str | None = None,
         device: str = "cuda:0",
         robotwin_root: str = "/app/RoboTwin",
+        # 以下必须显式声明：harness 的 serve CLI 会内省 __init__ 签名来生成 --args.*，
+        # 藏在 **kwargs 里的参数它认不出来（实测会被 CLI 拒绝）。
+        action_dim: int = 14,
+        state_dim: int = 14,
+        hidden_dim: int = 512,
+        dim_feedforward: int = 3200,
+        dec_layers: int = 7,
+        enc_layers: int = 4,
+        camera_names: list[str] | None = None,
+        chunk_size: int = 50,
+        temporal_agg: bool = False,
+        kl_weight: float = 10.0,
+        task_name: str | None = None,
+        ckpt_setting: str | None = None,
+        expert_data_num: int | None = None,
+        seed: int = 0,
+        checkpoint_num: int = 600,
         **overrides: Any,
     ) -> None:
         policy = policy.lower()
@@ -114,6 +131,18 @@ class RoboTwinPolicyServer(PredictModelServer):
         self.robotwin_root = robotwin_root
 
         self._usr_args = dict(_ROBOTWIN_DEFAULTS)
+        self._usr_args.update({
+            k: v for k, v in {
+                "action_dim": action_dim, "state_dim": state_dim,
+                "hidden_dim": hidden_dim, "dim_feedforward": dim_feedforward,
+                "dec_layers": dec_layers, "enc_layers": enc_layers,
+                "camera_names": camera_names, "chunk_size": chunk_size,
+                "temporal_agg": temporal_agg, "kl_weight": kl_weight,
+                "task_name": task_name, "ckpt_setting": ckpt_setting,
+                "expert_data_num": expert_data_num, "seed": seed,
+                "checkpoint_num": checkpoint_num,
+            }.items() if v is not None
+        })
         self._usr_args.update({k: v for k, v in overrides.items() if v is not None})
         if ckpt_dir:
             self._usr_args["ckpt_dir"] = ckpt_dir
@@ -128,7 +157,23 @@ class RoboTwinPolicyServer(PredictModelServer):
         return {"actions": RAW}
 
     def get_observation_spec(self) -> dict[str, Any]:
-        return {"image": IMAGE_RGB, "left_camera": IMAGE_RGB, "right_camera": IMAGE_RGB}
+        # joint_state 必须出现在 spec 里：`vla-eval test` 按 spec 造观测，
+        # 只靠 get_observation_params 的 send_state 在 test 路径不生效（实测）。
+        return {
+            "image": IMAGE_RGB,
+            "left_camera": IMAGE_RGB,
+            "right_camera": IMAGE_RGB,
+            "joint_state": RAW,
+        }
+
+    def get_observation_params(self) -> dict[str, Any]:
+        """告诉考场"要送关节状态"。
+
+        没有这一条，考场不会带 `joint_state`，predict 里必然 KeyError
+        （2026-11-24 `vla-eval test -c` 实测就是栽在这里）。
+        官方 CogACT/pi0/lerobot 等 server 都是这么声明的。
+        """
+        return {"send_state": True}
 
     # -------------------------------------------------------------- loading
     def _official_defaults(self, dp_module: Any) -> dict[str, Any]:
