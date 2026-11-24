@@ -56,4 +56,4 @@ issue 模板（照抄可用）：背景（一句话）→ 复现（镜像 tag + 
 
 - 栈差异对照：[explanation/01-stack-effects.md](../explanation/01-stack-effects.md)
 - 精度断崖：[explanation/02-precision-cliff.md](../explanation/02-precision-cliff.md)
-- 归档原稿：[old/09-community.md](../old/09-community.md)（含投稿计划等历史信息，只读）
+- 归档原稿：[old/09-community.md](../../archive/tutorial-v1/09-community.md)（含投稿计划等历史信息，只读）

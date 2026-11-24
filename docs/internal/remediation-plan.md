@@ -36,7 +36,7 @@ B 实验完整性
 C 目录归位（会改路径，最后做）
  ├─ C1 scripts 三分 + leaderboard 自包含
  ├─ C2 docs/reports JSON → docs/data；deck → docs/decks
- ├─ C3 tutorial/old → archive/tutorial-v1；合并 archive
+ ├─ C3 ✅ 旧教程稿 → archive/tutorial-v1；论文 → archive/papers
  ├─ C4 configs 三分 + docker-compose 入 docker/compose
  ├─ C5 workflows 拆 manual/
  ├─ C6 上传回读校验 + idle-guard 关机兜底
@@ -141,7 +141,7 @@ C 目录归位（会改路径，最后做）
 |---|---|---|---|
 | C1 | `scripts/` 三分 `ci/ gates/ data/`；`leaderboard/{data,schemas,scripts,tests}` 自包含 | 6 workflow + 2 脚本 + lint 2 步 | 2h |
 | C2 | `docs/reports/*.json` → `docs/data/`；`deck/` → `docs/decks/`；同步 `leaderboard.json` 的 `report` 字段 | 13 JSON + 2 文档 | 1.5h |
-| C3 | `docs/tutorial/old/` → `docs/archive/tutorial-v1/`；合并 `docs/archive/` | 12 + 互引 + `tutorial/index.md:93` | 1h |
+| C3 | ✅ 已完成：旧教程稿 → `docs/archive/tutorial-v1/`，论文 → `docs/archive/papers/` | 12 + 互引已改 | 1h |
 | C4 | `configs/{benchmarks,model_servers,registry}/`；`docker-compose.*` → `docker/compose/` | 3 + payload 清单 | 1.5h |
 | C5 | workflows 拆 `manual/`（8 个一次性排障） | 8（移动即改引用） | 1h |
 | C6 | `obsutil cp` 后回读校验；`idle-guard` cron 兜底关机 | 6 workflow + 1 新 workflow | 2h |
@@ -206,7 +206,7 @@ C 目录归位（会改路径，最后做）
 | Issue #14（总账） | 陈旧 | 已评论更新：出数、deck、两份检视、三道门禁、待办 |
 | Issue #8（OBS 自定义前缀 + 开跑前校验） | 半解决：校验步骤已有、上传 403/0 通过 | **保留**，已记明仍缺三项（自定义前缀未测、`|| true` 吞错、路径多一层 `matrix/`），并入 C6 |
 | 远程分支 `docs/tutorial-ia` | 0 ahead / 170 behind，纯落后 | **已删**（SHA `bcae8493`） |
-| 远程分支 `docs/tutorial-v1-2-stack-effects` | 1 ahead，但改动只针对已不存在的旧教程结构 | **已删**（SHA `2a7df768`）；核对后差异仅为归档时加的 `nav_exclude` 头，实质已进 `docs/tutorial/old/`，A–D 栈差异表已进 `explanation/01-stack-effects.md` |
+| 远程分支 `docs/tutorial-v1-2-stack-effects` | 1 ahead，但改动只针对已不存在的旧教程结构 | **已删**（SHA `2a7df768`）；核对后差异仅为归档时加的 `nav_exclude` 头，实质已进 `docs/archive/tutorial-v1/`，A–D 栈差异表已进 `explanation/01-stack-effects.md` |
 
 ### D1　git 历史分叉（必须先处理）
 

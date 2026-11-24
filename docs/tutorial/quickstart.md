@@ -79,7 +79,7 @@ smoke_exit=0
 
 * 来评测模型（手里有训好的模型要交上来，才需细看）：去 [partner/01-serve-yaml.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/partner/01-serve-yaml.md)，
  按 01→02→03 顺序读完（配准交付 → smoke → 全量拿分；不教训模型）。
-* 开卡保链路：去 [operator/02-duty-dispatch.md](./operator/02-duty-dispatch.md)（先看 [04-machines-network.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/tutorial/old/04-machines-network.md)）。
+* 开卡保链路：去 [operator/02-duty-dispatch.md](./operator/02-duty-dispatch.md)（先看 [04-machines-network.md](https://github.com/link-seek/partner-vla-eval/blob/main/docs/archive/tutorial-v1/04-machines-network.md)）。
 * 只看分数：RobotWin 四轮对照（校验种子，零 error 即有效；单榜 % 口径）。
  官方范式（论文 §4.5）本来就是**单 task 微调后测 Easy/Hard**，报的是 few-shot
  adaptation + robustness（Hard 落差）——我们的分头评测与官方范式一致，

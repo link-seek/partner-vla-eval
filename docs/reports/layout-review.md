@@ -35,8 +35,8 @@ partner-vla-eval/
 
 ### P1　两个归档目录，且归档混在现货里
 
-- `docs/archive/`：`paper-arxiv.tex`、`paper-ral.tex`、`paper-stack-effects.md`、`README.md`
-- `docs/tutorial/old/`：12 个旧教程稿（占 `docs/*.md` 的 **26%**）
+- 原 `docs/archive/`：论文 3 份 + README → **已收拢到 `docs/archive/papers/`（C3）**
+- 原 tutorial 旧稿目录：12 个旧教程稿（曾占 `docs/*.md` 的 **26%**）→ **已迁至 `docs/archive/tutorial-v1/`（C3）**
 
 **问题**：找"当前有效的文档"时要先排除 12 个归档文件；两个 archive 目录语义不同却同级（一个放论文，一个放旧教程），没有统一入口。
 
@@ -158,7 +158,7 @@ partner-vla-eval/
 │   ├── decks/                      ← capability-deck.html + exports/
 │   ├── internal/                   ← 6 个 nav_exclude 的内部过程文档
 │   └── archive/
-│       ├── tutorial-v1/            ← 原 tutorial/old/（12）
+│       ├── tutorial-v1/            ← 旧教程稿（12，已迁入）
 │       └── papers/                 ← 2 tex + paper-stack-effects.md
 └── .github/workflows/
     ├── （生产 6 个留在顶层）
@@ -181,7 +181,7 @@ partner-vla-eval/
 | `scripts/ci_*.sh` → `scripts/ci/` | 3 | 6 个 workflow 的 `bash scripts/...`、payload build 清单 |
 | `scripts/check_*.py` → `scripts/gates/` | 0（CI 里用路径调用） | `lint.yml` 两步 |
 | `docs/reports/*.json` → `docs/data/` | 1（deck/README 引用） | `REPORT-PLAN.md`、`leaderboard.json` 的 `report` 字段、`eval-engineering-review.md` |
-| `docs/tutorial/old/` → `docs/archive/tutorial-v1/` | 多（互引 + index 链接） | `tutorial/index.md:93`、`old/README.md` 表内相对路径、`changelog.md` |
+| ✅ 旧教程稿 → `docs/archive/tutorial-v1/` | 已完成（3 处外链 + 12 条相对路径已改） | — |
 | `docker-compose.*.yml` → `docker/compose/` | 0 | 无（仅 README 提及） |
 
 **风险点**：`docs/reports/*.json` 挪位置会断 `leaderboard.json` 里的 `report` 字段——而这正是今天刚加的对账门禁。迁移必须与新路径同步，否则 lint 会红（这其实是好事：门禁会替我们验）。
@@ -194,7 +194,7 @@ partner-vla-eval/
 |---|---|---|---|
 | **S1（已完成）** | 重写 README"仓库结构"（修正 3 处过期）；孤儿目录收编进 `docs/internal/`；`scripts/check_paths.py` 进 lint | 4 文件 | 是 |
 | **S2** | `docs/reports/*.json` → `docs/data/`；`leaderboard.json` 的 `report` 字段同步 | 1 JSON + 2 文档 | 是 |
-| **S3** | `docs/tutorial/old/` → `docs/archive/tutorial-v1/`；`archive/` 合并 | 12 + 链接 | 是 |
+| **S3（已完成）** | 旧教程稿 → `docs/archive/tutorial-v1/`；论文 → `docs/archive/papers/` | 12 + 链接 | 是 |
 | **S4** | `scripts/` 三分（ci/gates/data）；`leaderboard/` 自包含 | 6 workflow + 2 脚本 | 是 |
 | **S5** | `configs/` 三分；`docker-compose` 入 `docker/compose/` | 3 + payload 清单 | 是 |
 | **S6** | workflows 拆 `manual/` | 8 个（移动即需重命名引用） | 是 |
