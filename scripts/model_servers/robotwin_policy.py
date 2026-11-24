@@ -33,9 +33,15 @@ harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval(
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+# 纯函数放在同目录的 robotwin_obs.py（零依赖、可单测）；serve 按路径加载本文件时
+# 目录不一定在 sys.path 里，所以显式加一次。
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from robotwin_obs import build_policy_obs  # noqa: E402
 
 from vla_eval.model_servers.base import SessionContext
 from vla_eval.model_servers.predict import PredictModelServer
@@ -148,41 +154,19 @@ class RoboTwinPolicyServer(PredictModelServer):
 
     # ------------------------------------------------------------ inference
     def _to_robotwin_obs(self, obs: Observation) -> dict[str, Any]:
-        """harness Observation → 官方 encode_obs 的产物。"""
+        """harness Observation → 官方 encode_obs 的产物（转换逻辑见 robotwin_obs.py）。"""
         images = obs.get("images") or {}
         if not isinstance(images, dict):
             images = {"head_camera": images}
-        out: dict[str, Any] = {}
-        for name, short in zip(_CAMERAS, ("head_cam", "left_cam", "right_cam")):
-            if name not in images:
-                raise KeyError(
-                    f"观测缺相机 {name}（拿到 {sorted(images)}）；"
-                    "serve yaml 的 camera_keys 与考场不一致"
-                )
-            img = np.asarray(images[name])
-            # harness 给 HWC(uint8 或 float)；官方要 CHW 且 0..1
-            if img.ndim == 3 and img.shape[-1] in (3, 4):
-                img = img[..., :3]
-                img = np.moveaxis(img, -1, 0)
-            if img.dtype != np.float32:
-                img = img.astype(np.float32)
-            if img.max() > 1.5:
-                img /= 255.0
-            out[short] = img
-
         js = obs.get("joint_state")
         if js is None:
             raise KeyError("观测缺 joint_state（ACT 要 qpos / DP 要 agent_pos，都是 14 维）")
-        js = np.asarray(js, dtype=np.float32).reshape(-1)
-        if js.size != self._usr_args.get("action_dim", 14):
-            raise ValueError(
-                f"joint_state 维度 {js.size} 与 action_dim {self._usr_args.get('action_dim')} 不符"
-            )
-        if self.policy_kind == "act":
-            out["qpos"] = js.tolist()
-        else:
-            out["agent_pos"] = js
-        return out
+        return build_policy_obs(
+            images,
+            js,
+            self.policy_kind,
+            int(self._usr_args.get("action_dim", 14)),
+        )
 
     def predict(self, obs: Observation, ctx: SessionContext) -> Action:
         self._load()
