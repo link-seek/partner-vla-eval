@@ -19,36 +19,13 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 LB = ROOT / "leaderboard" / "leaderboard.json"
+LB_GLOB = "leaderboard/leaderboard*.json"   # easy / hard 各一份，逐个校验
+PROTO_EXPECT = {"leaderboard.json": None}   # 文件名 → 期望 protocol 前缀（None=不校验）
 SCHEMA = ROOT / "leaderboard" / "leaderboard.schema.json"
 VERSIONS = ROOT / "docker" / "versions.yaml"
 
 errors: list[str] = []
 warnings: list[str] = []
-
-
-def load():
-    if not LB.exists():
-        errors.append(f"缺 {LB.relative_to(ROOT)}")
-        return None
-    try:
-        return json.loads(LB.read_text())
-    except json.JSONDecodeError as e:
-        errors.append(f"leaderboard.json 非法 JSON: {e}")
-        return None
-
-
-def check_schema(data):
-    try:
-        import jsonschema
-    except ImportError:
-        warnings.append("jsonschema 未安装，跳过 schema 校验")
-        return
-    schema = json.loads(SCHEMA.read_text())
-    v = jsonschema.Draft7Validator(schema)
-    for e in sorted(v.iter_errors(data), key=lambda x: list(x.absolute_path)):
-        path = ".".join(str(p) for p in e.absolute_path) or "<root>"
-        errors.append(f"schema: {path}: {e.message}")
-
 
 REQUIRED_FIELDS = (
     "model", "task", "n", "success", "errors", "weight_type",
@@ -71,6 +48,20 @@ def check_required(data):
         wt = r.get("weight_type")
         if wt is not None and wt not in ("shared", "finetuned"):
             errors.append(f"{tag}: weight_type={wt!r} 只允许 shared|finetuned")
+
+
+def check_schema(data):
+    """JSON Schema 校验（装了 jsonschema 才做；没装由 check_required 兜底）。"""
+    try:
+        import jsonschema
+    except ImportError:
+        warnings.append("jsonschema 未安装，跳过 schema 校验（check_required 已兜底必填）")
+        return
+    schema = json.loads(SCHEMA.read_text())
+    v = jsonschema.Draft7Validator(schema)
+    for e in sorted(v.iter_errors(data), key=lambda x: list(x.absolute_path)):
+        path = ".".join(str(p) for p in e.absolute_path) or "<root>"
+        errors.append(f"schema: {path}: {e.message}")
 
 
 def check_rows(data):
@@ -137,18 +128,33 @@ def check_ranking_isolation(data):
             )
 
 
+def load_file(path: Path):
+    try:
+        return json.loads(path.read_text())
+    except json.JSONDecodeError as e:
+        errors.append(f"{path.name} 非法 JSON: {e}")
+        return None
+
+
 def main() -> int:
-    data = load()
-    if data is None:
+    files = sorted(f for f in ROOT.glob(LB_GLOB) if not f.name.endswith(".schema.json"))
+    if not files:
+        errors.append(f"没有找到任何榜单文件（{LB_GLOB}）")
         for e in errors:
             print("ERROR:", e)
         return 1
-    check_required(data)
-    check_schema(data)
-    check_rows(data)
-    check_reports(data)
-    check_ranking_isolation(data)
-
+    rc = 0
+    for f in files:
+        print(f"-- {f.name} ({f.relative_to(ROOT)})")
+        data = load_file(f)
+        if data is None:
+            rc = 1
+            continue
+        check_required(data); check_schema(data); check_rows(data); check_reports(data); check_ranking_isolation(data)
+        if errors:
+            rc = 1
+        else:
+            print(f"   OK ({len(data.get('entries', []))} entries, protocol={data.get('protocol')})")
     for w in warnings:
         print("WARN:", w)
     if errors:
@@ -156,9 +162,8 @@ def main() -> int:
         for e in errors:
             print(" -", e)
         return 1
-    n = len(data.get("entries", []))
-    print(f"LEADERBOARD OK ({n} entries, bench={data.get('bench')}, protocol={data.get('protocol')})")
-    return 0
+    print(f"LEADERBOARD OK ({len(files)} file(s))")
+    return rc
 
 
 if __name__ == "__main__":

@@ -287,3 +287,22 @@ C 目录归位（会改路径，最后做）
 `scripts/` 下沉到 `scripts/ci/` 后，`cd "$(dirname "$0")/.."` 只到 `scripts/`，
 导致 `configs/registry/model-registry.json` 找不到、跑批立即失败（run 45502286025）。
 已全部改成 `/../..`，并在 lint 加 `cd-depth` 守卫（bash -n 抓不到这类运行期路径错误）。
+
+---
+
+## 12. 收 Hard 数的固定管线（2026-11-24 补齐）
+
+之前这段只在 `/tmp`，机器一关就没了。现已进仓：
+
+```bash
+# 1) 汇总 aggregate（easy 或 hard）
+bash scripts/data/collect_matrix.sh x-vla-robotwin2 hard > /tmp/hard.json
+
+# 2) 生成报告：easy 新建；hard 在既有 easy 报告上回填 hard_success / gap
+python3 scripts/data/gen_reports.py /tmp/hard.json hard
+
+# 3) 门禁
+python3 scripts/gates/check_reports.py && python3 leaderboard/scripts/check_leaderboard.py
+```
+
+`hard` 模式实测（mock）：easy 0.96 / hard 0.40 → `gap: 0.56`，写进同一份报告，不覆盖 Easy 数。

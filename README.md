@@ -32,7 +32,9 @@ scripts/
   ci/                     6 条 CI 编排（bash 只编排，不写业务）+ ci/lib/common.sh
   gates/                  5 道门禁：check_versions / check_paths / check_registry /
                           check_reports / check_coverage
-  data/                   prepare_robotwin_data.sh（R01 数据下载/解包/manifest）
+  data/                   prepare_robotwin_data.sh（R01 数据）
+                          collect_matrix.sh（matrix/ → 紧凑 JSON）
+                          gen_reports.py（JSON → docs/data 报告；hard 模式回填 hard_success/gap）
   paths_allowlist.txt     允许"计划中/上游仓"路径的白名单
 leaderboard/              自包含（对齐上游布局）
   leaderboard.json        榜单条目（一行一个 model×task×protocol）

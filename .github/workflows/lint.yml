@@ -22,10 +22,17 @@ jobs:
       - name: bash -n all scripts
         run: |
           fail=0
-          for f in scripts/*.sh scripts/lib/*.sh; do
+          # 递归找（C1 下沉到 scripts/ci|gates|data 后，旧的 scripts/*.sh 已匹配不到文件，
+          # 等于一个都没检查——所以下面加了"至少 N 个"的断言，空匹配直接失败）
+          mapfile -t shs < <(find scripts -name '*.sh' -type f | sort)
+          mapfile -t pys < <(find scripts leaderboard/scripts -name '*.py' -type f 2>/dev/null | sort)
+          echo "shell scripts: ${#shs[@]}  python files: ${#pys[@]}"
+          [ "${#shs[@]}" -ge 6 ] || { echo "FAIL: 只找到 ${#shs[@]} 个 shell 脚本（应 >=6），glob 可能又失效了"; fail=1; }
+          [ "${#pys[@]}" -ge 6 ] || { echo "FAIL: 只找到 ${#pys[@]} 个 python 文件（应 >=6）"; fail=1; }
+          for f in "${shs[@]}"; do
             bash -n "$f" || { echo "SYNTAX FAIL: $f"; fail=1; }
           done
-          for f in scripts/*.py; do
+          for f in "${pys[@]}"; do
             python3 -m py_compile "$f" || { echo "PY SYNTAX FAIL: $f"; fail=1; }
           done
           [ "$fail" = 0 ] && echo "SYNTAX OK"
