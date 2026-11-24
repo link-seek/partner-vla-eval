@@ -38,7 +38,7 @@ C 目录归位（会改路径，最后做）
  ├─ C2 docs/reports JSON → docs/data；deck → docs/decks
  ├─ C3 ✅ 旧教程稿 → archive/tutorial-v1；论文 → archive/papers
  ├─ C4 configs 三分 + docker-compose 入 docker/compose
- ├─ C5 workflows 拆 manual/
+ ├─ C5 ✅ workflows 分类索引（子目录不可行，已改文档）
  ├─ C6 上传回读校验 + idle-guard 关机兜底
  └─ C7 队列拆组（或 r01 串 job 链）
 ```
@@ -143,7 +143,7 @@ C 目录归位（会改路径，最后做）
 | C2 | `docs/reports/*.json` → `docs/data/`；`deck/` → `docs/decks/`；同步 `leaderboard.json` 的 `report` 字段 | 13 JSON + 2 文档 | 1.5h |
 | C3 | ✅ 已完成：旧教程稿 → `docs/archive/tutorial-v1/`，论文 → `docs/archive/papers/` | 12 + 互引已改 | 1h |
 | C4 | `configs/{benchmarks,model_servers,registry}/`；`docker-compose.*` → `docker/compose/` | 3 + payload 清单 | 1.5h |
-| C5 | workflows 拆 `manual/`（8 个一次性排障） | 8（移动即改引用） | 1h |
+| C5 | ✅ 已完成（方案修正）：**GitHub 不支持 workflow 子目录**，改为 `.github/workflows/README.md` 分类索引 | 1 文档 | 0.5h |
 | C6 | `obsutil cp` 后回读校验；`idle-guard` cron 兜底关机 | 6 workflow + 1 新 workflow | 2h |
 | C7 | 队列拆组，或 `r01.yml` 串 `prep→train→eval` job 链 | 2–3 workflow | 2h |
 
