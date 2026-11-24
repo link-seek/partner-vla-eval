@@ -1,0 +1,25 @@
+{
+  "model": "2toINF/X-VLA-RoboTwin2 (fp32, EE 16D)",
+  "task": "RobotWin click_bell x50（Easy / demo_clean，本考场 5 task 子集）",
+  "mean_success": 0.96,
+  "n": 50,
+  "success": 48,
+  "errors": 0,
+  "versions": {
+    "harness": "0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16"
+  },
+  "machine": "V100-32GB ×2 (cn-north-4, 0002)",
+  "seeds": "bundled（skip_expert=false，从 100000 起）",
+  "date": "2026-11-24",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/45266034430",
+  "steps_success": {
+    "mean": 77.1,
+    "med": 58
+  },
+  "hard_success": null,
+  "gap": null,
+  "note": "Easy only；Hard 待补。4 分片并行；零 error。",
+  "report_version": "v1 (docs/tutorial/leaderboard.md)"
+}
