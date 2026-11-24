@@ -122,9 +122,19 @@ def check_reports(data):
 
 
 def check_ranking_isolation(data):
+    """B2：同一 protocol 内不允许 shared 与 finetuned 混排（会被误读成一个排名）。
+
+    确需同文件并列时，在顶层加 "ranked_separately": true 显式声明已分组。
+    """
     wt = {r.get("weight_type") for r in data.get("entries", [])}
     if "shared" in wt and "finetuned" in wt:
-        warnings.append("同榜单混有 shared 与 finetuned：排名必须分组，禁止合并")
+        if data.get("ranked_separately") is True:
+            warnings.append("shared 与 finetuned 混放，已声明 ranked_separately=true（需分别排名）")
+        else:
+            errors.append(
+                "同榜单混有 shared 与 finetuned 且未声明 ranked_separately："
+                "会被误读为一个排名，请拆分文件或加 \"ranked_separately\": true"
+            )
 
 
 def main() -> int:

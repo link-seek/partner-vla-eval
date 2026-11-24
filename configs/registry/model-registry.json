@@ -13,7 +13,8 @@
     "shards": 8,
     "seeds": "bundled（skip_expert=false，从 100000 起）",
     "difficulty": "Easy（Hard 待补）",
-    "stack": "V100-32GB ×2（serve=GPU0, env=GPU1），cn-north-4 内网，OBS 归档"
+    "stack": "V100-32GB ×2（serve=GPU0, env=GPU1），cn-north-4 内网，OBS 归档",
+    "ranking_rule": "只在同 (weight_type, protocol) 内排名；shared=用作者发布的 ckpt，finetuned=在本考场数据上训过。两者不得合并成同一张排名表。"
   },
   "models": {
     "db-cogact": {
@@ -42,7 +43,9 @@
         "click_bell": "无公开 ckpt（HF 仓无该 task 目录）",
         "handover_block": "无公开 ckpt（HF 仓无该 task 目录）"
       },
-      "ckpt_revision": "4c6404283bd00008f7c15ae986556bc0e03ebdff"
+      "ckpt_revision": "4c6404283bd00008f7c15ae986556bc0e03ebdff",
+      "weight_type": "shared",
+      "regime": null
     },
     "x-vla-robotwin2": {
       "family": "X-VLA",
@@ -68,7 +71,9 @@
         "place_phone_stand",
         "click_bell",
         "handover_block"
-      ]
+      ],
+      "weight_type": "shared",
+      "regime": null
     },
     "pi0-robotwin": {
       "family": "π0",
@@ -87,7 +92,9 @@
       "license": "未标",
       "note": "缺 robotwin 版 serve yaml（相机键/状态维/控制频率）+ 训练 task 清单未披露 → 不进首批",
       "fast_init": "true",
-      "ckpt_revision": null
+      "ckpt_revision": null,
+      "weight_type": "shared",
+      "regime": null
     },
     "act-baseline": {
       "family": "ACT（官方基线）",
@@ -106,7 +113,9 @@
       "license": "见上游 ckpt 卡片",
       "note": "本轮不做（需另写 ACT/DP serve 适配器，投入产出不划算）；保留登记以便后续想补时按此接入",
       "fast_init": "true",
-      "ckpt_revision": null
+      "ckpt_revision": null,
+      "weight_type": "finetuned",
+      "regime": null
     },
     "dp-baseline": {
       "family": "DP（官方基线）",
@@ -125,7 +134,9 @@
       "license": "见上游 ckpt 卡片",
       "note": "本轮不做（需另写 ACT/DP serve 适配器，投入产出不划算）；保留登记以便后续想补时按此接入",
       "fast_init": "true",
-      "ckpt_revision": null
+      "ckpt_revision": null,
+      "weight_type": "finetuned",
+      "regime": null
     }
   }
 }

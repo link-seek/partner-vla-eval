@@ -19,6 +19,9 @@ nav_order: 3
 | 评测栈 | 同一镜像（`vla-eval-robotwin:0.8.0-ee-slim`）、同分片（8）、同机（V100-32GB×2，cn-north-4 内网） |
 | 训练口径 | 用作者发布的 ckpt，**不自己重训**；dtype 按"能在 V100 上跑"的等价精度（bf16 → fp32 代替） |
 
+**排名口径**：只在同 `(weight_type, protocol)` 内排名。`shared`＝用作者发布的 ckpt（本页现状）；
+`finetuned`＝在本考场数据上训过（R01 那条轴）。两者不得合并成一张排名表——脚本会拒。
+
 **准入三条**（缺一条只能进"候选"，不能进表）：
 
 1. ckpt 公开可下（HF / OBS 直链，能写进 `configs/registry/model-registry.json`）。

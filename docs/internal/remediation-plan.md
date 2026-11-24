@@ -252,14 +252,15 @@ C 目录归位（会改路径，最后做）
 | A4 报告自洽 | ✅ 完成 | `check_reports.py`（19 份报告，mean_success vs success/n、镜像必填） |
 | A5 重复轮 | ⏳ 待 GPU | — |
 | B1 Hard | ⏳ 待批准（8–12h GPU） | 已确认 `demo_randomized.yml` 存在，非代码风险 |
-| B2/B3 | ⏳ 与 5b 一起 | — |
+| B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
+| B3 ACT/DP 适配器 | ⏳ 需开机在 0002 镜像内开发 | — |
 | C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
 | C2 结果 JSON → docs/data | ✅ 完成 | 19 JSON + deck → docs/decks；registry/leaderboard/schema 同步 |
 | C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |
 | C4 configs 三分 | ✅ 完成 | benchmarks 13 / model_servers 9 / registry 1；脚本与 workflow 同步 |
 | C5 workflows 分类 | ✅ 完成（方案修正） | GitHub 不支持子目录 → `.github/workflows/README.md` 索引（25 个全覆盖） |
 | C6 上传回读 + idle-guard | ✅ 完成 | 5 个 workflow 去掉 `\|\| true` 改回读计数；新增 `idle-guard.yml`（30min cron，三条件全满足才关）；lint 加回归门 |
-| C7 队列拆组 / job 链 | ⏳ 未开始 | — |
+| C7 队列拆组 | ✅ 完成 | `r01-prep` 独立到 `data-ecs-0002`（不占 GPU pending 位）；GPU 组加语义注释 |
 | D 收口 | ✅ 部分 | #11 关、#14/#8 更新、2 分支删；D1 git 分叉待外部环境 fetch |
 
 **CI 证据（C 线后半段）**：run `45438238470` 七道门全绿（C1 落地后）。

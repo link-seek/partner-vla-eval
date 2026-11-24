@@ -18,6 +18,8 @@ on:
         required: false
         default: "obs://so101-sim-pipeline/eval"
 concurrency:
+  # C7：GPU 任务同组串行（GitHub 同组只保 1 个 pending，第三个会顶掉第二个）。
+  # 所以「一次只派一个，等进 running 再派下一个」；数据类任务已拆到 data-ecs-0002。
   group: gpu-ecs-0002-smoke
   cancel-in-progress: false
 

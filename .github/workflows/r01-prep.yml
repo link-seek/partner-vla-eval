@@ -17,7 +17,9 @@ on:
         default: "/data/robotwin-train"
 
 concurrency:
-  group: gpu-ecs-0002-smoke
+  # C7：本 workflow 只下载/解包数据，不占 GPU。放在 GPU 组里会占掉那唯一的 pending 位
+  # （GitHub 同组只保 1 个 pending，第三个 dispatch 会顶掉第二个）。故独立成组。
+  group: data-ecs-0002
   cancel-in-progress: false
 
 permissions:
