@@ -27,6 +27,10 @@ on:
         description: "1=录像，默认关"
         required: false
         default: "0"
+      protocol:
+        description: "easy（demo_clean）| hard（demo_randomized）"
+        required: false
+        default: "easy"
       obs_prefix:
         description: "OBS 前缀，结果进 <前缀>/leaderboard/<model>/<task>/（默认 obs://so101-sim-pipeline/eval）"
         required: false
@@ -61,7 +65,7 @@ jobs:
           OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
           OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
           OBS_PREFIX: ${{ inputs.obs_prefix }}
-          OBS_SUBDIR: leaderboard
+          OBS_SUBDIR: leaderboard/${{ inputs.protocol }}
           OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
         run: |
           set -e
@@ -108,6 +112,7 @@ jobs:
           MM_EPISODES: ${{ inputs.episodes }}
           MM_SHARDS: ${{ inputs.shards }}
           MM_VIDEO: ${{ inputs.video }}
+          MM_PROTOCOL: ${{ inputs.protocol }}
           ASSETS_MOUNT: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
           RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
         run: |

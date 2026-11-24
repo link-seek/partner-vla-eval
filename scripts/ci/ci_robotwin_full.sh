@@ -6,6 +6,7 @@
 #   RW_EPISODES  每 task 集数（默认 50；验证用小值）
 #   RW_SHARDS    分片数（默认 8；EE 默认 4，见下）
 #   RW_VIDEO     1=录像，默认 0（全量关录像省时间/空间）
+#   RW_TASK_CONFIG  demo_clean（Easy，默认）| demo_randomized（Hard）
 # 输出：results/robotwin-<chunk>/aggregate.json + recording sqlite，OBS 按块累积。
 set -e
 cd "$(dirname "$0")/.."
@@ -26,7 +27,9 @@ CHUNK_TAG=$(echo "$RW_TASKS" | tr ',' '+' | cut -c1-60)
 if [ -n "${RW_RUN_YAML:-}" ]; then
   CHUNK_TAG=$(basename "$RW_RUN_YAML" .yaml | sed 's/^run-//')
 fi
-OUTDIR="results/robotwin-${CHUNK_TAG}-x${RW_EPISODES}"
+DIFF_TAG=""
+if [ "${RW_TASK_CONFIG:-demo_clean}" = "demo_randomized" ]; then DIFF_TAG="-hard"; fi
+OUTDIR="results/robotwin-${CHUNK_TAG}${DIFF_TAG}-x${RW_EPISODES}"
 results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR 会把上轮 libero 残留打进 artifact）
 # 注意：mkdir OUTDIR 必须在 results_root_wipe 之后（wipe 清 results/* 会连 OUTDIR 一起扬掉）
 
@@ -72,7 +75,7 @@ echo "    name: $t"
 echo "    episodes_per_task: 1"
 echo "    params:"
 echo "      task_name: $t"
-echo "      task_config: demo_clean"
+echo "      task_config: ${RW_TASK_CONFIG:-demo_clean}"
 echo "      seed: 0"
 echo "      instruction_type: seen"
 echo "      test_num: $RW_EPISODES"

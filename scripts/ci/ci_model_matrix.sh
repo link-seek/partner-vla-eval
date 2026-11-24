@@ -18,6 +18,7 @@ TASKS="${MM_TASKS:?MM_TASKS 必填（逗号分隔 task）}"
 EP="${MM_EPISODES:-50}"
 SH="${MM_SHARDS:-8}"
 VID="${MM_VIDEO:-0}"
+PROTO="${MM_PROTOCOL:-easy}"   # easy=demo_clean | hard=demo_randomized
 
 [ -f "$REG" ] || { echo "registry 不存在: $REG" >&2; exit 1; }
 
@@ -54,21 +55,26 @@ for model in ${MODELS//,/ }; do
     continue
   fi
 
+  case "$PROTO" in
+    easy) TASK_CFG="demo_clean" ;;
+    hard) TASK_CFG="demo_randomized" ;;
+    *) echo "MM_PROTOCOL 只允许 easy|hard（实际 $PROTO）" >&2; exit 1 ;;
+  esac
   for task in ${TASKS//,/ }; do
-    echo "---------------- [$model] $task x$EP ----------------"
-    rm -rf matrix/"$model"/"$task"
+    echo "---------------- [$model] $task x$EP ($PROTO) ----------------"
+    rm -rf "matrix/$model/$task" "matrix/$model/$task-$PROTO"
     RW_TASKS="$task" RW_EPISODES="$EP" RW_SHARDS="$SH" RW_VIDEO="$VID" \
       SERVE_IMAGE="$SERVE_IMAGE_V" RW_SERVE_YAML="$SERVE_YAML_V" RW_PREWARM="$PREWARM_V" \
       RW_ACTION_TYPE="$ACTION_V" RW_SKIP_EXPERT="$SKIP_V" RW_BENCH_TAG="$BENCH_V" RW_FAST_INIT="$FAST_V" \
-      RW_CKPT_REPO="$CKPT_REPO_V" RW_CKPT_REV="$CKPT_REV_V" \
+      RW_CKPT_REPO="$CKPT_REPO_V" RW_CKPT_REV="$CKPT_REV_V" RW_TASK_CONFIG="$TASK_CFG" \
       bash scripts/ci/ci_robotwin_full.sh
     mkdir -p matrix/"$model"
     if ! ls -d results/robotwin-* >/dev/null 2>&1; then
       echo "MISSING results/robotwin-*（$model/$task 没产物，停）" >&2
       exit 1
     fi
-    cp -r results/robotwin-* matrix/"$model"/"$task"
-    echo "collected: matrix/$model/$task"
+    cp -r results/robotwin-* "matrix/$model/$task-$PROTO"
+    echo "collected: matrix/$model/$task-$PROTO"
   done
 done
 
