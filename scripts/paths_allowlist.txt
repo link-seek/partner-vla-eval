@@ -36,3 +36,10 @@ leaderboard/data
 leaderboard/schemas
 leaderboard/scripts
 docker/compose
+
+# 1c) 整改计划（docs/internal/remediation-plan.md）里尚未创建的产物
+scripts/check_coverage.py
+scripts/check_reports.py
+scripts/model_servers/robotwin_policy.py
+docs/decks
+leaderboard/tests
