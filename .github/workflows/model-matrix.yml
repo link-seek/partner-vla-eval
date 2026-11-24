@@ -129,6 +129,32 @@ jobs:
           bash scripts/ci/ci_model_matrix.sh 2>&1 | tee matrix/ci.log; CODE=${PIPESTATUS[0]}
           echo "matrix_exit=$CODE"
           exit $CODE
+      - name: Emit collected summary + upload as artifact
+        # 为什么需要：跑完 stop-ecs 会关机，aggregate 只在 OBS（私桶），
+        # 容器里没有 obsutil 就取不到。把汇总 JSON 挂成 Actions artifact，
+        # 之后 `gh run download <run> -n collected-<proto>` 即可，不必再开机。
+        if: always()
+        env:
+          MM_MODELS: ${{ inputs.models }}
+          MM_PROTOCOL: ${{ inputs.protocol }}
+          MM_REPLICATE: ${{ inputs.replicate }}
+        run: |
+          set -e
+          mkdir -p matrix/summary
+          for m in ${MM_MODELS//,/ }; do
+            bash scripts/data/collect_matrix.sh "$m" "$MM_PROTOCOL" matrix "${MM_REPLICATE:-}" \
+              > "matrix/summary/collected-${m}-${MM_PROTOCOL}.json" || echo "WARN: $m 汇总失败"
+          done
+          ls -l matrix/summary || true
+          head -c 400 matrix/summary/*.json 2>/dev/null || true
+      - name: Upload collected summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: collected-${{ inputs.protocol }}${{ inputs.replicate != '' && format('-{0}', inputs.replicate) || '' }}
+          path: matrix/summary/
+          retention-days: 30
+          if-no-files-found: warn
       - name: Upload to OBS
         if: always()
         env:
