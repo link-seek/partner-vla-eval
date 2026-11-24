@@ -19,7 +19,35 @@
 - ACT 优先用 `vla-eval-robotwin:0.8.0-ee-slim` 起 serve（镜像里已有依赖）
 - DP 需要 `vla-serve-robotwin-dp`，把 `hydra`、`dill` 烘进去（V100 禁止现场 pip）
 
-## 0.1 前置
+## 0.1 ACT 参数体检（2026-11-24 CPU 实测，已跑通前向）
+
+在镜像里用 CPU（`Module.cuda` 打桩）真跑了一遍官方 ACT：
+
+```
+camera_names = ['head_cam','left_cam','right_cam']
+number of parameters: 31.35M
+constructed in 4.0s
+call1: raw=(1,14) flat=14 1.6s finite=True     ← 首次推理
+call2: raw=(1,14) flat=14 0.0s  finite=True     ← 命中 chunk 复用（query_frequency 生效）
+call3: raw=(1,14) flat=14 0.0s  finite=True
+reset_model → 再取仍 14 维
+ACT_CPU_SMOKE_OK
+```
+
+**过程中踩到两个坑（已修进适配器）**：
+
+| 坑 | 现象 | 根因 | 修法 |
+|---|---|---|---|
+| 缺 `dropout` | `AttributeError: 'Namespace' object has no attribute 'dropout'` | `deploy_policy.yml` 不含 detr parser 的字段，官方靠 task config 补 | 默认值改用 `get_args_parser()` 的默认值打底，再覆盖 yml 项 |
+| `camera_names` 为空 | `torch.cat(): expected a non-empty list` | `detr_vae.forward` 按 `args.camera_names` 长度逐个索引摄像机位 | 显式设 `["head_cam","left_cam","right_cam"]` |
+
+> 注意：官方 `build_ACT_model_and_optimizer` 里有硬编码 `model.cuda()`，**CPU 上必挂**——
+> 这个 CPU 体检靠 `torch.nn.Module.cuda = lambda self,*a,**k: self` 打桩才跑通。
+> 真实部署走 GPU，不需要打桩。
+
+**仍未验证**：真实 ckpt 加载（本次用随机权重）、跑满一集（本次只验前 3 步）。
+
+## 0.2 前置
 
 - 0002 空闲（`nvidia-smi` 两卡都空；`docker ps` 没有 cogact-serve / kind_*）
 - 本地有 `vla-eval-robotwin:0.8.0-ee-slim` 与一个能起 serve 的镜像

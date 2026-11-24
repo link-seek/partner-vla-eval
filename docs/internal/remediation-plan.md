@@ -342,3 +342,19 @@ diffusion_policy: vendored 在 policy/DP/diffusion_policy，dp_model.py 自己 a
 - **ACT 可直接用现成 robotwin 镜像起 serve**（依赖齐）
 - **DP 需要另烘镜像**（hydra + dill），不是改代码能解决的
 - 适配器已加 fail-fast：DP 导入失败时直接报"缺 hydra/dill，需另烘镜像"，不再抛裸异常
+
+---
+
+## 15. B3 ACT 前向体检通过（2026-11-24，CPU 打桩）
+
+```
+constructed in 4.0s, 31.35M params
+call1 (1,14) 1.6s finite   → 首次推理
+call2/3 (1,14) 0.0s finite → chunk 复用生效
+reset_model → 仍 14 维
+```
+
+修掉两个会直接导致 smoke 失败的问题：缺 `dropout`（改用官方 parser 默认值打底）、
+`camera_names` 为空（显式设三相机名）。
+
+**B3 剩余**：真实 ckpt 加载 + 跑满一集。仍在 `pending`。

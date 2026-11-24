@@ -57,6 +57,9 @@ _ROBOTWIN_DEFAULTS: dict[str, Any] = {
     "seed": 0,
     "instruction_type": "unseen",
     "action_dim": 14,
+    "state_dim": 14,                     # detr parser 必填
+    # 官方 act_policy 里硬编码这三个名字（detr_vae 按列表长度索引摄像机位）
+    "camera_names": ["head_cam", "left_cam", "right_cam"],
     # ACT
     "kl_weight": 10.0,
     "chunk_size": 50,
@@ -113,6 +116,7 @@ class RoboTwinPolicyServer(PredictModelServer):
 
         self._module = None
         self._model = None
+        self._parser_defaults: dict[str, Any] | None = None
 
     # ---------------------------------------------------------------- specs
     def get_action_spec(self) -> dict[str, Any]:
@@ -122,6 +126,29 @@ class RoboTwinPolicyServer(PredictModelServer):
         return {"image": IMAGE_RGB, "left_camera": IMAGE_RGB, "right_camera": IMAGE_RGB}
 
     # -------------------------------------------------------------- loading
+    def _official_defaults(self, dp_module: Any) -> dict[str, Any]:
+        """用官方 detr parser 的默认值打底。
+
+        实测教训（2026-11-24）：只按 `deploy_policy.yml` 填会缺 `dropout`
+        （`build_transformer` 直接读 args.dropout），且 `camera_names` 为空会让
+        `detr_vae.forward` 拿不到任何相机特征（`torch.cat([])` 报错）。
+        所以默认值必须来自官方 parser，而不是我们手抄的 yml。
+        """
+        if self._parser_defaults is not None:
+            return self._parser_defaults
+        from policy.ACT.detr.main import get_args_parser  # type: ignore
+
+        required = [
+            "--ckpt_dir", self._usr_args.get("ckpt_dir") or "/tmp/ckpt",
+            "--policy_class", "ACT",
+            "--task_name", str(self._usr_args.get("task_name") or "grab_roller"),
+            "--seed", str(self._usr_args.get("seed") or 0),
+            "--num_epochs", str(self._usr_args.get("num_epochs") or 2000),
+            "--state_dim", str(self._usr_args.get("state_dim") or 14),
+        ]
+        self._parser_defaults = vars(get_args_parser().parse_args(required))
+        return self._parser_defaults
+
     def _load(self) -> None:
         if self._model is not None:
             return
@@ -157,8 +184,13 @@ class RoboTwinPolicyServer(PredictModelServer):
                     f"当前只有 {sorted(k for k, v in self._usr_args.items() if v is not None)}"
                 )
 
+        if self.policy_kind == "act":
+            merged = dict(self._official_defaults(dp))
+            merged.update({k: v for k, v in self._usr_args.items() if v is not None})
+        else:
+            merged = dict(self._usr_args)
         self._dp = dp
-        self._model = dp.get_model(self._usr_args)
+        self._model = dp.get_model(merged)
         self._module = dp
 
     def _reset(self) -> None:
