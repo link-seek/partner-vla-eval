@@ -357,4 +357,13 @@ reset_model → 仍 14 维
 修掉两个会直接导致 smoke 失败的问题：缺 `dropout`（改用官方 parser 默认值打底）、
 `camera_names` 为空（显式设三相机名）。
 
-**B3 剩余**：真实 ckpt 加载 + 跑满一集。仍在 `pending`。
+**真实 ckpt 也验过了**（`Avada11/RoboTwin-Model-AgileX-ACT`，click_bell seed100）：
+`dec_layers=7 → missing=0 unexpected=0`，78.51M 参数，前向 14 维有限值。
+
+**四个配置坑**：dropout=0.1、camera_names=3、hidden_dim=512/dim_feedforward=3200、dec_layers=7；
+**一个文件名坑**：官方 ckpt 不叫 `policy_last.ckpt`，内置加载会静默用随机权重。
+
+**官方 ACT 只覆盖本考场 2/5**（adjust_bottle、click_bell），grab_roller/place_phone_stand/handover_block 无 ckpt。
+→ 榜上三家覆盖面各不相同：X-VLA 5/5、CogACT 3/5、ACT 2/5。
+
+**B3 剩余**：跑满一整集（需 GPU 空闲）。仍在 `pending`。

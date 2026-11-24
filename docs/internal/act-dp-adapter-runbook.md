@@ -45,7 +45,42 @@ ACT_CPU_SMOKE_OK
 > 这个 CPU 体检靠 `torch.nn.Module.cuda = lambda self,*a,**k: self` 打桩才跑通。
 > 真实部署走 GPU，不需要打桩。
 
-**仍未验证**：真实 ckpt 加载（本次用随机权重）、跑满一集（本次只验前 3 步）。
+### 真实 ckpt 实测（2026-11-24，官方 `Avada11/RoboTwin-Model-AgileX-ACT`）
+
+下载了 `click_bell/demo_clean-100/100/`（ckpt 321MB + dataset_stats.pkl 6.3KB），CPU 打桩加载：
+
+```
+number of parameters: 78.51M          ← hidden_dim=512（比 parser 默认 256 大一倍）
+Loaded normalization stats from dataset_stats.pkl
+dec_layers=6: missing=0 unexpected=18   ← 少建一层 decoder
+dec_layers=7: missing=0 unexpected=0    ← 完全对上
+call1: flat=14 2.0s finite=True range=[-0.447,1.011]
+```
+
+**四个必须的配置（`deploy_policy.yml` 只给了其中两个）**：
+
+| 项 | 值 | 来源 |
+|---|---|---|
+| `dropout` | 0.1 | detr parser 默认（yml 没有） |
+| `camera_names` | `["head_cam","left_cam","right_cam"]` | act_policy 硬编码（yml 没有，parser 默认空） |
+| `hidden_dim` / `dim_feedforward` | 512 / 3200 | yml 有 |
+| `dec_layers` | **7** | yml 没有，parser 默认 6 —— 只有比对 ckpt 才知道 |
+
+**还有一个文件名坑**：官方 ckpt 叫 `policy_epoch_6000_seed_100.ckpt`，
+而 `deploy_policy` 的加载逻辑只认 `policy_last.ckpt` → 找不到就**告警后继续用随机权重**（静默错误）。
+所以适配器加了 `ckpt_file` 参数：显式给了就自己 `load_state_dict`，
+并对 `missing`/`unexpected` 严格断言，不一致直接报错而不是静默跑。
+
+### 官方 ACT 仓库的覆盖（影响榜单设计）
+
+该仓库只有 **10 个 task**（adjust_bottle / beat_block_hammer / click_alarmclock / click_bell /
+lift_pot / open_laptop / open_microwave / place_container_plate / place_empty_cup / place_shoe），
+本考场 5 个里只有 **adjust_bottle、click_bell** 有 ckpt（`grab_roller` / `place_phone_stand` /
+`handover_block` 都没有）。
+
+→ ACT 在榜上最多 2/5 格，且与 CogACT 的 3 格、X-VLA 的 5 格都不同，**三家覆盖各不相同**。
+
+**仍未验证**：跑满一整集（本机 GPU 被 Hard 评测占用）。
 
 ## 0.2 前置
 

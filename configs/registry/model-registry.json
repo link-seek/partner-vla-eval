@@ -115,7 +115,17 @@
       "fast_init": "true",
       "ckpt_revision": null,
       "weight_type": "finetuned",
-      "regime": null
+      "regime": null,
+      "covered_tasks": [
+        "adjust_bottle",
+        "click_bell"
+      ],
+      "missing_tasks": {
+        "grab_roller": "官方仓无此 task ckpt（只有 10 个 task）",
+        "place_phone_stand": "同上",
+        "handover_block": "同上"
+      },
+      "ckpt_note": "官方文件名 policy_epoch_6000_seed_100.ckpt（非 policy_last.ckpt）；需 hidden_dim=512 / dim_feedforward=3200 / dec_layers=7 / camera_names=3"
     },
     "dp-baseline": {
       "family": "DP（官方基线）",

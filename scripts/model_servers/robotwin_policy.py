@@ -64,6 +64,9 @@ _ROBOTWIN_DEFAULTS: dict[str, Any] = {
     "kl_weight": 10.0,
     "chunk_size": 50,
     "hidden_dim": 512,
+    # 实测：官方 ACT ckpt 的 decoder 有 7 层（parser 默认 6），差一层会 missing=0/unexpected=18，
+    # 模型少跑一层、动作悄悄偏掉。见 runbook §0.1。
+    "dec_layers": 7,
     "dim_feedforward": 3200,
     "temporal_agg": False,
     "ckpt_dir": None,
@@ -94,6 +97,7 @@ class RoboTwinPolicyServer(PredictModelServer):
         self,
         policy: str = "act",
         ckpt_dir: str | None = None,
+        ckpt_file: str | None = None,
         device: str = "cuda:0",
         robotwin_root: str = "/app/RoboTwin",
         **overrides: Any,
@@ -105,6 +109,7 @@ class RoboTwinPolicyServer(PredictModelServer):
         super().__init__(chunk_size=None, action_ensemble="newest")
         self.policy_kind = policy
         self.ckpt_dir = ckpt_dir
+        self.ckpt_file = ckpt_file
         self.device = device
         self.robotwin_root = robotwin_root
 
@@ -191,6 +196,27 @@ class RoboTwinPolicyServer(PredictModelServer):
             merged = dict(self._usr_args)
         self._dp = dp
         self._model = dp.get_model(merged)
+
+        if self.ckpt_file:
+            # 官方 ckpt 文件名是 policy_epoch_<N>_seed_<S>.ckpt，而 deploy_policy 只认
+            # policy_last.ckpt —— 内置加载会告警跳过并留随机权重（静默错误）。
+            # 所以显式给了 ckpt_file 就自己 load，并对 missing 严格断言。
+            import torch
+
+            sd = torch.load(self.ckpt_file, map_location=self.device)
+            if isinstance(sd, dict) and "model" in sd:
+                sd = sd["model"]
+            missing, unexpected = self._model.policy.load_state_dict(sd, strict=False)
+            if missing:
+                raise RuntimeError(
+                    f"ckpt 缺 {len(missing)} 个键（前 3：{missing[:3]}）。"
+                    "多半是 hidden_dim / dim_feedforward / dec_layers 与训练时不一致。"
+                )
+            if unexpected:
+                raise RuntimeError(
+                    f"ckpt 多 {len(unexpected)} 个键（前 3：{unexpected[:3]}）。"
+                    "多半是 dec_layers 少于训练值（官方 ckpt 实测需 7 层）。"
+                )
         self._module = dp
 
     def _reset(self) -> None:
