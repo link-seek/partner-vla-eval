@@ -20,8 +20,8 @@ CuRobo 规划每个 pose，所以 `fast_init` 自动关。
 
 | 时间 | 报告 | 结果 | 说明 |
 |---|---|---|---|
-| 10-27 | [`x-vla_robotwin-ee_grab_roller.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_robotwin-ee_grab_roller.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/40471468752)） | 0/8，零 error，8 集各跑满 400 步 | 通路端到端成立；0 分是任务难，不是链路问题 |
-| 11-04 | [`xvla_robotwin-easy50.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/xvla_robotwin-easy50.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/41377057472)） | 66.6%（3328/5000），零 error | 50 task × 100ep，可出分 |
+| 10-27 | [`x-vla_robotwin-ee_grab_roller.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/x-vla_robotwin-ee_grab_roller.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/40471468752)） | 0/8，零 error，8 集各跑满 400 步 | 通路端到端成立；0 分是任务难，不是链路问题 |
+| 11-04 | [`xvla_robotwin-easy50.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/xvla_robotwin-easy50.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/41377057472)） | 66.6%（3328/5000），零 error | 50 task × 100ep，可出分 |
 
 ## 机理
 

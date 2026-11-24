@@ -91,7 +91,7 @@ benchmarks:
 
 1. **`robotwin-smoke.log`**：client 侧全日志，尾部看两行——`serve UP`（serve 活了）
  和 `smoke_exit=0` + 1/1（链路通了）。排障先看尾 15 行，见 02。
-2. **aggregate JSON**：长这样（实物见 `docs/reports/cogact_robotwin-grab_roller-x50.json`，
+2. **aggregate JSON**：长这样（实物见 `docs/data/cogact_robotwin-grab_roller-x50.json`，
  下例为 smoke 口径示意）：
 
 ```json

@@ -19,10 +19,10 @@ X-VLA 在 LIBERO 上跑 fp16，每个 episode 死在第一个 action：10/10 ERR
 
 | 精度 | 报告 | 结果 |
 |---|---|---|
-| fp16 | [`x-vla_libero-spatial_fp16.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-spatial_fp16.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/38990222346)） | 0/10，全 ERROR：`首个 act 即崩 RuntimeError float vs Half` |
-| fp32 | [`x-vla_libero-spatial_fp32.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-spatial_fp32.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/38981477153)） | 9/10，零 ERROR |
-| fp32 三榜 | [`object`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-object_fp32.json) / [`goal`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-goal_fp32.json) 各 10ep | 10/10 + 10/10，三榜合计 29/30 |
-| fp32 整榜 | [`x-vla_libero-spatial50_fp32.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/x-vla_libero-spatial50_fp32.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/40552080571)） | 487/500 |
+| fp16 | [`x-vla_libero-spatial_fp16.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/x-vla_libero-spatial_fp16.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/38990222346)） | 0/10，全 ERROR：`首个 act 即崩 RuntimeError float vs Half` |
+| fp32 | [`x-vla_libero-spatial_fp32.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/x-vla_libero-spatial_fp32.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/38981477153)） | 9/10，零 ERROR |
+| fp32 三榜 | [`object`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/x-vla_libero-object_fp32.json) / [`goal`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/x-vla_libero-goal_fp32.json) 各 10ep | 10/10 + 10/10，三榜合计 29/30 |
+| fp32 整榜 | [`x-vla_libero-spatial50_fp32.json`](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/x-vla_libero-spatial50_fp32.json)（[run](https://github.com/link-seek/partner-vla-eval/actions/runs/40552080571)） | 487/500 |
 
 报错原文：
 

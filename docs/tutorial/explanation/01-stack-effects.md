@@ -27,7 +27,7 @@ nav_order: 1
 | D | 种子 | 盲种子 vs 校验种子 | 35/35 有效 + 15 坏种 vs 零 error；同集重跑 41 vs 46 | 种子集动 error 率；同集轮间差 ≈1.7σ（噪声） |
 | E | 机器+精度 | V100 fp16 vs 官方 H100 bf16（place_empty_cup） | 16~20% vs 28% | 待定档，写进披露不硬判 |
 
-补充：0.8.0 的 grab_roller 另有一轮 50ep 复测 45/50=90%（[报告](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/cogact_robotwin-grab_roller-x50.json)），与 A 行 46/50 在 n=50 噪声带内一致。
+补充：0.8.0 的 grab_roller 另有一轮 50ep 复测 45/50=90%（[报告](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/cogact_robotwin-grab_roller-x50.json)），与 A 行 46/50 在 n=50 噪声带内一致。
 
 ## 怎么读这张表
 

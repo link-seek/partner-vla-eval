@@ -88,15 +88,15 @@ smoke_exit=0
 
 | task | 我们 | 官称 |
 |---|---|---|
-| [grab_roller](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/cogact_robotwin-grab_roller-x50.json) | 90%（45/50） | 89% |
+| [grab_roller](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/cogact_robotwin-grab_roller-x50.json) | 90%（45/50） | 89% |
 | adjust_bottle | 100%（35/35 有效，15 坏种已剔） | 99% |
-| [place_empty_cup](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/cogact_robotwin-place_empty_cup-x50.json) | 14%（7/50；另一轮 8/50，n=50 噪声带 ±6pp） | 28% |
+| [place_empty_cup](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/cogact_robotwin-place_empty_cup-x50.json) | 14%（7/50；另一轮 8/50，n=50 噪声带 ±6pp） | 28% |
 | place_phone_stand | 16%（8/50） | 18% |
 
 官称 = [Dexbotic README Benchmark Results](https://github.com/Dexmal/dexbotic#benchmark-results)（自家 toolbox 链路，非 harness；DB-CogACT 平均 58.5）。
 
 X-VLA EE 画像（easy50，11-04 跑完）：Easy demo_clean × seed 0 × 50 tasks × 100ep = 5000 ep，
-**66.6%，零 error**（[报告](https://github.com/link-seek/partner-vla-eval/blob/main/docs/reports/xvla_robotwin-easy50.json)）。
+**66.6%，零 error**（[报告](https://github.com/link-seek/partner-vla-eval/blob/main/docs/data/xvla_robotwin-easy50.json)）。
 5×100%（adjust_bottle/grab_roller/move_playingcard_away/shake_bottle/shake_bottle_horizontally）；
 5 塌（blocks_ranking_rgb / blocks_ranking_size / put_bottles_dustbin / stack_blocks_three /
 stack_bowls_three 全 0/100，步数跑满，疑 gripper 语义，跟踪中）。全 Easy、无 Hard；与上表 CogACT（qpos/50ep）不可比，并列。
