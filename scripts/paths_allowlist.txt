@@ -43,3 +43,7 @@ scripts/check_reports.py
 scripts/model_servers/robotwin_policy.py
 docs/decks
 leaderboard/tests
+
+# 3) 已删除的分支名（不是路径，但文档里用反引号记录了 SHA 以便恢复）
+docs/tutorial-ia
+docs/tutorial-v1-2-stack-effects

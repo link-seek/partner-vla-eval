@@ -192,3 +192,50 @@ C 目录归位（会改路径，最后做）
 2. **A2 + A1**（不占 GPU，把"版本/权重可钉"这两个最要命的补上）
 
 需要你点头的只有一件：**B1 会烧 8–12h 的 0002**（约 ¥260–390 按需价），其余都是本地代码。
+
+---
+
+## 9. D 线：协作面收口（PR / issue / 分支 / git 历史）
+
+盘点结果（2026-11-24 实查）：
+
+| 项 | 状态 | 处置 |
+|---|---|---|
+| 开着的 PR | **0** | 无需动作 |
+| Issue #11（报告归档缺失） | 本轮 `cogact_robotwin-{adjust_bottle,place_phone_stand}-x50.json` 正好补齐 | **已关**，附数字与噪声说明 |
+| Issue #14（总账） | 陈旧 | 已评论更新：出数、deck、两份检视、三道门禁、待办 |
+| Issue #8（OBS 自定义前缀 + 开跑前校验） | 半解决：校验步骤已有、上传 403/0 通过 | **保留**，已记明仍缺三项（自定义前缀未测、`|| true` 吞错、路径多一层 `matrix/`），并入 C6 |
+| 远程分支 `docs/tutorial-ia` | 0 ahead / 170 behind，纯落后 | **已删**（SHA `bcae8493`） |
+| 远程分支 `docs/tutorial-v1-2-stack-effects` | 1 ahead，但改动只针对已不存在的旧教程结构 | **已删**（SHA `2a7df768`）；核对后差异仅为归档时加的 `nav_exclude` 头，实质已进 `docs/tutorial/old/`，A–D 栈差异表已进 `explanation/01-stack-effects.md` |
+
+### D1　git 历史分叉（必须先处理）
+
+**问题**：本轮所有推送走的是 GitHub API（`POST /git/commits`），远程 commit SHA 与本地 SHA **系列不同**——内容一致但历史分叉。
+
+实测：
+```
+本地 HEAD tree  = f1ca234a...
+远程 main tree  = 4b000e1d...
+逐 blob 比对：156 vs 157 个文件，差异仅 1 个（Open Design 边车 .artifact.json）
+```
+
+**风险**：此刻在本地 `git push` 会撞非快进，或灌入 37 个重复历史。
+
+**动作**：
+1. 已删那 1 个越界文件并加 `.gitignore` → 内容对齐
+2. 在**能直连 github.com 的环境**执行一次：
+   ```bash
+   git fetch origin && git reset --hard origin/main
+   ```
+   本容器 `git fetch` 不通 github.com:443，但 `gh api` 通 api.github.com —— 两条出口不同。
+3. 之后恢复「本地 commit → git push」正常流程，不再用 API 造提交
+
+**在 D1 完成前**：继续用 API 推送，且**不要**在本地 `git push`。
+
+### D2　流程规矩（防止再分叉）
+
+| 规矩 | 原因 |
+|---|---|
+| 一个改动一个 PR，不再直推 main | 本轮 37 个提交全是直推，没有 review 记录 |
+| issue 关闭必须附证据（run id / 文件路径 / 数字） | #11 是"详情待补"挂了 15 天，实际早就该关 |
+| 分支生命周期 ≤ 1 周，超期要么合并要么删 | 两个分支分别滞后 170/171 个提交，等于死分支 |
