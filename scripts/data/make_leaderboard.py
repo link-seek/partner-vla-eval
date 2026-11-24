@@ -26,15 +26,19 @@ SHORT = {"x-vla-robotwin2": "xvla", "db-cogact": "cogact"}
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("src")
+    ap.add_argument("src", nargs="+", help="一份或多份 collected JSON（多份=重复轮）")
     ap.add_argument("protocol", choices=["easy", "hard"])
     ap.add_argument("--run", required=True, help="GitHub Actions run id")
     ap.add_argument("--out", default=None)
     ap.add_argument("--date", default=str(date.today()))
     a = ap.parse_args()
 
-    data = json.loads(Path(a.src).read_text())
-    model = data["model"]
+    runs = [json.loads(Path(p).read_text()) for p in a.src]
+    models = {r["model"] for r in runs}
+    if len(models) != 1:
+        print(f"多份输入必须是同一模型（拿到 {sorted(models)}）", file=sys.stderr)
+        return 1
+    model = runs[0]["model"]
     short = SHORT.get(model, model)
 
     reg = json.loads(REG.read_text())["models"].get(model)
@@ -50,10 +54,27 @@ def main() -> int:
     out = {"last_updated": a.date, "bench": "robotwin", "protocol": proto_label, "entries": []}
 
     skipped = []
-    for task, t in data["tasks"].items():
-        if t.get("status") == "missing":
+    all_tasks = sorted({t for r in runs for t in r["tasks"]})
+    for task in all_tasks:
+        per_run = [r["tasks"][task] for r in runs if r["tasks"].get(task, {}).get("status") != "missing"]
+        if not per_run:
             skipped.append(task)
             continue
+        if len(per_run) != len(runs):
+            print(f"WARN {task}: 只有 {len(per_run)}/{len(runs)} 轮有数", file=sys.stderr)
+        # 重复轮：合并样本（success/n 相加），并记录轮间极差
+        n_sum = sum(x["n"] for x in per_run)
+        ok_sum = sum(x["success"] for x in per_run)
+        rates = [x["rate"] for x in per_run]
+        t = {
+            "n": n_sum, "success": ok_sum,
+            "rate": round(ok_sum / max(1, n_sum), 4),
+            "errors": sum(x["errors"] for x in per_run),
+            "steps_avg": round(sum(x["steps_avg"] * x["n"] for x in per_run) / max(1, n_sum), 1),
+            "steps_med": per_run[0]["steps_med"],
+            "created_at": per_run[0].get("created_at"),
+            "harness_version": per_run[0].get("harness_version"),
+        }
         out["entries"].append({
             "model": model,
             "task": task,
@@ -61,7 +82,7 @@ def main() -> int:
             "success": t["success"],
             "errors": t["errors"],
             "weight_type": reg.get("weight_type", "shared"),
-            "replicate_count": 1,
+            "replicate_count": len(per_run),
             "run": str(a.run),
             "date": (t.get("created_at") or a.date)[:10],
             "ckpt_repo": (reg.get("ckpt_repo") or reg.get("ckpt") or "").split("/<")[0],
@@ -69,6 +90,8 @@ def main() -> int:
             "bench_image": BENCH_IMAGE,
             "serve_image": reg.get("serve_image", ""),
             "harness_version": t.get("harness_version") or None,
+            "rate_min": min(rates) if len(rates) > 1 else None,
+            "rate_max": max(rates) if len(rates) > 1 else None,
             "report": f"docs/data/{short}_robotwin-{task}-x50.json",
             **({"regime": reg["regime"]} if reg.get("regime") else {}),
         })

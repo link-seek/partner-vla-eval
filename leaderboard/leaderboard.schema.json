@@ -139,6 +139,20 @@
           },
           "note": {
             "type": "string"
+          },
+          "rate_min": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "重复轮中的最低单轮成功率（replicate_count>1 时必填）"
+          },
+          "rate_max": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "重复轮中的最高单轮成功率"
           }
         }
       }

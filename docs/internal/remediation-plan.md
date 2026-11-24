@@ -250,7 +250,7 @@ C 目录归位（会改路径，最后做）
 | A2 版本取自 aggregate | ✅ 完成 | 5 份 X-VLA 报告改为实测 `0.0.0` + `harness_note` |
 | A3 覆盖检查前置 | ✅ 完成 | `check_coverage.py`；`model-matrix.yml` 新增 Coverage check；CI 反例返回 2 |
 | A4 报告自洽 | ✅ 完成 | `check_reports.py`（19 份报告，mean_success vs success/n、镜像必填） |
-| A5 重复轮 | ⏳ 待 GPU | — |
+| A5 重复轮 | 🟡 管线就绪、待跑 | matrix 加 `replicate` 输入；产物/OBS 按轮次分目录；`make_leaderboard.py` 支持多轮合并（replicate_count + rate_min/max）；门禁强制多轮必带极差 |
 | B1 Hard | 🔄 运行中（run 45503556969，X-VLA 5 task） | `task_config: demo_randomized` 已确认；按实测吞吐 250ep ≈ 15.8h ≈ ¥521 |
 | B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
 | B3 ACT/DP 适配器 | 🟡 代码已完成、**未 smoke** | `scripts/model_servers/robotwin_policy.py` + 2 个 serve yaml + runbook；registry 标 `pending` |

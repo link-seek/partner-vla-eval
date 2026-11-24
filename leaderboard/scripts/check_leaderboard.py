@@ -78,8 +78,13 @@ def check_rows(data):
         if key in seen:
             errors.append(f"{tag}: 重复条目 (同 model/task/protocol)")
         seen.add(key)
-        if r.get("replicate_count") == 1:
+        rc = r.get("replicate_count")
+        if rc == 1:
             warnings.append(f"{tag}: 单轮（n={n}），榜单需标'单轮勿作结论'")
+        elif isinstance(rc, int) and rc > 1:
+            # A5：多轮必须有轮间极差，否则"方差"无法复核
+            if r.get("rate_min") is None or r.get("rate_max") is None:
+                errors.append(f"{tag}: replicate_count={rc} 但缺 rate_min/rate_max（方差不可查）")
 
 
 def check_reports(data):

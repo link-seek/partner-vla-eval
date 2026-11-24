@@ -31,6 +31,10 @@ on:
         description: "easy（demo_clean）| hard（demo_randomized）"
         required: false
         default: "easy"
+      replicate:
+        description: "重复轮标签（r2/r3…，空=首轮）。A5：同集重跑测方差"
+        required: false
+        default: ""
       obs_prefix:
         description: "OBS 前缀，结果进 <前缀>/leaderboard/<model>/<task>/（默认 obs://so101-sim-pipeline/eval）"
         required: false
@@ -65,7 +69,7 @@ jobs:
           OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
           OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
           OBS_PREFIX: ${{ inputs.obs_prefix }}
-          OBS_SUBDIR: leaderboard/${{ inputs.protocol }}
+          OBS_SUBDIR: leaderboard/${{ inputs.protocol }}${{ inputs.replicate != '' && format('-{0}', inputs.replicate) || '' }}
           OBS_ENDPOINT: https://obs.cn-north-4.myhuaweicloud.com
         run: |
           set -e
@@ -113,6 +117,7 @@ jobs:
           MM_SHARDS: ${{ inputs.shards }}
           MM_VIDEO: ${{ inputs.video }}
           MM_PROTOCOL: ${{ inputs.protocol }}
+          MM_REPLICATE: ${{ inputs.replicate }}
           ASSETS_MOUNT: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
           RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
         run: |

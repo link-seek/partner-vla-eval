@@ -19,6 +19,7 @@ EP="${MM_EPISODES:-50}"
 SH="${MM_SHARDS:-8}"
 VID="${MM_VIDEO:-0}"
 PROTO="${MM_PROTOCOL:-easy}"   # easy=demo_clean | hard=demo_randomized
+REPLICATE="${MM_REPLICATE:-}"  # A5：重复轮标签（r2/r3…），空=首轮
 
 [ -f "$REG" ] || { echo "registry 不存在: $REG" >&2; exit 1; }
 
@@ -62,19 +63,22 @@ for model in ${MODELS//,/ }; do
   esac
   for task in ${TASKS//,/ }; do
     echo "---------------- [$model] $task x$EP ($PROTO) ----------------"
-    rm -rf "matrix/$model/$task" "matrix/$model/$task-$PROTO"
+    SUFFIX="$PROTO"
+    if [ -n "$REPLICATE" ]; then SUFFIX="$PROTO-$REPLICATE"; fi
+    rm -rf "matrix/$model/$task" "matrix/$model/$task-$SUFFIX"
     RW_TASKS="$task" RW_EPISODES="$EP" RW_SHARDS="$SH" RW_VIDEO="$VID" \
       SERVE_IMAGE="$SERVE_IMAGE_V" RW_SERVE_YAML="$SERVE_YAML_V" RW_PREWARM="$PREWARM_V" \
       RW_ACTION_TYPE="$ACTION_V" RW_SKIP_EXPERT="$SKIP_V" RW_BENCH_TAG="$BENCH_V" RW_FAST_INIT="$FAST_V" \
       RW_CKPT_REPO="$CKPT_REPO_V" RW_CKPT_REV="$CKPT_REV_V" RW_TASK_CONFIG="$TASK_CFG" \
+      RW_REPLICATE="$REPLICATE" \
       bash scripts/ci/ci_robotwin_full.sh
     mkdir -p matrix/"$model"
     if ! ls -d results/robotwin-* >/dev/null 2>&1; then
       echo "MISSING results/robotwin-*（$model/$task 没产物，停）" >&2
       exit 1
     fi
-    cp -r results/robotwin-* "matrix/$model/$task-$PROTO"
-    echo "collected: matrix/$model/$task-$PROTO"
+    cp -r results/robotwin-* "matrix/$model/$task-$SUFFIX"
+    echo "collected: matrix/$model/$task-$SUFFIX"
   done
 done
 

@@ -9,24 +9,26 @@
 # 为什么要有这个脚本：2026-11-24 之前这段逻辑只存在于 /tmp，机器一关就没了，不可复现。
 set -euo pipefail
 
-MODEL="${1:?用法: collect_matrix.sh <model> <easy|hard> [matrix_root]}"
+MODEL="${1:?用法: collect_matrix.sh <model> <easy|hard> [matrix_root] [replicate]}"
 PROTO="${2:?用法: collect_matrix.sh <model> <easy|hard> [matrix_root]}"
 ROOT="${3:-matrix}"
+REPLICATE="${4:-}"   # A5：重复轮标签（r2/r3…）
 
 case "$PROTO" in
   easy) SUFFIX="" ;;
   hard) SUFFIX="-hard" ;;
   *) echo "协议只允许 easy|hard（实际 $PROTO）" >&2; exit 1 ;;
 esac
+if [ -n "$REPLICATE" ]; then SUFFIX="${SUFFIX}-${REPLICATE}"; fi
 
-python3 - "$ROOT" "$MODEL" "$SUFFIX" "$PROTO" <<'PY'
+python3 - "$ROOT" "$MODEL" "$SUFFIX" "$PROTO" "$REPLICATE" <<'PY'
 import json, pathlib, sys
 
-root, model, suffix, proto = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+root, model, suffix, proto, replicate = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 base = pathlib.Path(root) / model
 tasks = ["grab_roller", "adjust_bottle", "place_phone_stand", "click_bell", "handover_block"]
 
-out = {"model": model, "protocol": proto, "tasks": {}}
+out = {"model": model, "protocol": proto, "replicate": replicate or None, "tasks": {}}
 for task in tasks:
     # 目录名 = <task> 或 <task>-hard；早期产物没有 -hard 后缀，两种都试
     cands = [base / f"{task}{suffix}", base / task]
