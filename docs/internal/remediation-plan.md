@@ -253,7 +253,7 @@ C 目录归位（会改路径，最后做）
 | A5 重复轮 | 🟡 管线就绪、待跑 | matrix 加 `replicate` 输入；产物/OBS 按轮次分目录；`make_leaderboard.py` 支持多轮合并（replicate_count + rate_min/max）；门禁强制多轮必带极差 |
 | B1 Hard | 🔄 运行中（run 45503556969，X-VLA 5 task） | `task_config: demo_randomized` 已确认；按实测吞吐 250ep ≈ 15.8h ≈ ¥521 |
 | B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
-| B3 ACT/DP 适配器 | 🟡 代码已完成、**未 smoke** | `scripts/model_servers/robotwin_policy.py` + 2 个 serve yaml + runbook；registry 标 `pending` |
+| B3 ACT/DP 适配器 | 🟡 代码+单测完成，**未 smoke** | 观测转换 16 项单测进 lint；镜像内实测：ACT 可导入、DP 缺 hydra/dill；registry 仍 `pending` |
 | C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
 | C2 结果 JSON → docs/data | ✅ 完成 | 19 JSON + deck → docs/decks；registry/leaderboard/schema 同步 |
 | C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |
@@ -323,3 +323,22 @@ python3 scripts/gates/check_reports.py && python3 leaderboard/scripts/check_lead
 
 **为什么现在不能标 verified**：verified 的含义是"本仓已跑出数"。适配器只是能加载，
 动作维度/相机通道/归一化这三处都可能错，必须 1ep smoke 才能定。
+
+---
+
+## 14. B3 依赖体检（2026-11-24 实测，非推测）
+
+在 `vla-eval-robotwin:0.8.0-ee-slim` 的 robotwin 环境里真跑了一遍导入：
+
+```
+ACT import ok: True True True          # get_model / encode_obs / reset_model
+DP  import FAIL: ModuleNotFoundError No module named 'hydra'
+dep ok: IPython / torch / cv2 / h5py
+dep MISSING: detr（顶层，但 ACT 走相对导入可用）
+diffusion_policy: vendored 在 policy/DP/diffusion_policy，dp_model.py 自己 append sys.path
+```
+
+结论：
+- **ACT 可直接用现成 robotwin 镜像起 serve**（依赖齐）
+- **DP 需要另烘镜像**（hydra + dill），不是改代码能解决的
+- 适配器已加 fail-fast：DP 导入失败时直接报"缺 hydra/dill，需另烘镜像"，不再抛裸异常

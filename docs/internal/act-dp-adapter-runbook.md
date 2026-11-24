@@ -3,7 +3,23 @@
 > 状态：**适配器已写、未验证**。2026-11-24 机器被 B1 Hard 评测占用，没跑过 smoke。
 > 目标：把"官方 ckpt → 本仓 harness"这条链路一次性打通，之后 R01 的 20 个 ckpt 都能直接上榜。
 
-## 0. 前置
+## 0. 依赖体检（2026-11-24 实测，`vla-eval-robotwin:0.8.0-ee-slim`）
+
+在 robotwin conda 环境里实际导入过官方 policy 包，结论：
+
+| 项 | 结果 | 含义 |
+|---|---|---|
+| `policy.ACT.deploy_policy` | ✅ 可导入（`get_model/encode_obs/reset_model` 都在） | ACT 走现成 robotwin 镜像即可 |
+| `policy.DP.deploy_policy` | ❌ `ModuleNotFoundError: hydra` | DP 需另烘镜像（还缺 `dill`） |
+| `diffusion_policy` | ✅ vendored 在 `policy/DP/diffusion_policy`，`dp_model.py` 自己 append 进 sys.path | 不用另装 |
+| `IPython` / `torch` / `cv2` / `h5py` | ✅ 都在 | ACT 的模块级 `e = IPython.embed` 只是引用，不阻塞导入 |
+| `detr`（顶层） | ❌ 但 ACT 内部 `from .detr.main` 相对导入可用 | 不影响 ACT |
+
+**因此**：
+- ACT 优先用 `vla-eval-robotwin:0.8.0-ee-slim` 起 serve（镜像里已有依赖）
+- DP 需要 `vla-serve-robotwin-dp`，把 `hydra`、`dill` 烘进去（V100 禁止现场 pip）
+
+## 0.1 前置
 
 - 0002 空闲（`nvidia-smi` 两卡都空；`docker ps` 没有 cogact-serve / kind_*）
 - 本地有 `vla-eval-robotwin:0.8.0-ee-slim` 与一个能起 serve 的镜像

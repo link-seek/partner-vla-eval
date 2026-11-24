@@ -131,9 +131,22 @@ class RoboTwinPolicyServer(PredictModelServer):
             sys.path.insert(0, self.robotwin_root)
 
         if self.policy_kind == "act":
-            from policy.ACT import deploy_policy as dp  # type: ignore
+            try:
+                from policy.ACT import deploy_policy as dp  # type: ignore
+            except ModuleNotFoundError as e:
+                raise RuntimeError(
+                    f"ACT 导入失败：缺 {e.name}。robotwin 镜像（0.8.0-ee-slim）实测可导入 ACT；"
+                    "若换镜像，需把 detr 等依赖烘进去（V100 禁止现场 pip）。"
+                ) from e
         else:
-            from policy.DP import deploy_policy as dp  # type: ignore
+            try:
+                from policy.DP import deploy_policy as dp  # type: ignore
+            except ModuleNotFoundError as e:
+                raise RuntimeError(
+                    f"DP 导入失败：缺 {e.name}。实测 0.8.0-ee-slim 的 robotwin 环境缺 hydra/dill"
+                    "（diffusion_policy 本身是 vendored，不用另装）；"
+                    "需另烘一个 DP serve 镜像，再切 serve_image。"
+                ) from e
 
         if self.policy_kind == "dp":
             # DP 的 get_model 从 ckpt_dir 约定拼路径，需要 task_name/expert_data_num 等
