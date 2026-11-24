@@ -54,6 +54,16 @@ jobs:
           docker cp payload-tmp:/payload/. .
           docker rm -f payload-tmp
           ls scripts/prepare_robotwin_data.sh
+      - name: 修复数据目录属主（历史 root 残留，runner 写不进）
+        env:
+          PAYLOAD_IMAGE: swr.cn-north-4.myhuaweicloud.com/link-seek/vla-payload:latest
+          DATA_ROOT: ${{ inputs.data_root }}
+        run: |
+          set -e
+          # 根因：早期手工以 root 建过 raw/ data/ 子目录 → runner 执行 mkdir 报 Permission denied。
+          # runner 无 sudo，所以借 docker 以 root 身份改属主（只动这一棵树）。
+          docker run --rm --user root -v /data:/data --entrypoint sh "$PAYLOAD_IMAGE" -c \
+            "mkdir -p '$DATA_ROOT' && chown -R $(id -u):$(id -g) '$DATA_ROOT' && ls -ld '$DATA_ROOT'"
       - name: Download + unpack + manifest
         env:
           TASKS: ${{ inputs.tasks }}

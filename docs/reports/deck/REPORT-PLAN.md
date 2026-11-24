@@ -121,7 +121,20 @@
 
 ---
 
-## 七、这次汇报**不**包含
+## 七、交付状态（2026-11-24 13:xx 更新）
+
+| 项 | 状态 |
+|---|---|
+| deck 正文 12 页 + 附录 2 页 | ✅ `docs/reports/deck/capability-deck.html` |
+| PPTX（全图版） | ✅ `docs/reports/deck/exports/capability-deck.pptx`（14 页，2.5MB） |
+| PPTX（可编辑版） | ✅ `docs/reports/deck/exports/capability-deck-editable.pptx`（271 文本框，512KB） |
+| 5 份 task 报告 | ✅ `docs/reports/xvla_robotwin-<task>-x50.json` |
+| 榜单终版 | ✅ `docs/tutorial/leaderboard.md`（含 CI 与覆盖差异披露） |
+| OBS 产物 | ✅ run 45266034430 上传 `Succeed 403 / Failed 0` |
+
+**未做（明确标为下一阶段）**：Hard 一轮（档二）、R01 微调轴（5b）。
+
+## 八、这次汇报**不**包含
 
 1. 基模排名结论（训练口径未固定）
 2. Hard 条件下的鲁棒性落差（除非做档二）
