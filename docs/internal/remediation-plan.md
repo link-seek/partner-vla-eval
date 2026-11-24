@@ -253,7 +253,14 @@ C 目录归位（会改路径，最后做）
 | A5 重复轮 | ⏳ 待 GPU | — |
 | B1 Hard | ⏳ 待批准（8–12h GPU） | 已确认 `demo_randomized.yml` 存在，非代码风险 |
 | B2/B3 | ⏳ 与 5b 一起 | — |
-| C1–C7 | ⏳ 未开始（会改路径） | 每步必跑 `check_paths.py` |
+| C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
+| C2 结果 JSON → docs/data | ✅ 完成 | 19 JSON + deck → docs/decks；registry/leaderboard/schema 同步 |
+| C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |
+| C4 configs 三分 | ✅ 完成 | benchmarks 13 / model_servers 9 / registry 1；脚本与 workflow 同步 |
+| C5 workflows 分类 | ✅ 完成（方案修正） | GitHub 不支持子目录 → `.github/workflows/README.md` 索引（25 个全覆盖） |
+| C6 上传回读 + idle-guard | ⏳ 未开始 | — |
+| C7 队列拆组 / job 链 | ⏳ 未开始 | — |
 | D 收口 | ✅ 部分 | #11 关、#14/#8 更新、2 分支删；D1 git 分叉待外部环境 fetch |
 
-**CI 证据**：run `45432762112` —— SYNTAX / VERSIONS / LEADERBOARD / PATHS / REPORTS / REGISTRY / COVERAGE 七道全绿。
+**CI 证据（C 线后半段）**：run `45438238470` 七道门全绿（C1 落地后）。
+**CI 证据（A 线）**：run `45432762112` —— SYNTAX / VERSIONS / LEADERBOARD / PATHS / REPORTS / REGISTRY / COVERAGE 七道全绿。
