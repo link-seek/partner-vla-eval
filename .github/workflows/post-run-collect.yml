@@ -42,10 +42,41 @@ jobs:
       - name: Show what we got
         run: |
           echo "run=${{ github.event.workflow_run.id }} conclusion=${{ github.event.workflow_run.conclusion }}"
-          ls -l /tmp/collected 2>/dev/null || echo "（无 artifact：该 run 早于 artifact 步骤，需人工开机取数）"
+          ls -l /tmp/collected 2>/dev/null || echo "（无 artifact）"
+
+      - name: Fallback — pull matrix/ from OBS
+        id: obs-fallback
+        # 兜底：早于 artifact 步骤的 run 没有 artifact，但 Upload to OBS 已把 matrix/ 传上去。
+        # 这里装 obsutil 拉回来，转成与 artifact 相同的形状（/tmp/collected/collected-*.json）。
+        if: steps.fetch.outcome != 'success'
+        continue-on-error: true
+        env:
+          OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          OBS_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          EP: https://obs.cn-north-4.myhuaweicloud.com
+          SRC: obs://so101-sim-pipeline/eval/leaderboard
+        run: |
+          set -e
+          curl -sSL "https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz" -o /tmp/obsutil.tgz
+          tar -xzf /tmp/obsutil.tgz -C /tmp
+          OBSUTIL=$(ls -d /tmp/obsutil_linux_amd64_*/obsutil | head -1); chmod +x "$OBSUTIL"
+          mkdir -p /tmp/collected
+          for proto in hard easy; do
+            echo "--- try $proto"
+            "$OBSUTIL" cp "$SRC/$proto/matrix/" ./matrix -r -f -e "$EP" -i "$OBS_AK" -k "$OBS_SK" 2>&1 | tail -3 || true
+            [ -d matrix ] || continue
+            for m in $(ls matrix); do
+              [ -d "matrix/$m" ] || continue
+              out="/tmp/collected/collected-${m}-${proto}.json"
+              bash scripts/data/collect_matrix.sh "$m" "$proto" matrix > "$out" 2>/dev/null || true
+              python3 scripts/data/drop_if_empty.py "$out" || true
+            done
+            ls -l /tmp/collected || true
+            [ -n "$(ls /tmp/collected 2>/dev/null)" ] && break
+          done
 
       - name: Backfill reports + leaderboard
-        if: steps.fetch.outcome == 'success'
+        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
         run: |
           set -e
           shopt -s nullglob
@@ -63,13 +94,13 @@ jobs:
           [ "$found" = 1 ] || { echo "artifact 里没有 collected-*.json"; exit 1; }
 
       - name: Gates
-        if: steps.fetch.outcome == 'success'
+        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
         run: |
           python3 scripts/gates/check_reports.py
           python3 leaderboard/scripts/check_leaderboard.py
 
       - name: Commit results
-        if: steps.fetch.outcome == 'success'
+        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
         run: |
           set -e
           git config user.name "post-run-collect"
