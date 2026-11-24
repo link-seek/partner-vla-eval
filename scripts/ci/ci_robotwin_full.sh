@@ -9,7 +9,7 @@
 #   RW_TASK_CONFIG  demo_clean（Easy，默认）| demo_randomized（Hard）
 # 输出：results/robotwin-<chunk>/aggregate.json + recording sqlite，OBS 按块累积。
 set -e
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 WORK="$PWD"
 source "$WORK/scripts/ci/lib/common.sh"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"

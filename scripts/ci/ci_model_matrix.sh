@@ -10,7 +10,7 @@
 #   MODEL_REGISTRY 默认 configs/registry/model-registry.json
 # 约定：matrix/ 独立于 results/（results/ 每轮会被 results_fresh 清空）。
 set -e
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 WORK="$PWD"
 REG="${MODEL_REGISTRY:-configs/registry/model-registry.json}"
 MODELS="${MM_MODELS:?MM_MODELS 必填（逗号分隔 registry key）}"

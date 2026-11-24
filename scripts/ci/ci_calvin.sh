@@ -3,7 +3,7 @@
 # serve 用 configs/model_servers/serve-cogact-calvin.yaml（Dexmal/calvin-db-cogact 单仓，chunk 7）。
 # 5 sequences，只验链路。
 set -e
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 WORK="$PWD"
 SERVE_IMAGE="${SERVE_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"

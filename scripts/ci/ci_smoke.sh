@@ -2,7 +2,7 @@
 # CI smoke: host 编排 serve(verify 容器, GPU0) + run(molmo 镜像当 client)。
 # serve 用自研配置 configs/model_servers/serve-pi05.yaml (Franka 相机映射), 不用上游 LIBERO 版。
 set -e
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 WORK="$PWD"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 MOLMO_IMAGE="ghcr.io/allenai/vla-evaluation-harness/molmospaces:latest"

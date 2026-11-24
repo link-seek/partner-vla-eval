@@ -5,7 +5,7 @@
 # V100 适配（历史记录，現已烘进镜像）：
 # - torch==2.6.0 cu126 + transformers 4.46.3 + fp16（见 serve-cogact Dockerfile）。
 set -e
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 WORK="$PWD"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
 ASSETS_MOUNT="${ASSETS_MOUNT:-/data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro}"

@@ -68,6 +68,20 @@ jobs:
           echo "coverage negative case OK (refused with 2)"
           python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 \
             --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
+      - name: Script cd-depth guard (scripts in subdirs must go up 2 levels)
+        # C1 回归（2026-11-24）：脚本下沉到 scripts/ci/ 后，`cd "$(dirname "$0")/.."`
+        # 只到 scripts/，导致 configs/registry/model-registry.json 找不到、跑批立刻失败。
+        # lint 只做 bash -n 抓不到这种运行期路径错误，故加静态断言。
+        run: |
+          fail=0
+          for f in scripts/ci/*.sh scripts/data/*.sh; do
+            if grep -q 'cd "$(dirname "$0")/\.\.\"' "$f"; then
+              echo "FAIL: $f 用 /.. 上溯（在子目录里只到 scripts/，必须用 /../..）"
+              fail=1
+            fi
+          done
+          [ "$fail" = 0 ] && echo "CD-DEPTH OK"
+          exit $fail
       - name: OBS uploads must not swallow failures
         # C6 回归门：`obsutil cp ... || true` 会让"上传失败但产物只留在机器上"变成静默事故。
         # 现在的写法是 cp 不带 || true + 回读计数，见各 workflow 的 Upload to OBS 步骤。

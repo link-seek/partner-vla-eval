@@ -116,6 +116,9 @@ jobs:
           ASSETS_MOUNT: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
           RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
         run: |
+          # 清掉上一轮遗留的 matrix/（否则旧产物会被传到本轮 protocol 目录，
+          # 2026-11-24 把 easy 的 403 个对象传进了 leaderboard/hard/）
+          rm -rf matrix
           mkdir -p matrix
           chmod +x scripts/ci/ci_model_matrix.sh
           bash scripts/ci/ci_model_matrix.sh 2>&1 | tee matrix/ci.log; CODE=${PIPESTATUS[0]}

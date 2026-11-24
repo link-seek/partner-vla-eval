@@ -2,7 +2,7 @@
 # LIBERO smoke: host 编排 serve(pi05) + run(SWR libero 镜像当 client)。
 # serve 用 $SERVE_YAML（默认 serve-pi05-libero.yaml），run 用 $RUN_YAML。
 set -e
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 WORK="$PWD"
 LIBERO_IMAGE="${LIBERO_IMAGE:-swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-libero:0.8.0}"
 VERIFY_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-verify:0.1"
