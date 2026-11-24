@@ -46,6 +46,9 @@ jobs:
         # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。
         # 计划中/上游仓路径登记在 scripts/paths_allowlist.txt。
         run: python3 scripts/check_paths.py
+      - name: Report self-consistency (mean_success vs success/n, image present)
+        # A4：拦住"报告写 0.8.0 而 aggregate 是 0.0.0"、"mean_success 与 success/n 对不上"。
+        run: python3 scripts/check_reports.py
       - name: Model registry reproducibility gate
         # A1：status=verified 必须能钉住权重（ckpt_revision 40-hex），否则复现必翻车。
         run: python3 scripts/check_registry.py
