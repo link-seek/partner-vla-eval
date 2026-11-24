@@ -340,6 +340,40 @@
     </div>
   </section>
 
+  <!-- A1 -->
+  <section class="slide" data-screen-label="A1 附录 数据明细">
+    <div class="eyebrow">附录 A1 · 数据明细</div>
+    <h2>每格都带 n、errors、步数与 95% 置信区间</h2>
+    <table>
+      <tr><th>模型</th><th>task</th><th>k/n</th><th>点估计</th><th>95% Wilson CI</th><th>steps 均值</th><th>errors</th></tr>
+      <tr><td>X-VLA</td><td>grab_roller</td><td class="num">49/50</td><td class="num">98.0%</td><td class="num">[89.5, 99.6]</td><td class="num">104.6</td><td class="num">0</td></tr>
+      <tr><td>X-VLA</td><td>adjust_bottle</td><td class="num">49/50</td><td class="num">98.0%</td><td class="num">[89.5, 99.6]</td><td class="num">122.2</td><td class="num">0</td></tr>
+      <tr><td>X-VLA</td><td>place_phone_stand</td><td class="num">48/50</td><td class="num">96.0%</td><td class="num">[86.5, 98.9]</td><td class="num">124.1</td><td class="num">0</td></tr>
+      <tr><td>X-VLA</td><td>click_bell</td><td class="num">48/50</td><td class="num">96.0%</td><td class="num">[86.5, 98.9]</td><td class="num">77.1</td><td class="num">0</td></tr>
+      <tr><td>CogACT</td><td>grab_roller</td><td class="num">45/50</td><td class="num">90.0%</td><td class="num">[78.6, 95.7]</td><td class="num">90.0</td><td class="num">0</td></tr>
+      <tr><td>CogACT</td><td>adjust_bottle</td><td class="num">35/35</td><td class="num">100%</td><td class="num">[90.1, 100]</td><td class="num">94.5</td><td class="num">15 坏种已剔</td></tr>
+      <tr><td>CogACT</td><td>place_phone_stand</td><td class="num">8/50</td><td class="num">16.0%</td><td class="num">[8.3, 28.5]</td><td class="num">—</td><td class="num">0</td></tr>
+    </table>
+    <p class="sub" style="margin-top:16px">n=50 时 Wilson 区间宽约 ±5–10pp；<strong>差异小于 ±7pp 不下结论</strong>。</p>
+  </section>
+
+  <!-- A2 -->
+  <section class="slide" data-screen-label="A2 附录 复现参数">
+    <div class="eyebrow">附录 A2 · 复现</div>
+    <h2>同样的参数，能跑出同样的数</h2>
+    <table>
+      <tr><th style="width:26%">项</th><th>取值</th></tr>
+      <tr><td>benchmark 镜像</td><td><code>vla-eval-robotwin:0.8.0-ee-slim</code></td></tr>
+      <tr><td>serve 镜像</td><td><code>vla-serve-cogact:0.8.0</code> / <code>vla-serve-xvla:0.8.0-ee16</code></td></tr>
+      <tr><td>机器</td><td>2×V100-32GB，serve=GPU0 / env=GPU1</td></tr>
+      <tr><td>种子</td><td>bundled，skip_expert=false，从 100000 起</td></tr>
+      <tr><td>分片</td><td>CogACT 8 / X-VLA 4（EE 8 分片 OOM）</td></tr>
+      <tr><td>集数</td><td>每 task 50 ep，task_config=demo_clean</td></tr>
+      <tr><td>产物</td><td><code>obs://so101-sim-pipeline/eval/leaderboard/</code></td></tr>
+      <tr><td>workflow</td><td><code>model-matrix.yml</code>（自动开关机）</td></tr>
+    </table>
+  </section>
+
 </div>
 <div class="foot">
   <span id="label">01 封面</span>
