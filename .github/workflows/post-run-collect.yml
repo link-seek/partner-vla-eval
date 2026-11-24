@@ -1,0 +1,83 @@
+name: Post-run Collect (matrix → reports → leaderboard)
+
+# 目的：Model Matrix 跑完自动收数、回填报告、更新榜单并提交。
+# 为什么需要：跑完 stop-ecs 会关机，aggregate 只在 OBS 私桶；而容器里没有 obsutil。
+# 所以由 matrix workflow 把汇总挂成 Actions artifact，本 workflow 从 artifact 取。
+#
+# 只处理带 artifact 的 run（2026-11-24 之后）。更早的 run 需人工开机取数。
+
+on:
+  workflow_run:
+    workflows: ["Model Matrix (base models x exam tasks)"]
+    types: [completed]
+
+concurrency:
+  group: post-run-collect
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  collect:
+    # 失败也要收（部分 task 可能已出数），但不能因为 cancelled 白跑
+    if: github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Fetch collected summary artifact
+        id: fetch
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/collected
+
+      - name: Show what we got
+        run: |
+          echo "run=${{ github.event.workflow_run.id }} conclusion=${{ github.event.workflow_run.conclusion }}"
+          ls -l /tmp/collected 2>/dev/null || echo "（无 artifact：该 run 早于 artifact 步骤，需人工开机取数）"
+
+      - name: Backfill reports + leaderboard
+        if: steps.fetch.outcome == 'success'
+        run: |
+          set -e
+          shopt -s nullglob
+          found=0
+          for f in /tmp/collected/*/collected-*.json /tmp/collected/collected-*.json; do
+            [ -f "$f" ] || continue
+            found=1
+            echo "=== $f"
+            proto=$(python3 -c "import json,sys; print(json.load(open('$f'))['protocol'])")
+            echo "protocol=$proto"
+            python3 scripts/data/gen_reports.py "$f" "$proto"
+            python3 scripts/data/make_leaderboard.py "$f" "$proto" \
+              --run "${{ github.event.workflow_run.id }}"
+          done
+          [ "$found" = 1 ] || { echo "artifact 里没有 collected-*.json"; exit 1; }
+
+      - name: Gates
+        if: steps.fetch.outcome == 'success'
+        run: |
+          python3 scripts/gates/check_reports.py
+          python3 leaderboard/scripts/check_leaderboard.py
+
+      - name: Commit results
+        if: steps.fetch.outcome == 'success'
+        run: |
+          set -e
+          git config user.name "post-run-collect"
+          git config user.email "noreply@link-seek.local"
+          git add docs/data leaderboard
+          if git diff --cached --quiet; then
+            echo "无变化，不提交"
+          else
+            git commit -m "chore(auto): 收数 run ${{ github.event.workflow_run.id }} → 报告 hard_success/gap + 榜单"
+            git push
+          fi
