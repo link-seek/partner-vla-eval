@@ -35,6 +35,12 @@ jobs:
           python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + glob.glob('.github/actions/*/action.yml')]; print('YAML OK')"
       - name: versions.yaml consistency (no silent pin drift)
         run: python3 scripts/check_versions.py
+      - name: Leaderboard schema + report reconciliation
+        # 对照上游 leaderboard-validate.yml：榜单数据必须机器可验。
+        # 额外两条本仓规则：数字要与 docs/reports 对账；shared/finetuned 不许混排。
+        run: |
+          python3 -m pip install --quiet jsonschema
+          python3 scripts/check_leaderboard.py
       - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
         run: |
           ! grep -rn "rm -rf /\s*$\|rm -rf /\*" scripts/ || { echo "DANGEROUS rm FOUND"; exit 1; }

@@ -1,0 +1,25 @@
+{
+  "versions": {
+    "harness": "0.0.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0"
+  },
+  "machine": "V100-32GB ×2 (cn-north-4, 0002)",
+  "seeds": "bundled（skip_expert=false，从 100000 起）",
+  "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/45188046221",
+  "report_version": "v1 (docs/tutorial/leaderboard.md)",
+  "hard_success": null,
+  "gap": null,
+  "model": "Dexmal/robotwin-db-cogact (fp16, qpos 14D)",
+  "task": "RobotWin place_phone_stand x50（Easy / demo_clean，本考场 5 task 子集）",
+  "mean_success": 0.12,
+  "n": 50,
+  "success": 6,
+  "errors": 0,
+  "steps_success": {
+    "mean": 365.1,
+    "med": null
+  },
+  "date": "2026-11-23",
+  "note": "零 error。另一轮 8/50=16%，差 4pp 在噪声带内，本轮为准。"
+}
