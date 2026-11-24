@@ -56,7 +56,7 @@
       "action_spec": "EE 16D（quat）",
       "precision": "fp32",
       "status": "verified",
-      "evidence": "easy50 全 50 task×100ep = 3328/5000 = 66.6%（docs/reports/xvla_robotwin-easy50.json，run 41377057472，零 error）；本考场 5 task 子集 465/500 = 93.0%",
+      "evidence": "easy50 全 50 task×100ep = 3328/5000 = 66.6%（docs/data/xvla_robotwin-easy50.json，run 41377057472，零 error）；本考场 5 task 子集 465/500 = 93.0%",
       "official_ref": "官方 RoboTwin2 权重，论文约 66.7%",
       "license": "见上游 ckpt 卡片",
       "note": "单 ckpt 全 task；EE 需 fast_init=false + 资产挂载（8 分片 OOM，用 4）；必须用 0.8.0-ee16 变体（0.8.0 是旧适配器，返回 20D → benchmark 报 \"takes a 16D action, got 20D\"）",

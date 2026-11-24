@@ -18,7 +18,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16",
       "harness_version": "0.0.0",
-      "report": "docs/reports/xvla_robotwin-grab_roller-x50.json"
+      "report": "docs/data/xvla_robotwin-grab_roller-x50.json"
     },
     {
       "model": "x-vla-robotwin2",
@@ -35,7 +35,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16",
       "harness_version": "0.0.0",
-      "report": "docs/reports/xvla_robotwin-adjust_bottle-x50.json"
+      "report": "docs/data/xvla_robotwin-adjust_bottle-x50.json"
     },
     {
       "model": "x-vla-robotwin2",
@@ -52,7 +52,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16",
       "harness_version": "0.0.0",
-      "report": "docs/reports/xvla_robotwin-place_phone_stand-x50.json"
+      "report": "docs/data/xvla_robotwin-place_phone_stand-x50.json"
     },
     {
       "model": "x-vla-robotwin2",
@@ -69,7 +69,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16",
       "harness_version": "0.0.0",
-      "report": "docs/reports/xvla_robotwin-click_bell-x50.json"
+      "report": "docs/data/xvla_robotwin-click_bell-x50.json"
     },
     {
       "model": "x-vla-robotwin2",
@@ -86,7 +86,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16",
       "harness_version": "0.0.0",
-      "report": "docs/reports/xvla_robotwin-handover_block-x50.json"
+      "report": "docs/data/xvla_robotwin-handover_block-x50.json"
     },
     {
       "model": "db-cogact",
@@ -103,7 +103,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0",
       "harness_version": "0.0.0",
-      "report": "docs/reports/cogact_robotwin-grab_roller-x50.json",
+      "report": "docs/data/cogact_robotwin-grab_roller-x50.json",
       "note": "历史轮次，与 X-VLA 非同一 run"
     },
     {
@@ -121,7 +121,7 @@
       "bench_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0",
       "harness_version": "0.0.0",
-      "report": "docs/reports/cogact_robotwin-adjust_bottle-x50.json"
+      "report": "docs/data/cogact_robotwin-adjust_bottle-x50.json"
     },
     {
       "model": "db-cogact",
@@ -139,7 +139,7 @@
       "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0",
       "harness_version": "0.0.0",
       "note": "另一轮 8/50=16%，差 4pp 在噪声带内，本轮为准",
-      "report": "docs/reports/cogact_robotwin-place_phone_stand-x50.json"
+      "report": "docs/data/cogact_robotwin-place_phone_stand-x50.json"
     }
   ]
 }

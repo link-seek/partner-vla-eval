@@ -27,6 +27,11 @@ TOP_DIRS = ("scripts/", "configs/", "docker/", "docs/", "leaderboard/", ".github
 
 # 反引号内容；只取第一段（避免 `a/b: 说明` 这种）
 PAT = re.compile(r"`([^`\n]+)`")
+# 只校验指向"本仓"的链接：https://github.com/link-seek/partner-vla-eval/(blob|tree)/main/<path>
+# 上游仓（allenai/*）的路径不归我们管，不能误判。
+LINK_PAT = re.compile(
+    r"github\.com/link-seek/partner-vla-eval/(?:blob|tree)/main/([A-Za-z0-9_.\-/]+)"
+)
 # 允许出现但不当路径的形态
 SKIP_PAT = re.compile(r"(https?://|\*|<|>|\{|\}|\$|\s{2,}|\.\.\.|…)")
 
@@ -67,6 +72,16 @@ def main() -> int:
         except UnicodeDecodeError:
             continue
         for lineno, line in enumerate(lines, 1):
+            # 先查 "…/blob/main/<path>" 形式的链接（C2/C3 移文件时最容易断的就是这类）
+            for lm in LINK_PAT.finditer(line):
+                cand = lm.group(1).rstrip('/').split(':')[0].strip()
+                if not cand or cand.startswith(("http", "README")):
+                    continue
+                checked += 1
+                if allowed(cand, patterns):
+                    continue
+                if not (ROOT / cand).exists():
+                    broken.append((str(rel), cand, lineno))
             for m in PAT.finditer(line):
                 cand = m.group(1).strip()
                 if not cand.startswith(TOP_DIRS):

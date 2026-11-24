@@ -24,7 +24,7 @@
 | 04 | 支柱一 执行 | 一条命令派出去，无人值守跑完 | 5 行表：分工/开关机/离线/队列/收产物 | run 45174481686、operator/01-03 |
 | 05 | 支柱二 方法 | 每个旋钮值多少分 | 栈差异 5 行表（镜像/资产/精度/分片/种子） | `explanation/01-stack-effects.md` |
 | 06 | 支柱三 保真 | 尺子错了能不能修 | #166→#168 合入数据；#169；本仓 20D→16D | `gh api` PR #168 |
-| 07 | 支柱四 评价 | 单配置下多少分 | CogACT / X-VLA 已出数 + 边界声明 | `docs/reports/*.json` |
+| 07 | 支柱四 评价 | 单配置下多少分 | CogACT / X-VLA 已出数 + 边界声明 | `docs/data/*.json` |
 | 08 | 支柱五-a 榜单 | 同栈同种子，但覆盖不同 | 194/200 KPI + 5 task × 2 模型表 + 覆盖率 3/5 vs 5/5 | 本次 run 45266034430 |
 | 09 | 支柱五-b 微调轴 | 下一阶段，不在本次 | 官方 Table 3 三档 + 我们的 R01 方案 + 为什么单列 | 论文 §4.3、R01 文档 |
 | 10 | 进度与缺口 | 五根柱子在哪 | 6 行状态表（含每条缺口） | 全篇汇总 |
@@ -44,11 +44,11 @@
 | 材料 | 位置 |
 |---|---|
 | 栈差异对照表 | `docs/tutorial/explanation/01-stack-effects.md` |
-| 12 份历史报告 JSON | `docs/reports/*.json` |
+| 12 份历史报告 JSON | `docs/data/*.json` |
 | 榜单机制与准入三条 | `docs/tutorial/leaderboard.md` |
 | R01 方案 | `docs/reports/R01-training-data-axis.md` |
 | 能力地图帖 | Discussion #18 |
-| deck 初稿 | `docs/reports/deck/capability-deck.html` |
+| deck 初稿 | `docs/decks/capability-deck.html` |
 
 ### 待补（按阻塞程度）
 
@@ -125,9 +125,9 @@
 
 | 项 | 状态 |
 |---|---|
-| deck 正文 12 页 + 附录 2 页 | ✅ `docs/reports/deck/capability-deck.html` |
-| PPTX（全图版） | ✅ `docs/reports/deck/exports/capability-deck.pptx`（14 页，2.5MB） |
-| PPTX（可编辑版） | ✅ `docs/reports/deck/exports/capability-deck-editable.pptx`（271 文本框，512KB） |
+| deck 正文 12 页 + 附录 2 页 | ✅ `docs/decks/capability-deck.html` |
+| PPTX（全图版） | ✅ `docs/decks/exports/capability-deck.pptx`（14 页，2.5MB） |
+| PPTX（可编辑版） | ✅ `docs/decks/exports/capability-deck-editable.pptx`（271 文本框，512KB） |
 | 5 份 task 报告 | ✅ `docs/reports/xvla_robotwin-<task>-x50.json` |
 | 榜单终版 | ✅ `docs/tutorial/leaderboard.md`（含 CI 与覆盖差异披露） |
 | OBS 产物 | ✅ run 45266034430 上传 `Succeed 403 / Failed 0` |

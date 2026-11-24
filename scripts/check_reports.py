@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-REPORTS = ROOT / "docs" / "reports"
+DATA = ROOT / "docs" / "data"
 LB = ROOT / "leaderboard" / "leaderboard.json"
 
 REQUIRED = ("model", "task", "n", "errors", "versions", "machine", "seeds", "date")
@@ -84,7 +84,7 @@ def check_one(path: Path) -> dict | None:
 
 
 def main() -> int:
-    files = sorted(glob.glob(str(REPORTS / "*.json")))
+    files = sorted(glob.glob(str(DATA / "*.json")))
     results = {}
     for f in files:
         d = check_one(Path(f))

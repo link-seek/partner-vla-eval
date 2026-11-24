@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "partner-vla-eval leaderboard entries",
-  "description": "一行一个 (model × task × protocol)。数字必须能在 docs/reports/*.json 里找到；缺 ckpt_revision 或 n/success 不自洽即红。",
+  "description": "一行一个 (model × task × protocol)。数字必须能在 docs/data/*.json 里找到；缺 ckpt_revision 或 n/success 不自洽即红。",
   "type": "object",
   "required": ["last_updated", "bench", "protocol", "entries"],
   "additionalProperties": false,
@@ -53,7 +53,7 @@
           "serve_image": {"type": "string", "minLength": 3},
           "digest": {"type": ["string", "null"], "description": "镜像 sha256:...，未锁时为 null"},
           "harness_version": {"type": ["string", "null"]},
-          "report": {"type": "string", "description": "对应 docs/reports/*.json 路径"},
+          "report": {"type": "string", "description": "对应 docs/data/*.json 路径"},
           "note": {"type": "string"}
         }
       }
