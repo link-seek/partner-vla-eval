@@ -251,7 +251,7 @@ C 目录归位（会改路径，最后做）
 | A3 覆盖检查前置 | ✅ 完成 | `check_coverage.py`；`model-matrix.yml` 新增 Coverage check；CI 反例返回 2 |
 | A4 报告自洽 | ✅ 完成 | `check_reports.py`（19 份报告，mean_success vs success/n、镜像必填） |
 | A5 重复轮 | ⏳ 待 GPU | — |
-| B1 Hard | ⏳ 待批准（8–12h GPU） | 已确认 `demo_randomized.yml` 存在，非代码风险 |
+| B1 Hard | 🔄 运行中（run 45503556969，X-VLA 5 task） | `task_config: demo_randomized` 已确认；按实测吞吐 250ep ≈ 15.8h ≈ ¥521 |
 | B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
 | B3 ACT/DP 适配器 | ⏳ 需开机在 0002 镜像内开发 | — |
 | C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
@@ -265,3 +265,25 @@ C 目录归位（会改路径，最后做）
 
 **CI 证据（C 线后半段）**：run `45438238470` 七道门全绿（C1 落地后）。
 **CI 证据（A 线）**：run `45432762112` —— SYNTAX / VERSIONS / LEADERBOARD / PATHS / REPORTS / REGISTRY / COVERAGE 七道全绿。
+
+---
+
+## 11. 估算修正（2026-11-24）
+
+早先给 B1 报「8–12h / ¥260–390」是按主观节奏估的，**与实测吞吐不符**，此处更正：
+
+| 依据 | 数值 |
+|---|---|
+| 实测 run 45266034430（Easy，5 task × 50ep = 250 ep） | 15.8h |
+| 吞吐 | **15.78 ep/h**（4 分片） |
+| Hard 单模型 5 task（250 ep） | ≈ 15.8h ≈ **¥521** |
+| Hard 双模型 5 task（500 ep） | ≈ 31.7h ≈ **¥1042** |
+| A5 重复轮单模型（250 ep） | ≈ 15.8h ≈ **¥521** |
+
+所以 B1 实际按 **单模型（X-VLA）先跑**，成本约 ¥520，而不是原估的 ¥260–390；CogACT 的 Hard 待 X-VLA 跑完再决定。
+
+### C1 回归（已修）
+
+`scripts/` 下沉到 `scripts/ci/` 后，`cd "$(dirname "$0")/.."` 只到 `scripts/`，
+导致 `configs/registry/model-registry.json` 找不到、跑批立即失败（run 45502286025）。
+已全部改成 `/../..`，并在 lint 加 `cd-depth` 守卫（bash -n 抓不到这类运行期路径错误）。
