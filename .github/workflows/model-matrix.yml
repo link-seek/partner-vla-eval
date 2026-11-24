@@ -89,6 +89,11 @@ jobs:
           docker cp payload-tmp:/payload/. .
           docker rm -f payload-tmp
           ls scripts/ci_robotwin_full.sh configs/model-registry.json docker/versions.yaml
+      - name: Coverage check (fail fast, no GPU burn)
+        # A3：缺格模型（如 CogACT 只有 4 个头）在 dispatch 时就拒跑，
+        # 不再等预热报 "Fetching 0 files" 才发现。
+        run: |
+          python3 scripts/check_coverage.py             --models "${{ inputs.models }}"             --tasks "${{ inputs.tasks }}"
       - name: Run matrix
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

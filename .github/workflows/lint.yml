@@ -46,6 +46,25 @@ jobs:
         # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。
         # 计划中/上游仓路径登记在 scripts/paths_allowlist.txt。
         run: python3 scripts/check_paths.py
+      - name: Model registry reproducibility gate
+        # A1：status=verified 必须能钉住权重（ckpt_revision 40-hex），否则复现必翻车。
+        run: python3 scripts/check_registry.py
+      - name: Coverage gate (must refuse partial models)
+        # A3：缺格模型 dispatch 时就拒跑，不等到预热报 "Fetching 0 files"。
+        # 这里同时测反例（CogACT 只有 3 头）与正例（X-VLA 全 5）。
+        run: |
+          set +e
+          python3 scripts/check_coverage.py --models db-cogact \
+            --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
+          rc=$?
+          set -e
+          if [ "$rc" != "2" ]; then
+            echo "FAIL: 缺格模型应返回 2（拒跑），实际 $rc" >&2
+            exit 1
+          fi
+          echo "coverage negative case OK (refused with 2)"
+          python3 scripts/check_coverage.py --models x-vla-robotwin2 \
+            --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
       - name: No direct $WORKSPACE-mutating leftovers (results/ hygiene guard)
         run: |
           ! grep -rn "rm -rf /\s*$\|rm -rf /\*" scripts/ || { echo "DANGEROUS rm FOUND"; exit 1; }

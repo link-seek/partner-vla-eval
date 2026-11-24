@@ -6,9 +6,10 @@
   "success": 39,
   "errors": 0,
   "versions": {
-    "harness": "0.8.0",
+    "harness": "0.0.0",
     "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
-    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16"
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-xvla:0.8.0-ee16",
+    "harness_note": "aggregate 实测值；上游 __version__ 未注入，真实栈版本以 benchmark_image tag 为准"
   },
   "machine": "V100-32GB ×2 (cn-north-4, 0002)",
   "seeds": "bundled（skip_expert=false，从 100000 起）",

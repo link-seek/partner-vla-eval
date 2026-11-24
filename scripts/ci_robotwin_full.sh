@@ -112,6 +112,7 @@ if [ "${RW_PREWARM:-cogact}" = "none" ]; then
   echo "prewarm skipped"
 else
 FIRST_TASK=$(echo "${RW_TASKS:-grab_roller}" | cut -d, -f1)
+echo "ckpt: ${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}@${RW_CKPT_REV:-<main>}"
 for i in 1 2 3; do
   # 纯 CLI 预热：huggingface-cli 下载 + ls 定位 snapshot（不写 python）
   INC=()
@@ -124,14 +125,16 @@ for i in 1 2 3; do
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    "$VERIFY_IMAGE" hf-download download Dexmal/robotwin-db-cogact "${INC[@]}" > /tmp/prewarm.log 2>&1; then
+    "$VERIFY_IMAGE" hf-download download "${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}" \
+      ${RW_CKPT_REV:+--revision "$RW_CKPT_REV"} "${INC[@]}" > /tmp/prewarm.log 2>&1; then
     # snapshot 即缓存下最新子目录（宿主/容器同挂载，路径对应）
-    SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/"*/ 2>/dev/null | head -n 1)
+    CACHE_NAME="models--$(echo "${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}" | tr '/' '-')"
+    SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots/"*/ 2>/dev/null | head -n 1)
     if [ -n "$SNAP_HOST" ] && [ -d "$SNAP_HOST$FIRST_TASK" ]; then
-      SNAP="/root/.cache/huggingface/hub/models--Dexmal--robotwin-db-cogact/snapshots/$(basename "$SNAP_HOST")"
+      SNAP="/root/.cache/huggingface/hub/$CACHE_NAME/snapshots/$(basename "$SNAP_HOST")"
       echo "snapshot: $SNAP"; break
     fi
-    echo "snapshot 目录异常"; ls "$WORK/.cache/hf/hub/models--Dexmal--robotwin-db-cogact/snapshots/" 2>/dev/null || true
+    echo "snapshot 目录异常"; ls "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots/" 2>/dev/null || true
   fi
   tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   sleep 15
