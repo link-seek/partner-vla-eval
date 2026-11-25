@@ -8,7 +8,11 @@ name: ops
 #   tailnet-join              → docs/howto/tailnet-join.md
 #   audit                     → 只读审计（du / docker images / nvidia-smi）
 #
-# 为什么跑在 hw21：它到 V100 的 22 通，且有 hcloud CLI；V100 本身不再需要有 workflow。
+# runner 选择（2026-11-25 实测后确定）：
+#   audit        → V100-0002（本机只读；也可 V100-0001）
+#   repair-0001  → V100-0002（到 0001 的 22 通）
+#   repair-0002  → V100-0001（**不能**在 0002 自己身上重配 agent，会把自己踢下线）
+#   tailnet-join → 需要一个在 tailnet 上的 runner（hw41/hw21）。当前无在线节点 = 已知缺口。
 on:
   workflow_dispatch:
     inputs:
@@ -25,6 +29,10 @@ on:
         description: "tailnet-join 用：V100 在 tailnet 里的主机名"
         required: false
         default: "v100-0002"
+      runner:
+        description: "在哪个 self-hosted runner 上执行（标签）。默认 V100-0002；repair-0002 必须换成 V100-0001（不能在目标机自己身上重配 agent）"
+        required: false
+        default: "V100-0002"
 
 permissions:
   contents: read
@@ -35,7 +43,9 @@ concurrency:
 
 jobs:
   run:
-    runs-on: [self-hosted, hw21]
+    # 2026-11-25 实测：原 hw21 runner 已不在线（组织级只剩 ecs-0002，仓级只剩 ecs-0001）。
+    # 所以 runner 改成输入参数，默认 V100-0002；约束见 docs/howto/repair-runner.md。
+    runs-on: [self-hosted, "${{ inputs.runner }}"]
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
