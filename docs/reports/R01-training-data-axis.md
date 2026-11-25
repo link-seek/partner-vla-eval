@@ -181,3 +181,40 @@ S3 训练 3–4 天后要立刻进 S4 评测，所以先确认"训练写出来�
 DP 的保存走 hydra workspace（`diffusion_policy/workspace/base_workspace.py` 的 `torch.save`），
 而 serve 侧按 `<task>-<setting>-<num>-<seed>/<num>.ckpt` 拼路径。两者是否一致**尚未实测**，
 S3 首次训练后必须先 `ls` 确认，再决定是否软链；不要等 20 个 ckpt 都训完才发现路径对不上。
+
+---
+
+## 13. S3 训练冒烟（2026-11-25，GPU0 实测 1 epoch）
+
+在 6–7 天长跑前，用 click_bell clean_50 跑了一遍完整入口：数据转换 → 1 epoch 训练 → 产物检查。
+
+### 三个前置条件（都踩过）
+
+| # | 问题 | 现象 | 解法 |
+|---|---|---|---|
+| 1 | 训练镜像缺依赖 | `ModuleNotFoundError: einops`，换 DP 镜像后 `dm_control` | 构建期装：`docker/Dockerfile.robotwin-train`（`train deps OK`） |
+| 2 | 原始数据布局 ≠ 训练布局 | `process_data.py` 找 `../../data/<task>/<config>/data/episode*.hdf5` | 软链 `aloha-agilex_clean_50` 到该路径，再跑 `process_data.py <task> <config> <num>` |
+| 3 | DataLoader worker 崩 | `DataLoader worker (pid(s) 110) exited unexpectedly` | 训练容器加 `--ipc=host`（默认 64MB /dev/shm 不够） |
+
+另外：镜像里的 `SIM_TASK_CONFIGS.json` 是 **0 字节**；`process_data.py` 会为每个 task 写入配置，所以每个训练容器都要先跑它（或挂载生成好的 JSON）。
+
+### 实测输出
+
+```
+process_data: proccess 49 success!
+number of parameters: 83.90M
+Epoch 0: Train loss 53.67689 | Val loss 73.86844
+ckpt:
+  policy_last.ckpt          321M
+  policy_best.ckpt          321M
+  policy_epoch_0_seed_0.ckpt 321M
+  policy_epoch_1_seed_0.ckpt 321M
+  dataset_stats.pkl         5.7K
+```
+
+`policy_last.ckpt` + `dataset_stats.pkl` 与 serve 契约一致（第 12 节），可直接进 S4。
+
+### 磁盘/时间估算
+
+- 单 ckpt 321MB；一次训练至少留 5 个文件 ≈ 1.6GB → 20 个 ckpt ≈ **32GB**（`/data` 余 397GB，够）
+- 1 epoch（50 集、7 batch）在本机约 1 分钟量级；40k 步的长跑时间需在 S3 首轮实测后校准

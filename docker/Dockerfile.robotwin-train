@@ -1,0 +1,27 @@
+# R01 训练镜像（ACT / DP 训练用；serve 镜像不带这些依赖）
+#
+# 为什么单独一个：2026-11-25 实测，ACT 训练入口 `imitate_episodes.py` 在
+# vla-serve-robotwin-act / vla-eval-robotwin 两个镜像里都缺两个包：
+#   - einops      （imitate_episodes.py:18）
+#   - dm_control  （sim_env.py:5，即使只训练也会 import）
+# 按"V100 禁止现场 pip"的规矩，必须在构建期装。
+#
+# 运行时注意（不在 Dockerfile 里）：训练容器必须 `--ipc=host`。
+# 默认 64MB /dev/shm 会让 DataLoader worker 崩：
+#   RuntimeError: DataLoader worker (pid(s) 110) exited unexpectedly
+#
+# 构建（0002 实测）：
+#   docker build -f docker/Dockerfile.robotwin-train -t vla-robotwin-train:dev .
+# 自检通过：`train deps OK`
+ARG BASE=swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin@sha256:7cc969f19b7997e98f4cc3960ae2b5d0e8f1a81571510b8a38b2abf2733c39fb
+FROM ${BASE}
+
+USER root
+
+# 默认源失败时回落清华镜像（国内构建更快）
+RUN conda run -n robotwin pip install --no-cache-dir einops dm_control \
+    || conda run -n robotwin pip install --no-cache-dir \
+         -i https://pypi.tuna.tsinghua.edu.cn/simple einops dm_control
+
+# 自检：让缺依赖在构建期红，而不是等 6–7 天训练跑到一半
+RUN conda run -n robotwin python -c "import einops, dm_control; print('train deps OK')"
