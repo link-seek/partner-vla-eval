@@ -17,6 +17,7 @@ status: living
 | 模块 | 行数 | 归属 | 新策略要不要动 |
 |---|---|---|---|
 | `action_queue.py` | 74 | **公共** | 不动（队列语义与策略无关） |
+| `act_ckpt.py` | 45 | **公共**（权重路径 fail-closed） | 策略若也走 `policy_last.ckpt` 约定可直接复用 |
 | `robotwin_obs.py` | 153 | **公共**（图像/关节转换） | 只在"图像契约"不同时加分支 |
 | `robotwin_policy.py` | 349 | **策略骨架 + 两个 profile** | 加一段 profile（~30 行） |
 | `Dockerfile.serve-robotwin` | — | 构建 | 加一个 `POLICY=` tag |
