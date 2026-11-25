@@ -1,0 +1,896 @@
+{
+  "benchmark": "click_bell",
+  "mode": "sync",
+  "harness_version": "0.0.0",
+  "created_at": "2026-11-25T19:54:09.919799+00:00",
+  "tasks": [
+    {
+      "task": "click_bell",
+      "episodes": [
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "012fd8ef-99c8-441f-b59c-3a7348035096",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 117,
+          "elapsed_sec": 134.606,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100045,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 45
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "05cf3292-28ca-4041-9227-82f72276a36a",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 112,
+          "elapsed_sec": 119.923,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100014,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 14
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "08ea7880-d60e-4f9f-aa7a-3e5e202b4231",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 99,
+          "elapsed_sec": 109.077,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100039,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 39
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "0939da1c-c377-40be-8a32-28cb1a270160",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 282,
+          "elapsed_sec": 320.574,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100028,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 28
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "095964d4-f904-4348-a0f0-e9aeb89d06cb",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 112,
+          "elapsed_sec": 125.141,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100029,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 29
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "0a952dd0-0048-4100-96c5-c57285b72d3d",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 439.175,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100009,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 9
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "14160a25-5dd1-43fc-8bfe-f885d470934b",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 86,
+          "elapsed_sec": 93.53,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100024,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 24
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "1a598b83-8421-4ac8-8767-0a1dbf6eceae",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 148,
+          "elapsed_sec": 163.055,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100038,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 38
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "22965297-5968-434f-8ee7-ecdf643bf41e",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 112,
+          "elapsed_sec": 173.762,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100000,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 0
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "234c91e4-6b8e-4793-a0e4-4f1dcdb9cc83",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 113,
+          "elapsed_sec": 121.049,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100016,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 16
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "2c9eb90c-89f6-42fb-b2c4-c8d8b8cf2dda",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 101,
+          "elapsed_sec": 110.002,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100002,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 2
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "30e858db-062f-48bb-b32b-6bc180e90b34",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 130,
+          "elapsed_sec": 144.781,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100031,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 31
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "31b35f94-13e1-42f3-be51-164abad22e46",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 124,
+          "elapsed_sec": 132.857,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100043,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 43
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "34c66c03-57fc-4db6-9fc1-0d10b58d50b8",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 110,
+          "elapsed_sec": 124.338,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100008,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 8
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "3f3558be-7931-42fe-9611-aa0db3384247",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 166,
+          "elapsed_sec": 179.702,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100044,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 44
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "4195087e-be8b-4a21-a7a8-773a29ea5343",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 208,
+          "elapsed_sec": 216.511,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100019,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 19
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "48f450f3-cd4f-4484-b4af-8b0f3f4fd341",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 101,
+          "elapsed_sec": 110.786,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100041,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 41
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "4a2ef5cb-f64e-473f-97b8-65dc2d81a37b",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 432.023,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100037,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 37
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "4ef471c8-4d24-48a4-94d3-83a8253ba289",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 165,
+          "elapsed_sec": 181.855,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100042,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 42
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "5384431c-a808-4a68-ba4e-6e268ad63b86",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 117,
+          "elapsed_sec": 129.202,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100012,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 12
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "538e9d76-8246-4425-8a8d-4126354f26be",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 462.083,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100034,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 34
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "55df20c4-fd0d-44da-b28d-1872028ade95",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 141,
+          "elapsed_sec": 153.659,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100007,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 7
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "5635b1cd-c1b5-40f5-93e2-0d4d6099d7b9",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 153,
+          "elapsed_sec": 166.158,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100026,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 26
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "56b96352-25c8-430e-a2bc-d734479588ac",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 106,
+          "elapsed_sec": 118.363,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100046,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 46
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "579a5dee-1aca-4cc8-bf21-3df09da5740a",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 130,
+          "elapsed_sec": 148.279,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100035,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 35
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "59b067f9-2368-44fa-bcd1-da7a8c4c2023",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 442.434,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100010,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 10
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "59ec21d1-cabc-4527-994f-43da81189a0d",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 262,
+          "elapsed_sec": 289.83,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100017,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 17
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "63e3681a-5ea0-4665-990c-5d0ebf0be9b0",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 385,
+          "elapsed_sec": 408.967,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100025,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 25
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "68d532ef-aecd-4bd7-8bd7-ef96d4e60304",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 100,
+          "elapsed_sec": 109.457,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100004,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 4
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "6acf6d23-7908-438c-89b9-003b94cfa0be",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 142,
+          "elapsed_sec": 159.556,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100030,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 30
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "6e6c037b-5644-405f-9696-f032b7cabf6d",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 107,
+          "elapsed_sec": 117.752,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100003,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 3
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "79813411-731c-4589-a72a-1ed85fb619c4",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 436.284,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100006,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 6
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "7b71746b-cd60-49a6-9e66-09260a89c081",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 112,
+          "elapsed_sec": 125.753,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100049,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 49
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "7ecda1f9-8fcf-47b7-8a53-29720de76251",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 415.579,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100015,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 15
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "7edc988e-2745-445b-9265-332a6baa573c",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 127,
+          "elapsed_sec": 132.72,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100036,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 36
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "80be89e1-5c14-4cf5-a626-c8b6f99b8560",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 433.366,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100032,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 32
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "8238fa01-4614-4961-9be6-aca88ae186c5",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 100,
+          "elapsed_sec": 104.677,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100021,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 21
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "8849acda-9c27-4ee4-b480-d6d131858807",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 112,
+          "elapsed_sec": 121.789,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100023,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 23
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "8c23aade-046a-47fa-a859-6f38953b8516",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 106,
+          "elapsed_sec": 118.341,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100013,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 13
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "9790e2af-eeb9-4ee8-a16c-30b97d7fb012",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 143,
+          "elapsed_sec": 156.418,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100020,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 20
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "979c02b5-5173-41f8-ad99-696f78167d55",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 414.21,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100048,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 48
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "9e4571f5-d1a0-42d5-9fa8-7a745cb4282b",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 130,
+          "elapsed_sec": 135.448,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100027,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 27
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "a064d981-7071-4184-bcfd-3fb3bb76b0ab",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 129,
+          "elapsed_sec": 140.039,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100011,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 11
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "ad18f630-0d59-415e-8250-4dff21935388",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 166,
+          "elapsed_sec": 182.743,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100033,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 33
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "bb9a6ce8-fee5-47dd-9440-499170ae3af4",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 95,
+          "elapsed_sec": 114.324,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100040,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 40
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "f648e5e8-9c58-4acc-8d14-2ce69974e841",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 418.374,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100018,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 18
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "f7457391-5482-46da-85c2-c68cd3512f90",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 159,
+          "elapsed_sec": 180.607,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100022,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 22
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "f7590629-bb61-413b-9ea6-8fe1f15dba7e",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 124,
+          "elapsed_sec": 135.183,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100001,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 1
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "f8032439-5919-42a2-ae4d-985fa6b51a73",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 400,
+          "elapsed_sec": 428.383,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100047,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 47
+        },
+        {
+          "sid": "4ce7f123-3a8d-44a8-bbfb-350a939b3848",
+          "eid": "f8ce43eb-4856-419c-92f5-ccecb42a9d58",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 112,
+          "elapsed_sec": 129.05,
+          "name": "click_bell",
+          "suite": "robotwin",
+          "seed": 100005,
+          "episode_idx": 0,
+          "instruction": "Perform the click_bell task.",
+          "task_idx": 5
+        }
+      ],
+      "num_episodes": 50,
+      "avg_steps": 190.88,
+      "mean_success": 0.8
+    }
+  ],
+  "config": {
+    "benchmark": "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark",
+    "mode": "sync",
+    "name": "click_bell",
+    "subname": null,
+    "episodes_per_task": 1,
+    "max_steps": null,
+    "max_tasks": null,
+    "tasks": null,
+    "params": {
+      "task_name": "click_bell",
+      "task_config": "demo_clean",
+      "seed": 0,
+      "instruction_type": "seen",
+      "test_num": 50,
+      "skip_expert_check": true,
+      "fast_init": false,
+      "action_type": "qpos"
+    },
+    "recording": null,
+    "hz": 10.0,
+    "throughput_mode": false,
+    "paced": true,
+    "wait_first_action": false
+  },
+  "eval_id": "54600211-de92-4915-afd4-ca2ce22a63ad-click_bell",
+  "server_info": {
+    "harness_version": "0.0.0",
+    "protocol_version": 1,
+    "model_server": "RoboTwinPolicyServer",
+    "capabilities": {},
+    "observation_params": {
+      "send_state": true
+    },
+    "action_spec": {
+      "joints": {
+        "name": "joints",
+        "dims": 14,
+        "format": "joint_positions"
+      }
+    },
+    "observation_spec": {
+      "head_camera": {
+        "name": "image",
+        "dims": 0,
+        "format": "rgb_hwc_uint8"
+      },
+      "left_camera": {
+        "name": "image",
+        "dims": 0,
+        "format": "rgb_hwc_uint8"
+      },
+      "right_camera": {
+        "name": "image",
+        "dims": 0,
+        "format": "rgb_hwc_uint8"
+      },
+      "state": {
+        "name": "state",
+        "dims": 0,
+        "format": "joint_positions"
+      },
+      "language": {
+        "name": "language",
+        "dims": 0,
+        "format": "language"
+      }
+    }
+  },
+  "render": {
+    "requested": "gpu",
+    "applied_env": {}
+  },
+  "seed": 0,
+  "metric_keys": {
+    "success": "mean"
+  },
+  "mean_success": 0.8,
+  "num_episodes_total": 50,
+  "num_errors": 0
+}

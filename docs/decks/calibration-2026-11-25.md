@@ -79,7 +79,7 @@ status: living
 | 项 | 预期对照（官方 Easy） | 成本 |
 |---|---|---|
 | ~~ACT `click_bell` × 50ep~~ | **已完成：92%（46/50），50 种子** | 实花 ≈¥50 |
-| DP `click_bell` × 50ep | 进行中（1 集 smoke 1/1）；官方 54% 仅参考 | ≈¥104 |
+| ~~DP `click_bell` × 50ep~~ | **已完成：80%（40/50）** | 实花 ≈¥96 |
 | place_empty_cup 新跑 100ep（CogACT） | 官方 28%，看是否收敛；**旧 50 集不可续 → n=100** | ≈¥380 |
 
 ACT/DP 是**官方自带的基线**，跑它们等于"用官方自己的模型验我们的尺子"，比第三方模型更有说服力。
@@ -210,7 +210,7 @@ python3 scripts/ci/calibration_row.py --entry db-cogact --task place_empty_cup \
 | 模型 | 我们 | 官方（50-demo 口径） | 差 | 判读 |
 |---|---|---|---|---|
 | ACT `click_bell` | **92%（46/50）**，50 个不同种子，0 error | 58% | **+34pp** | 口径不同（100-demo）→ **参考值，不作一致判据** |
-| DP `click_bell` | 50 集进行中（1 集 smoke 1/1 已过） | 54% | — | 同上 |
+| DP `click_bell` | **80%（40/50）**，50 个不同种子，0 error | 54% | **+26pp** | 口径不同（100-demo）→ **参考值，不作一致判据** |
 
 证据：`docs/data/act-baseline_robotwin-click_bell-x50.json`（原始 aggregate 在 0002 `/root/r01/act50v3`）。
 
