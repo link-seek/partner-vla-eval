@@ -17,6 +17,8 @@ nav_exclude: true
 | `tailnet-join.md` | runner 重装后重新加入 tailnet（经 hw41 跳板，key 不落盘） |
 | `act-dp-adapter-runbook.md` | ACT/DP 适配器首次 smoke（12 个坑） |
 | `serve-yaml-onboarding.md` | serve yaml 编写/对接（上游讨论草稿） |
+| `ops-entry.md` | **运维入口 ops.yml**：4 个 action 跑在哪个 runner、首次实证、3 个排错记录 |
+| `obs-lifecycle.md` | OBS 桶生命周期核对/调整 |
 
 ## 写作要求
 
