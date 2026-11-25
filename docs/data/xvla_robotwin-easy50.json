@@ -318,5 +318,6 @@
       "avg_steps": 300.0
     }
   ],
-  "note": "3328/5000=66.6%。5x100%(adjust_bottle/grab_roller/move_playingcard_away/shake_bottle/horizontally)；6塌：blocks_ranking_rgb/size、put_bottles_dustbin、stack_blocks_three/bowls_three全0/100（avg_steps=300跑满，系统性失败，疑gripper语义，见#168遗留跟踪），open_microwave 1/100，click_alarmclock 14/100。全Easy，无Hard，robustness未知；与CogACT四轮（qpos/50ep）不可比，并列。60.5h，video=0故无mp4。"
+  "note": "3328/5000=66.6%。5x100%(adjust_bottle/grab_roller/move_playingcard_away/shake_bottle/horizontally)；6塌：blocks_ranking_rgb/size、put_bottles_dustbin、stack_blocks_three/bowls_three全0/100（avg_steps=300跑满，系统性失败，疑gripper语义，见#168遗留跟踪），open_microwave 1/100，click_alarmclock 14/100。全Easy，无Hard，robustness未知；与CogACT四轮（qpos/50ep）不可比，并列。60.5h，video=0故无mp4。",
+  "protocol_version": "robotwin-2.0.1"
 }

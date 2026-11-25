@@ -34,5 +34,6 @@
       0.2381
     ],
     "ci95_method": "wilson"
-  }
+  },
+  "protocol_version": "robotwin-2.0.1"
 }

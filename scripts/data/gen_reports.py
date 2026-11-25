@@ -28,6 +28,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from stats import summarize  # noqa: E402
 
 
+def protocol_version() -> str:
+    """协议版本唯一真源：registry.exam.protocol_version。"""
+    reg = json.loads((ROOT / "configs" / "registry" / "model-registry.json").read_text())
+    return reg["exam"]["protocol_version"]
+
+
 def model_dir_name(model: str) -> str:
     return {"x-vla-robotwin2": "xvla", "db-cogact": "cogact"}.get(model, model)
 
@@ -44,6 +50,10 @@ def backfill(argv: list[str]) -> int:
             skipped += 1
             continue
         todo = []
+        if not d.get("protocol_version"):
+            # robotwin 报告属于主协议；libero/calvin 的临时 smoke 不是版本化协议，标 adhoc（诚实而非编造）
+            d["protocol_version"] = protocol_version() if "robotwin" in p.name else "adhoc"
+            todo.append(("protocol_version", None))
         if isinstance(d.get("success"), int) and isinstance(d.get("n"), int) and not d.get("stats"):
             todo.append(("stats", d["success"]))
         if isinstance(d.get("hard_success"), (int, float)) and isinstance(d.get("n"), int) and not d.get("hard_stats"):
@@ -51,6 +61,8 @@ def backfill(argv: list[str]) -> int:
         if not todo:
             continue
         for key, k in todo:
+            if key == "protocol_version":
+                continue          # 上面已直接写入
             d[key] = summarize(k, d["n"])
         p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
         changed += 1
@@ -104,6 +116,7 @@ def main() -> int:
                 "hard_success": None, "gap": None,
                 "note": "Easy only；Hard 待补（跑完由 gen_reports.py --hard 回填）。",
                 "report_version": "v1 (docs/tutorial/leaderboard.md)",
+                "protocol_version": protocol_version(),
             }
         else:
             # hard：在已有 easy 报告上回填
@@ -119,6 +132,9 @@ def main() -> int:
             rep["hard_errors"] = t["errors"]
             rep["hard_steps_success"] = {"mean": t["steps_avg"], "med": t["steps_med"]}
             rep["hard_stats"] = summarize(t["success"], t["n"])
+            if rep.get("protocol_version") != protocol_version():
+                # 若旧报告没有版本字段，按当前协议补；已有且不同则保留（说明是不同协议的历史结果）
+                rep.setdefault("protocol_version", protocol_version())
             rep["note"] = (
                 f"Easy {easy:.3f}（n={rep.get('n')}）vs Hard {t['rate']:.3f}（n={t['n']}），"
                 f"落差 {rep['gap']:.3f}。" if isinstance(easy, (int, float)) else rep.get("note")

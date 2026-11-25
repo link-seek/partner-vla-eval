@@ -31,6 +31,8 @@ GATES: list[tuple[str, list[str], str]] = [
      "基础设施登记（workflow kind / 选项配置，禁 one-off 进 main）"),
     ("versions",   ["python3", "scripts/gates/check_versions.py"],
      "Dockerfile/versions.yaml 的 pin 不许漂移"),
+    ("protocol",   ["python3", "scripts/gates/check_protocol.py"],
+     "协议版本贯穿（报告/榜单必须与 registry.exam.protocol_version 一致）"),
     ("reports",    ["python3", "scripts/gates/check_reports.py"],
      "报告自洽（mean_success vs success/n、stats、图片）"),
     ("coverage",   ["python3", "scripts/gates/check_coverage.py",

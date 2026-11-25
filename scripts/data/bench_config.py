@@ -13,6 +13,7 @@
   python3 scripts/data/bench_config.py task_config hard   # demo_randomized
   python3 scripts/data/bench_config.py label hard         # Hard
   python3 scripts/data/bench_config.py episodes           # 50
+  python3 scripts/data/bench_config.py protocol_version   # robotwin-2.0.1
   python3 scripts/data/bench_config.py json               # exam 段原样输出
 
 registry 是 JSON，所以不依赖 PyYAML，任何有 python3 的地方都能跑。
@@ -46,6 +47,9 @@ def main(argv: list[str]) -> int:
         return 0
     if cmd == "episodes":
         print(int(e["episodes"]))
+        return 0
+    if cmd == "protocol_version":
+        print(e.get("protocol_version") or "")
         return 0
     if cmd == "json":
         print(json.dumps(e, ensure_ascii=False, indent=2))

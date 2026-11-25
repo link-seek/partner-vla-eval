@@ -14,5 +14,6 @@
   "date": "2026-10-26",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40552080571",
   "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
-  "note": "官方协议整榜（非抽样）：487/500，最低 task 45/50。无 Wilson 区间需求（n=500 足够窄）"
+  "note": "官方协议整榜（非抽样）：487/500，最低 task 45/50。无 Wilson 区间需求（n=500 足够窄）",
+  "protocol_version": "adhoc"
 }
