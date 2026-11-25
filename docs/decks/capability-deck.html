@@ -175,20 +175,23 @@
     <div class="foot"><span>04 与上游的关系</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
-<section class="slide" data-screen-label="03 证明一 校准">
+<section class="slide" data-screen-label="05 证明一 校准">
     <div class="eyebrow">证明一 · 校准</div>
-    <h2>先量官方基线：四条能对上的 task，有效平均差 2.5pp</h2>
-    <table>
-      <tr><th style="width:22%">task</th><th style="width:18%">我们</th><th style="width:16%">官方</th><th style="width:14%">差</th><th>说明</th></tr>
-      <tr><td>grab_roller</td><td class="num">92%（46/50）</td><td class="num">89%</td><td class="num">+3pp</td><td>0.8.0 校验种子，零 error</td></tr>
-      <tr><td>adjust_bottle</td><td class="num">100%（35/35 有效）</td><td class="num">99%</td><td class="num">+1pp</td><td>0.7.0；15 个坏种已剔除</td></tr>
-      <tr><td>place_phone_stand</td><td class="num">16%（8/50）</td><td class="num">18%</td><td class="num">−2pp</td><td>0.8.0 校验种子</td></tr>
-      <tr><td>place_empty_cup</td><td class="num">16%（8/50）</td><td class="num">28%</td><td class="num">−12pp</td><td><strong>离群</strong>：V100 fp16 vs 官方 H100 bf16 + 种子分布不同 → 待定档</td></tr>
-      <tr><td><strong>有效平均</strong></td><td class="num"><strong>56%</strong></td><td class="num">58.5%</td><td class="num"><strong>−2.5pp</strong></td><td>四条能对上 task 的合计</td></tr>
+    <h2>两个模型、九条 task 级对照：七条在 ±4pp 内</h2>
+    <table style="font-size:14px">
+      <tr><th style="width:14%">模型</th><th style="width:22%">task</th><th style="width:14%">我们</th><th style="width:12%">官方</th><th style="width:12%">差</th><th>说明</th></tr>
+      <tr><td>DB-CogACT</td><td>grab_roller</td><td class="num">92%</td><td class="num">89%</td><td class="num">+3pp</td><td>0.8.0 校验种子，零 error</td></tr>
+      <tr><td>DB-CogACT</td><td>adjust_bottle</td><td class="num">100%</td><td class="num">99%</td><td class="num">+1pp</td><td>15 个坏种已剔除</td></tr>
+      <tr><td>DB-CogACT</td><td>place_phone_stand</td><td class="num">16%</td><td class="num">18%</td><td class="num">−2pp</td><td>—</td></tr>
+      <tr><td>DB-CogACT</td><td>place_empty_cup</td><td class="num">16%</td><td class="num">28%</td><td class="num"><strong>−12pp</strong></td><td>离群：V100 fp16 vs 官方 H100 bf16 + 种子分布</td></tr>
+      <tr><td>X-VLA</td><td>grab_roller</td><td class="num">98%</td><td class="num">100%</td><td class="num">−2pp</td><td>—</td></tr>
+      <tr><td>X-VLA</td><td>adjust_bottle</td><td class="num">98%</td><td class="num">99%</td><td class="num">−1pp</td><td>—</td></tr>
+      <tr><td>X-VLA</td><td>place_phone_stand</td><td class="num">96%</td><td class="num">84%</td><td class="num"><strong>+12pp</strong></td><td>离群：n=50 vs 官方 100，方向相反</td></tr>
+      <tr><td>X-VLA</td><td>click_bell</td><td class="num">96%</td><td class="num">100%</td><td class="num">−4pp</td><td>—</td></tr>
+      <tr><td>X-VLA</td><td>handover_block</td><td class="num">78%</td><td class="num">77%</td><td class="num">+1pp</td><td>—</td></tr>
+      <tr><td><strong>X-VLA</strong></td><td><strong>50 task 全量（官方口径）</strong></td><td class="num"><strong>66.6%</strong></td><td class="num">68.0%</td><td class="num"><strong>−1.4pp</strong></td><td>n=5000，同口径</td></tr>
     </table>
-    <p class="sub" style="margin-top:18px"><strong>怎么读</strong>：三条在 ±3pp 内 → 链路是健康的；<strong>离群那一条我们主动标出来</strong>——它同时受精度（V100 fp16 vs H100 bf16）与种子分布影响，只写进披露、不硬判高下。</p>
-    <p class="sub" style="margin-top:8px">对不上的地方自己先说，是"能评测"的一部分：<strong>否则你无法判断哪一格可以引用。</strong></p>
-    <div class="foot"><span>05 证明一 校准</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <p class="sub" style="margin-top:16px"><strong>怎么读</strong>：n=50 的 95% 区间约 ±10pp，所以单 task 差 12pp 也不足以判"谁错"，只能标成<strong>离群/待定</strong>；而 50 task 全量（n=5000，差 1.4pp）落在噪声带内，<strong>可以当"一致"</strong>。</p>
   </section>
 
 <section class="slide" data-screen-label="04 证明二 扩展">
