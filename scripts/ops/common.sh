@@ -12,8 +12,9 @@ is_dry() { [ "$DRY_RUN" = "1" ]; }
 plan()   { echo "[ops][dry] $*"; }
 
 # 只读可达性探测（不建连、不发认证）：用于 dry-run 证明"目标解析对了"
-tcp_check() {  # tcp_check <host> <port> → open|closed
-  if (exec 3<>"/dev/tcp/$1/$2") 2>/dev/null; then exec 3<&- 2>/dev/null; echo open; else echo closed; fi
+tcp_check() {  # tcp_check <host> <port> [timeout_s] → open|closed
+  local t="${3:-5}"
+  if timeout "$t" bash -c "exec 3<>/dev/tcp/$1/$2" 2>/dev/null; then echo open; else echo closed; fi
 }
 
 require_env() {   # require_env KEY...
