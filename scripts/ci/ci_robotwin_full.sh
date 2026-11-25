@@ -16,6 +16,9 @@ source "$WORK/scripts/ci/lib/common.sh"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
+# 并行隔离：容器名与评测卡必须可参数化，否则第二个 run 会杀掉第一个的 serve / 抢同一张卡
+SERVE_NAME="${RW_SERVE_NAME:-cogact-serve}"
+EVAL_CUDA="${RW_EVAL_CUDA:-1}"
 # task 清单与集数一律从 registry.exam 读（唯一真源）。
 # 2026-11-25：此前这里默认含 stack_blocks_two、collect_matrix.sh 含 place_phone_stand，两处已漂移。
 RW_TASKS="${RW_TASKS:-$(python3 "$WORK/scripts/data/bench_config.py" tasks)}"
@@ -197,8 +200,8 @@ if [ -n "${ASSETS_MOUNT:-}" ]; then
 fi
 
 echo "[5/6] 启动 serve (GPU${SERVE_CUDA:-0}，后台；烘焙镜像 + UV_OFFLINE，零下载；配置 $SERVE_YAML)"
-docker rm -f cogact-serve 2>/dev/null || true
-docker run -d --name cogact-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network host \
+docker rm -f "$SERVE_NAME" 2>/dev/null || true
+docker run -d --name "$SERVE_NAME" --gpus "\"device=${SERVE_CUDA:-0}\"" --network host \
   -v "$WORK/configs":/work/configs:ro \
   -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
@@ -210,9 +213,9 @@ docker run -d --name cogact-serve --gpus "\"device=${SERVE_CUDA:-0}\"" --network
   "$SERVE_IMAGE" \
   vla-eval serve -c /work/configs/model_servers/serve-robotwin-local.yaml
 for i in $(seq 1 120); do
-  [ "$(docker inspect -f '{{.State.Running}}' cogact-serve 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
+  [ "$(docker inspect -f '{{.State.Running}}' "$SERVE_NAME" 2>/dev/null)" = "true" ] || { echo "serve 容器退出"; docker logs "$SERVE_NAME" 2>&1 | tail -n 15; exit 1; }
   if (echo > /dev/tcp/127.0.0.1/8000) 2>/dev/null; then echo "serve UP"; break; fi
-  [ "$i" = "120" ] && { echo "serve 超时"; docker logs cogact-serve 2>&1 | tail -n 15; exit 1; }
+  [ "$i" = "120" ] && { echo "serve 超时"; docker logs "$SERVE_NAME" 2>&1 | tail -n 15; exit 1; }
   sleep 10
 done
 
@@ -263,7 +266,7 @@ docker run --rm --gpus all --network host --entrypoint bash \
   -v "$WORK/results":/work/results \
   -v "$WORK/.cache/hf":/root/.cache/huggingface \
   "${MOUNT_FLAGS[@]}" \
-  -e CUDA_VISIBLE_DEVICES=1 \
+  -e CUDA_VISIBLE_DEVICES=$EVAL_CUDA \
   -e STATE_PATCH="${RW_STATE_PATCH:-}" \
   "$ROBOTWIN_IMAGE" \
   -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（挂载丢失，先查 /data 与 -v 源）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; command -v docker >/dev/null && { echo '--- 并发容器 ---'; docker ps --format '{{.Names}} {{.Image}}' | head -5; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/benchmarks/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
@@ -279,15 +282,15 @@ for attempt in 1 2 3 4 5; do
     -v "$WORK/results":/work/results \
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     "${MOUNT_FLAGS[@]}" \
-    -e CUDA_VISIBLE_DEVICES=1 \
+    -e CUDA_VISIBLE_DEVICES=$EVAL_CUDA \
     -e STATE_PATCH="${RW_STATE_PATCH:-}" \
     "$ROBOTWIN_IMAGE" \
     -c "pwd; ls -l /app/RoboTwin/assets/objects/objaverse/list.json || { echo 'REFUSE: client 容器看不到 assets/objects（重试仍失败）' >&2; mount | grep -E 'RoboTwin/assets|/work/results' || true; exit 9; }; conda run --no-capture-output -n robotwin bash /opt/patches/run_sharded.sh -c /work/configs/benchmarks/run-robotwin-chunk.yaml -n $RW_SHARDS -o /work/$OUTDIR $VIDEO_FLAG" 2>&1 | tee "$OUTDIR/shard.log"
   CODE=${PIPESTATUS[0]}
 done
 set -e
-docker logs cogact-serve > "$OUTDIR/cogact-serve.log" 2>&1 || true
-docker rm -f cogact-serve 2>/dev/null || true
+docker logs "$SERVE_NAME" > "$OUTDIR/${SERVE_NAME}.log" 2>&1 || true
+docker rm -f "$SERVE_NAME" 2>/dev/null || true
 ls -lh "$OUTDIR" || true
 echo "chunk_exit=$CODE"
 exit $CODE
