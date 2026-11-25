@@ -96,6 +96,10 @@ jobs:
           fi
           echo "coverage negative case OK (refused with 2)"
           python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 --tasks "$TASKS"
+      - name: Collect-matrix regression (easily-silent mislabeling)
+        # 2026-11-25 实测：A5 的 easy-r2 收 0 个 task；修完若不收紧，hard 会回落裸名(easy)、
+        # r2 会回落 r1 —— 都只在数字上出错、不报错。测试钉住三种命名与两条严格性。
+        run: python3 scripts/data/test_collect_matrix.py
       - name: Stats unit tests (bootstrap / Wilson)
         run: |
           python3 -m pip install --quiet numpy

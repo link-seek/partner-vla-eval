@@ -31,17 +31,41 @@ root, model, suffix, proto, replicate = sys.argv[1], sys.argv[2], sys.argv[3], s
 base = pathlib.Path(root) / model
 tasks = [t for t in sys.argv[6].split(",") if t]
 
+def dir_names(task: str) -> list[str]:
+    """该 task 在本协议/重复轮下允许的目录名（严格，不回落到别的轮次/协议）。
+
+    历史上有三种命名并存：
+      ci_model_matrix.sh 现在写：  <task>-<proto>[-<replicate>]   如 click_bell-easy-r2
+      早期 hard 产物：             <task>-hard
+      早期 easy 产物：             <task>                         裸名
+    两条严格性约束（2026-11-25 实测踩坑）：
+      1) 收 hard 时**不许**回落到裸名 <task>——那是 easy 的目录，会把 easy 数标成 hard；
+      2) 收 r2 时**不许**回落到 r1 目录——那等于把同一轮数据复制一份当重复轮。
+    """
+    if replicate:
+        return [f"{task}-{proto}-{replicate}"]
+    names = [f"{task}-{proto}"]
+    if proto == "hard":
+        names.append(f"{task}-hard")     # 与上面同值时去重
+    else:
+        names.append(task)               # 仅 easy 允许裸名（legacy）
+    seen, out_names = set(), []
+    for n in names:
+        if n not in seen:
+            seen.add(n); out_names.append(n)
+    return out_names
+
+
 # 目录里有、但清单里没有的：多数是别的考场或改名残留，提醒但不收（避免混进报告）
 if base.is_dir():
-    known = set(tasks)
-    extra = sorted({d.name.split("-hard")[0].replace("-r2", "") for d in base.iterdir() if d.is_dir()} - known)
+    known_dirs = {n for t in tasks for n in dir_names(t)}
+    extra = sorted(d.name for d in base.iterdir() if d.is_dir() and d.name not in known_dirs)
     if extra:
-        print(f"[collect] 注意：{model} 下有不属于 exam.tasks 的目录，已跳过：{extra}", file=sys.stderr)
+        print(f"[collect] 注意：{model} 下有不在 exam.tasks 名单里的目录，已跳过：{extra}", file=sys.stderr)
 
 out = {"model": model, "protocol": proto, "replicate": replicate or None, "tasks": {}}
 for task in tasks:
-    # 目录名 = <task> 或 <task>-hard；早期产物没有 -hard 后缀，两种都试
-    cands = [base / f"{task}{suffix}", base / task]
+    cands = [base / n for n in dir_names(task)]
     p = None
     for d in cands:
         f = d / f"{task}_aggregate.json"
