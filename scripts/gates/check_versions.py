@@ -3,6 +3,7 @@
 长期机制：新增/改动 pin 只改 versions.yaml + Dockerfile ARG 默认，两处对不上即红。
 已知债走 versions.yaml 的 known_debts（带到期条件），不在此脚本里开口子。
 """
+import glob
 import re, sys
 import yaml
 
@@ -16,10 +17,34 @@ def arg_default(path, name):
     m = re.search(rf"^ARG\s+{name}=(.+?)\s*$", open(path).read(), re.M)
     return m.group(1).strip().strip('"') if m else None
 
+# 0. 两类 serve 镜像分流：
+#    a) python:3.12-slim 基座 + 源码装 harness（cogact/xvla/pi0/...）
+#    b) robotwin 考场镜像基座（已含 robotwin conda 环境，官方 policy 代码在里面）
+#       —— 这一类的合规要求不是 python:3.12-slim，而是「基座必须钉 digest 且与
+#       registry.exam.bench_image_digest 一致」（tag 可被重打，digest 不会）。
+from_registry_bench = None
+try:
+    import json as _json
+    _reg = _json.load(open("configs/registry/model-registry.json"))
+    from_registry_bench = _reg["exam"].get("bench_image_digest")
+except Exception:
+    pass
+
+ROBOTWIN_BASE = "docker/Dockerfile.serve-robotwin"
+if from_registry_bench:
+    _t = open(ROBOTWIN_BASE).read() if glob.glob(ROBOTWIN_BASE) else ""
+    if from_registry_bench not in _t:
+        fails.append(f"{ROBOTWIN_BASE}: 基座未钉 registry 里的 bench_image_digest（{from_registry_bench[:20]}…）")
+
 # 1. serve 系 HARNESS_REF：必须等于 target（tag 语义），或为上游主线 SHA（直连验证用），或在 known_debts 中登记
 debts = V.get("known_debts_harness_070", [])
-import glob
+def _is_robotwin_base(f: str) -> bool:
+    return f.startswith(ROBOTWIN_BASE)
+
+
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
+    if _is_robotwin_base(f):
+        continue           # 基镜像里已装好 harness，不 craft HARNESS_REF
     v = arg_default(f, "HARNESS_REF")
     if norm(v) == norm(V["harness_serve_target"]):
         continue
@@ -34,6 +59,8 @@ for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
 
 # 2. torch_serve：serve 系 sed 目标必须 == torch_serve_cu126
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
+    if _is_robotwin_base(f):
+        continue           # torch 由基镜像提供
     txt = open(f).read()
     if '"torch==2.6.0"' in txt or "'torch==2.6.0'" in txt or "torch==2.6.0" in txt:
         continue
@@ -41,6 +68,8 @@ for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
 
 # 3. python 基座：serve 系必须 FROM python:3.12-slim
 for f in sorted(glob.glob("docker/Dockerfile.serve-*")):
+    if _is_robotwin_base(f):
+        continue           # 见 #0：要求改为钉 digest 并与 registry 一致
     if "FROM python:3.12-slim" not in open(f).read():
         fails.append(f"{f}: 基座不是 python:3.12-slim")
 
