@@ -37,6 +37,18 @@ jobs:
           done
           [ "$fail" = 0 ] && echo "SYNTAX OK"
           exit $fail
+      - name: Shell lint (shellcheck, errors only)
+        # runner 预装 shellcheck 0.9.0，无需安装/下载。
+        # 只开 -S error：抓真 bug（未定义变量、坏引号、命令替换)，不纠缠风格。
+        run: |
+          find scripts -name '*.sh' -print0 | xargs -0 -r shellcheck -S error -x
+
+      - name: YAML lint (yamllint, relaxed)
+        # runner 预装 yamllint 1.38；config/前只查实话（缩进、重复键、tab）
+        run: |
+          printf 'extends: relaxed\nrules:\n  line-length: disable\n  comments-indentation: disable\n  document-start: disable\n' > /tmp/yamllint.yml
+          yamllint -c /tmp/yamllint.yml .github/workflows configs
+
       - name: YAML parse all workflows + actions
         run: |
           python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + glob.glob('.github/actions/*/action.yml')]; print('YAML OK')"
@@ -48,6 +60,10 @@ jobs:
         run: |
           python3 -m pip install --quiet jsonschema
           python3 leaderboard/scripts/check_leaderboard.py
+      - name: Task list not hardcoded (single source = registry.exam.tasks)
+        # 实测漂移：ci_robotwin_full.sh 默认含 stack_blocks_two、collect_matrix.sh 含
+        # place_phone_stand，两份都"跑得通"所以没人发现，代价是报告里 MISSING。
+        run: python3 scripts/gates/check_task_list.py
       - name: Referenced paths must exist
         # 漂移实例：README 曾引用 scripts/upstream/run_sharded.sh（已删）、
         # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。
@@ -64,8 +80,8 @@ jobs:
         # 这里同时测反例（CogACT 只有 3 头）与正例（X-VLA 全 5）。
         run: |
           set +e
-          python3 scripts/gates/check_coverage.py --models db-cogact \
-            --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
+          TASKS=$(python3 scripts/data/bench_config.py tasks)
+          python3 scripts/gates/check_coverage.py --models db-cogact --tasks "$TASKS"
           rc=$?
           set -e
           if [ "$rc" != "2" ]; then
@@ -73,8 +89,7 @@ jobs:
             exit 1
           fi
           echo "coverage negative case OK (refused with 2)"
-          python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 \
-            --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
+          python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 --tasks "$TASKS"
       - name: Stats unit tests (bootstrap / Wilson)
         run: |
           python3 -m pip install --quiet numpy

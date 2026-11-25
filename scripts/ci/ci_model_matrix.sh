@@ -14,7 +14,8 @@ cd "$(dirname "$0")/../.."
 WORK="$PWD"
 REG="${MODEL_REGISTRY:-configs/registry/model-registry.json}"
 MODELS="${MM_MODELS:?MM_MODELS 必填（逗号分隔 registry key）}"
-TASKS="${MM_TASKS:?MM_TASKS 必填（逗号分隔 task）}"
+TASKS="${MM_TASKS:-}"
+if [ -z "$TASKS" ]; then TASKS="$(python3 scripts/data/bench_config.py tasks)"; fi  # 留空=registry.exam.tasks
 EP="${MM_EPISODES:-50}"
 SH="${MM_SHARDS:-8}"
 VID="${MM_VIDEO:-0}"
@@ -57,11 +58,11 @@ for model in ${MODELS//,/ }; do
     continue
   fi
 
-  case "$PROTO" in
-    easy) TASK_CFG="demo_clean" ;;
-    hard) TASK_CFG="demo_randomized" ;;
-    *) echo "MM_PROTOCOL 只允许 easy|hard（实际 $PROTO）" >&2; exit 1 ;;
-  esac
+  # 协议 → task_config 从 registry.exam.protocols 读（唯一真源）
+  if ! TASK_CFG="$(python3 "$WORK/scripts/data/bench_config.py" task_config "$PROTO" 2>/dev/null)"; then
+    echo "MM_PROTOCOL 只允许 registry 里声明的协议（实际 $PROTO）" >&2
+    exit 1
+  fi
   for task in ${TASKS//,/ }; do
     echo "---------------- [$model] $task x$EP ($PROTO) ----------------"
     SUFFIX="$PROTO"

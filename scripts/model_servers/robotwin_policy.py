@@ -285,6 +285,13 @@ class RoboTwinPolicyServer(PredictModelServer):
             js = obs.get("state")
         if js is None:
             raise KeyError("观测缺 joint_state（ACT 要 qpos / DP 要 agent_pos，都是 14 维）")
+        # 一次性诊断（RW_DEBUG_OBS=1）：打印实际键名/维度/原图尺寸，别再靠猜
+        if os.environ.get("RW_DEBUG_OBS") == "1" and not getattr(self, "_dbg_done", False):
+            self._dbg_done = True
+            arr = np.asarray(js).reshape(-1)
+            print("[dbg] obs keys:", sorted(obs.keys()), flush=True)
+            print(f"[dbg] state dim={arr.size} dtype={arr.dtype} head={arr[:4]}", flush=True)
+            print(f"[dbg] image shapes={ {k: getattr(v, 'shape', None) for k, v in images.items()} }", flush=True)
         return build_policy_obs(
             images,
             js,

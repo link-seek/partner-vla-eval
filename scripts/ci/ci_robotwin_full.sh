@@ -16,8 +16,10 @@ source "$WORK/scripts/ci/lib/common.sh"
 HARNESS_REF="${HARNESS_REF:-v0.8.0}"
 ROBOTWIN_IMAGE="swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:${RW_BENCH_TAG:-0.8.0-ee-slim}"
 VERIFY_IMAGE="pi0-molmo-verify:0.1"
-RW_TASKS="${RW_TASKS:-grab_roller,adjust_bottle,click_bell,handover_block,stack_blocks_two}"
-RW_EPISODES="${RW_EPISODES:-50}"
+# task 清单与集数一律从 registry.exam 读（唯一真源）。
+# 2026-11-25：此前这里默认含 stack_blocks_two、collect_matrix.sh 含 place_phone_stand，两处已漂移。
+RW_TASKS="${RW_TASKS:-$(python3 "$WORK/scripts/data/bench_config.py" tasks)}"
+RW_EPISODES="${RW_EPISODES:-$(python3 "$WORK/scripts/data/bench_config.py" episodes)}"
 # EE 默认 4 分片：fast_init=false 全量 planner + SAPIEN 抢显存，8 分片 OOM（10-27 实测 3/10 env_start）。
 # qpos 保持 8（已验证吞吐）。
 if [ -z "${RW_SHARDS:-}" ]; then

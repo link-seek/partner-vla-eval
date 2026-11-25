@@ -12,9 +12,9 @@ on:
         required: true
         default: "db-cogact"
       tasks:
-        description: "考场 task（逗号分隔）"
-        required: true
-        default: "grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block"
+        description: "考场 task（逗号分隔；留空=registry.exam.tasks）"
+        required: false
+        default: ""
       episodes:
         description: "每 task 集数（考场口径 50）"
         required: false

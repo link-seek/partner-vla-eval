@@ -20,6 +20,17 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+
+# task 清单唯一真源：registry.exam.tasks（2026-11-25 前这里手抄过一份，已漂移）
+def _exam_tasks() -> list[str]:
+    try:
+        d = json.loads((ROOT / "configs" / "registry" / "model-registry.json").read_text())
+        return list(d["exam"]["tasks"])
+    except Exception:
+        return []
+
+
+EXAM_TASKS = _exam_tasks()
 DATA = ROOT / "docs" / "data"
 LB = ROOT / "leaderboard" / "leaderboard.json"
 
@@ -125,7 +136,7 @@ def main() -> int:
         if d.get("hard_success") is None:
             continue
         task = str(d.get("task", ""))
-        for t in ("grab_roller", "adjust_bottle", "place_phone_stand", "click_bell", "handover_block"):
+        for t in EXAM_TASKS:
             if t in task:
                 # 报告文件名前缀是 xvla/cogact；榜单 model 是 registry key，用宽松匹配
                 prefix = "xvla" if "xvla" in fname else ("db-cogact" if "cogact" in fname else None)

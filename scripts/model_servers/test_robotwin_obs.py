@@ -18,7 +18,9 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from robotwin_obs import build_policy_obs, flat_joint_state, to_chw01  # noqa: E402
+from robotwin_obs import (  # noqa: E402
+    RESIZE_WH, build_policy_obs, flat_joint_state, resize_bilinear, to_chw01,
+)
 
 fails: list[str] = []
 
@@ -65,6 +67,7 @@ def main() -> int:
         check("15 维应报错", True)
 
     print("[build_policy_obs]")
+    imgs_320 = {k: np.zeros((240, 320, 3), dtype=np.uint8) for k in ("head_camera", "left_camera", "right_camera")}
     imgs = {
         "head_camera": np.zeros((480, 640, 3), np.uint8),
         "left_camera": np.zeros((480, 640, 3), np.uint8),
@@ -82,6 +85,22 @@ def main() -> int:
         check("缺相机应报错", False, "未抛错")
     except KeyError:
         check("缺相机应报错", True)
+
+    # ---- resize：考场 D435 是 320x240，官方要求 640x480（2026-11-25 实测 0/1 的真因）----
+    small = np.random.default_rng(0).integers(0, 255, (240, 320, 3), dtype=np.uint8)
+    big = resize_bilinear(small, *RESIZE_WH)
+    check("320x240 HWC uint8 → 480x640x3", big.shape == (480, 640, 3), f"{big.shape}")
+    check("resize 保持 uint8 与值域", big.dtype == np.uint8 and big.min() >= 0 and big.max() <= 255)
+    const = np.full((240, 320, 3), 77, dtype=np.uint8)
+    check("常量图 resize 后仍是 77", int(resize_bilinear(const, 640, 480).max()) == 77)
+    chw_in = np.random.default_rng(1).integers(0, 255, (3, 240, 320), dtype=np.uint8)
+    chw_out = resize_bilinear(chw_in, 640, 480)
+    check("CHW 输入保持 CHW", chw_out.shape == (3, 480, 640), f"{chw_out.shape}")
+    same = resize_bilinear(small, 320, 240)
+    check("尺寸相同则原样返回", np.array_equal(same, small))
+    o2 = build_policy_obs(imgs_320, np.zeros(14, dtype=np.float32), "act")
+    check("build_policy_obs 输出 3x480x640（不再是 3x240x320）",
+          all(v.shape == (3, 480, 640) for k, v in o2.items() if k in ("head_cam", "left_cam", "right_cam")))
 
     # 回归：numpy 数组作为 joint_state 时不得触发"真值歧义"
     arr_js = np.zeros(14, dtype=np.float32)

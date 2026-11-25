@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       tasks:
-        description: "任务列表（逗号分隔）"
+        description: "任务列表（逗号分隔；留空=registry.exam.tasks）"
         required: false
-        default: "grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block"
+        default: ""
       data_root:
         description: "本地落盘目录（必须是 runner 可写：/data）"
         required: false

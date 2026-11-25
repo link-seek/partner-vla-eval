@@ -6,7 +6,8 @@
 # 用法：TASKS=grab_roller,... DATA_ROOT=/root/robotwin-train bash scripts/data/prepare_robotwin_data.sh
 set -euo pipefail
 
-TASKS="${TASKS:-grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block}"
+# 默认从 registry.exam.tasks 读（唯一真源；此前这里手抄一份，已漂移过）
+TASKS="${TASKS:-$(python3 "$(dirname "$0")/bench_config.py" tasks)}"
 DATA_ROOT="${DATA_ROOT:-/data/robotwin-train}"
 BASE="${HF_MIRROR:-https://hf-mirror.com}/datasets/TianxingChen/RoboTwin2.0/resolve/main/dataset"
 

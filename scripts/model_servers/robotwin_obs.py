@@ -17,6 +17,10 @@ from typing import Any, Mapping
 import numpy as np
 
 CAMERAS = ("head_camera", "left_camera", "right_camera")
+# 官方 `encode_obs()` 把三相机统一 resize 到 (w=640, h=480) 再送进策略。
+# 考场 D435 相机实际是 320x240（task_config/demo_clean.yml: head_camera_type: D435），
+# 2026-11-25 实测：不做这步 resize 时 ACT 整集 0/1——模型按 640x480 训练，喂半分辨率就是分布外。
+RESIZE_WH = (640, 480)
 SHORT = {"head_camera": "head_cam", "left_camera": "left_cam", "right_camera": "right_cam"}
 
 
@@ -41,6 +45,42 @@ def to_chw01(img: np.ndarray) -> np.ndarray:
     if a.max(initial=0.0) > 1.5:
         a = a / 255.0
     return np.ascontiguousarray(a)
+
+
+def resize_bilinear(img: np.ndarray, out_w: int, out_h: int) -> np.ndarray:
+    """双线性 resize，保持 HWC/CHW 布局与 dtype 语义（对齐 cv2.resize INTER_LINEAR）。
+
+    为什么自己写：本模块是零依赖纯函数（只 numpy），不想为了一个 resize 把 cv2 拖进单测。
+    对齐的是"尺寸与插值方式"，不追求与 cv2 逐比特一致。
+    """
+    a = np.asarray(img)
+    if a.ndim != 3:
+        raise ValueError(f"图像维度应为 3，拿到 shape={a.shape}")
+    chw = a.shape[0] in (1, 3, 4) and a.shape[-1] not in (1, 3, 4)
+    hwc = np.moveaxis(a, 0, -1) if chw else a
+    h, w = hwc.shape[0], hwc.shape[1]
+    if (w, h) == (out_w, out_h):
+        return a
+
+    ys = (np.arange(out_h, dtype=np.float64) + 0.5) * (h / out_h) - 0.5
+    xs = (np.arange(out_w, dtype=np.float64) + 0.5) * (w / out_w) - 0.5
+    ys = np.clip(ys, 0, h - 1)
+    xs = np.clip(xs, 0, w - 1)
+    y0 = np.floor(ys).astype(np.int64); y1 = np.minimum(y0 + 1, h - 1)
+    x0 = np.floor(xs).astype(np.int64); x1 = np.minimum(x0 + 1, w - 1)
+    wy = (ys - y0)[:, None, None]
+    wx = (xs - x0)[None, :, None]
+
+    src = hwc.astype(np.float64)
+    top = src[y0][:, x0] * (1 - wx) + src[y0][:, x1] * wx
+    bot = src[y1][:, x0] * (1 - wx) + src[y1][:, x1] * wx
+    out = top * (1 - wy) + bot * wy
+
+    if np.issubdtype(a.dtype, np.integer):
+        out = np.clip(np.rint(out), 0, 255).astype(a.dtype)
+    else:
+        out = out.astype(a.dtype)
+    return np.ascontiguousarray(np.moveaxis(out, -1, 0) if chw else out)
 
 
 def flat_joint_state(js: Any, action_dim: int = 14) -> np.ndarray:
@@ -70,7 +110,8 @@ def build_policy_obs(
     for name in CAMERAS:
         if name not in images:
             raise KeyError(f"观测缺相机 {name}（拿到 {sorted(images)}）")
-        out[SHORT[name]] = to_chw01(images[name])
+        # 先按官方口径 resize 到 640x480，再转 CHW/0..1
+        out[SHORT[name]] = to_chw01(resize_bilinear(images[name], *RESIZE_WH))
 
     js = flat_joint_state(joint_state, action_dim)
     if policy == "act":

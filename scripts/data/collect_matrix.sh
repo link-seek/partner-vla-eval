@@ -21,12 +21,22 @@ case "$PROTO" in
 esac
 if [ -n "$REPLICATE" ]; then SUFFIX="${SUFFIX}-${REPLICATE}"; fi
 
-python3 - "$ROOT" "$MODEL" "$SUFFIX" "$PROTO" "$REPLICATE" <<'PY'
+# task 清单从 registry.exam.tasks 取（唯一真源，见 scripts/data/bench_config.py 注释）
+CFG_TASKS=$(python3 "$(dirname "$0")/bench_config.py" tasks)
+
+python3 - "$ROOT" "$MODEL" "$SUFFIX" "$PROTO" "$REPLICATE" "$CFG_TASKS" <<'PY'
 import json, pathlib, sys
 
 root, model, suffix, proto, replicate = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 base = pathlib.Path(root) / model
-tasks = ["grab_roller", "adjust_bottle", "place_phone_stand", "click_bell", "handover_block"]
+tasks = [t for t in sys.argv[6].split(",") if t]
+
+# 目录里有、但清单里没有的：多数是别的考场或改名残留，提醒但不收（避免混进报告）
+if base.is_dir():
+    known = set(tasks)
+    extra = sorted({d.name.split("-hard")[0].replace("-r2", "") for d in base.iterdir() if d.is_dir()} - known)
+    if extra:
+        print(f"[collect] 注意：{model} 下有不属于 exam.tasks 的目录，已跳过：{extra}", file=sys.stderr)
 
 out = {"model": model, "protocol": proto, "replicate": replicate or None, "tasks": {}}
 for task in tasks:
