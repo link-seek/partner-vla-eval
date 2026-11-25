@@ -13,8 +13,13 @@ ARG POLICY=act
 USER root
 
 # 适配器与它的零依赖转换模块放在同一目录，靠 PYTHONPATH 解决同级 import
+# 适配器的**全部**本地依赖都要 COPY：漏一个，构建期只看 robotwin_obs 是发现不了的，
+# 要等运行时 `from action_queue import ...` 才炸（2026-11-25 抽出公共件后踩到）。
+# 下面有 packaging 门禁守着这份清单。
 COPY scripts/model_servers/robotwin_policy.py /opt/serve/robotwin_policy.py
 COPY scripts/model_servers/robotwin_obs.py /opt/serve/robotwin_obs.py
+COPY scripts/model_servers/action_queue.py /opt/serve/action_queue.py
+COPY scripts/model_servers/act_ckpt.py /opt/serve/act_ckpt.py
 
 # DP（RoboTwin 官方 policy/DP 里的 vendored diffusion_policy）在 robotwin 环境里缺一批依赖。
 # 2026-11-25 实测：只补 hydra/dill 不够，import 依次报 einops → torch.accelerator(diffusers 太新)。
@@ -40,6 +45,10 @@ WORKDIR /opt/serve
 
 # 自检 1：转换模块可导入（纯 numpy，不需要 GPU）
 RUN conda run -n robotwin python -c "import robotwin_obs; print('robotwin_obs OK', robotwin_obs.RESIZE_WH)"
+
+# 自检 1b：适配器本体可导入——它的本地依赖（action_queue/act_ckpt/robotwin_obs）必须都齐。
+# 这一条才是"COPY 漏了"的告警；只 import robotwin_obs 抓不到。
+RUN cd /opt/serve && conda run -n robotwin python -c "import robotwin_policy; print('robotwin_policy OK')"
 
 # 自检 2：DP 的依赖组合真的能导入官方 deploy_policy —— 让构建失败在镜像里，而不是等到 smoke。
 # 2026-11-25 就是这么逐个试出来的（hydra/dill → einops → diffusers 版本），以后回归会直接红。
