@@ -64,6 +64,12 @@ jobs:
         # 实测漂移：ci_robotwin_full.sh 默认含 stack_blocks_two、collect_matrix.sh 含
         # place_phone_stand，两份都"跑得通"所以没人发现，代价是报告里 MISSING。
         run: python3 scripts/gates/check_task_list.py
+      - name: Python static check (ruff undefined names)
+        # 2026-11-25 教训：适配器里写了 os.environ 但没 import os，
+        # 单测碰不到、bash -n 也碰不到，只有真跑才崩（NameError）。F821 一条就能拦住。
+        run: |
+          python3 -m pip install --quiet ruff
+          ruff check --no-cache --select F821,F811,E9 scripts leaderboard/scripts
       - name: Referenced paths must exist
         # 漂移实例：README 曾引用 scripts/upstream/run_sharded.sh（已删）、
         # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。

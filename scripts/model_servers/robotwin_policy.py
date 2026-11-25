@@ -32,6 +32,7 @@ harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval(
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
