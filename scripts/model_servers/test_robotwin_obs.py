@@ -83,6 +83,11 @@ def main() -> int:
     except KeyError:
         check("缺相机应报错", True)
 
+    # 回归：numpy 数组作为 joint_state 时不得触发"真值歧义"
+    arr_js = np.zeros(14, dtype=np.float32)
+    o = build_policy_obs(imgs, arr_js, "dp")
+    check("numpy joint_state 不炸（真值歧义回归）", o["agent_pos"].size == 14)
+
     try:
         build_policy_obs(imgs, list(range(14)), "pi0")
         check("未知 policy 应报错", False, "未抛错")

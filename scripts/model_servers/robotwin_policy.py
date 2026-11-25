@@ -45,7 +45,7 @@ from robotwin_obs import build_policy_obs  # noqa: E402
 
 from vla_eval.model_servers.base import SessionContext
 from vla_eval.model_servers.predict import PredictModelServer
-from vla_eval.specs import IMAGE_RGB, RAW
+from vla_eval.specs import IMAGE_RGB, LANGUAGE, STATE_JOINT, DimSpec
 from vla_eval.types import Action, Observation
 
 # 官方 deploy_policy.yml 的默认值（ACT / DP 两份合并；未用到的键会被忽略）
@@ -154,16 +154,20 @@ class RoboTwinPolicyServer(PredictModelServer):
 
     # ---------------------------------------------------------------- specs
     def get_action_spec(self) -> dict[str, Any]:
-        return {"actions": RAW}
+        # 与 RobotWin benchmark 的声明逐字对齐（2026-11-25 从 benchmark 源码取）：
+        #   "joints": DimSpec("joints", 14, "joint_positions")
+        return {"joints": DimSpec("joints", int(self._usr_args.get("action_dim", 14)), "joint_positions")}
 
     def get_observation_spec(self) -> dict[str, Any]:
-        # joint_state 必须出现在 spec 里：`vla-eval test` 按 spec 造观测，
-        # 只靠 get_observation_params 的 send_state 在 test 路径不生效（实测）。
+        # 与 RobotWin benchmark 的声明逐字对齐（2026-11-25 从 benchmark 源码取）：
+        #   head_camera / left_camera / right_camera / state(STATE_JOINT) / language
+        # 注：send_state 时 benchmark 还会加 ee_state，我们不需要，故不声明。
         return {
-            "image": IMAGE_RGB,
+            "head_camera": IMAGE_RGB,
             "left_camera": IMAGE_RGB,
             "right_camera": IMAGE_RGB,
-            "joint_state": RAW,
+            "state": STATE_JOINT,
+            "language": LANGUAGE,
         }
 
     def get_observation_params(self) -> dict[str, Any]:
@@ -271,10 +275,14 @@ class RoboTwinPolicyServer(PredictModelServer):
     # ------------------------------------------------------------ inference
     def _to_robotwin_obs(self, obs: Observation) -> dict[str, Any]:
         """harness Observation → 官方 encode_obs 的产物（转换逻辑见 robotwin_obs.py）。"""
-        images = obs.get("images") or {}
-        if not isinstance(images, dict):
-            images = {"head_camera": images}
+        # 注意：不能用 `or` 兜底——numpy 数组的真值会抛 ValueError
+        # （2026-11-25 实测：js = obs.get("joint_state") or obs.get("state") 直接炸）。
+        images = obs.get("images")
+        if not isinstance(images, dict) or not images:
+            images = {k: obs[k] for k in ("head_camera", "left_camera", "right_camera") if k in obs}
         js = obs.get("joint_state")
+        if js is None:
+            js = obs.get("state")
         if js is None:
             raise KeyError("观测缺 joint_state（ACT 要 qpos / DP 要 agent_pos，都是 14 维）")
         return build_policy_obs(
