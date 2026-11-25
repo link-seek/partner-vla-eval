@@ -1,0 +1,27 @@
+{
+  "collected_at": "2026-11-25T10:44Z",
+  "bucket": "obs://so101-sim-pipeline",
+  "region": "cn-north-4",
+  "storage_class": "standard",
+  "bucket_stat": {
+    "objects": 3457,
+    "size": "58.07GB"
+  },
+  "prefix_stats": {
+    "eval/": "167.77MB"
+  },
+  "lifecycle_rules": [
+    {
+      "ID": "auto-delete-download-7d",
+      "Prefix": "下载/",
+      "Status": "Enabled",
+      "ExpirationDays": 7
+    }
+  ],
+  "versioning": {
+    "observed": "versionId=null（未启用对象版本化）"
+  },
+  "conclusion": "eval/ 前缀没有任何生命周期规则 → 默认永久保留，与 ADR-0002「sqlite/产物全留」一致；唯一规则只作用于 下载/（7 天）。",
+  "cost_estimate": "eval/ 167.77MB × ¥0.099/GB/月 ≈ ¥0.017/月",
+  "how_to_recheck": "obsutil lifecycle obs://so101-sim-pipeline -method=get -localfile=/tmp/lifecycle.json；obsutil ls obs://so101-sim-pipeline/eval -s -du"
+}

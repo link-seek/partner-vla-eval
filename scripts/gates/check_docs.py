@@ -95,7 +95,9 @@ def main() -> int:
     report("reports/ADR 的状态标签有效", bad_status, " → 缺 status 或值非法")
 
     # 站外的"根目录参考文档"必须是活的：被至少一篇其他文档引用，否则就是孤儿稿
-    all_text = {p: p.read_text(errors="ignore") for p in pages}
+    # 引用源不限于 docs/ 内部：README / CONTRIBUTING 也算（它们会指向 AGENTS、howto 等）
+    sources = list(pages) + sorted(ROOT.glob("*.md"))
+    all_text = {p: p.read_text(errors="ignore") for p in sources}
     orphans = []
     for p in pages:
         rel = str(p.relative_to(ROOT))

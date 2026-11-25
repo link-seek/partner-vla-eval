@@ -19,6 +19,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
       - name: bash -n all scripts
         run: |
           fail=0
@@ -61,6 +64,16 @@ jobs:
           python3 -m pip install --quiet pyyaml numpy jsonschema
           python3 scripts/gates/run_all.py
 
+      - name: Docs site build (jekyll, strict front matter)
+        # check_docs 只校验 front-matter 字段，不能证明站点真能构建。
+        # 这一步用 docs/Gemfile 起真的 jekyll，坏 front-matter / 坏 Liquid 在 PR 就红。
+        # 注意：用的是 remote_theme（just-the-docs），需要网络拉主题，runner 有外网。
+        run: |
+          ruby -v
+          cd docs
+          bundle install --quiet --jobs 4
+          bundle exec jekyll build --strict_front_matter --destination /tmp/_site
+          test -f /tmp/_site/index.html && echo "SITE BUILD OK"
       - name: Workflow syntax (actionlint is a separate workflow)
         # actionlint 放在 .github/workflows/actionlint.yml（社区 action，pin 版本），此处只解析 YAML。
         run: |

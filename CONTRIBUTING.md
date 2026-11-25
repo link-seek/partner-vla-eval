@@ -84,9 +84,13 @@ main 上只允许常驻能力。任何只做一次的东西活在分支，用完
 | 决策（为什么这么定） | `docs/adr/ADR-NNNN-*.md`，**接受后冻结** | 不进站（`nav_exclude`） |
 | 运维手册 | `docker/AGENTS.md`、`scripts/AGENTS.md`（就近） | 不进站 |
 
-站点只发布公开面；内部稿一律 `nav_exclude: true`。
+站点只发布公开面；内部稿一律 `nav_exclude: true`。目录规则见 `docs/AGENTS.md`。
+产物保留策略（OBS 桶生命周期）见 `docs/adr/ADR-0002` 与 `docs/howto/obs-lifecycle.md`。
 
-门禁 `scripts/gates/check_docs.py` 判定四件事：
+门禁分两层：
+
+- **构建**：CI 跑 `bundle exec jekyll build --strict_front_matter`（`docs/Gemfile`）——字段对了但站点构建不出来，同样红
+- **字段/归属**：`scripts/gates/check_docs.py` 判定四件事：
 1. 每篇都有 front-matter；
 2. 进站页面必须有 `title`；
 3. 每篇归属明确：`parent` / `nav_exclude` / `has_children` / 站点首页 四选一；

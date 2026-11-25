@@ -10,3 +10,10 @@ configs/model_servers/serve-robotwin-local.yaml
 .env
 .env.*
 !.env.example
+
+# Jekyll 构建产物与缓存（docs/Gemfile 供 CI 构建用）
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+docs/vendor/
+docs/Gemfile.lock

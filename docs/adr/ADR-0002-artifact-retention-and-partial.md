@@ -35,6 +35,19 @@ nav_exclude: true
 - `check_leaderboard` 两条门禁：`n != 50` 即红、附录缺 `partial/n_target` 即红（反例已验证）
 - 附录样例 `leaderboard/partial/x-vla-robotwin2-hard-grab_roller.json`（真实数据 8/12）
 
+**OBS 侧核实（2026-11-25，此前只是"决定"，这次是"验证"）**
+
+| 项 | 实测 |
+|---|---|
+| 桶 | `obs://so101-sim-pipeline`（cn-north-4，standard，3457 对象 / 58.07GB） |
+| 生命周期规则 | **只有一条**：`下载/` 前缀 7 天过期 |
+| `eval/` 前缀 | **无任何规则 → 默认永久保留**；实测 167.77MB |
+| 对象版本化 | 未启用（`versionId=null`，不会堆积旧版本） |
+| 成本 | 167.77MB × ¥0.099/GB/月 ≈ **¥0.017/月** |
+
+证据存档：`docs/adr/evidence/obs-lifecycle-2026-11-25.json`；
+复核/调整方法：`docs/howto/obs-lifecycle.md`（含"`put` 是整份替换"的坑）。
+
 **未完成（明确记着）**
 
 - 确定性实验未跑（需 GPU 空闲窗口，与 A5 同批）；因此**回归频率仍未定**
