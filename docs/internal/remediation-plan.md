@@ -1,3 +1,8 @@
+---
+title: 整改计划：把'能说'变成'能验'
+nav_exclude: true
+---
+
 # 整改计划：把"能说"变成"能验"
 
 > 制定：2026-11-24 ｜ 依据：`docs/reports/eval-engineering-review.md`（工程化）+ `docs/reports/layout-review.md`（目录）
