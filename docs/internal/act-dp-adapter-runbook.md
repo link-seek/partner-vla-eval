@@ -253,12 +253,13 @@ TARGET_EPISODES=50 bash scripts/data/rescue_partial.sh "$S" /tmp/rescue
 ## 镜像构建：为什么不在 GitHub runner 上打（2026-11-25 实测选择）
 
 `build-serve.yml` 打 robotwin 基座镜像时，runner 需要先把 **11.3GB** 的 bench 镜像从
-SWR（cn-north-4）**跨境**拉到 Azure：实测 77 分钟仍停在 `Build + push` 的拉取阶段，日志在运行中
-不可下载，只能干等。于是改为在 0002 本机构建（镜像已在本地，无需拉取）+ 推同区 SWR：
+SWR（cn-north-4）**跨境**拉到 Azure。2026-11-25 实测：跑了 **约 18 分钟**仍停在 `Build + push`
+（拉取阶段，日志运行中不可下载，看不到进度条），据此判断跨境拉 11.3GB 不划算，改为在 0002
+本机构建（镜像已在本地，无需拉取）+ 推同区 SWR：
 
 | 方式 | 耗时 |
 |---|---|
-| GitHub runner（跨境拉 11.3GB） | >77 min（未完成，已取消） |
+| GitHub runner（跨境拉 11.3GB） | 约 18 min 未完成（已取消；当时无法判断还需多久） |
 | 0002 本地构建（COPY + pip） | ACT **6s** / DP **11s**；push 仅传新增层 |
 
 这属于**构建**，不是评测/验证负载（不占 GPU、不起仿真），所以在 0002 上做不违反
