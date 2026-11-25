@@ -167,6 +167,16 @@ jobs:
           path: matrix/summary/
           retention-days: 30
           if-no-files-found: warn
+      # 完整结果（aggregate/sqlite/逐集 jsonl）也进 GitHub artifact：
+      # run 结束会 stop-ecs，之后只能靠 OBS；artifact 让取数不依赖开机。
+      - name: Upload full matrix results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ inputs.protocol }}${{ inputs.replicate != '' && format('-{0}', inputs.replicate) || '' }}
+          path: matrix/
+          retention-days: 30
+          if-no-files-found: warn
       - name: Upload to OBS
         if: always()
         env:
