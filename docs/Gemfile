@@ -1,0 +1,10 @@
+# 本地/CI 构建用（GitHub Pages 用的是另一套 remote_theme 流程）
+# 目的：让 `jekyll build --strict_front_matter` 能在 CI 里跑，坏 front-matter 在 PR 就红。
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.3"
+gem "jekyll-remote-theme", "~> 0.4"
+gem "jekyll-seo-tag", "~> 2.8"
+gem "jekyll-sitemap", "~> 1.4"
+gem "jekyll-include-cache", "~> 0.2"
+gem "webrick", "~> 1.8"

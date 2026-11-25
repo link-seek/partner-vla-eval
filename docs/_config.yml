@@ -6,6 +6,14 @@ baseurl: "/partner-vla-eval"
 color_scheme: light
 search_enabled: true
 heading_anchors: true
+# 插件：GitHub Pages 内置这些；本地/CI 构建必须显式声明，否则 remote_theme 不生效
+# （2026-11-25 实测：不写这几行时 CI 构建 0.34s 通过但没有主题资源 = 假绿）
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-include-cache
+
 markdown: kramdown
 kramdown:
   input: GFM
