@@ -48,6 +48,7 @@ status: living
 | 维度 | 结果 |
 |---|---|
 | 覆盖模型 | **2 个**（DB-CogACT、X-VLA） |
+| 另：ACT/DP 100-demo 参考 | 见第八节；**不计入** ±4pp 统计 |
 | task 级对照 | **9 条** |
 | ±4pp 内 | **7 条** |
 | 离群 | 2 条：CogACT `place_empty_cup` −12pp、X-VLA `place_phone_stand` +12pp |
@@ -77,8 +78,8 @@ status: living
 
 | 项 | 预期对照（官方 Easy） | 成本 |
 |---|---|---|
-| ACT `click_bell` × 50ep | 官方 58% | ≈¥104 |
-| DP `click_bell` × 50ep | 官方 54% | ≈¥104 |
+| ~~ACT `click_bell` × 50ep~~ | **已完成：92%（46/50），50 种子** | 实花 ≈¥50 |
+| DP `click_bell` × 50ep | 进行中（1 集 smoke 1/1）；官方 54% 仅参考 | ≈¥104 |
 | place_empty_cup +100ep（CogACT） | 官方 28%，看是否收敛 | ≈¥208 |
 
 ACT/DP 是**官方自带的基线**，跑它们等于"用官方自己的模型验我们的尺子"，比第三方模型更有说服力。
@@ -181,5 +182,14 @@ python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
 - 要对齐官方，需要 50-demo 权重（公开仓没有）或自训 50-demo（属 R01 范围）；
 - 这一条必须写在结果旁边，否则 94% vs 58% 会被误读成"我们的尺子偏松"。
 
-（中途读数：ACT click_bell 50 种子跑到 31 集时 29 success；最终以 aggregate 为准，
-但无论多少，都不改变"口径不同"这个结论。）
+### 实测结果（2026-11-25，n=50）
+
+| 模型 | 我们 | 官方（50-demo 口径） | 差 | 判读 |
+|---|---|---|---|---|
+| ACT `click_bell` | **92%（46/50）**，50 个不同种子，0 error | 58% | **+34pp** | 口径不同（100-demo）→ **参考值，不作一致判据** |
+| DP `click_bell` | 50 集进行中（1 集 smoke 1/1 已过） | 54% | — | 同上 |
+
+证据：`docs/data/act-baseline_robotwin-click_bell-x50.json`（原始 aggregate 在 0002 `/root/r01/act50v3`）。
+
++34pp 不是"尺子偏松"：官方训练用 50 demos、我们用 100 demos，模型本身就强一截。
+这条要和 X-VLA 全量 −1.4pp（同口径）分开读。
