@@ -171,6 +171,13 @@ python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
     --aggregate <aggregate.json>
 ```
 
+官方值不在榜单快照里的模型（DB-CogACT）用显式覆盖，出处必须写：
+
+```bash
+python3 scripts/ci/calibration_row.py --entry db-cogact --task place_empty_cup \
+    --official-value 28 --official-source "Dexbotic 论文/官方 repo" --aggregate <agg.json>
+```
+
 输出即为可粘贴的表格行（含 K/N、差值、超出 4pp 的自动标"离群"），同时打印一份 JSON
 （ours/official/delta/outlier/snapshot/board_updated），供报告与榜单引用。
 快照本身由 `calibration` 门守住：13 项锚点断言（ACT 58、DP 54、X-VLA 100 / 67.96、50 task、任务名映射、
