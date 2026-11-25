@@ -279,3 +279,24 @@ numcodecs 0.13.1, numba 0.60.0, atomics 1.0.3, diffusers 0.27.2
 - `diffusers>=0.34` 会调 `torch.accelerator`（需 torch≥2.6），本镜像 torch 2.4.1 → 必须 0.27.x
 - 推断路径**不需要** pytorch3d / r3m / robomimic / wandb / pygame / pymunk（import 测试证明）
 - 依赖正确性已写进 Dockerfile 的**构建期自检**：`import policy.DP.deploy_policy` 失败则构建失败
+
+## 坑 9：健康检查用了 `/dev/tcp`，在容器里永远 unhealthy
+
+**症状**：前置检查全过、镜像在本地、端口空闲，但 `serve 未通过健康检查`，看起来像"服务起不来"。
+实际服务**好得很**——日志里 `server listening on 0.0.0.0:8031` 清清楚楚。
+
+**根因**：`docker run --health-cmd` 由容器内的 **`/bin/sh`（dash）** 执行，
+而 `/dev/tcp/...` 是 **bash 专有**特性：
+```
+sh: 1: cannot create /dev/tcp/127.0.0.1:8031: Directory nonexistent
+```
+（同一个容器里 `bash -c '(echo > /dev/tcp/...)'` 是通的 → 说明不是网络问题，是 shell 问题。）
+
+**正确做法**：打服务自己的 HTTP 端点（serve 会打印 `HTTP config endpoint at http://…/config`）：
+```bash
+--health-cmd "curl -fsS -o /dev/null http://127.0.0.1:$PORT/config || exit 1"
+```
+实测 `curl … /config` → HTTP **200**。
+
+**方法论**：探针本身也要验证。别假设"等我用 bash 试是通的，健康检查也一定通"——
+执行探针的 shell 不是我所在的 shell。

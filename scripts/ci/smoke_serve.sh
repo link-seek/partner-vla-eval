@@ -167,10 +167,13 @@ YML
 CTR_NAME="smoke-${POLICY}-$$"
 docker rm -f "$CTR_NAME" >/dev/null 2>&1 || true
 # 端口走 --address 显式覆盖：yaml 里没有 server.port 这个概念（见 --help）
-# 就绪判定用 Docker 原生 HEALTHCHECK（标准原语），不再手写 TCP 轮询循环：
-# 健康状态由 docker 自己维护，我们只读 .State.Health.Status。
+# 就绪判定用 Docker 原生 HEALTHCHECK（标准原语），不再手写 TCP 轮询循环。
+# 探针必须打**服务自己的 HTTP 端点** `/config`（serve 日志会打印它，实测 200）。
+# 教训（2026-11-25）：别用 `/dev/tcp` —— HEALTHCHECK 由容器里的 /bin/sh(dash) 执行，
+# /dev/tcp 是 bash 专有特性，dash 下报 "cannot create /dev/tcp/...: Directory nonexistent"，
+# 于是健康检查永远 unhealthy，看起来像"服务起不来"，其实服务好得很。
 docker run -d --name "$CTR_NAME" --gpus '"device=0"' --network host --entrypoint bash \
-  --health-cmd "(echo > /dev/tcp/127.0.0.1/$PORT) 2>/dev/null || exit 1" \
+  --health-cmd "curl -fsS -o /dev/null http://127.0.0.1:$PORT/config || exit 1" \
   --health-interval=5s --health-timeout=3s --health-retries=40 --health-start-period=15s \
   -v "$WORKDIR:$CTR_WD:ro" "${EXTRA_MOUNT[@]}" \
   -e CUDA_VISIBLE_DEVICES=0 -e HF_HUB_OFFLINE=1 \
