@@ -253,7 +253,7 @@ C 目录归位（会改路径，最后做）
 | A5 重复轮 | 🟡 管线就绪、待跑 | matrix 加 `replicate` 输入；产物/OBS 按轮次分目录；`make_leaderboard.py` 支持多轮合并（replicate_count + rate_min/max）；门禁强制多轮必带极差 |
 | B1 Hard | 🔄 运行中（run 45503556969，X-VLA 5 task） | `task_config: demo_randomized` 已确认；按实测吞吐 250ep ≈ 15.8h ≈ ¥521 |
 | B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
-| B3 ACT/DP 适配器 | 🟡 代码+单测完成，**未 smoke** | 观测转换 16 项单测进 lint；镜像内实测：ACT 可导入、DP 缺 hydra/dill；registry 仍 `pending` |
+| B3 ACT/DP 适配器 | 🟢 ACT **已整集跑通**（1/1），DP 待验 | ACT click_bell 1 task×1ep = 100%（400 步无错）；根因是漏了官方 640×480 resize（0/1→1/1 对照）；适配器已进 `Dockerfile.serve-robotwin`，等镜像构建完即可从 pending 升 verified |
 | C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
 | C2 结果 JSON → docs/data | ✅ 完成 | 19 JSON + deck → docs/decks；registry/leaderboard/schema 同步 |
 | C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |
@@ -366,7 +366,22 @@ reset_model → 仍 14 维
 **官方 ACT 只覆盖本考场 2/5**（adjust_bottle、click_bell），grab_roller/place_phone_stand/handover_block 无 ckpt。
 → 榜上三家覆盖面各不相同：X-VLA 5/5、CogACT 3/5、ACT 2/5。
 
-**B3 剩余**：跑满一整集（需 GPU 空闲）。仍在 `pending`。
+**B3 剩余**：ACT 已在 2026-11-25 跑满一整集（详见下节）；DP 仍待验。
+
+## 16. B3 实测收口（2026-11-25，真跑）
+
+| 项 | 结果 |
+|---|---|
+| ACT `click_bell` 1 task × 1 ep | **100%（1/1）**，400 步，无 error、无 Spec mismatch |
+| 关键根因 | 漏了官方 `encode_obs` 的 `cv2.resize(..., (640,480))`；考场 D435 输出 240×320 |
+| 对照证据 | 缺 resize：0/1（连跑 2 次）；补 resize：1/1 |
+| 尺寸实证 | serve 侧日志 `image shapes={'head_camera': (240, 320, 3), ...}` |
+| 可复现化 | `docker/Dockerfile.serve-robotwin`（基座钉 manifest digest）+ `build-serve.yml` 两个新 tag；ACT/DP 共用，`POLICY` 切换 |
+| ckpt 钉版 | ACT `c248f218…`、DP `7e57ab03…`（HF sha，40 hex） |
+| 覆盖核实 | 直读 HF 文件清单：ACT 仅 `adjust_bottle`/`click_bell` → **2/5**（与 registry 一致） |
+| 仍未 verified 的原因 | 适配器此前靠本地挂载；镜像构建完成后才有 `serve_image_digest` |
+
+坑 7/坑 8 详见 `docs/internal/act-dp-adapter-runbook.md`。
 
 ---
 
