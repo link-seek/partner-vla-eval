@@ -21,5 +21,18 @@
     "med": null
   },
   "date": "2026-11-23",
-  "note": "零 error。另一轮 8/50=16%，差 4pp 在噪声带内，本轮为准。"
+  "note": "零 error。另一轮 8/50=16%，差 4pp 在噪声带内，本轮为准。",
+  "stats": {
+    "n": 50,
+    "success": 6,
+    "mean_success": 0.12,
+    "stderr": 0.046067,
+    "stderr_method": "bootstrap(2000)",
+    "stderr_analytic": 0.045957,
+    "ci95": [
+      0.0562,
+      0.2381
+    ],
+    "ci95_method": "wilson"
+  }
 }

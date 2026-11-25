@@ -22,5 +22,18 @@
   "hard_success": null,
   "gap": null,
   "note": "Easy only；Hard 待补。4 分片并行；零 error。",
-  "report_version": "v1 (docs/tutorial/leaderboard.md)"
+  "report_version": "v1 (docs/tutorial/leaderboard.md)",
+  "stats": {
+    "n": 50,
+    "success": 48,
+    "mean_success": 0.96,
+    "stderr": 0.027658,
+    "stderr_method": "bootstrap(2000)",
+    "stderr_analytic": 0.027713,
+    "ci95": [
+      0.8654,
+      0.989
+    ],
+    "ci95_method": "wilson"
+  }
 }
