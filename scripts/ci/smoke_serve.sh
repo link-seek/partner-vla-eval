@@ -170,13 +170,16 @@ output_dir: "$CTR_RESULTS"
 benchmarks:
   - benchmark: "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark"
     name: $TASK
-    episodes_per_task: $EPISODES
+    # test_num = 不同种子的任务数，episodes_per_task = 每个任务跑几集。
+    # n=50 必须是 50 个种子 × 1 集；写成 1 个任务 × 50 集 = 同一集重复 50 次
+    # （2026-11-25 实测：5 集全是 seed 100000、69 步，看起来像 5/5，其实 n=1）。
+    episodes_per_task: 1
     params:
       task_name: $TASK
       task_config: demo_clean
       seed: 0
       instruction_type: seen
-      test_num: 1
+      test_num: $EPISODES
       skip_expert_check: true
       fast_init: false
       action_type: qpos
@@ -240,11 +243,19 @@ AGG="$HOST_RESULTS/${TASK}_aggregate.json"
 ok "aggregate 落在预期路径：$AGG"
 # 断言对齐 aggregate 的真源字段：task.num_errors + 每集 failure_reason/failure_detail。
 # 2026-11-25 教训：之前只看 e["error"]（aggregate 根本没有这个键）→ 明明 1 集报错还判 PASS。
-python3 - "$AGG" <<'PY'
+python3 - "$AGG" "$EPISODES" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 t = d.get("tasks", [d])[0]
 eps = t.get("episodes", [])
+expected = int(sys.argv[2])
+seeds = [e.get("seed") for e in eps]
+uniq = len(set(seeds))
+print(f"[smoke] 种子：{uniq} 个不同 / {len(eps)} 集（期望 {expected}）")
+if uniq < expected:
+    print(f"[smoke] FAIL 种子重复：只有 {uniq} 个，等于把同一集跑了 {len(eps)} 次，n 不可信")
+    print("[smoke] 修法：test_num=$EPISODES + episodes_per_task=1（见 run yaml 注释）")
+    sys.exit(2)
 ok = sum(1 for e in eps if (e.get("metrics") or {}).get("success"))
 err = int(t.get("num_errors") or 0) or sum(
     1 for e in eps if e.get("failure_reason") or e.get("failure_detail"))
