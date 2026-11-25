@@ -41,7 +41,8 @@ python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
 # → | click_bell | 58%（29/50） | 58% | **+0pp** |
 ```
 
-`--band`（默认 4pp）之外的差异会标 `← 离群`；`--selftest` 有 13 项锚点断言，
+生成器默认拒绝两类"看起来有数、其实无效"的 aggregate：不同种子数 < n（同一集重复跑）、
+n < 10（区间太宽）；`--selftest` 有 16 项断言（含这两条），
 已进 `scripts/gates/run_all.py` 的 `calibration` 门（快照被改坏会直接红）。
 
 ## 刷新流程

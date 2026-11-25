@@ -122,6 +122,14 @@ matrix 路径一直是对的（`episodes_per_task: 1` + `test_num: 50`），所�
 
 所以现在"n=50"有三个必要条件：不同种子 50 个、每集独立跑、error 计数为 0。缺一个都不是 n=50。
 
+这两条现在由生成器**强制**，不再靠人看：
+
+| 输入 | `calibration_row.py` 行为 |
+|---|---|
+| 不同种子数 < n（假 n） | **拒绝**，提示 `test_num/episodes_per_task` 配反；确需继续用 `--allow-repeated-seeds` |
+| n < 10 | **拒绝**（区间半宽 >20pp 不能进表）；查链路用 `--allow-small-n` |
+| 正常 n=50、种子各不相同 | 输出表格行 + JSON（含 `distinct_seeds`） |
+
 ---
 
 ## 六、官方基线的官方值（从快照读，非手抄）

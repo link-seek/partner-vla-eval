@@ -58,17 +58,51 @@ def official_value(snap: dict, entry_id: str, task: str, difficulty: str = "easy
     return float(series[idx]), e["name"]
 
 
-def read_aggregate(path: Path) -> tuple[int, int, int]:
-    """返回 (success, n, errors)。兼容 mean_success 无量级 success 的报告。"""
+def read_aggregate(path: Path, require_distinct_seeds: bool = True) -> dict:
+    """读 aggregate，返回 success/n/errors/seed 数，并拒绝"重复种子的假 n"。
+
+    兼容两种格式：
+      - harness aggregate：{tasks:[{episodes:[{seed,metrics,...}], num_errors}]}
+      - 报告摘要：{mean_success, n}（没有逐集信息，无法校验种子）
+
+    2026-11-25 实测：episodes_per_task=50 + test_num=1 会把同一集跑 50 次，
+    aggregate 照样给 mean_success=1.0，看起来像 50/50。种子数就是判据。
+    """
     d = json.loads(path.read_text())
-    n = int(d.get("n") or 0)
-    success = d.get("success")
-    if success is None:
-        mean = d.get("mean_success")
-        if mean is None or not n:
-            raise SystemExit(f"{path} 里没有 success 也没有 mean_success+n")
-        success = round(float(mean) * n)
-    return int(success), n, int(d.get("errors") or 0)
+    seeds: list = []
+    tasks = d.get("tasks")
+    if isinstance(tasks, list):
+        if len(tasks) != 1:
+            raise SystemExit(f"{path} 含 {len(tasks)} 个 task；校准行只接受单 task aggregate")
+        t = tasks[0]
+        eps = t.get("episodes") or []
+        n = int(t.get("num_episodes") or len(eps))
+        success = sum(1 for e in eps if (e.get("metrics") or {}).get("success"))
+        errors = int(t.get("num_errors") or 0) or sum(
+            1 for e in eps if e.get("failure_reason") or e.get("failure_detail"))
+        seeds = [e.get("seed") for e in eps if e.get("seed") is not None]
+        if eps and n != len(eps):
+            raise SystemExit(f"{path}: num_episodes={n} 与 episodes={len(eps)} 不一致")
+    else:
+        n = int(d.get("n") or 0)
+        success = d.get("success")
+        if success is None:
+            mean = d.get("mean_success")
+            if mean is None or not n:
+                raise SystemExit(f"{path} 里没有 success 也没有 mean_success+n")
+            success = round(float(mean) * n)
+        success = int(success)
+        errors = int(d.get("errors") or 0)
+        seeds = [x for x in (d.get("seeds") or []) if x is not None]
+
+    uniq = len(set(seeds))
+    if require_distinct_seeds and seeds and uniq < n:
+        raise SystemExit(
+            f"{path}: 只有 {uniq} 个不同种子，却有 n={n} 集——"
+            "同一集被重复跑（test_num/episodes_per_task 配反的典型症状）。"
+            "确认后用 --allow-repeated-seeds 才能继续。")
+    return {"success": success, "n": n, "errors": errors, "seeds": uniq,
+            "seed_checked": bool(seeds)}
 
 
 def fmt_row(task: str, success: int, n: int, official: float, errors: int, band: float) -> tuple[str, float]:
@@ -127,9 +161,29 @@ def selftest() -> int:
     with tempfile.TemporaryDirectory() as td:
         p = Path(td) / "a.json"
         p.write_text(json.dumps({"mean_success": 0.58, "n": 50, "errors": 0}))
-        check("mean_success 反推 success", read_aggregate(p) == (29, 50, 0), read_aggregate(p))
+        a = read_aggregate(p)
+        check("mean_success 反推 success", (a["success"], a["n"], a["errors"]) == (29, 50, 0), a)
         p.write_text(json.dumps({"success": 31, "n": 50, "errors": 2}))
-        check("显式 success 优先", read_aggregate(p) == (31, 50, 2), read_aggregate(p))
+        a = read_aggregate(p)
+        check("显式 success 优先", (a["success"], a["n"], a["errors"]) == (31, 50, 2), a)
+
+        def harness(seeds):
+            return {"tasks": [{"episodes": [
+                {"seed": s, "metrics": {"success": i % 2 == 0}} for i, s in enumerate(seeds)
+            ], "num_errors": 0}]}
+
+        p.write_text(json.dumps(harness([100000, 100001])))
+        a = read_aggregate(p)
+        check("harness 格式逐集统计", (a["success"], a["n"], a["seeds"]) == (1, 2, 2), a)
+
+        p.write_text(json.dumps(harness([100000, 100000])))
+        try:
+            read_aggregate(p)
+            check("重复种子必须拒绝", False, "没抛")
+        except SystemExit as e:
+            check("重复种子必须拒绝", "不同种子" in str(e), str(e))
+        a = read_aggregate(p, require_distinct_seeds=False)
+        check("允许时才放行", a["seeds"] == 1, a)
 
     if fails:
         print(f"\nFAILED: {len(fails)} -> {fails}")
@@ -149,6 +203,10 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--difficulty", default="easy", choices=["easy", "hard"])
     ap.add_argument("--snapshot", type=Path, default=DEFAULT_SNAPSHOT)
     ap.add_argument("--band", type=float, default=BAND_PP)
+    ap.add_argument("--allow-small-n", action="store_true",
+                    help="默认拒绝 n<10 的 aggregate（区间太宽，不能进表）")
+    ap.add_argument("--allow-repeated-seeds", action="store_true",
+                    help="默认拒绝「不同种子数 < 集数」的 aggregate（假 n）")
     ap.add_argument("--official-only", action="store_true")
     ap.add_argument("--selftest", action="store_true")
     a = ap.parse_args(argv)
@@ -166,12 +224,19 @@ def main(argv: list[str]) -> int:
         return 0
 
     errors = a.errors
+    agg = None
     if a.aggregate:
-        success, n, errors = read_aggregate(a.aggregate)
+        agg = read_aggregate(a.aggregate, require_distinct_seeds=not a.allow_repeated_seeds)
+        success, n, errors = agg["success"], agg["n"], agg["errors"]
     elif a.success is not None and a.n:
         success, n = a.success, a.n
     else:
         ap.error("需要 --aggregate 或 --success + --n")
+
+    if n < 10 and not a.allow_small_n:
+        raise SystemExit(
+            f"n={n} 太小（95% 区间半宽 >20pp），不作分数结论；"
+            "确认只是查链路就用 --allow-small-n。")
 
     row, delta = fmt_row(a.task, success, n, official, errors, a.band)
     print(row)
@@ -181,6 +246,7 @@ def main(argv: list[str]) -> int:
         "ours": round(100.0 * success / n, 2) if n else None,
         "official": official, "delta_pp": round(delta, 2),
         "success": success, "n": n, "errors": errors,
+        "distinct_seeds": (agg or {}).get("seeds"),
         "outlier": abs(delta) > a.band, "band_pp": a.band,
         "snapshot": str(a.snapshot.relative_to(ROOT)) if a.snapshot.is_relative_to(ROOT) else str(a.snapshot),
         "board_updated": snap["board"]["updated"],
