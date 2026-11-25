@@ -73,7 +73,13 @@ jobs:
           cd docs
           bundle install --quiet --jobs 4
           bundle exec jekyll build --strict_front_matter --destination /tmp/_site
-          test -f /tmp/_site/index.html && echo "SITE BUILD OK"
+          test -f /tmp/_site/index.html || { echo "FAIL: 没生成 index.html"; exit 1; }
+          # 只生成空壳也算失败：必须有主题资源（just-the-docs 的 css/js）
+          ls -R /tmp/_site/assets 2>/dev/null | head -20
+          test -d /tmp/_site/assets/css || {
+            echo "FAIL: 缺主题资源 —— remote_theme 没生效（_config.yml 需要 plugins: jekyll-remote-theme）"
+            exit 1; }
+          echo "SITE BUILD OK ($(find /tmp/_site -name '*.html' | wc -l) 个页面)"
       - name: Workflow syntax (actionlint is a separate workflow)
         # actionlint 放在 .github/workflows/actionlint.yml（社区 action，pin 版本），此处只解析 YAML。
         run: |
