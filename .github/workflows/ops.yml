@@ -1,0 +1,53 @@
+name: ops
+
+# 常驻运维入口（登记为 rare）：原先 4 个一次性 workflow 收敛到这里。
+# 规则见 CONTRIBUTING 第二/三节：main 只放常驻能力；一次性动作开分支做完即删。
+#
+# 每个 action 对应的手工等价步骤见 docs/howto/：
+#   repair-0001 / repair-0002 → docs/howto/repair-runner.md
+#   tailnet-join              → docs/howto/tailnet-join.md
+#   audit                     → 只读审计（du / docker images / nvidia-smi）
+#
+# 为什么跑在 hw21：它到 V100 的 22 通，且有 hcloud CLI；V100 本身不再需要有 workflow。
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "要执行的动作"
+        required: true
+        type: choice
+        options:
+          - audit
+          - repair-0002
+          - repair-0001
+          - tailnet-join
+      hostname:
+        description: "tailnet-join 用：V100 在 tailnet 里的主机名"
+        required: false
+        default: "v100-0002"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ops-${{ inputs.action }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: [self-hosted, hw21]
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: ops action
+        env:
+          ACTION: ${{ inputs.action }}
+          TAILNET_HOSTNAME: ${{ inputs.hostname }}
+          V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
+          V100_REG_TOKEN: ${{ secrets.V100_REG_TOKEN }}
+          PROD_GH_TOKEN: ${{ secrets.PROD_GH_TOKEN }}
+          AGENT_GITHUB_TOKEN: ${{ secrets.AGENT_GITHUB_TOKEN }}
+          PROD_HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
+          PROD_HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
+          TS_API_KEY: ${{ secrets.TS_API_KEY }}
+        run: bash scripts/ops/run.sh

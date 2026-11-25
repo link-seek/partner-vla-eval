@@ -4,11 +4,6 @@
     "actionlint": {
       "kind": "routine"
     },
-    "audit-v100": {
-      "kind": "rare",
-      "owner": "@xieyucheng123",
-      "when": "排查 runner 环境异常（可复用审计）"
-    },
     "build-benchmark-slim": {
       "kind": "routine"
     },
@@ -63,26 +58,16 @@
     "r01-prep": {
       "kind": "routine"
     },
-    "repair-v100": {
-      "kind": "rare",
-      "owner": "@xieyucheng123",
-      "when": "runner 装机 / agent 损坏（0002）"
-    },
-    "repair-v100-0001": {
-      "kind": "rare",
-      "owner": "@xieyucheng123",
-      "when": "runner 装机（0001，与 0002 隔离）"
-    },
     "secret-hygiene": {
       "kind": "routine"
     },
     "sync-images": {
       "kind": "routine"
     },
-    "ts-join-v100": {
+    "ops": {
       "kind": "rare",
       "owner": "@xieyucheng123",
-      "when": "runner 重装后重新加入 tailnet"
+      "when": "机器重装/审计/tailnet 重入；action=audit|repair-0002|repair-0001|tailnet-join（howto 见 docs/howto/）"
     }
   },
   "configs": {
