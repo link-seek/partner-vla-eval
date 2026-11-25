@@ -136,5 +136,24 @@ adjust_bottle clean_50 n=50 sample=5 OK T=140..153
 检查项：`joint_action/vector` 必须 (T,14)、左右臂 (T,6)、gripper (T,)、三路相机帧数 = T、
 首帧 cv2 能解码、同一文件内 T 一致。**0 失败组**，可以进入 S3。
 
+### 统计量（全量，非抽样）
+
+`python3 scripts/data/robotwin_data_stats.py --root /data/robotwin-train --out .../stats.json`
+对 2,750 个文件、约 38 万帧逐帧累计（不是抽样）：
+
+| task | clean std_mean | randomized std_mean | 帧数（A / B） |
+|---|---|---|---|
+| adjust_bottle | 0.5479 | 0.5989 | 7,238 / 71,723 |
+| click_bell | 0.4313 | 0.4264 | 3,905 / 39,013 |
+| grab_roller | 0.5128 | 0.5551 | 4,778 / 48,321 |
+| handover_block | 0.4375 | 0.4351 | 14,134 / 142,746 |
+| place_phone_stand | 0.4422 | 0.4476 | 6,407 / 64,024 |
+
+**0 个坏文件**（NaN/维度/空集都算坏）。A/B 各自独立统计，结果入库
+`docs/data/raw/robotwin-train-stats-2026-11-25.json`，S3 训练时对得上。
+
+注意：randomized 的 joint 方差不一定更大（它增加的是场景多样性，不是关节幅度），
+所以不能拿 std 当"数据多样性"的代理指标。
+
 注意：**不要用 `r01-prep.yml` 在评测期间补数据**——它最后一步会 `stop-ecs`，会把在跑的 B1/DP 一起关掉；
 补数据直接跑脚本（不占 GPU、不关机）。
