@@ -34,7 +34,6 @@ from __future__ import annotations
 
 import os
 import sys
-from collections import deque
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +42,7 @@ import numpy as np
 # 纯函数放在同目录的 robotwin_obs.py（零依赖、可单测）；serve 按路径加载本文件时
 # 目录不一定在 sys.path 里，所以显式加一次。
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from action_queue import ActionQueue  # noqa: E402
 from robotwin_obs import build_policy_obs, split_action_chunk  # noqa: E402
 
 from vla_eval.model_servers.base import SessionContext
@@ -155,9 +155,9 @@ class RoboTwinPolicyServer(PredictModelServer):
             }.items() if v is not None
         })
         self._usr_args.update({k: v for k, v in overrides.items() if v is not None})
-        # DP 返回 (n_action_steps, 14) 动作块，官方是开环执行整块再重新推理；
-        # harness 每步只问一个动作，所以这里排队逐步吐出（ACT 不用队列）。
-        self._chunk_queue: deque[np.ndarray] = deque()
+        # 分块策略（DP）的动作队列：队列空才推理、每步吐一个。
+        # 逻辑抽在 action_queue.py（纯函数，配单测），接第三个策略时可复用。
+        self._queue = ActionQueue(int(self._usr_args.get("action_dim", 14)))
         if ckpt_dir:
             self._usr_args["ckpt_dir"] = ckpt_dir
         self._usr_args["device"] = device
@@ -283,7 +283,7 @@ class RoboTwinPolicyServer(PredictModelServer):
         self._module = dp
 
     def _reset(self) -> None:
-        self._chunk_queue.clear()
+        self._queue.clear()
         if self._model is not None and self._module is not None:
             self._module.reset_model(self._model)
 
@@ -320,11 +320,9 @@ class RoboTwinPolicyServer(PredictModelServer):
 
         if self.policy_kind == "dp":
             # 队列空才推理（= 官方的"整块开环执行"），否则继续吐上一块的剩余步。
-            if not self._chunk_queue:
-                chunk = self._model.get_action(self._to_robotwin_obs(obs))
-                for a in split_action_chunk(chunk, dim):
-                    self._chunk_queue.append(a)
-            return {"actions": np.asarray(self._chunk_queue.popleft(), dtype=np.float32).reshape(1, dim)}
+            if self._queue.pending == 0:
+                self._queue.push(self._model.get_action(self._to_robotwin_obs(obs)))
+            return {"actions": self._queue.pop().reshape(1, dim)}
 
         act = self._model.get_action(self._to_robotwin_obs(obs))
         actions = split_action_chunk(act, dim)
