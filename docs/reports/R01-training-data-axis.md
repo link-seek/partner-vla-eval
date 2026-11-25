@@ -6,7 +6,8 @@ nav_exclude: true
 
 # R01：训练数据口径 → 成功率（V100 版，第一阶段汇报）
 
-> 状态：**下一阶段立项**（2026-11-24 定）——方案已定，S2/S3/S4 未跑，**不进本次汇报**。
+> 状态：**下一阶段立项**（2026-11-24 定）——方案已定；**S1 数据 5/5、S2 适配器已完成（2026-11-25）**，
+> S3/S4 等 GPU 独占，**不进本次汇报**。
 > 本次汇报只讲前四根柱子（执行/方法/保真/评价）+ 基模榜单 5a；微调轴 5b 在下一阶段交付。
 > 目的：先说清"这个测试是怎么做的、我们的评测是怎么做的"；表跑出来后连同数字一起复核。
 > 范围：只用现有 2×V100-32GB（0002），**不申请任何新算力**。A30 / A100 作为后续决策项，不在本报告。
@@ -93,8 +94,8 @@ nav_exclude: true
 
 | 步骤 | 内容 | 估时 |
 |---|---|---|
-| S1 | 数据解包 + 格式/统计校验（5 task × 2 口径） | 0.5 天 |
-| S2 | ACT/DP serve 适配器 + 1 task smoke（链路通） | 1 天 |
+| S1 | 数据解包 + 格式/统计校验（5 task × 2 口径） | ✅ 2026-11-25 |
+| S2 | ACT/DP serve 适配器 + 1 task smoke（链路通） | ✅ 2026-11-25（各 1/1） |
 | S3 | 训练 20 个 ckpt（2 模型 × 2 口径 × 5 task，40k 步） | 3–4 天 |
 | S4 | 评测 20 × 2 难度 × 50 ep（2000 ep） | 1.5–2 天 |
 | S5 | 出表 + 写报告 | 0.5 天 |
@@ -104,3 +105,23 @@ nav_exclude: true
 
 - 是否上 A30（`pi3.6xlarge.4`，cn-north-4，¥18.06/h）把 π0 那行补上（bf16，LoRA）
 - 是否把 `cotrain_ckpt/` 里官方发布的 11 个模型 ckpt 纳入 L1 榜单（X_VLA / Pi_05 / starVLA / GalaxeaVLA …）
+
+---
+
+## 11. S1 数据就位（2026-11-25 实测）
+
+`TASKS=click_bell,handover_block DATA_ROOT=/data/robotwin-train bash scripts/data/prepare_robotwin_data.sh`
+补齐最后两个 task；现在 5/5：
+
+| task | clean_50 | randomized_500 | 口径 A | 口径 B |
+|---|---|---|---|---|
+| adjust_bottle | 50 | 500 | 50 | 550 |
+| click_bell | 50 | 500 | 50 | 550 |
+| grab_roller | 50 | 500 | 50 | 550 |
+| handover_block | 50 | 500 | 50 | 550 |
+| place_phone_stand | 50 | 500 | 50 | 550 |
+
+证据：`/data/robotwin-train/manifest.json`（脚本生成）+ 每 task `find -name '*.hdf5' | wc -l = 550`。
+
+注意：**不要用 `r01-prep.yml` 在评测期间补数据**——它最后一步会 `stop-ecs`，会把在跑的 B1/DP 一起关掉；
+补数据直接跑脚本（不占 GPU、不关机）。
