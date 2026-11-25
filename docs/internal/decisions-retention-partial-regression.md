@@ -152,7 +152,7 @@ sqlite 是**唯一**能：
 | 1 = A 全留 | sqlite 随 `matrix/` 长期保留；`RW_RESUME=1` 可跳过清盘；`rescue_partial.sh` 可救援 | ✅ |
 | 2 = A 只进附录 | `check_leaderboard` 强制 `n == exam.episodes(50)`；`leaderboard/partial/*.json` 必须 `partial: true` + `n_target` | ✅ |
 | 3 = 先测确定性 | 未跑（需开机，与 ACT smoke / A5 合并窗口） | ⏳ |
-| 附加（消灭最大漂移源） | 镜像钉 digest：bench `sha256:b4cac6f7…`、cogact `sha256:f97b48e4…`、xvla `sha256:f08fb2e6…`；`check_registry` 对 verified 强制要求 | ✅ |
+| 附加（消灭最大漂移源） | 镜像钉 digest（manifest digest，非 config digest）：bench `sha256:7cc969f1…`、cogact `sha256:d2d0a7bf…`、xvla `sha256:0ba69d4b…`。2026-11-25 纠正：早先误取 `config.digest`，`FROM image@该值` 直接报 media type 错。；`check_registry` 对 verified 强制要求 | ✅ |
 
 附录样例（真实数据，来自 2026-11-25 救援）：
 `leaderboard/partial/x-vla-robotwin2-hard-grab_roller.json` —— Hard grab_roller 12 集中 8 成功（非满格，不进排名）。
