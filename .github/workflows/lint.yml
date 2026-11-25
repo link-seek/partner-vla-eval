@@ -75,6 +75,10 @@ jobs:
           echo "coverage negative case OK (refused with 2)"
           python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 \
             --tasks grab_roller,adjust_bottle,place_phone_stand,click_bell,handover_block
+      - name: Stats unit tests (bootstrap / Wilson)
+        run: |
+          python3 -m pip install --quiet numpy
+          python3 scripts/data/test_stats.py
       - name: Adapter unit tests (robotwin_obs)
         # B3 最可能的失败点是观测转换（通道/归一化），这里用纯函数单测把它钉住。
         # 只依赖 numpy（CI 基础镜像没有，装一下）。

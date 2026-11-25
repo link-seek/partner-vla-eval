@@ -20,6 +20,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 RUN_HINT = "https://github.com/link-seek/partner-vla-eval/actions"
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from stats import summarize  # noqa: E402
+
 
 def model_dir_name(model: str) -> str:
     return {"x-vla-robotwin2": "xvla", "db-cogact": "cogact"}.get(model, model)
@@ -64,6 +67,7 @@ def main() -> int:
                 "date": (t.get("created_at") or "")[:10] or None,
                 "artifacts": RUN_HINT,
                 "steps_success": {"mean": t["steps_avg"], "med": t["steps_med"]},
+                "stats": summarize(t["success"], t["n"]),
                 "hard_success": None, "gap": None,
                 "note": "Easy only；Hard 待补（跑完由 gen_reports.py --hard 回填）。",
                 "report_version": "v1 (docs/tutorial/leaderboard.md)",
@@ -81,6 +85,7 @@ def main() -> int:
             rep["hard_success_count"] = t["success"]
             rep["hard_errors"] = t["errors"]
             rep["hard_steps_success"] = {"mean": t["steps_avg"], "med": t["steps_med"]}
+            rep["hard_stats"] = summarize(t["success"], t["n"])
             rep["note"] = (
                 f"Easy {easy:.3f}（n={rep.get('n')}）vs Hard {t['rate']:.3f}（n={t['n']}），"
                 f"落差 {rep['gap']:.3f}。" if isinstance(easy, (int, float)) else rep.get("note")

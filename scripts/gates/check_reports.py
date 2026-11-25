@@ -78,6 +78,11 @@ def check_one(path: Path) -> dict | None:
     elif hv == "0.0.0":
         warnings.append(f"{name}: harness=0.0.0（上游 __version__ 未注入，以镜像 tag 为准）")
 
+    if isinstance(ms, (int, float)) and not d.get("stats"):
+        warnings.append(f"{name}: 缺 stats（bootstrap stderr / Wilson CI），建议用 gen_reports.py 重生成")
+    if d.get("hard_success") is not None and not d.get("hard_stats"):
+        warnings.append(f"{name}: 有 hard_success 但缺 hard_stats")
+
     if d.get("hard_success") is None and d.get("gap") is None:
         warnings.append(f"{name}: 只有 Easy（hard_success/gap 为 null，按约定不当 0）")
     return d
