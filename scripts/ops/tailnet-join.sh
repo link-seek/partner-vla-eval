@@ -7,6 +7,16 @@ require_env V100_SSH_PASS TS_API_KEY
 setup_ssh
 HN="${TAILNET_HOSTNAME:-v100-0002}"
 
+if is_dry; then
+  plan "action=tailnet-join hostname=$HN"
+  plan "跳板 hw41=$HW41_JUMP tcp 22: $(tcp_check "$HW41_JUMP" 22)"
+  plan "目标 V100=$V100_0002 tcp 22: $(tcp_check "$V100_0002" 22)"
+  plan "TS_API_KEY 在位（长度 ${#TS_API_KEY}）；dry-run 不 mint key、不执行 tailscale up"
+  plan "将执行的命令：ssh root@$HW41_JUMP \"ssh root@$V100_0002 'tailscale up --authkey=<minted> --hostname=$HN ...'\""
+  plan "dry-run 结束"
+  exit 0
+fi
+
 echo "[ops] 1/3 预检：V100 22 是否可达（经 hw41 跳板）"
 "$OPS_SSH_DIR/ssh.sh" "root@$HW41_JUMP" \
   "(echo > /dev/tcp/$V100_0002/22) 2>/dev/null && echo v100-22-OPEN || { echo v100-22-CLOSED; exit 1; }"

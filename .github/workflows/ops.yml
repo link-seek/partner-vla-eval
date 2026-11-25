@@ -33,6 +33,11 @@ on:
         description: "在哪个 self-hosted runner 上执行（标签）。默认 V100-0002；repair-0002 必须换成 V100-0001（不能在目标机自己身上重配 agent）"
         required: false
         default: "V100-0002"
+      dry_run:
+        description: "true=只打印计划与目标可达性，不执行任何变更（开机/mint/config.sh/tailscale up 全跳过）"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -66,6 +71,7 @@ jobs:
       - name: ops action
         env:
           ACTION: ${{ inputs.action }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
           TAILNET_HOSTNAME: ${{ inputs.hostname }}
           V100_SSH_PASS: ${{ secrets.V100_SSH_PASS }}
           V100_REG_TOKEN: ${{ secrets.V100_REG_TOKEN }}

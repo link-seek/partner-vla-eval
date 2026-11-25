@@ -7,6 +7,15 @@ V100_0002="${V100_0002_HOST:-114.116.228.0}"
 V100_0001="${V100_0001_HOST:-1.94.192.234}"
 HW41_JUMP="${HW41_JUMP_HOST:-100.91.222.51}"
 
+DRY_RUN="${DRY_RUN:-0}"
+is_dry() { [ "$DRY_RUN" = "1" ]; }
+plan()   { echo "[ops][dry] $*"; }
+
+# 只读可达性探测（不建连、不发认证）：用于 dry-run 证明"目标解析对了"
+tcp_check() {  # tcp_check <host> <port> → open|closed
+  if (exec 3<>"/dev/tcp/$1/$2") 2>/dev/null; then exec 3<&- 2>/dev/null; echo open; else echo closed; fi
+}
+
 require_env() {   # require_env KEY...
   local missing=()
   for k in "$@"; do [ -n "${!k:-}" ] || missing+=("$k"); done

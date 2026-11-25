@@ -30,6 +30,16 @@ sleep 15
 echo "listener 进程数: $(ps aux | grep -c '[R]unner.Listener')"
 REMOTE
 
+if is_dry; then
+  plan "action=repair-0002 target=root@$V100_0002"
+  plan "tcp 22: $(tcp_check "$V100_0002" 22)"
+  plan "token: 已从 secrets 注入（长度 ${#V100_REG_TOKEN}），dry-run 不发给远端"
+  plan "将执行的远端脚本："
+  printf '%s\n' "$REMOTE" | sed 's/^/[ops][dry]   /'
+  plan "dry-run 结束（未改动任何 agent）"
+  exit 0
+fi
+
 "$OPS_SSH_DIR/ssh.sh" "root@$V100_0002" "REG_TOKEN='$V100_REG_TOKEN' bash -s" <<< "$REMOTE"
 rc=$?
 echo "[ops] repair-0002 exit=$rc"
