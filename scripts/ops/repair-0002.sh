@@ -6,9 +6,27 @@
 # 不落 V100 磁盘（只在进程环境里）。
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
-require_env V100_SSH_PASS V100_REG_TOKEN
-mask "$V100_REG_TOKEN"
+require_env V100_SSH_PASS PROD_GH_TOKEN
 setup_ssh
+
+# 2026-11-25 实测：原来依赖手动设置的 V100_REG_TOKEN，该 secret 已不存在 →
+# 这个修复能力在重构前就已经不可用了。改成与 repair-0001 一致：现场 mint。
+if [ -n "${V100_REG_TOKEN:-}" ]; then
+  REG_TOKEN="$V100_REG_TOKEN"
+  echo "[ops] 用预置 V100_REG_TOKEN"
+else
+  if is_dry; then
+    REG_TOKEN="<dry-run-minted>"
+    plan "将通过 PROD_GH_TOKEN 现场 mint 注册 token（dry-run 不真的 mint）"
+  else
+    RESP=$(curl -sS -m 30 -X POST -H "Authorization: Bearer $PROD_GH_TOKEN" \
+      -H "Accept: application/vnd.github+json" \
+      https://api.github.com/orgs/link-seek/actions/runners/registration-token)
+    REG_TOKEN=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('token',''))")
+    [ -n "$REG_TOKEN" ] || { echo "[ops] FAIL: mint 失败 $(echo "$RESP" | head -c 200)" >&2; exit 1; }
+  fi
+fi
+mask "$REG_TOKEN"
 
 read -r -d '' REMOTE <<'REMOTE'
 set -euo pipefail
@@ -33,14 +51,14 @@ REMOTE
 if is_dry; then
   plan "action=repair-0002 target=root@$V100_0002"
   plan "tcp 22: $(tcp_check "$V100_0002" 22)"
-  plan "token: 已从 secrets 注入（长度 ${#V100_REG_TOKEN}），dry-run 不发给远端"
+  plan "token: $([ "$REG_TOKEN" = "<dry-run-minted>" ] && echo '将现场 mint（未执行）' || echo "已注入，长度 ${#REG_TOKEN}")"
   plan "将执行的远端脚本："
   printf '%s\n' "$REMOTE" | sed 's/^/[ops][dry]   /'
   plan "dry-run 结束（未改动任何 agent）"
   exit 0
 fi
 
-"$OPS_SSH_DIR/ssh.sh" "root@$V100_0002" "REG_TOKEN='$V100_REG_TOKEN' bash -s" <<< "$REMOTE"
+"$OPS_SSH_DIR/ssh.sh" "root@$V100_0002" "REG_TOKEN='$REG_TOKEN' bash -s" <<< "$REMOTE"
 rc=$?
 echo "[ops] repair-0002 exit=$rc"
 exit $rc
