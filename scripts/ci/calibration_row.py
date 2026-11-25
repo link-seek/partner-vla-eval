@@ -156,6 +156,10 @@ def selftest() -> int:
     row2, d2 = fmt_row("place_empty_cup", 8, 50, 28.0, 0, BAND_PP)
     check("16 vs 28 标离群", "离群" in row2 and d2 == -12.0, row2)
 
+    print("[官方值覆盖（DB-CogACT 不在榜单里）]")
+    row3, d3 = fmt_row("place_empty_cup", 8, 50, 28.0, 0, BAND_PP)
+    check("覆盖值 28 也能出行", "28%" in row3 and d3 == -12.0, row3)
+
     print("[aggregate 解析]")
     import tempfile
     with tempfile.TemporaryDirectory() as td:
@@ -199,6 +203,10 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--success", type=int)
     ap.add_argument("--n", type=int)
     ap.add_argument("--aggregate", type=Path)
+    ap.add_argument("--official-value", type=float,
+                    help="官方值不在榜单快照里时显式给（如 DB-CogACT 28）；需配 --official-source")
+    ap.add_argument("--official-source", default="",
+                    help="官方值出处（如 'Dexbotic 论文/官方 repo'），进 JSON 便于审计")
     ap.add_argument("--errors", type=int, default=0)
     ap.add_argument("--difficulty", default="easy", choices=["easy", "hard"])
     ap.add_argument("--snapshot", type=Path, default=DEFAULT_SNAPSHOT)
@@ -217,7 +225,13 @@ def main(argv: list[str]) -> int:
         ap.error("--entry 和 --task 必填（或 --selftest）")
 
     snap = load_snapshot(a.snapshot)
-    official, display = official_value(snap, a.entry, a.task, a.difficulty)
+    if a.official_value is not None:
+        official = float(a.official_value)
+        display = a.entry
+        if not a.official_source:
+            raise SystemExit("用 --official-value 时必须给 --official-source（否则没人知道这个数从哪来）")
+    else:
+        official, display = official_value(snap, a.entry, a.task, a.difficulty)
     if a.official_only:
         print(f"{display} · {a.task} · {a.difficulty} = {official:.0f}% "
               f"(board {snap['board']['updated']})")
@@ -247,6 +261,7 @@ def main(argv: list[str]) -> int:
         "official": official, "delta_pp": round(delta, 2),
         "success": success, "n": n, "errors": errors,
         "distinct_seeds": (agg or {}).get("seeds"),
+        "official_source": a.official_source or "official leaderboard snapshot",
         "outlier": abs(delta) > a.band, "band_pp": a.band,
         "snapshot": str(a.snapshot.relative_to(ROOT)) if a.snapshot.is_relative_to(ROOT) else str(a.snapshot),
         "board_updated": snap["board"]["updated"],

@@ -35,6 +35,10 @@ status: living
 python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell --official-only
 # → ACT · click_bell · easy = 58% (board 2026-11-20)
 
+# 官方值不在榜单里（如 DB-CogACT 的 28% 来自 Dexbotic）→ 显式覆盖 + 写出处
+python3 scripts/ci/calibration_row.py --entry db-cogact --task place_empty_cup \
+    --official-value 28 --official-source "Dexbotic 论文/官方 repo" --aggregate <agg.json>
+
 # 从我们的 aggregate 直接生成校准行（不手抄）
 python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
     --aggregate /path/to/click_bell_aggregate.json
@@ -42,7 +46,7 @@ python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
 ```
 
 生成器默认拒绝两类"看起来有数、其实无效"的 aggregate：不同种子数 < n（同一集重复跑）、
-n < 10（区间太宽）；`--selftest` 有 16 项断言（含这两条），
+n < 10（区间太宽）；`--selftest` 有 17 项断言（含这两条），
 已进 `scripts/gates/run_all.py` 的 `calibration` 门（快照被改坏会直接红）。
 
 ## 刷新流程
