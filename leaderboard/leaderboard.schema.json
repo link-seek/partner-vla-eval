@@ -7,7 +7,8 @@
     "last_updated",
     "bench",
     "protocol",
-    "entries"
+    "entries",
+    "protocol_version"
   ],
   "additionalProperties": false,
   "properties": {
@@ -45,7 +46,8 @@
           "ckpt_repo",
           "ckpt_revision",
           "bench_image",
-          "serve_image"
+          "serve_image",
+          "protocol_version"
         ],
         "additionalProperties": false,
         "properties": {
@@ -153,6 +155,9 @@
               "null"
             ],
             "description": "重复轮中的最高单轮成功率"
+          },
+          "protocol_version": {
+            "type": "string"
           }
         }
       }
@@ -160,6 +165,10 @@
     "ranked_separately": {
       "type": "boolean",
       "description": "shared 与 finetuned 同文件并列时置 true，声明两者分别排名；缺省则混排即错。"
+    },
+    "protocol_version": {
+      "type": "string",
+      "description": "协议版本，真源 registry.exam.protocol_version；升版本则旧结果冻结"
     }
   }
 }
