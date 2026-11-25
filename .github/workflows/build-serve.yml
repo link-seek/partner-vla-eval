@@ -8,6 +8,11 @@ name: Build Serve Images
 on:
   workflow_dispatch:
     inputs:
+      force_retag:
+        description: "版本 tag 已存在且 digest 不同时强行挪 tag（旧 pin 会断；默认红）"
+        required: false
+        type: boolean
+        default: false
       images:
         description: "逗号分隔：serve-cogact,serve-cogact-fp32,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,serve-pi0,verify,serve-robotwin-act,serve-robotwin-dp"
         required: false
@@ -58,6 +63,31 @@ jobs:
             serve-robotwin-act) DOCKERFILE=docker/Dockerfile.serve-robotwin; TAG=vla-serve-robotwin-act:0.8.0; BUILD_ARGS="--build-arg POLICY=act" ;;
             serve-robotwin-dp) DOCKERFILE=docker/Dockerfile.serve-robotwin; TAG=vla-serve-robotwin-dp:0.8.0; BUILD_ARGS="--build-arg POLICY=dp" ;;
           esac
+          set -euo pipefail
+          REF="${{ env.SWR_REG }}/$TAG"
+          TEMP="${REF}-ci${{ github.run_id }}"
           # shellcheck disable=SC2086
-          docker build -f "$DOCKERFILE" $BUILD_ARGS -t "${{ env.SWR_REG }}/$TAG" .
-          docker push "${{ env.SWR_REG }}/$TAG"
+          docker build -f "$DOCKERFILE" $BUILD_ARGS -t "$TEMP" .
+          docker push "$TEMP"
+          NEW_DIGEST=$(docker buildx imagetools inspect --format '{{.Manifest.Digest}}' "$TEMP")
+          echo "本次 digest: $NEW_DIGEST"
+
+          # 版本 tag 不可变守卫（house 约定，见 link-seek/docker-images bake-stack.yml）：
+          # tag 已被别的 digest 占着就红，除非显式 force_retag —— 否则下游 pin 会被静默挪走。
+          EXISTING=$(docker buildx imagetools inspect --format '{{.Manifest.Digest}}' "$REF" 2>/dev/null || true)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "$NEW_DIGEST" ]; then
+            if [ "${{ inputs.force_retag }}" = "true" ]; then
+              echo "::warning::tag $TAG 已存在($EXISTING)，force_retag 挪到 $NEW_DIGEST；旧 pin 会断"
+            else
+              echo "::error::版本 tag $TAG 已存在且指向 $EXISTING ≠ 本次 $NEW_DIGEST；版本 tag 不可变。请发新版本或显式 force_retag=true"
+              exit 1
+            fi
+          fi
+
+          # 转正：registry 侧改 tag（不重传层）；跨境偶发断流重试 3 次
+          for i in 1 2 3; do
+            docker buildx imagetools create -t "$REF" "$TEMP" && break || {
+              echo "转正 $TAG 第 $i 次失败"; sleep 60; }
+            [ "$i" -lt 3 ] || { echo "::error::转正 $TAG 三次全失败"; exit 1; }
+          done
+          echo "**$TAG** → $NEW_DIGEST" >> "$GITHUB_STEP_SUMMARY"

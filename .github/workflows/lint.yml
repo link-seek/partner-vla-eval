@@ -100,6 +100,14 @@ jobs:
         # 2026-11-25 实测：A5 的 easy-r2 收 0 个 task；修完若不收紧，hard 会回落裸名(easy)、
         # r2 会回落 r1 —— 都只在数字上出错、不报错。测试钉住三种命名与两条严格性。
         run: python3 scripts/data/test_collect_matrix.py
+      - name: Serve config contract (yaml keys ⊆ __init__ kwargs)
+        # 2026-11-25 两次静默失败都被这一条静态拦住：
+        #   顶层 server.port 被忽略（只认 args.port / --address）
+        #   args.left_arm_dim 未在 __init__ 声明 → unrecognized arguments
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 scripts/model_servers/test_serve_contract.py
+          bash scripts/ci/smoke_serve.sh --image x --policy act --ckpt-host . --workdir /tmp/smoke-dry --dry-run
       - name: Stats unit tests (bootstrap / Wilson)
         run: |
           python3 -m pip install --quiet numpy

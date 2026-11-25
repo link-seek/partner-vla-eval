@@ -128,7 +128,7 @@
       "evidence": "官方 ACT 基线，按 task 分 ckpt（.ckpt + dataset_stats.pkl），无 lerobot/HF policy 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "适配器已烘进 vla-serve-robotwin-act（/opt/serve/），基座是 bench 镜像（钉 manifest digest），可复现。2026-11-25 整集 smoke：click_bell 1/1（400 步无错）。",
+      "note": "适配器已烘进 vla-serve-robotwin-act（/opt/serve/），基座 bench 镜像钉 manifest digest。2026-11-25 整集 smoke：click_bell 1/1（400 步无错）。适配器补了官方 encode_obs 的 640x480 resize（考场 D435 是 320x240，缺这步会静默 0/1）。",
       "fast_init": "true",
       "ckpt_revision": "c248f2181c997ffa987d3a932b57f3c25c0482ed",
       "weight_type": "finetuned",
@@ -153,7 +153,7 @@
         "protocol": "demo_clean / seed 0 / 400 steps",
         "note": "对照实验：缺 640x480 resize 时同一配置连跑两次 0/1；补上后 1/1。根因为考场 D435 相机输出 240x320，官方 encode_obs 会 resize 到 640x480，适配器原先漏了。"
       },
-      "serve_image_digest": "sha256:241ec8bb37d08954d54b093da3340b9ccbadced0a80dc153d5522c411dd09609"
+      "serve_image_digest": "sha256:25c6d14a95d6fcf57675476a7bc44781e52fd958a222bc4bc30792e8b587394b"
     },
     "dp-baseline": {
       "family": "DP（官方基线）",
@@ -170,12 +170,12 @@
       "evidence": "官方 DP 基线，同 ACT 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "镜像 vla-serve-robotwin-dp 已补齐 DP 全部推断依赖（hydra-core/dill/einops/zarr/numcodecs/numba/atomics/diffusers 0.27.2，构建期自检 import 通过；diffusers>=0.34 需 torch.accelerator(≥2.6) 不可用）。官方 get_model 用相对路径 + 4 段目录，serve 的 CWD 必须 /app/RoboTwin 且 ckpt 挂到 <task>-<setting>-<num>-<seed>/<ckpt>.ckpt。",
+      "note": "镜像 vla-serve-robotwin-dp 补齐 DP 推断依赖（hydra-core/dill/einops/zarr/numcodecs/numba/atomics/diffusers 0.27.2），构建期自检 import policy.DP.deploy_policy 通过。适配器签名已声明 left_arm_dim/right_arm_dim（缺了 jsonargparse 会直接拒绝）。待 smoke。",
       "fast_init": "true",
       "ckpt_revision": "7e57ab03eb7658cc83272deba01c35b73905cb9d",
       "weight_type": "finetuned",
       "regime": null,
-      "serve_image_digest": "sha256:61e602340e439a0b5c2156aca9ade7f2e4eca53872a20c9f610cadbe15300bbe",
+      "serve_image_digest": "sha256:ea6a2ab4f3452ec45b846927cd279b8d1861c30d44e8705e46dffa178b34ae80",
       "covered_tasks": [
         "adjust_bottle",
         "click_bell"

@@ -118,6 +118,14 @@ class RoboTwinPolicyServer(PredictModelServer):
         expert_data_num: int | None = None,
         seed: int = 0,
         checkpoint_num: int = 600,
+        # 官方 DP 的 get_model 要这两个来算 action_dim = left + right + 2 个夹爪。
+        # 必须显式声明：jsonargparse 按类签名生成 --args.*，缺了就直接
+        # "unrecognized arguments: --args.left_arm_dim=6"（2026-11-25 实测）。
+        left_arm_dim: int = 6,
+        right_arm_dim: int = 6,
+        # 服务端口：harness 的 serve 读的是 args.port（默认 8000），
+        # 写成 yaml 顶层 server.port 会被静默忽略（2026-11-25 实测：去绑了 8000）。
+        port: int = 8000,
         **overrides: Any,
     ) -> None:
         policy = policy.lower()
@@ -142,6 +150,7 @@ class RoboTwinPolicyServer(PredictModelServer):
                 "task_name": task_name, "ckpt_setting": ckpt_setting,
                 "expert_data_num": expert_data_num, "seed": seed,
                 "checkpoint_num": checkpoint_num,
+                "left_arm_dim": left_arm_dim, "right_arm_dim": right_arm_dim,
             }.items() if v is not None
         })
         self._usr_args.update({k: v for k, v in overrides.items() if v is not None})

@@ -1,0 +1,27 @@
+name: actionlint
+
+# workflow 静态校验：用 actionlint（社区长期维护，pin action 版本 + 工具版本）。
+# 覆盖表达式/上下文/私有 action 输入/needs 等；shellcheck/pyflakes 关掉（我们已有独立步骤，
+# 避免同一问题在两处报、风格噪声互相干扰）。
+#
+# 取自 link-seek/infra 的同名 workflow（house 标准），不自己写解析器。
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: actionlint
+        uses: raven-actions/actionlint@v2.2.0
+        with:
+          version: 1.7.12
+          shellcheck: false
+          pyflakes: false
