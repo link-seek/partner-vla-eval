@@ -1,0 +1,23 @@
+{
+  "model": "Avada11/RoboTwin-Model-AgileX-DP (100-demo ckpt, qpos 14D)",
+  "task": "RobotWin click_bell x50（Easy / demo_clean，50 个不同种子）",
+  "mean_success": 0.8,
+  "n": 50,
+  "success": 40,
+  "errors": 0,
+  "versions": {
+    "harness": "0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-robotwin-dp:0.8.0",
+    "ckpt": "Avada11/RoboTwin-Model-AgileX-DP@7e57ab03eb7658cc83272deba01c35b73905cb9d",
+    "ckpt_path": "/data/dp-official/click_bell-demo_clean-100/100/500.ckpt"
+  },
+  "machine": "V100-32GB ×2（cn-north-4，0002）；serve=GPU0，env=GPU0",
+  "seeds": "100000–100049（test_num=50 × episodes_per_task=1，skip_expert_check=true）",
+  "date": "2026-11-25",
+  "artifacts": "本地 run /root/r01/dp50（非 GitHub workflow）；aggregate: results/dp/click_bell_aggregate.json",
+  "steps_success_median": 124,
+  "note": "公开 ckpt 为 demo_clean-100（100 demos/task），官方榜为 50 demos/task → 只作 100-demo 参考基线，不与官方 54% 作同口径差值与 ±4pp 判据。50 个不同种子、0 error。",
+  "report_version": "v1 (docs/tutorial/leaderboard.md)",
+  "protocol_version": "robotwin-2.0.1"
+}
