@@ -59,7 +59,7 @@ docs/                     GitHub Pages 源（just-the-docs）
 - smoke（单 task×1ep）：dispatch `pi0-molmo-smoke` / `pi0-robotwin-smoke`
 - 全量（1 task×50ep/轮）：dispatch `pi0-robotwin-full`（tasks/episodes/shards/video 参数化）
 - 镜像同步：dispatch `sync-images`（skopeo 直拷 ghcr→SWR）
-- runner 掉了：dispatch `repair-v100`（token 现开、用完删 secret）
+- runner 掉了：dispatch `ops.yml`（`action=repair-0002` / `repair-0001`；token 现开、用完删 secret）
 
 ## Pin
 

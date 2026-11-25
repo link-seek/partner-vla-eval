@@ -41,7 +41,9 @@ nav_order: 6
 设计目标是零盯守，所以正常路径上没有"看着"这一步。只有这三种情况会打断你：
 
 1. **15 分钟没到 ACTIVE** → 看 start-ecs 日志（hcloud 内网 API）：配额、安全组、region。
-2. **runner 不上线** → dispatch `repair-v100`（token 现开、用完删 secret；流程：安全组放行 → 跳板 SSH → `svc uninstall` → `config remove` → 新 token 重配 → 重装 service）。
+2. **runner 不上线** → dispatch `ops.yml`，`action=repair-0002`（0002）或 `repair-0001`（0001）。
+   流程：安全组放行 → 跳板 SSH → `svc uninstall` → `config remove` → 新 token 重配 → 重装 service。
+   手工等价步骤见 `docs/howto/repair-runner.md`；只读排查用 `action=audit`。
 3. **结果没进 OBS** → 看 workflow 日志尾部：validation 步骤红 = 地址错；上传报错被 `|| true` 吞掉 = 去 issue #8 的测试项对。
 
 ## 原理：为什么能开完不管

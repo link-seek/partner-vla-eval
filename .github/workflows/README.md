@@ -32,9 +32,7 @@
 |---|---|
 | `power.yml` | 可复用开关机（被上面各 workflow `uses:`，勿单独点） |
 | `power-selftest.yml` | 开关机自检 |
-| `repair-v100.yml` / `repair-v100-0001.yml` | runner 掉线修复（token 现开现删） |
-| `ts-join-v100.yml` | tailnet 加入 |
-| `audit-v100.yml` | 机器审计（可复用，登记为 rare） |
+| `ops.yml` | **运维唯一入口**（rare）：`action=audit｜repair-0002｜repair-0001｜tailnet-join`；逻辑在 `scripts/ops/`，手工步骤见 `docs/howto/` |
 
 ## 排障（一次性，用完即弃）
 

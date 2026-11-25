@@ -17,7 +17,7 @@ nav_order: 9
 | 4 | bf16 vs Half 混 / `Input type (float) and bias type (Half)` | X-VLA fp16 数值越界（官方训练 `accelerate --mixed_precision bf16`，fp16 推理非法）；V100 无 bf16 | X-VLA 一律 fp32（29/30 vs 0/30 六轮一致）；bf16 复刻待 H100。CogACT 走 fp16（fp32 首个 forward 即 OOM 31GB） |
 | 4b | 0 分但 exit 0 | error 当数据（0/30 全 ERROR 非 FAIL） | 先看 `errors` 列再看 `mean_success`；error 单列不怪模型 |
 | 5 | SWR 登录失败 | 密码是 HMAC-SHA256(AK)，不是 SK 明文 | 按 AK 派生登录密码（脚本里已有） |
-| 6 | runner 不上线 | 离线超期被回收注册 | dispatch `repair-v100`（token 现开、用完删 secret） |
+| 6 | runner 不上线 | 离线超期被回收注册 | dispatch `ops.yml` action=`repair-0002`/`repair-0001`（token 现开、用完删 secret） |
 | 7 | `.cache` Permission denied | docker -v 把宿主目录建成 root | 预建目录 + 改属主（脚本里已有） |
 | 8 | 分片 watchdog 全杀 | 多 SAPIEN 上下文抢单卡 | 默认 8（EE 默认 4）；2 稳、4 慢、8 hang；serve 独占卡 0、分片放卡 1 |
 | 9 | hub CLI 改名 | v1 只有 `hf`，0.x 无 `--version` | 镜像里钉别名 `hf-download`，脚本只认它 |
