@@ -45,6 +45,7 @@ import numpy as np
 # 目录不一定在 sys.path 里，所以显式加一次。
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from action_queue import ActionQueue  # noqa: E402
+from act_ckpt import resolve_act_ckpt  # noqa: E402
 from robotwin_obs import build_policy_obs, split_action_chunk  # noqa: E402
 
 from vla_eval.model_servers.base import SessionContext
@@ -222,27 +223,10 @@ class RoboTwinPolicyServer(PredictModelServer):
     def _act_ckpt_or_fail(self) -> None:
         """官方 ACT 只认 `<ckpt_dir>/policy_last.ckpt`，缺了会**静默**留随机权重。
 
-        2026-11-25 实测：挂进去的是官方发布的 `policy_epoch_6000_seed_100.ckpt`，
-        官方加载器打一行 Warning 就继续跑，50 集全 0 却不报错。这里改成 fail-closed：
-        要么显式给 ckpt_file，要么目录里真有 policy_last.ckpt，否则直接失败。
+        判断逻辑抽在 `act_ckpt.py`（纯函数 + 单测）：显式 ckpt_file 优先；
+        目录里没有 policy_last 就报错，不猜。
         """
-        if self.ckpt_file:
-            return
-        ckpt_dir = self._usr_args.get("ckpt_dir") or ""
-        if not ckpt_dir:
-            raise RuntimeError("ACT 需要 ckpt_dir 或 ckpt_file（缺了会用随机权重）")
-        last = os.path.join(ckpt_dir, "policy_last.ckpt")
-        if os.path.exists(last):
-            return
-        found = sorted(glob.glob(os.path.join(ckpt_dir, "*.ckpt")))
-        hint = (
-            f"目录里有 {[os.path.basename(x) for x in found]}；"
-            if found else "目录里没有 .ckpt；"
-        )
-        raise RuntimeError(
-            f"官方 ACT 只认 {last}，{hint}"
-            "不修就会静默用随机权重（跑满也不报错，分数全 0）。"
-            "传 ckpt_file=<容器内 .ckpt 路径>，或把权重软链成 policy_last.ckpt。")
+        resolve_act_ckpt(self._usr_args.get("ckpt_dir"), self.ckpt_file)
 
     def _load(self) -> None:
         if self._model is not None:
