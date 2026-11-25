@@ -29,7 +29,9 @@
         "note": "官方 demo_randomized，纹理/光照/位姿随机"
       }
     },
-    "tasks_note": "exam.tasks 是 task 清单的唯一真源。CI/汇总脚本一律从这里读，不再在 shell 或 workflow 里写死（2026-11-25 发现 ci_robotwin_full.sh 默认含 stack_blocks_two、collect_matrix.sh 含 place_phone_stand，两处已漂移）。"
+    "tasks_note": "exam.tasks 是 task 清单的唯一真源。CI/汇总脚本一律从这里读，不再在 shell 或 workflow 里写死（2026-11-25 发现 ci_robotwin_full.sh 默认含 stack_blocks_two、collect_matrix.sh 含 place_phone_stand，两处已漂移）。",
+    "protocol_version": "robotwin-2.0.1",
+    "protocol_version_rules": "bump 条件：题集、每 task 集数、种子策略、task_config、harness_ref、bench_image_digest、max_steps 任一变化。旧版本结果永久冻结，不覆盖。"
   },
   "models": {
     "db-cogact": {

@@ -15,5 +15,6 @@
   "date": "2026-10-27",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40471468752",
   "note": "执行端到端成立（8 集各跑满 400 步，P2 sidecar 落盘）；2 例 env_start OOM 系 EE 并行 planner 抢显存（EE 默认已改 4 分片）。0/8 解读为任务难，非链路问题",
-  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "protocol_version": "robotwin-2.0.1"
 }

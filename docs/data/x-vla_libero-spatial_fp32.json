@@ -14,5 +14,6 @@
   "date": "2026-10-16",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/38981477153",
   "note": "fail 集 220 步超时；成功集 76~145 步。B 系列三榜之一（fp32 合计 29/30）",
-  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "protocol_version": "adhoc"
 }

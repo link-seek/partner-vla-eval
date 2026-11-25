@@ -14,5 +14,6 @@
   "date": "2026-10-28",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40595833935",
   "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
-  "note": "官方协议整榜：486/500，最低 task 46/50。三榜合计 1463/1500=97.5%"
+  "note": "官方协议整榜：486/500，最低 task 46/50。三榜合计 1463/1500=97.5%",
+  "protocol_version": "adhoc"
 }

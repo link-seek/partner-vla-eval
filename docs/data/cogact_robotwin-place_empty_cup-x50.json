@@ -14,5 +14,6 @@
   "date": "2026-10-28",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40625856573",
   "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
-  "note": "成功集步数 med=148；与历史 16% 一致，官称 28%，差 12pp 判待定（见 tutorial/07 规则 3）"
+  "note": "成功集步数 med=148；与历史 16% 一致，官称 28%，差 12pp 判待定（见 tutorial/07 规则 3）",
+  "protocol_version": "robotwin-2.0.1"
 }

@@ -14,5 +14,6 @@
   "date": "2026-10-17",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/38993768217",
   "note": "成功集 114~132 步",
-  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "protocol_version": "adhoc"
 }

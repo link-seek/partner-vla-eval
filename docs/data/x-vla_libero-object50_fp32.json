@@ -14,5 +14,6 @@
   "date": "2026-10-27",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/40574468442",
   "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
-  "note": "官方协议整榜：490/500，零 ERROR"
+  "note": "官方协议整榜：490/500，零 ERROR",
+  "protocol_version": "adhoc"
 }

@@ -90,6 +90,10 @@ main 上只允许常驻能力。任何只做一次的东西活在分支，用完
 
 ## 七、发布与版本
 
-- 版本号唯一真源：`registry.exam.protocol_version`
-- bump 条件：题集 / 集数 / 种子 / `task_config` / harness ref / bench digest / step 上限，任一变化
+- 版本号唯一真源：`registry.exam.protocol_version`（bump 条件写在 `protocol_version_rules`）
+- 报告与榜单（含每条 entry）必须带该字段；`check_protocol.py` 判定，删字段即红
+- 非 robotwin 考场的临时 smoke 标 `adhoc`（如实标注，不冒充版本化协议）
 - 旧结果冻结，不覆盖；`git tag v<protocol_version>` 即发布
+
+**物理目录分版（`docs/data/v<ver>/`）推迟到第一次真正发布时做**：现在 0 tag、0 release，
+提前分目录只会让 19 份报告的所有引用重排一遍，收益为零。触发条件就是我们打第一个 tag。

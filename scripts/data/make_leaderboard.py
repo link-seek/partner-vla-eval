@@ -51,7 +51,9 @@ def main() -> int:
         return 1
 
     proto_label = "easy-demo_clean" if a.protocol == "easy" else "hard-demo_randomized"
-    out = {"last_updated": a.date, "bench": "robotwin", "protocol": proto_label, "entries": []}
+    pver = json.loads(REG.read_text())["exam"]["protocol_version"]
+    out = {"last_updated": a.date, "bench": "robotwin", "protocol": proto_label,
+           "protocol_version": pver, "entries": []}
 
     skipped = []
     all_tasks = sorted({t for r in runs for t in r["tasks"]})
@@ -76,6 +78,7 @@ def main() -> int:
             "harness_version": per_run[0].get("harness_version"),
         }
         out["entries"].append({
+            "protocol_version": pver,
             "model": model,
             "task": task,
             "n": t["n"],

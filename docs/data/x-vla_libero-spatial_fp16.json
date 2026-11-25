@@ -13,5 +13,6 @@
   "date": "2026-10-17",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/38990222346",
   "note": "未判分：10/10 ERROR（首个 act 即崩 RuntimeError float vs Half）。fp16 路径在算子级即坏，非模型不行——证伪记录，不计分",
-  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "protocol_version": "adhoc"
 }

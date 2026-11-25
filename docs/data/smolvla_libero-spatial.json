@@ -14,5 +14,6 @@
   "date": "2026-10-22",
   "artifacts": "https://github.com/link-seek/partner-vla-eval/actions/runs/39791574999",
   "note": "6-D 断言墙拆除验证（换 finetune checkpoint 后零推理错误）；剩下的是模型分问题，链路已闭环。上游 #169 已附验证关闭",
-  "report_version": "v1 (docs/tutorial/07-run-and-score.md)"
+  "report_version": "v1 (docs/tutorial/07-run-and-score.md)",
+  "protocol_version": "adhoc"
 }
