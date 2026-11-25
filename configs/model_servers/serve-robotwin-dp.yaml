@@ -1,18 +1,26 @@
 # DP（RoboTwin 官方 policy/DP）serve 配置
 #
 # 状态：未 smoke。镜像 vla-serve-robotwin-dp 在 robotwin 环境里补了 hydra-core + dill
-# （diffusion_policy 已 vendored 但缺这两个依赖）。
+# （diffusion_policy 是 vendored 的，缺的只是这两个依赖）。
 #
-# ckpt 运行时挂到 /ckpt，官方布局：
-#   <task>-<ckpt_setting>-<expert_data_num>/<checkpoint_num>.ckpt
-#   例：adjust_bottle-demo_clean-100/100/500.ckpt
+# ⚠️ 官方 get_model 用**相对路径**拼 ckpt，且是 4 段（不是 HF 仓库的 3 段目录）：
+#     ./policy/DP/checkpoints/<task>-<ckpt_setting>-<expert_data_num>-<seed>/<checkpoint_num>.ckpt
+#   所以 serve 的 CWD 必须是 /app/RoboTwin，并把 ckpt 挂到该路径下：
+#     -v /data/dp-official/click_bell-demo_clean-100/100/500.ckpt:\
+#        /app/RoboTwin/policy/DP/checkpoints/click_bell-demo_clean-100-100/500.ckpt:ro
+#   例：task_name=click_bell, ckpt_setting=demo_clean, expert_data_num=100, seed=100
+#       → click_bell-demo_clean-100-100/500.ckpt
+#
+# 覆盖率：DP 与 ACT 一样只覆盖考场 2/5（adjust_bottle、click_bell）。
 script: "/opt/serve/robotwin_policy.py"
 args:
   policy: dp
   task_name: click_bell
-  ckpt_setting: demo_clean-100
+  ckpt_setting: demo_clean
   expert_data_num: 100
   seed: 100
   checkpoint_num: 500
   action_dim: 14
+  left_arm_dim: 6
+  right_arm_dim: 6
   device: cuda:0
