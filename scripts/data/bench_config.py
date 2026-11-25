@@ -20,10 +20,14 @@ registry 是 JSON，所以不依赖 PyYAML，任何有 python3 的地方都能�
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import sys
 
-REGISTRY = pathlib.Path(__file__).resolve().parents[2] / "configs" / "registry" / "model-registry.json"
+# 默认按仓内相对位置找；可用 MODEL_REGISTRY 覆盖（脚本被复制到仓外单独跑时必需，
+# 例如在评测机上核对 matrix 产物——2026-11-25 实测踩过）
+_DEFAULT = pathlib.Path(__file__).resolve().parents[2] / "configs" / "registry" / "model-registry.json"
+REGISTRY = pathlib.Path(os.environ.get("MODEL_REGISTRY") or _DEFAULT)
 
 
 def exam() -> dict:
