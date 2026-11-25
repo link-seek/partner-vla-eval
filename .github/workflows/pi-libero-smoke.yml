@@ -28,7 +28,7 @@ on:
       volumes:
         description: "分号分隔的 -v 挂载（P2  instrumentation 用）"
         required: false
-        default: 
+        default:
 
       obs_prefix:
         description: "OBS 归档前缀，结果进 <前缀>/libero-smoke/（默认 obs://so101-sim-pipeline/eval；填错则开跑前拦截）"

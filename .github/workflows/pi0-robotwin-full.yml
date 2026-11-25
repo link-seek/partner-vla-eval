@@ -45,7 +45,7 @@ on:
       action_type:
         description: "空=不发（stock 镜像）；ee=EE 验证（需 ee 镜像）"
         required: false
-        default: 
+        default:
       serve_yaml:
         description: "serve 配置名（默认 CogACT 双臂；X-VLA 用 serve-robotwin.yaml）"
         required: false
