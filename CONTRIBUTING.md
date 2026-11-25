@@ -86,6 +86,17 @@ main 上只允许常驻能力。任何只做一次的东西活在分支，用完
 
 站点只发布公开面；内部稿一律 `nav_exclude: true`。
 
+门禁 `scripts/gates/check_docs.py` 判定四件事：
+1. 每篇都有 front-matter；
+2. 进站页面必须有 `title`；
+3. 每篇归属明确：`parent` / `nav_exclude` / `has_children` / 站点首页 四选一；
+4. `archive|adr|howto|internal|reports|decks` 下的页面必须 `nav_exclude`，
+   且 `docs/` 根下的站外文档必须**被至少一篇其他文档引用**（防孤儿稿）。
+
+注意：`docs/` 根下的站外文档**不等于过时**。`partner-onboarding`（对接表单）、
+`proposal-stack-effects`（对外口径）、`reproducibility`（digest 记法）都被站内教程实质引用——
+按日期归档会打断这些链接。判断依据是"有没有人引用"，不是"多久没改"。
+
 ---
 
 ## 七、发布与版本

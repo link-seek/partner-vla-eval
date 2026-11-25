@@ -1,3 +1,8 @@
+---
+title: 本仓遵循的 house 标准（镜像 / workflow / 门禁）
+nav_exclude: true
+---
+
 # 本仓遵循的 house 标准（镜像 / workflow / 门禁）
 
 > 2026-11-25。起因：我在 ACT/DP 镜像这条线上连续自造了四套东西（本机构建脚本、digest 手抄、

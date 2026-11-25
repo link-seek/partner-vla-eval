@@ -1,3 +1,8 @@
+---
+title: ACT / DP 适配器：首次 smoke 手册（B3）
+nav_exclude: true
+---
+
 # ACT / DP 适配器：首次 smoke 手册（B3）
 
 > 状态：**适配器已写、未验证**。2026-11-24 机器被 B1 Hard 评测占用，没跑过 smoke。
