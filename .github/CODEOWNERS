@@ -1,0 +1,10 @@
+# 默认：所有路径由仓主负责（单人维护期先这样，出现第二位维护者再细分）
+*       @xieyucheng123
+
+# 分类归属（与 CONTRIBUTING.md 的四类一致）
+/docs/              @xieyucheng123
+/scripts/           @xieyucheng123
+/configs/           @xieyucheng123
+/leaderboard/       @xieyucheng123
+/docker/            @xieyucheng123
+/.github/           @xieyucheng123

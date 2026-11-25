@@ -25,6 +25,8 @@ GATES: list[tuple[str, list[str], str]] = [
      "task 清单不硬编码 + serve yaml 契约（不需要 GPU）"),
     ("registry",   ["python3", "scripts/gates/check_registry.py"],
      "模型真源可复现（verified 必须钉 digest/revision）"),
+    ("infra",      ["python3", "scripts/gates/check_infra_inventory.py"],
+     "基础设施登记（workflow kind / 选项配置，禁 one-off 进 main）"),
     ("versions",   ["python3", "scripts/gates/check_versions.py"],
      "Dockerfile/versions.yaml 的 pin 不许漂移"),
     ("reports",    ["python3", "scripts/gates/check_reports.py"],

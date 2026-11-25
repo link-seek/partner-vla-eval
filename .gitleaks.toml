@@ -1,0 +1,20 @@
+title = "gitleaks config"
+
+# 用官方默认规则 + 本仓已知非密钥的允许清单（gitleaks 规则库随上游更新）。
+# 抄自 link-seek/docker-images 与 infra 的同名文件（house 标准），只保留本仓需要的条目。
+[extend]
+useDefault = true
+
+[allowlist]
+description = "已知非密钥：git 元数据 / 文档里的占位写法 / 环境变量引用"
+paths = [
+  '''(^|/)\.git/''',
+  '''(^|/)\.env\.example$''',          # 只有键名，无值
+  '''(^|/)docs/decks/exports/''',      # 二进制导出物（pptx/png），不是源码
+]
+regexes = [
+  '''\$HCLOUD_(AK|SK)''',              # 一律用变量引用
+  '''\$OBS_(AK|SK)''',
+  '''\$\{\{\s*secrets\.[A-Z_]+\s*\}\}''',  # workflow 里的 secrets 引用
+  '''your[-_]?(ak|sk|token|password)''',   # 文档里的占位词
+]

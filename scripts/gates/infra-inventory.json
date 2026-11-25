@@ -1,0 +1,129 @@
+{
+  "说明": "第 2 类基础设施的登记表。kind 只允许 routine/rare；one-off 禁止进 main（见 CONTRIBUTING 第二节）。",
+  "workflows": {
+    "actionlint": {
+      "kind": "routine"
+    },
+    "audit-v100": {
+      "kind": "rare",
+      "owner": "@xieyucheng123",
+      "when": "排查 runner 环境异常（可复用审计）"
+    },
+    "build-benchmark-slim": {
+      "kind": "routine"
+    },
+    "build-payload": {
+      "kind": "routine"
+    },
+    "build-serve": {
+      "kind": "routine"
+    },
+    "export-assets": {
+      "kind": "routine"
+    },
+    "idle-guard": {
+      "kind": "routine"
+    },
+    "lint": {
+      "kind": "routine"
+    },
+    "mirror-swr-ghcr": {
+      "kind": "routine"
+    },
+    "model-matrix": {
+      "kind": "routine"
+    },
+    "pi-calvin-smoke": {
+      "kind": "routine"
+    },
+    "pi-libero-smoke": {
+      "kind": "routine"
+    },
+    "pi0-molmo-smoke": {
+      "kind": "routine"
+    },
+    "pi0-robotwin-full": {
+      "kind": "routine"
+    },
+    "pi0-robotwin-smoke": {
+      "kind": "routine"
+    },
+    "post-run-collect": {
+      "kind": "routine"
+    },
+    "power": {
+      "kind": "routine"
+    },
+    "power-selftest": {
+      "kind": "routine"
+    },
+    "queue-conductor": {
+      "kind": "routine"
+    },
+    "r01-prep": {
+      "kind": "routine"
+    },
+    "repair-v100": {
+      "kind": "rare",
+      "owner": "@xieyucheng123",
+      "when": "runner 装机 / agent 损坏（0002）"
+    },
+    "repair-v100-0001": {
+      "kind": "rare",
+      "owner": "@xieyucheng123",
+      "when": "runner 装机（0001，与 0002 隔离）"
+    },
+    "secret-hygiene": {
+      "kind": "routine"
+    },
+    "sync-images": {
+      "kind": "routine"
+    },
+    "ts-join-v100": {
+      "kind": "rare",
+      "owner": "@xieyucheng123",
+      "when": "runner 重装后重新加入 tailnet"
+    }
+  },
+  "configs": {
+    "说明": "靠参数（run_yaml/serve_yaml/build-arg）引用的配置：grep 看不出引用，必须登记，不许按时间删。",
+    "option": {
+      "configs/benchmarks/run-libero-goal10.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-goal50.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-object10.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-object50.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-smoke.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-smolvla.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-spatial10.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/benchmarks/run-libero-spatial50.yaml": {
+        "via": "pi-libero-smoke.yml (run_yaml)"
+      },
+      "configs/model_servers/serve-pi0-libero.yaml": {
+        "via": "pi-libero-smoke.yml (serve_yaml)"
+      },
+      "configs/model_servers/serve-pi05-libero.yaml": {
+        "via": "pi-libero-smoke.yml (serve_yaml)"
+      },
+      "configs/model_servers/serve-smolvla-libero.yaml": {
+        "via": "pi-libero-smoke.yml (serve_yaml)"
+      },
+      "configs/model_servers/serve-xvla-libero.yaml": {
+        "via": "pi-libero-smoke.yml (serve_yaml)"
+      }
+    }
+  }
+}

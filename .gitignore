@@ -5,3 +5,8 @@ __pycache__/
 # 本地权重路径 serve 配置（CI 生成，机内绝对路径，不进仓）
 configs/model_servers/serve-robotwin-local.yaml
 .artifact.json
+
+# 环境变量：只允许 .env.example 进仓（真值只活在 Secrets 与目标机 600 文件里）
+.env
+.env.*
+!.env.example
