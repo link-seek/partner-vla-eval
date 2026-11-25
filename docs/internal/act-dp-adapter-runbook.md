@@ -313,24 +313,24 @@ sh: 1: cannot create /dev/tcp/127.0.0.1:8031: Directory nonexistent
 
 教训：**断言必须读被测系统自己的判定字段**，不能读我"以为"的字段名。
 
-## 坑 11：把 ACT 的图像处理套给 DP，报一个空消息的 AssertionError
+## 坑 11：ACT 的图像处理不能套给 DP（两个策略契约不同）
 
-**症状**：DP 每集 `failure_reason=model_act`，`failure_detail` 只有 `AssertionError:`（**没有消息**），
-光看 traceback 根本不知道该改什么。
+**症状**：DP 每集 `failure_reason=model_act`，`failure_detail` 先是空消息的 `AssertionError:`，
+改一处后又变成 `KeyError: 'left_cam'`。
 
-**根因**：两个官方策略对图像的契约不同，我先按 ACT 的做法统一处理了。
-把 ckpt 载进来打印才看清：
+**真实契约（必须读调用链，别只看一层）**：
 
-```
-ACT: 官方 encode_obs → 三路相机 resize 到 (640, 480)
-DP : ckpt 的 shape_meta → key_shape_map = {'head_cam': (3, 240, 320), 'agent_pos': (14,)}
-     MultiImageObsEncoder 里直接 assert img.shape[1:] == key_shape_map[key]
-```
+| | 送几路相机 | 是否 resize | 依据 |
+|---|---|---|---|
+| ACT | 3 路（head/left/right） | **是**，→ 640×480 | 官方 `encode_obs` 显式 `cv2.resize` |
+| DP | **3 路**（缺一路就 KeyError） | **否**，保持原生 240×320 | `DPRunner.get_action` 里显式读 head/left/right + agent_pos；`obs_encoder` 的 `rgb_keys` 只有 head_cam，且 `key_shape_map={'head_cam': (3,240,320)}` |
 
-DP 只用 **head_cam**，且要**原生 240×320**（不 resize）。我们对两者都 resize 到 640×480 并送三路 → 必炸。
+两个错我各犯一次：
+1. 按 ACT 的做法给 DP 也 resize 到 640×480 → encoder 的 `assert img.shape[1:] == key_shape_map[key]` 失败（**空消息**，极难查）
+2. 以为"encoder 只用 head_cam，那就只送 head_cam" → `DPRunner` 在更外层就把 left_cam 取出来了，`KeyError`
 
-**修法**：`robotwin_obs.build_policy_obs` 按策略分支（ACT 三路+resize；DP 单路原生）。
+**教训（这次是真的可复用）**：判断"要给什么输入"，要顺着**调用链**从最外层读到最内层——
+最外层（runner）决定**需要哪些键**，最内层（encoder）决定**数值形状**。只看一层必然来回改。
 
-**方法论**：空消息的 assert 不要猜；把模型载进来打印它的期望（`key_shape_map`），
-一次就问出真值。另外，`shape_meta` 里的 `[3,-1,-1]` 是**训练配置**的占位，
-真实期望在 **ckpt 里**，读 yaml 会得到错误结论。
+**另外**：`robot_dp_14.yaml` 里 `shape_meta` 写 `[3,-1,-1]`，那是训练配置占位；
+真实期望在 **ckpt** 里，必须载入后打印 `key_shape_map`。

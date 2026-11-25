@@ -120,10 +120,14 @@ def build_policy_obs(
                 raise KeyError(f"观测缺相机 {name}（拿到 {sorted(images)}）")
             out[SHORT[name]] = to_chw01(resize_bilinear(images[name], *RESIZE_WH))
     else:
-        # DP：只 head_cam，原尺寸（ckpt 的 shape_meta 就是 (3,240,320)）
-        if "head_camera" not in images:
-            raise KeyError(f"DP 观测缺 head_camera（拿到 {sorted(images)}）")
-        out["head_cam"] = to_chw01(images["head_camera"])
+        # DP：DPRunner 的 get_action 里**显式读三路相机**（head_cam/left_cam/right_cam）
+        # + agent_pos，缺任一路就 KeyError；但 encoder 的 rgb_keys 只有 head_cam，
+        # 且其 key_shape_map 是 (3, 240, 320) → **不 resize**（考场 D435 原尺寸正好就是它）。
+        # 所以：三路都送，全部保持原生尺寸。
+        for name in CAMERAS:
+            if name not in images:
+                raise KeyError(f"DP 观测缺相机 {name}（拿到 {sorted(images)}）")
+            out[SHORT[name]] = to_chw01(images[name])
 
     js = flat_joint_state(joint_state, action_dim)
     if policy == "act":
