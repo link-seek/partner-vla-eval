@@ -1,0 +1,160 @@
+{
+  "说明": "全部镜像的唯一清单（第 2 类真源之一）。digest 一律用 `docker buildx imagetools inspect --format '{{.Manifest.Digest}}'` 取，禁用 config.digest。",
+  "registry": "swr.cn-north-4.myhuaweicloud.com/link-seek",
+  "count": 15,
+  "images": [
+    {
+      "ref": "vla-eval-robotwin:0.8.0",
+      "digest": "sha256:506da95baec4a0cbcff0057c44ddd6553530a076d6db3f69f4f5e50f32d717ec",
+      "kind": "bench",
+      "status": "legacy",
+      "dockerfile": "docker/Dockerfile.robotwin-unified",
+      "workflow": ".github/workflows/build-benchmark-slim.yml",
+      "note": "全量版（28.7G），已被 ee-slim 取代"
+    },
+    {
+      "ref": "vla-eval-robotwin:0.8.0-ee-slim",
+      "digest": "sha256:7cc969f19b7997e98f4cc3960ae2b5d0e8f1a81571510b8a38b2abf2733c39fb",
+      "kind": "bench",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.robotwin-slim",
+      "workflow": ".github/workflows/build-benchmark-slim.yml",
+      "note": "考场基座（11.3G），5 个 exam task 全用它",
+      "used_by": [
+        "所有模型（exam 基座）"
+      ]
+    },
+    {
+      "ref": "vla-payload:latest",
+      "digest": "sha256:e7f62b85ea8e010d5371821af310a79d79cc431ef631bb1ec9f7fbf7407a230f",
+      "kind": "tool",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.payload",
+      "workflow": ".github/workflows/build-payload.yml",
+      "note": "V100 执行侧 payload；**可变 tag**（每次 push main 重打），身份以 sha tag 为准",
+      "mutable": true
+    },
+    {
+      "ref": "vla-serve-cogact-fp32-2gpu:0.8.0",
+      "digest": "sha256:2a1f2081f37439c765756790d1984d5e32cdcb3bcc9859db49ee3b0541b5542a",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-cogact",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "CogACT fp32 双卡变体"
+    },
+    {
+      "ref": "vla-serve-cogact-fp32:0.8.0",
+      "digest": "sha256:25df6f3ed8927c1609fbf883c13520a412d1417e4f1375b76262d44c5d585a53",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-cogact",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "CogACT fp32 变体"
+    },
+    {
+      "ref": "vla-serve-cogact:0.8.0",
+      "digest": "sha256:d2d0a7bfd90b58e10f9f28b32f5843200311ed7b781e7897d0c588be388a204f",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-cogact",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "CogACT 基础版",
+      "used_by": [
+        "db-cogact"
+      ]
+    },
+    {
+      "ref": "vla-serve-pi05:0.8.0",
+      "digest": "sha256:60b46ded4951031286ff8f74387886d47be40b218752c58f56650a3f827fec13",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-pi05",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "π0.5"
+    },
+    {
+      "ref": "vla-serve-pi0:0.8.0",
+      "digest": "sha256:506206426c88d6ebfcf8b02aa2c82a6e37f91e3a89bf681caeba5da94b0e1461",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-pi0",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "π0",
+      "used_by": [
+        "pi0-robotwin"
+      ]
+    },
+    {
+      "ref": "vla-serve-robotwin-act:0.8.0",
+      "digest": "sha256:12fcc9be398b5c11e3394cb903fd9da91653eb5867041243e1c9e54d4fc6429f",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-robotwin",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "自建 ACT 适配器",
+      "used_by": [
+        "act-baseline"
+      ]
+    },
+    {
+      "ref": "vla-serve-robotwin-dp:0.8.0",
+      "digest": "sha256:dafe751f1579e3dfe820b98d164a1e38ba88f4dfe015e740ddd86d979e661793",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-robotwin",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "自建 DP 适配器（含 8 个推断依赖）",
+      "used_by": [
+        "dp-baseline"
+      ]
+    },
+    {
+      "ref": "vla-serve-smolvla:0.8.0",
+      "digest": "sha256:905cd3e3a103aff3a31fa99e53caa6e7d2d1add894051edf3bfb625ae5f3a017",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-smolvla",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "SmolVLA"
+    },
+    {
+      "ref": "vla-serve-xvla-fp16:0.8.0",
+      "digest": "sha256:bb585d31ac2650dfb1032412ed571aac9c5185f4c1e3c14b3416392a5c1c6d99",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-xvla",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "X-VLA fp16 变体"
+    },
+    {
+      "ref": "vla-serve-xvla:0.8.0",
+      "digest": "sha256:11ceb21345fcfbd2c2fb8139d8d6b7270d4d657655f3a51a2ec11ccf52dcca8c",
+      "kind": "serve",
+      "status": "legacy",
+      "dockerfile": "docker/Dockerfile.serve-xvla",
+      "note": "无当前 workflow 产出（旧版），保留待定"
+    },
+    {
+      "ref": "vla-serve-xvla:0.8.0-ee16",
+      "digest": "sha256:0ba69d4b545bb4a5cc36423aad817d29b71a6f34efbf3126c836393c88995b8a",
+      "kind": "serve",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.serve-xvla",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "X-VLA，EE 16D 口径",
+      "used_by": [
+        "x-vla-robotwin2"
+      ]
+    },
+    {
+      "ref": "vla-verify:0.1",
+      "digest": "sha256:18ffa2820d9dd32844199c409c7cf6912b048ea5fee6fe5b7cfd4d31fb83e0b2",
+      "kind": "tool",
+      "status": "active",
+      "dockerfile": "docker/Dockerfile.verify",
+      "workflow": ".github/workflows/build-serve.yml",
+      "note": "自检镜像（torch cu121 + lerobot）"
+    }
+  ]
+}
