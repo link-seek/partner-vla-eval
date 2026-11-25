@@ -1,5 +1,6 @@
 ---
 title: R01：训练数据口径 → 成功率（V100 版，第一阶段汇报）
+status: snapshot
 nav_exclude: true
 ---
 

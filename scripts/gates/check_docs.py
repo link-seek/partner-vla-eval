@@ -82,6 +82,18 @@ def main() -> int:
            " → 这 10 篇会直接进公开导航")
     report("站外目录必须 nav_exclude", out_of_site_leak, " → 内部稿会出现在公开站")
 
+    # 状态标签必须有意义：reports 是快照、ADR 有状态机（PEP/RFC 的做法）
+    bad_status = []
+    for p in pages:
+        rel = str(p.relative_to(ROOT))
+        fm = front_matter(p.read_text(errors="ignore"))
+        if rel.startswith("docs/reports/") and fm.get("status") != "snapshot":
+            bad_status.append(f"{rel}: 应为 status: snapshot（检视报告是快照，不再改）")
+        if rel.startswith("docs/adr/") and p.name.startswith("ADR-"):
+            if fm.get("status") not in {"Proposed", "Accepted", "Superseded", "Deprecated"}:
+                bad_status.append(f"{rel}: status 需为 Proposed/Accepted/Superseded/Deprecated")
+    report("reports/ADR 的状态标签有效", bad_status, " → 缺 status 或值非法")
+
     # 站外的"根目录参考文档"必须是活的：被至少一篇其他文档引用，否则就是孤儿稿
     all_text = {p: p.read_text(errors="ignore") for p in pages}
     orphans = []

@@ -27,6 +27,21 @@ python3 scripts/gates/run_all.py --list
 3. **断言读被测系统自己的字段**：例如"有没有报错"要读 aggregate 的 `num_errors`/`failure_reason`，
    不是自己以为的 `error` 键（曾因此把报错的一集判成 PASS）
 
+## 推送纪律：重命名后取变更清单必须 `--no-renames`
+
+```bash
+git show --name-only --no-renames HEAD        # ✅ 重命名会同时列出旧路径与新增路径
+git show --name-only HEAD                     # ❌ 重命名只输出新路径 → 旧路径的删除被漏掉
+```
+
+**真实事故（2026-11-25，PR #23 → #24）**：`git mv docs/internal/x.md docs/howto/x.md` 后，
+用 `git show --name-only` 生成推送清单，结果只推送了新增的 `docs/howto/x.md`，
+旧路径的删除没进 commit —— main 上同时存在新旧两份，`docs/internal/` 404 不掉，
+只能再开一个 PR 补删。
+
+**判据**：任何"按文件清单推送"的自动化（API 建 tree、批量 scp、rsync），
+都必须用 `--no-renames`，或在推送后核对"旧路径是否真的消失"。
+
 ## 配置的唯一真源
 
 - 考场/task/协议/镜像 digest → `configs/registry/model-registry.json`（经 `scripts/data/bench_config.py` 读）
