@@ -15,7 +15,9 @@
 | `Dockerfile.verify` | 1 | `vla-verify:0.1` |
 | `Dockerfile.payload` | 2 | `vla-payload:<sha>` + `:latest` |
 
-**准确数量以 SWR 为准**，不以 Dockerfile 为准——历史 tag 不会自动消失。
+**唯一清单**：`configs/registry/image-registry.json`（15 条，含 digest / kind / status / 来源 Dockerfile）。
+准确数量以 SWR 为准，不以 Dockerfile 为准——历史 tag 不会自动消失。
+门禁：`scripts/gates/check_images.py`（静态一致性）；加 `--remote` 可逐个向 SWR 解析 digest 比对。
 查法：`docker buildx imagetools inspect <ref> --format '{{.Manifest.Digest}}'`。
 
 ## 三条硬规则

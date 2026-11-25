@@ -25,6 +25,8 @@ GATES: list[tuple[str, list[str], str]] = [
      "task 清单不硬编码 + serve yaml 契约（不需要 GPU）"),
     ("registry",   ["python3", "scripts/gates/check_registry.py"],
      "模型真源可复现（verified 必须钉 digest/revision）"),
+    ("images",     ["python3", "scripts/gates/check_images.py"],
+     "镜像唯一清单（15 条）+ 与 model-registry 交叉校验"),
     ("infra",      ["python3", "scripts/gates/check_infra_inventory.py"],
      "基础设施登记（workflow kind / 选项配置，禁 one-off 进 main）"),
     ("versions",   ["python3", "scripts/gates/check_versions.py"],
