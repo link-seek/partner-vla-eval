@@ -253,7 +253,7 @@ C 目录归位（会改路径，最后做）
 | A5 重复轮 | 🟡 管线就绪、待跑 | matrix 加 `replicate` 输入；产物/OBS 按轮次分目录；`make_leaderboard.py` 支持多轮合并（replicate_count + rate_min/max）；门禁强制多轮必带极差 |
 | B1 Hard | 🔄 运行中（run 45503556969，X-VLA 5 task） | `task_config: demo_randomized` 已确认；按实测吞吐 250ep ≈ 15.8h ≈ ¥521 |
 | B2 weight_type/regime | ✅ 完成 | registry 5 模型全标；两道门禁（缺字段/混排即红）；schema 支持 `ranked_separately` |
-| B3 ACT/DP 适配器 | 🟢 ACT **已整集跑通**（1/1），DP 待验 | ACT click_bell 1 task×1ep = 100%（400 步无错）；根因是漏了官方 640×480 resize（0/1→1/1 对照）；适配器已进 `Dockerfile.serve-robotwin`，等镜像构建完即可从 pending 升 verified |
+| B3 ACT/DP 适配器 | ✅ 两者均 verified（镜像+ckpt 钉版，smoke 0 error） | ACT click_bell 1 task×1ep = 100%（400 步无错）；根因是漏了官方 640×480 resize（0/1→1/1 对照）；适配器已进 `Dockerfile.serve-robotwin`，等镜像构建完即可从 pending 升 verified |
 | C1 scripts 三分 + leaderboard 自包含 | ✅ 完成 | `scripts/{ci,gates,data}`、`leaderboard/scripts/`；28 处引用已改 |
 | C2 结果 JSON → docs/data | ✅ 完成 | 19 JSON + deck → docs/decks；registry/leaderboard/schema 同步 |
 | C3 归档合并 | ✅ 完成 | tutorial-v1 12 个、papers 3 个；外链与相对路径已改 |

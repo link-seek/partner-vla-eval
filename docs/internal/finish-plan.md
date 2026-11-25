@@ -33,8 +33,8 @@
 ### 阶段 B3-serve（当前）
 | 项 | 输入 | 动作 | 产物 | 门禁/验收 |
 |---|---|---|---|---|
-| B3-1 ACT verified | 镜像 `…-act@sha256:25c6d14a…` + ckpt rev `c248f218…` | 用镜像内适配器跑 1 task×1ep | `registry.smoke` 证据、`status=verified` | `check_registry` OK；smoke 无 error |
-| B3-2 DP smoke | 镜像 `…-dp@sha256:ea6a2ab4…` + `500.ckpt`（已下载 1.5G） | 同上，CWD/ph 路径按冻结契约 | `registry.smoke`、`covered_tasks=2/5` | aggregate 落在预期路径；errors=0 |
+| B3-1 ACT verified | 镜像 `…-act@sha256:12fcc9be…` + ckpt rev `c248f218…` | 镜像内适配器跑 1 task×1ep（共 3 次） | ✅ `status=verified`，smoke 1/3、0 error | `check_registry` OK |
+| B3-2 DP smoke | 镜像 `…-dp@sha256:dafe751f…` + `500.ckpt` | 同上 | ✅ `status=verified`，smoke 1/1、0 error | aggregate 落盘 + errors=0 |
 
 工具：`scripts/ci/smoke_serve.sh`（前置断言 + docker healthcheck + 后置 aggregate 断言）。
 **不通过就停在 B3，不往下推**——因为 B1 收数和 A5 都不依赖它，但 B3 的结论会被引用。

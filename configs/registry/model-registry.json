@@ -124,11 +124,11 @@
       "skip_expert": "false",
       "action_spec": "qpos 14D",
       "precision": "fp32",
-      "status": "pending",
+      "status": "verified",
       "evidence": "官方 ACT 基线，按 task 分 ckpt（.ckpt + dataset_stats.pkl），无 lerobot/HF policy 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "适配器已烘进 vla-serve-robotwin-act（/opt/serve/），基座 bench 镜像钉 manifest digest。2026-11-25 整集 smoke：click_bell 1/1（400 步无错）。适配器补了官方 encode_obs 的 640x480 resize（考场 D435 是 320x240，缺这步会静默 0/1）。",
+      "note": "适配器烘进 vla-serve-robotwin-act（/opt/serve/），基座为 bench 镜像（钉 manifest digest）。ctk 内部自做 qpos 归一化；我们传原始 14 维 qpos。verified 指权重+镜像可复现，非分数结论。",
       "fast_init": "true",
       "ckpt_revision": "c248f2181c997ffa987d3a932b57f3c25c0482ed",
       "weight_type": "finetuned",
@@ -147,13 +147,31 @@
       "smoke": {
         "date": "2026-11-25",
         "task": "click_bell",
-        "episodes": 1,
-        "success": 1,
-        "harness": "vla-eval 0.8.0 (bench sha256:b4cac6f7…)",
         "protocol": "demo_clean / seed 0 / 400 steps",
-        "note": "对照实验：缺 640x480 resize 时同一配置连跑两次 0/1；补上后 1/1。根因为考场 D435 相机输出 240x320，官方 encode_obs 会 resize 到 640x480，适配器原先漏了。"
+        "runs": [
+          {
+            "image": "挂载版（本地 mnt）",
+            "success": 1,
+            "episodes": 1,
+            "errors": 0
+          },
+          {
+            "image": "sha256:241ec8bb…",
+            "success": 0,
+            "episodes": 1,
+            "errors": 0
+          },
+          {
+            "image": "sha256:12fcc9be…（当前）",
+            "success": 0,
+            "episodes": 1,
+            "errors": 0
+          }
+        ],
+        "conclusion": "链路验证通过：3 集 0 error、无 Spec mismatch、aggregate 正常落盘。成功 1/3，n=1 不作分数结论。",
+        "note": "唯一必须做的预处理是官方 encode_obs 的 640x480 resize（考场 D435 是 240x320）；缺它时静默 0/1。"
       },
-      "serve_image_digest": "sha256:25c6d14a95d6fcf57675476a7bc44781e52fd958a222bc4bc30792e8b587394b"
+      "serve_image_digest": "sha256:12fcc9be398b5c11e3394cb903fd9da91653eb5867041243e1c9e54d4fc6429f"
     },
     "dp-baseline": {
       "family": "DP（官方基线）",
@@ -166,11 +184,11 @@
       "skip_expert": "false",
       "action_spec": "qpos 14D",
       "precision": "fp32",
-      "status": "pending",
+      "status": "verified",
       "evidence": "官方 DP 基线，同 ACT 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "镜像 vla-serve-robotwin-dp 补齐 DP 推断依赖（hydra-core/dill/einops/zarr/numcodecs/numba/atomics/diffusers 0.27.2），构建期自检 import policy.DP.deploy_policy 通过。适配器签名已声明 left_arm_dim/right_arm_dim（缺了 jsonargparse 会直接拒绝）。待 smoke。",
+      "note": "镜像 vla-serve-robotwin-dp：基座 bench + 8 个推断依赖钉版（hydra-core/dill/einops/zarr/numcodecs/numba/atomics/diffusers 0.27.2），构建期自检 import 通过。覆盖 2/5（与 ACT 同）。",
       "fast_init": "true",
       "ckpt_revision": "7e57ab03eb7658cc83272deba01c35b73905cb9d",
       "weight_type": "finetuned",
@@ -180,7 +198,22 @@
         "adjust_bottle",
         "click_bell"
       ],
-      "coverage_evidence": "2026-11-25 读 HF 文件清单（Avada11/RoboTwin-Model-AgileX-DP，320 个 .ckpt）：与 exam.tasks 交集 = {adjust_bottle, click_bell} → 2/5。每个 ckpt 约 1.5GB。"
+      "coverage_evidence": "2026-11-25 读 HF 文件清单（Avada11/RoboTwin-Model-AgileX-DP，320 个 .ckpt）：与 exam.tasks 交集 = {adjust_bottle, click_bell} → 2/5。每个 ckpt 约 1.5GB。",
+      "smoke": {
+        "date": "2026-11-25",
+        "task": "click_bell",
+        "protocol": "demo_clean / seed 0",
+        "runs": [
+          {
+            "image": "sha256:dafe751f…（当前）",
+            "success": 1,
+            "episodes": 1,
+            "errors": 0
+          }
+        ],
+        "conclusion": "链路验证通过：1/1、0 error。n=1 不作分数结论。",
+        "note": "三个契约必须同时满足：① 送三路相机（DPRunner 显式读 head/left/right，缺一路 KeyError）；② 不 resize（encoder 的 key_shape_map=head_cam:(3,240,320)）；③ 动作块 (6,14) 用队列逐步吐出、队列空才推理（官方是开环执行 6 步）。"
+      }
     }
   }
 }
