@@ -48,6 +48,8 @@ GATES: list[tuple[str, list[str], str]] = [
      "采集器三种目录命名 + 禁止跨协议/跨轮回落"),
     ("adapter",    ["python3", "scripts/model_servers/test_robotwin_obs.py"],
      "观测转换（通道/resize/真值歧义）"),
+    ("calibration", ["python3", "scripts/ci/calibration_row.py", "--selftest"],
+     "官方榜单快照锚点 + 校准行生成（ACT 58/DP 54/50 task/离群标注）"),
 ]
 
 
