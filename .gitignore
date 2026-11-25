@@ -17,3 +17,6 @@ docs/.jekyll-cache/
 docs/.jekyll-metadata
 docs/vendor/
 docs/Gemfile.lock
+
+# deck 逐页渲染图（可再生成，不进仓）
+docs/decks/exports/capability-deck-*.png
