@@ -158,3 +158,28 @@ python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
 （ours/official/delta/outlier/snapshot/board_updated），供报告与榜单引用。
 快照本身由 `calibration` 门守住：13 项锚点断言（ACT 58、DP 54、X-VLA 100 / 67.96、50 task、任务名映射、
 离群标注、aggregate 解析），改坏快照会直接红。
+
+---
+
+## 八、ACT / DP：口径先对齐，再谈一致性
+
+跑之前先查了官方口径，发现一处**不能忽略的差异**：
+
+| 项 | 官方榜单 | 我们挂的公开 ckpt |
+|---|---|---|
+| 训练数据 | **50 demo_clean × 50 task**（2,500 demos） | **100 demos/task**（路径 `click_bell/demo_clean-100/100`） |
+| 评测 | 100 trials/task | 50 ep/task |
+
+官方快照 `board.train_data` 原文：`50 demo_clean x 50 tasks (2,500 demos)`。
+公开权重仓（`Avada11/RoboTwin-Model-AgileX-ACT`、`-DP`）里 **没有 50-demo 版本**，
+只有 `demo_clean-100`（HF 目录清单实测）。
+
+所以：
+
+- ACT / DP 的分数只能作 **100-demo 参考基线**，**不能**与官方 58% / 54% 算同口径差值，
+  也不计入"±4pp 一致"的条数；
+- 要对齐官方，需要 50-demo 权重（公开仓没有）或自训 50-demo（属 R01 范围）；
+- 这一条必须写在结果旁边，否则 94% vs 58% 会被误读成"我们的尺子偏松"。
+
+（中途读数：ACT click_bell 50 种子跑到 31 集时 29 success；最终以 aggregate 为准，
+但无论多少，都不改变"口径不同"这个结论。）
