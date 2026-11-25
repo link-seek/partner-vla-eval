@@ -22,6 +22,7 @@ VID="${MM_VIDEO:-0}"
 PROTO="${MM_PROTOCOL:-easy}"   # easy=demo_clean | hard=demo_randomized
 REPLICATE="${MM_REPLICATE:-}"  # A5：重复轮标签（r2/r3…），空=首轮
 RESUME="${MM_RESUME:-0}"       # 1=保留 results/ 与 sqlite（续跑/救援）
+EVAL_CUDA="${MM_EVAL_CUDA:-1}" # 评测卡（并行时用空闲卡，如 0）
 
 [ -f "$REG" ] || { echo "registry 不存在: $REG" >&2; exit 1; }
 
@@ -68,7 +69,10 @@ for model in ${MODELS//,/ }; do
     SUFFIX="$PROTO"
     if [ -n "$REPLICATE" ]; then SUFFIX="$PROTO-$REPLICATE"; fi
     rm -rf "matrix/$model/$task" "matrix/$model/$task-$SUFFIX"
+    # serve 容器名必须每轮唯一：否则第二个 run 的 `docker rm -f` 会杀掉第一个的 serve
+    SNAME="serve-$(echo "$model-$task$SUFFIX" | tr -c 'a-zA-Z0-9.-' '-' | cut -c1-40)"
     RW_TASKS="$task" RW_EPISODES="$EP" RW_SHARDS="$SH" RW_VIDEO="$VID" \
+      RW_SERVE_NAME="$SNAME" RW_EVAL_CUDA="$EVAL_CUDA" \
       SERVE_IMAGE="$SERVE_IMAGE_V" RW_SERVE_YAML="$SERVE_YAML_V" RW_PREWARM="$PREWARM_V" \
       RW_ACTION_TYPE="$ACTION_V" RW_SKIP_EXPERT="$SKIP_V" RW_BENCH_TAG="$BENCH_V" RW_FAST_INIT="$FAST_V" \
       RW_CKPT_REPO="$CKPT_REPO_V" RW_CKPT_REV="$CKPT_REV_V" RW_TASK_CONFIG="$TASK_CFG" \

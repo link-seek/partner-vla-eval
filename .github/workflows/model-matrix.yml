@@ -35,6 +35,10 @@ on:
         description: "重复轮标签（r2/r3…，空=首轮）。A5：同集重跑测方差"
         required: false
         default: ""
+      eval_cuda:
+        description: "评测用哪张卡（默认 1；并行跑时指到空闲卡，如 0）"
+        required: false
+        default: "1"
       resume:
         description: "1=保留 results/ 与 recording sqlite（续跑/崩溃后救援）"
         required: false
@@ -123,6 +127,7 @@ jobs:
           MM_PROTOCOL: ${{ inputs.protocol }}
           MM_REPLICATE: ${{ inputs.replicate }}
           MM_RESUME: ${{ inputs.resume }}
+          MM_EVAL_CUDA: ${{ inputs.eval_cuda }}
           ASSETS_MOUNT: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
           RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
         run: |
@@ -144,6 +149,7 @@ jobs:
           MM_PROTOCOL: ${{ inputs.protocol }}
           MM_REPLICATE: ${{ inputs.replicate }}
           MM_RESUME: ${{ inputs.resume }}
+          MM_EVAL_CUDA: ${{ inputs.eval_cuda }}
         run: |
           set -e
           mkdir -p matrix/summary
