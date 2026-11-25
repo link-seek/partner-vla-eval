@@ -7,7 +7,8 @@ status: living
 # 校准表：我们 vs 官方
 
 > 目的：证明**同一把尺子量官方基线，量出来的数和官方接近**。
-> 数据源：官方 leaderboard `robotwin-platform.github.io/data/robotwin_leaderboard.json`（更新于 2026-11-20）。
+> 数据源：官方榜单**入库快照** `docs/data/official/robotwin_leaderboard_2026-11-20.json`（board updated 2026-11-20，37 entry × 50 task）。
+> 官方值不手抄：由 `scripts/ci/calibration_row.py` 从快照读取并生成对照行。
 > 口径差异：官方 **100 trials/task**，我们 **50 ep/task**（噪声带见文末）。
 
 ---
@@ -81,3 +82,32 @@ status: living
 | place_empty_cup +100ep（CogACT） | 官方 28%，看是否收敛 | ≈¥208 |
 
 ACT/DP 是**官方自带的基线**，跑它们等于"用官方自己的模型验我们的尺子"，比第三方模型更有说服力。
+
+---
+
+## 六、官方基线的官方值（从快照读，非手抄）
+
+`python3 scripts/ci/calibration_row.py --entry <id> --task click_bell --official-only`：
+
+| entry | 模型 | click_bell (Easy) | 50 task Easy 均值 | 50 task Hard 均值 |
+|---|---|---|---|---|
+| `sft:ACT` | ACT | **58%** | 29.74% | 1.74% |
+| `sft:DP` | DP | **54%** | 28.04% | 0.64% |
+| `cotrain:X_VLA` | X-VLA | 100% | 67.96% | 20.95% |
+
+（X-VLA 的 67.96% 就是第二节"50 task 全量"的官方参照；三行同源，可一次复核。）
+
+## 七、结果怎么并表（机械动作）
+
+校准跑结束后，不再手工抄数：
+
+```bash
+# ACT click_bell 50ep 跑完
+python3 scripts/ci/calibration_row.py --entry sft:ACT --task click_bell \
+    --aggregate <aggregate.json>
+```
+
+输出即为可粘贴的表格行（含 K/N、差值、超出 4pp 的自动标"离群"），同时打印一份 JSON
+（ours/official/delta/outlier/snapshot/board_updated），供报告与榜单引用。
+快照本身由 `calibration` 门守住：13 项锚点断言（ACT 58、DP 54、X-VLA 100 / 67.96、50 task、任务名映射、
+离群标注、aggregate 解析），改坏快照会直接红。
