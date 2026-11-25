@@ -8,6 +8,15 @@ setup_ssh
 
 INSTANCE_ID="${V100_0001_INSTANCE:-c5b805bd-5e8d-4ba5-a5ab-7523244da0fa}"
 
+if is_dry; then
+  plan "action=repair-0001 instance=$INSTANCE_ID target=root@$V100_0001"
+  plan "tcp 22: $(tcp_check "$V100_0001" 22)"
+  plan "PROD_GH_TOKEN 在位（长度 ${#PROD_GH_TOKEN}）；OBS 凭证在位（AK 长度 ${#PROD_HCLOUD_AK}）"
+  plan "步骤：1) hcloud BatchStartServers + 轮询 ACTIVE  2) mint 注册 token  3) 装 agent  4) 确认上线  5) 资产恢复"
+  plan "dry-run 结束（未开机、未 mint、未改 agent）"
+  exit 0
+fi
+
 echo "[ops] 1/5 开机 $INSTANCE_ID"
 echo "y" | hcloud ECS BatchStartServers --cli-region="cn-north-4" \
   --cli-access-key="$PROD_HCLOUD_AK" --cli-secret-key="$PROD_HCLOUD_SK" \
