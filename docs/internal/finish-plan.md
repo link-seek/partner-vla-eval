@@ -20,6 +20,7 @@
 | DP 用相对路径 + 4 段目录 `<task>-<setting>-<num>-<seed>` | `policy/DP/deploy_policy.py:get_model` | serve CWD=`/app/RoboTwin`，ckpt 按该路径挂载 |
 | ACT / DP 覆盖考场 **2/5**（`adjust_bottle`、`click_bell`） | ACT 310 ckpt、DP 320 ckpt 的文件清单交集 | 榜单必须标覆盖差异 |
 | digest 用 **manifest digest**（`buildx imagetools inspect`） | config.digest 做 FROM 会报 media type | registry/文档只认这个 |
+| aggregate 的"有没有报错"看 **`task.num_errors` + 每集 `failure_reason`/`failure_detail`**，不是 `episodes[].error`（没有这个键） | 2026-11-25：DP 1 集报错但旧断言报 errors=0 判 PASS | 后置断言已对齐 |
 | 就绪探针必须打 **服务自己的 HTTP `/config`**（实测 200） | serve 日志 `HTTP config endpoint at http://…/config`；`sh`(dash) 不支持 `/dev/tcp`，用它会永远 unhealthy | `smoke_serve.sh` 用 curl 探针 |
 | 采集目录命名有三种并存 | `ci_model_matrix.sh` 写 `<task>-<proto>[-<rN>]`；历史有 `<task>-hard`、裸 `<task>` | 采集器兼容，但**禁止跨协议/跨轮回落** |
 

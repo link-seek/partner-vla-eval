@@ -300,3 +300,15 @@ sh: 1: cannot create /dev/tcp/127.0.0.1:8031: Directory nonexistent
 
 **方法论**：探针本身也要验证。别假设"等我用 bash 试是通的，健康检查也一定通"——
 执行探针的 shell 不是我所在的 shell。
+
+## 坑 10：断言看错了字段，报错的一集被判成 PASS
+
+`click_bell_aggregate.json` 里**没有** `episodes[].error` 这个键。真实的"有没有报错"在：
+
+- task 级：`num_errors`
+- 每集：`failure_reason`（如 `model_act`）+ `failure_detail`（traceback）
+
+我的 smoke 后置断言最初只看 `e.get("error")` → 恒为 0 → DP 明明 `⚠ 1 episodes errored` 还打印 `errors=0`、退出码 0。
+**这是最坏的一类错：门禁说绿，结果其实挂了。** 已改为读 `num_errors` 与 `failure_*`，有错就非零退出并打印 detail 尾部。
+
+教训：**断言必须读被测系统自己的判定字段**，不能读我"以为"的字段名。

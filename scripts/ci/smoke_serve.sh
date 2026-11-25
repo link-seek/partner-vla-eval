@@ -208,8 +208,9 @@ timeout 900 docker run --rm --gpus '"device=0"' --network host --entrypoint bash
   2>&1 | grep -viE '^\s*[0-9]+%|it/s|B/s'
 RC=${PIPESTATUS[0]}
 
-echo "[smoke] serve 日志（诊断）"
-docker logs "$CTR_NAME" 2>&1 | grep -aiE '\[dbg\]|loaded|error|traceback' | tail -15
+echo "[smoke] serve 日志（完整落盘 + 摘要）"
+docker logs "$CTR_NAME" > "$WORKDIR/serve.log" 2>&1
+grep -aiE '\[dbg\]|loaded|error|traceback' "$WORKDIR/serve.log" | tail -15
 docker rm -f "$CTR_NAME" >/dev/null 2>&1
 
 # ---------------------------------------------------------------- 后置断言
@@ -217,14 +218,22 @@ AGG="$HOST_RESULTS/${TASK}_aggregate.json"
 [ "$RC" = "0" ] || die "客户端退出码 $RC（日志：$LOG）"
 [ -f "$AGG" ] || die "没找到 aggregate：$AGG（输出写偏了？见 $LOG）"
 ok "aggregate 落在预期路径：$AGG"
+# 断言对齐 aggregate 的真源字段：task.num_errors + 每集 failure_reason/failure_detail。
+# 2026-11-25 教训：之前只看 e["error"]（aggregate 根本没有这个键）→ 明明 1 集报错还判 PASS。
 python3 - "$AGG" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
 t = d.get("tasks", [d])[0]
 eps = t.get("episodes", [])
 ok = sum(1 for e in eps if (e.get("metrics") or {}).get("success"))
-err = sum(1 for e in eps if e.get("error"))
-print(f"[smoke] {t.get('task')}: {ok}/{len(eps)}  success, errors={err}")
-sys.exit(0 if not err else 1)
+err = int(t.get("num_errors") or 0) or sum(
+    1 for e in eps if e.get("failure_reason") or e.get("failure_detail"))
+print(f"[smoke] {t.get('task')}: {ok}/{len(eps)} success, num_errors={err}")
+if err:
+    for e in eps:
+        if e.get("failure_reason") or e.get("failure_detail"):
+            print(f"[smoke] FAIL {e.get('failure_reason')}: {str(e.get('failure_detail'))[-600:]}")
+    sys.exit(1)
+sys.exit(0)
 PY
 echo "[smoke] PASS（日志：$LOG）"
