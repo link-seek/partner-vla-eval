@@ -126,54 +126,59 @@
       <div>机器<b>2×V100-32GB · cn-north-4</b></div>
       <div>镜像<b>vla-eval-robotwin:0.8.0-ee-slim</b></div>
     </div>
-      <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 02 exec summary -->
-  <section class="slide" data-screen-label="02 执行摘要">
-    <div class="eyebrow">执行摘要</div>
-    <h2>前四根已经钉住，第五根正在补</h2>
-    <p class="sub">一次评测能不能被别人采信，取决于四件事同时成立。少一件，分数就只是一家之言。</p>
+  <section class="slide" data-screen-label="02 我们是什么">
+    <div class="eyebrow">我们是什么</div>
+    <h2>我们造尺子，不卖读数</h2>
+    <p class="sub" style="margin-bottom:22px">别人训模型，我们给分。<strong>分数怎么来、能不能复核，由底座决定</strong>——所以我们证明的不是"我们的分数对"，是"同一把尺子量谁都一样，而且你能自己量"。</p>
     <div class="kpi-row">
-      <div class="kpi ok"><div class="n">已闭环</div><div class="l">执行：链路稳<br/>无人值守 + 自动关机</div></div>
-      <div class="kpi ok"><div class="n">已出表</div><div class="l">方法：栈差异量化<br/>每个旋钮值多少分</div></div>
-      <div class="kpi ok"><div class="n">已合入</div><div class="l">保真：尺子能修<br/>上游 PR #168</div></div>
-      <div class="kpi ok"><div class="n">5/5</div><div class="l">评测 5a 已收齐<br/>233/250 = 93.2% / 5b 下一阶段</div></div>
+      <div class="kpi pri"><div class="n">可复现</div><div class="l">同参数同数：协议版本 + 镜像 digest + 权重 revision</div></div>
+      <div class="kpi pri"><div class="n">可审计</div><div class="l">每一格追得到：run id → aggregate → sqlite → 逐集 jsonl</div></div>
+      <div class="kpi pri"><div class="n">可扩展</div><div class="l">官方没支持的模型/口径，我们接得上（见第 4 页）</div></div>
+      <div class="kpi pri"><div class="n">诚实</div><div class="l">不可比的地方自己先说：覆盖 5 vs 3、n 与误差、中途不进榜</div></div>
     </div>
     <div class="rule"></div>
-    <p class="quote">专业评测不是"跑得分数多"，是四件事同时成立：链路稳、方法透明、尺子可修、口径分得清。</p>
-      <div class="foot"><span>02 执行摘要</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <p class="quote">我们不要求你信我们的分数 —— 我们提供让你自己验的一切。</p>
+  
+    <div class="foot"><span>02 我们是什么</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
-  <!-- 03 why capability -->
-  <section class="slide" data-screen-label="03 为什么按能力组织">
-    <div class="eyebrow">组织方式</div>
-    <h2>为什么按"能力"讲，不按"章节"讲</h2>
-    <div class="cols">
-      <div class="col">
-        <h3>按结果讲，会停在结果层</h3>
-        <ul>
-          <li class="dim">分数是多少</li>
-          <li class="dim">跟官方差多少</li>
-          <li class="dim">下一个任务什么时候跑</li>
-        </ul>
-        <p class="sub" style="margin-top:8px">这些都对，但回答不了"凭什么信你"。</p>
-      </div>
-      <div class="col">
-        <h3>按能力讲，每一栏都可验收</h3>
-        <ul>
-          <li><strong>跑得起来</strong> —— 派一条命令，无人值守跑完</li>
-          <li><strong>比得可信</strong> —— 换一个变量，能量化它值多少分</li>
-          <li><strong>尺子能修</strong> —— 协议错了，改得动上游</li>
-          <li><strong>结论站得住</strong> —— 口径分得清，不越界解读</li>
-        </ul>
-      </div>
-    </div>
-      <div class="foot"><span>03 为什么按能力组织</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<section class="slide" data-screen-label="03 证明一 校准">
+    <div class="eyebrow">证明一 · 校准</div>
+    <h2>先量官方基线：四条能对上的 task，有效平均差 2.5pp</h2>
+    <table>
+      <tr><th style="width:22%">task</th><th style="width:18%">我们</th><th style="width:16%">官方</th><th style="width:14%">差</th><th>说明</th></tr>
+      <tr><td>grab_roller</td><td class="num">92%（46/50）</td><td class="num">89%</td><td class="num">+3pp</td><td>0.8.0 校验种子，零 error</td></tr>
+      <tr><td>adjust_bottle</td><td class="num">100%（35/35 有效）</td><td class="num">99%</td><td class="num">+1pp</td><td>0.7.0；15 个坏种已剔除</td></tr>
+      <tr><td>place_phone_stand</td><td class="num">16%（8/50）</td><td class="num">18%</td><td class="num">−2pp</td><td>0.8.0 校验种子</td></tr>
+      <tr><td>place_empty_cup</td><td class="num">16%（8/50）</td><td class="num">28%</td><td class="num">−12pp</td><td><strong>离群</strong>：V100 fp16 vs 官方 H100 bf16 + 种子分布不同 → 待定档</td></tr>
+      <tr><td><strong>有效平均</strong></td><td class="num"><strong>56%</strong></td><td class="num">58.5%</td><td class="num"><strong>−2.5pp</strong></td><td>四条能对上 task 的合计</td></tr>
+    </table>
+    <p class="sub" style="margin-top:18px"><strong>怎么读</strong>：三条在 ±3pp 内 → 链路是健康的；<strong>离群那一条我们主动标出来</strong>——它同时受精度（V100 fp16 vs H100 bf16）与种子分布影响，只写进披露、不硬判高下。</p>
+    <p class="sub" style="margin-top:8px">对不上的地方自己先说，是"能评测"的一部分：<strong>否则你无法判断哪一格可以引用。</strong></p>
+  
+    <div class="foot"><span>03 证明一 校准</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
-  <!-- 04 pillar 1 -->
-  <section class="slide" data-screen-label="04 支柱一 执行能力">
+<section class="slide" data-screen-label="04 证明二 扩展">
+    <div class="eyebrow">证明二 · 扩展</div>
+    <h2>官方不支持的模型，我们有办法接上；补不了的，我们直说</h2>
+    <table>
+      <tr><th style="width:30%">场景</th><th style="width:22%">官方状态</th><th>我们的做法</th><th style="width:12%">结果</th></tr>
+      <tr><td>ACT / DP 官方基线</td><td>ckpt 不是 HF policy 格式，没有 serve 入口</td><td>自建 serve 适配器 + 两个镜像（钉 digest），啃下 5 条硬契约</td><td><span class="tag ok">verified</span></td></tr>
+      <tr><td>动作空间 20D vs 16D（EE）</td><td>官方只有 20D 口径</td><td><code>-ee16</code> 变体镜像 + 转换层，Spec 校验前置</td><td><span class="tag ok">已合入</span></td></tr>
+      <tr><td>X-VLA 吐 20D EE，benchmark 硬截 <code>act[:14]</code></td><td>上游 bug</td><td>定位到文件行号 → 提 PR #168（+1462/−951）</td><td><span class="tag ok">已合入</span></td></tr>
+      <tr><td>CogACT 缺 2 个 task</td><td><strong>没有公开权重</strong></td><td>补不了——不编数，如实标 3/5</td><td><span class="tag warn">披露</span></td></tr>
+    </table>
+    <p class="sub" style="margin-top:18px"><strong>这就是底座和"跑分脚本"的区别</strong>：跑分脚本只能跑官方已经支持的；底座要能把"官方还没支持的"接进来，接不进来的说清楚为什么。</p>
+  
+    <div class="foot"><span>04 证明二 扩展</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+<section class="slide" data-screen-label="04 支柱一 执行能力">
     <div class="eyebrow">支柱一 · 执行能力</div>
     <h2>任意模型 × 任意 task：一条命令派出去，无人值守跑完</h2>
     <table>
@@ -184,7 +189,7 @@
       <tr><td>队列治理</td><td>同 concurrency 组串行；只保 1 个 pending</td><td><span class="tag warn">踩过两次，已写进 operator/02</span></td></tr>
       <tr><td>自动收产物</td><td>aggregate + 逐 ep json/sqlite/mp4 直落 OBS，保留 episodes/ 结构</td><td><span class="tag ok">12 文件 282.67KB</span></td></tr>
     </table>
-      <div class="foot"><span>04 支柱一 执行能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>05 支柱一 执行能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 05 pillar 2 -->
@@ -200,7 +205,7 @@
       <tr><td>种子</td><td>盲种子 vs 校验种子</td><td class="num">15 坏种 vs 零 error</td><td>动 error 率不动能力</td></tr>
     </table>
     <p class="sub" style="margin-top:22px">行业通病是默认 fp16/bf16 可互换——<code>29/30 → 0/30</code> 直接证伪。有了这张表，看别人分数时知道该追问什么。</p>
-      <div class="foot"><span>05 支柱二 方法能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>06 支柱二 方法能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 06 pillar 3 -->
@@ -227,7 +232,7 @@
     </div>
     <div class="rule"></div>
     <p class="quote">别人遇到尺子 bug 只能绕，我们能改进去——这是让"0 分"变成"真 0 分"的前提。</p>
-      <div class="foot"><span>06 支柱三 保真能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>07 支柱三 保真能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 07 pillar 4 -->
@@ -255,7 +260,7 @@
     </table>
     <p class="sub" style="margin-top:20px"><code>adjust_bottle</code> / <code>place_phone_stand</code> 为本轮实测（run 45188046221）；<code>grab_roller</code> / <code>place_empty_cup</code> 为历史轮次，跨轮次不加总。</p>
     <p class="sub" style="margin-top:10px"><strong>边界</strong>：这一栏不回答"哪个基模强"——因为训练口径还没固定。</p>
-      <div class="foot"><span>07 支柱四 评价能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>08 支柱四 评价能力</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 08 5a -->
@@ -276,7 +281,7 @@
       <tr><td>handover_block</td><td class="num">39/50</td><td class="num muted">— 无公开 ckpt</td></tr>
     </table>
     <p class="sub" style="margin-top:16px"><strong>不给跨模型总分</strong>：覆盖格数不同（5 vs 3）且 grab_roller 取自不同 run；横向只在共同覆盖的 task 上成立。</p>
-      <div class="foot"><span>08 榜单首版</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>09 榜单首版</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 09 5b -->
@@ -302,7 +307,7 @@
         </ul>
       </div>
     </div>
-      <div class="foot"><span>09 微调轴 下一阶段</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>10 微调轴 下一阶段</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 09b 官方基线接入 -->
@@ -331,7 +336,7 @@
       </div>
     </div>
     <p class="sub" style="margin-top:16px"><strong>n=1 不作分数结论</strong>：这两次 smoke 证明的是"链路通、零报错"，不是"ACT 有多强"。</p>
-      <div class="foot"><span>09b 官方基线接入</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>11 官方基线接入</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 09c Easy vs Hard -->
@@ -345,7 +350,7 @@
     </table>
     <p class="sub" style="margin-top:16px">Hard 整轮 250 集仍在跑（当前 124 集，3 个 task 未出）。上表是<strong>已跑满 50 集</strong>的两个 task，属中途读数：<strong>不进榜</strong>，等整轮收完按 <code>protocol_version</code> 归档。</p>
     <p class="sub"><strong>这就是必须两列的原因</strong>：只报 Easy 会把"固定摆位下能成功"说成"能操作"；randomized 才是真实增益的判据（官方 §4.3 同结论）。</p>
-      <div class="foot"><span>09c Easy vs Hard</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>12 Easy vs Hard</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 09d 治理 -->
@@ -373,7 +378,7 @@
       </div>
     </div>
     <p class="sub" style="margin-top:16px">为什么算"能力"：<strong>没有这些，分数不可复现</strong>——同配置重跑、换人跑、三个月后跑，都要对得上。</p>
-      <div class="foot"><span>09d 治理</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>13 治理</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 10 progress -->
@@ -390,7 +395,7 @@
       <tr><td>官方基线</td><td><span class="tag ok">已接入</span></td><td>ACT / DP 各 verified（镜像+权重钉版），覆盖 2/5；smoke 零报错</td></tr>
       <tr><td>评测 5b</td><td><span class="tag next">下一阶段</span></td><td>S3 / S4 未跑（<strong>S2 适配器已完成</strong>）</td></tr>
     </table>
-      <div class="foot"><span>10 进度与缺口</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>14 进度与缺口</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 11 next -->
@@ -413,7 +418,7 @@
     </div>
     <div class="rule"></div>
     <p class="sub">分行原则：<strong>能用公开 ckpt 的，先出数</strong>；要自己训的，单独立项，不占用评测队列。</p>
-      <div class="foot"><span>11 下一步</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>15 下一步</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 12 closing -->
@@ -439,7 +444,7 @@
         </ul>
       </div>
     </div>
-      <div class="foot"><span>12 结论</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>16 结论</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- A1 -->
@@ -458,7 +463,7 @@
       <tr><td>CogACT</td><td>place_phone_stand</td><td class="num">6/50</td><td class="num">12.0%</td><td class="num">[5.6, 23.8]</td><td class="num">365.1</td><td class="num">0</td></tr>
     </table>
     <p class="sub" style="margin-top:16px">n=50 时 Wilson 区间宽约 ±5–10pp；<strong>差异小于 ±7pp 不下结论</strong>。</p>
-      <div class="foot"><span>A1 附录 数据明细</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
+    <div class="foot"><span>17 附录 数据明细</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
   </section>
 
   <!-- A2 -->
@@ -479,7 +484,7 @@
       <tr><td>产物</td><td><code>obs://so101-sim-pipeline/eval/leaderboard/</code></td></tr>
       <tr><td>workflow</td><td><code>model-matrix.yml</code>（自动开关机）</td></tr>
     </table>
-      <div class="foot"><span>A2 附录 复现参数</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
+    <div class="foot"><span>18 附录 复现参数</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
   </section>
 
 </div>
