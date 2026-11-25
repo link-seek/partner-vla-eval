@@ -1,13 +1,18 @@
 # ACT（RoboTwin 官方 policy/ACT）serve 配置
-# ⚠️ 未验证：2026-11-24 写就，机器被 Hard 评测占用，尚未 smoke。
-# 首次使用前按 docs/internal/act-dp-adapter-runbook.md 跑 1 task×1ep。
-script: "scripts/model_servers/robotwin_policy.py"
+#
+# 状态：2026-11-25 已跑通整集（click_bell 1/1，400 步无错），见 registry 的 smoke 字段。
+# 适配器已烘进镜像 vla-serve-robotwin-act（/opt/serve/），不再依赖本地挂载 → 可复现。
+#
+# ckpt 不进镜像（体积大、按 task 变），运行时挂到 /ckpt：
+#   docker run -v /data/act-official:/ckpt ...
+# 官方 ckpt 命名是 policy_epoch_6000_seed_100.ckpt（不是 policy_last.ckpt，
+# 写错会静默加载随机权重）。
+script: "/opt/serve/robotwin_policy.py"
 args:
   policy: act
-  # ACT 从 ckpt_dir 读 policy_last.ckpt + dataset_stats.pkl（官方约定）
-  ckpt_dir: /root/robotwin-train/ckpt/grab_roller-clean50-seed0
+  ckpt_dir: /ckpt/click_bell/demo_clean-100/100
   action_dim: 14
-  chunk_size: 50
+  chunk_size: 50          # 官方 detr parser 的训练参数，运行时不用它做缓冲
   kl_weight: 10.0
   temporal_agg: false
   device: cuda:0

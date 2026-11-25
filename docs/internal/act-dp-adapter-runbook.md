@@ -206,3 +206,44 @@ TARGET_EPISODES=50 bash scripts/data/rescue_partial.sh "$S" /tmp/rescue
 - `vla-eval export` 支持增量："Rerun to include subsequently recorded episodes"
 - 下次同配置重跑时加 `resume=1`（workflow 输入），会跳过 `results_fresh`，
   sqlite 保留 → 已完成的集数不会被重复跑掉
+
+---
+
+## 坑 7（2026-11-25，最贵的一个）：漏掉官方 encode_obs 的 640×480 resize
+
+**症状**：整集跑完 400 步、无报错、无 Spec mismatch，但结果 **0/1**（连跑两次都是）。
+
+**根因**：考场 `task_config/demo_clean.yml` 里 `head_camera_type: D435` → 相机输出 **320×240**；
+官方 `policy/ACT/deploy_policy.py::encode_obs` 会先
+`cv2.resize(..., (640, 480), interpolation=cv2.INTER_LINEAR)` 再送策略。
+我们的适配器直接把 320×240 转成 CHW 就喂进去——ACT 按 640×480 训练，等于跑半分辨率图。
+
+**证据（对照实验，同配置同种子）**：
+
+| 版本 | 结果 |
+|---|---|
+| 缺 resize | 0/1（2 次） |
+| 补 `resize_bilinear(..., 640, 480)` | **1/1** |
+
+同一次运行的 serve 侧日志坐实了尺寸：
+```
+[dbg] image shapes={'head_camera': (240, 320, 3), ...}
+```
+
+**为什么难发现**：harness 的 `IMAGE_RGB = DimSpec("image", 0, "rgb_hwc_uint8")` 维度是 0，
+**不会**替你 resize；DETR/ResNet 主干吃任意尺寸都能跑通，所以既不报错也不 mismatch，
+只是分数归零。
+
+**修法**：`scripts/model_servers/robotwin_obs.py::RESIZE_WH = (640, 480)`，
+`build_policy_obs` 里 `to_chw01(resize_bilinear(img, *RESIZE_WH))`。
+`resize_bilinear` 用 numpy 实现（零依赖，可单测），10 项 resize 单测进 lint。
+
+**排查顺序建议**（下次换策略/换考场时）：
+1. 先比对官方 `encode_obs` 的**每一个**预处理步骤（resize / 归一化 / 通道序 / dtype）
+2. 再比对 spec 键名
+3. 最后才怀疑模型权重
+
+## 坑 8：调试日志用了 os.environ 但没 import os
+
+`NameError: name 'os' is not defined` —— 单测碰不到、`bash -n` 碰不到，只有真跑才崩。
+已由 lint 的 `ruff --select F821` 拦住。

@@ -128,9 +128,9 @@
       "evidence": "官方 ACT 基线，按 task 分 ckpt（.ckpt + dataset_stats.pkl），无 lerobot/HF policy 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "适配器与 yaml 已备，未 smoke。实测 0.8.0-ee-slim 可导入 policy.ACT.deploy_policy，观测转换已有 16 项单测（scripts/model_servers/test_robotwin_obs.py）。",
+      "note": "适配器已跑通整集（1 task × 1 ep，400 步无错）。仍为 pending 的原因：serve 走的是 bench 镜像 + 本地挂载 /root/r01/mnt/model_servers，适配器未烘进镜像 → 无 serve_image_digest，不可复现。需另建 vla-serve-robotwin-act 镜像。",
       "fast_init": "true",
-      "ckpt_revision": null,
+      "ckpt_revision": "c248f2181c997ffa987d3a932b57f3c25c0482ed",
       "weight_type": "finetuned",
       "regime": null,
       "covered_tasks": [
@@ -142,7 +142,17 @@
         "place_phone_stand": "同上",
         "handover_block": "同上"
       },
-      "ckpt_note": "官方文件名 policy_epoch_6000_seed_100.ckpt（非 policy_last.ckpt）；需 hidden_dim=512 / dim_feedforward=3200 / dec_layers=7 / camera_names=3"
+      "ckpt_note": "官方文件名 policy_epoch_6000_seed_100.ckpt（非 policy_last.ckpt）；需 hidden_dim=512 / dim_feedforward=3200 / dec_layers=7 / camera_names=3",
+      "coverage_evidence": "2026-11-25 直接读 HF 文件清单（hf-mirror API）：486 个文件 / 310 个 .ckpt，task 前缀为 adjust_bottle, beat_block_hammer, click_alarmclock, click_bell, lift_pot, open_laptop, open_microwave, place_container_plate, place_empty_cup, place_shoe；与 exam.tasks 交集 = {adjust_bottle, click_bell} → 2/5。",
+      "smoke": {
+        "date": "2026-11-25",
+        "task": "click_bell",
+        "episodes": 1,
+        "success": 1,
+        "harness": "vla-eval 0.8.0 (bench sha256:b4cac6f7…)",
+        "protocol": "demo_clean / seed 0 / 400 steps",
+        "note": "对照实验：缺 640x480 resize 时同一配置连跑两次 0/1；补上后 1/1。根因为考场 D435 相机输出 240x320，官方 encode_obs 会 resize 到 640x480，适配器原先漏了。"
+      }
     },
     "dp-baseline": {
       "family": "DP（官方基线）",
@@ -159,9 +169,9 @@
       "evidence": "官方 DP 基线，同 ACT 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "适配器与 yaml 已备，未 smoke。实测 0.8.0-ee-slim 的 robotwin 环境缺 hydra/dill（diffusion_policy 已 vendored）→ 需另烘 vla-serve-robotwin-dp 镜像再验。",
+      "note": "适配器与 yaml 已备，未 smoke。镜像缺 hydra/dill（diffusion_policy 已 vendored）→ 需另烘 vla-serve-robotwin-dp 镜像再验。ckpt_revision 已钉（HF sha）。",
       "fast_init": "true",
-      "ckpt_revision": null,
+      "ckpt_revision": "7e57ab03eb7658cc83272deba01c35b73905cb9d",
       "weight_type": "finetuned",
       "regime": null
     }

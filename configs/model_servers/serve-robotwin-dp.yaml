@@ -1,13 +1,18 @@
 # DP（RoboTwin 官方 policy/DP）serve 配置
-# ⚠️ 未验证：同上。
-script: "scripts/model_servers/robotwin_policy.py"
+#
+# 状态：未 smoke。镜像 vla-serve-robotwin-dp 在 robotwin 环境里补了 hydra-core + dill
+# （diffusion_policy 已 vendored 但缺这两个依赖）。
+#
+# ckpt 运行时挂到 /ckpt，官方布局：
+#   <task>-<ckpt_setting>-<expert_data_num>/<checkpoint_num>.ckpt
+#   例：adjust_bottle-demo_clean-100/100/500.ckpt
+script: "/opt/serve/robotwin_policy.py"
 args:
   policy: dp
-  # DP 官方按 <task>-<ckpt_setting>-<expert_data_num>-<seed>/<checkpoint_num>.ckpt 拼路径
-  task_name: grab_roller
-  ckpt_setting: clean50
-  expert_data_num: 50
-  seed: 0
-  checkpoint_num: 600
+  task_name: click_bell
+  ckpt_setting: demo_clean-100
+  expert_data_num: 100
+  seed: 100
+  checkpoint_num: 500
   action_dim: 14
   device: cuda:0

@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       images:
-        description: "逗号分隔：serve-cogact,serve-cogact-fp32,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,verify"
+        description: "逗号分隔：serve-cogact,serve-cogact-fp32,serve-pi05,serve-xvla,serve-xvla-fp16,serve-smolvla,serve-pi0,verify,serve-robotwin-act,serve-robotwin-dp"
         required: false
-        default: "serve-cogact,serve-pi05,serve-xvla,serve-smolvla,serve-pi0,serve-cogact-fp32-2gpu,verify"
+        default: "serve-cogact,serve-pi05,serve-xvla,serve-smolvla,serve-pi0,serve-cogact-fp32-2gpu,verify,serve-robotwin-act,serve-robotwin-dp"
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [serve-cogact, serve-cogact-fp32, serve-pi05, serve-xvla, serve-xvla-fp16, serve-smolvla, serve-pi0, serve-cogact-fp32-2gpu, verify]
+        image: [serve-cogact, serve-cogact-fp32, serve-pi05, serve-xvla, serve-xvla-fp16, serve-smolvla, serve-pi0, serve-cogact-fp32-2gpu, verify, serve-robotwin-act, serve-robotwin-dp]
     steps:
       - uses: actions/checkout@v4
       - name: Filter
@@ -55,6 +55,8 @@ jobs:
             serve-smolvla) DOCKERFILE=docker/Dockerfile.serve-smolvla; TAG=vla-serve-smolvla:0.8.0; BUILD_ARGS="" ;;
             serve-pi0) DOCKERFILE=docker/Dockerfile.serve-pi0; TAG=vla-serve-pi0:0.8.0; BUILD_ARGS="" ;;
             verify) DOCKERFILE=docker/Dockerfile.verify; TAG=vla-verify:0.1; BUILD_ARGS="" ;;
+            serve-robotwin-act) DOCKERFILE=docker/Dockerfile.serve-robotwin; TAG=vla-serve-robotwin-act:0.8.0; BUILD_ARGS="--build-arg POLICY=act" ;;
+            serve-robotwin-dp) DOCKERFILE=docker/Dockerfile.serve-robotwin; TAG=vla-serve-robotwin-dp:0.8.0; BUILD_ARGS="--build-arg POLICY=dp" ;;
           esac
           # shellcheck disable=SC2086
           docker build -f "$DOCKERFILE" $BUILD_ARGS -t "${{ env.SWR_REG }}/$TAG" .

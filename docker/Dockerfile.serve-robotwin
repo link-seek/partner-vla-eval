@@ -1,0 +1,30 @@
+# RoboTwin 官方 ACT / DP 的 serve 镜像（同一个 Dockerfile，POLICY 切换）
+#
+# 为什么需要它：适配器 scripts/model_servers/robotwin_policy.py 之前是**本地挂载**进容器的
+# （-v /root/r01/mnt/model_servers），跑得通但不可复现 —— 挂载内容在机器上、不在镜像里，
+# 于是 registry 里 act-baseline/dp-baseline 只能是 pending（无 serve_image_digest）。
+#
+# 基镜像钉 digest（tag 会被重打，digest 不会）；与 configs/registry 里的 bench_image_digest 同源。
+ARG BASE=swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin@sha256:b4cac6f706ba34f07e2242bde4ca398cd4045f2f38330ea023f3053133ff3eef
+FROM ${BASE}
+
+ARG POLICY=act
+
+USER root
+
+# 适配器与它的零依赖转换模块放在同一目录，靠 PYTHONPATH 解决同级 import
+COPY scripts/model_servers/robotwin_policy.py /opt/serve/robotwin_policy.py
+COPY scripts/model_servers/robotwin_obs.py /opt/serve/robotwin_obs.py
+
+# DP（diffusion_policy）在 robotwin 环境里缺这两个；ACT 不需要。
+# 只在构建期装（V100 上禁止现场 pip）。
+RUN if [ "${POLICY}" = "dp" ]; then \
+      conda run -n robotwin pip install --no-cache-dir hydra-core dill; \
+    fi
+
+ENV PYTHONPATH=/opt/serve
+ENV POLY_POLICY=${POLICY}
+WORKDIR /opt/serve
+
+# 自检：至少能 import 转换模块（不依赖 GPU，纯 numpy）
+RUN conda run -n robotwin python -c "import robotwin_obs; print('robotwin_obs OK', robotwin_obs.RESIZE_WH)"
