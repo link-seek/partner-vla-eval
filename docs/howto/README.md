@@ -13,8 +13,10 @@ nav_exclude: true
 
 | 手册 | 场景 |
 |---|---|
-| （待迁）`repair-runner.md` | V100 runner 装机 / agent 损坏 |
-| （待迁）`tailnet-join.md` | runner 重装后重新加入 tailnet |
+| `repair-runner.md` | V100 runner 装机 / agent 损坏（0002 双 agent、0001 单 agent） |
+| `tailnet-join.md` | runner 重装后重新加入 tailnet（经 hw41 跳板，key 不落盘） |
+| `act-dp-adapter-runbook.md` | ACT/DP 适配器首次 smoke（12 个坑） |
+| `serve-yaml-onboarding.md` | serve yaml 编写/对接（上游讨论草稿） |
 
 ## 写作要求
 

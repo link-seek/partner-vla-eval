@@ -34,13 +34,13 @@
 | `power-selftest.yml` | 开关机自检 |
 | `repair-v100.yml` / `repair-v100-0001.yml` | runner 掉线修复（token 现开现删） |
 | `ts-join-v100.yml` | tailnet 加入 |
-| `inspect-v100.yml` / `audit-v100.yml` | 机器巡检（只读） |
+| `audit-v100.yml` | 机器审计（可复用，登记为 rare） |
 
 ## 排障（一次性，用完即弃）
 
 | 文件 | 用途 |
 |---|---|
-| `probe-jev.yml` / `probe-jev-hw21.yml` / `probe-guard.yml` | JEV/探针类临时验证 |
+| `secret-hygiene.yml` | gitleaks 真值扫描（每个 PR 必跑） |
 
 ## 门禁
 
@@ -51,5 +51,6 @@
 
 ---
 
-**约定**：新增 workflow 请在上面对应小节补一行；一次性排障请以 `probe-` 或 `audit-` 前缀命名，
-并在标题首行写 `# 一次性：<场景>`，便于识别哪些能点。
+**约定**：新增 workflow 请在上面对应小节补一行，并在 `scripts/gates/infra-inventory.json` 登记 `kind`。
+**一次性排障不要提交 workflow**——开分支做完即删（见 CONTRIBUTING 第二节）；
+确有长期价值的排障能力（如 `audit-v100`）登记为 `rare` 并写 owner/触发条件。
