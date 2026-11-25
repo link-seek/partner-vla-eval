@@ -85,7 +85,7 @@ main 上只允许常驻能力。任何只做一次的东西活在分支，用完
 | 运维手册 | `docker/AGENTS.md`、`scripts/AGENTS.md`（就近） | 不进站 |
 
 站点只发布公开面；内部稿一律 `nav_exclude: true`。目录规则见 `docs/AGENTS.md`。
-产物保留策略（OBS 桶生命周期）见 `docs/adr/ADR-0002` 与 `docs/howto/obs-lifecycle.md`。
+产物保留策略（OBS 桶生命周期）见 `docs/adr/ADR-0002-artifact-retention-and-partial.md` 与 `docs/howto/obs-lifecycle.md`。
 
 门禁分两层：
 
