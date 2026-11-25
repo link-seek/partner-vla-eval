@@ -17,4 +17,7 @@ regexes = [
   '''\$OBS_(AK|SK)''',
   '''\$\{\{\s*secrets\.[A-Z_]+\s*\}\}''',  # workflow 里的 secrets 引用
   '''your[-_]?(ak|sk|token|password)''',   # 文档里的占位词
+  '''\$\{?TS_AUTHKEY\}?''',              # tailscale authkey 一律变量引用
+  '''-u\s+"\$[A-Z_]''',                 # curl -u "$VAR" 是变量引用（curl-auth-user 误报）
+  '''\$\{?[A-Z][A-Z0-9_]*\}?''',            # 其他环境变量引用
 ]
