@@ -19,7 +19,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from robotwin_obs import (  # noqa: E402
-    RESIZE_WH, build_policy_obs, flat_joint_state, resize_bilinear, to_chw01,
+    RESIZE_WH, build_policy_obs, flat_joint_state, resize_bilinear,
+    split_action_chunk, to_chw01,
 )
 
 fails: list[str] = []
@@ -108,6 +109,18 @@ def main() -> int:
     check("dp 全路保持 3x240x320（不 resize，ckpt shape_meta 就这个）",
           all(o3[k].shape == (3, 240, 320) for k in ("head_cam", "left_cam", "right_cam")),
           str({k: o3[k].shape for k in ("head_cam", "left_cam", "right_cam")}))
+
+    # ---- 动作块切分（DP 一次返回 6x14；harness 每步只要 14）----
+    one = split_action_chunk(np.arange(14, dtype=np.float32), 14)
+    check("单步 14 维 → 1 个动作", len(one) == 1 and one[0].shape == (14,))
+    chunk = split_action_chunk(np.arange(6 * 14, dtype=np.float32).reshape(6, 14), 14)
+    check("DP 动作块 6x14 → 6 个动作", len(chunk) == 6 and all(c.shape == (14,) for c in chunk))
+    check("切块保持顺序（第 2 行首元素 = 14）", float(chunk[1][0]) == 14.0)
+    try:
+        split_action_chunk(np.zeros(15, dtype=np.float32), 14)
+        check("维度不整除应报错", False, "未抛错")
+    except ValueError:
+        check("维度不整除应报错", True)
 
     # 回归：numpy 数组作为 joint_state 时不得触发"真值歧义"
     arr_js = np.zeros(14, dtype=np.float32)

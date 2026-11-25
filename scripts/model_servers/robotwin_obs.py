@@ -97,6 +97,22 @@ def flat_joint_state(js: Any, action_dim: int = 14) -> np.ndarray:
     return a
 
 
+def split_action_chunk(arr, action_dim: int = 14) -> list[np.ndarray]:
+    """把策略返回值切成"逐步动作"列表。
+
+    官方两个策略的返回形态不同（2026-11-25 实测）：
+      ACT → 单个 (14,)；内部自己有 query_frequency/temporal_agg 缓冲
+      DP  → 一整块 (n_action_steps, 14) = (6,14)，官方 eval 是**开环执行 6 步**再重新推理
+    harness 每步只问一个动作，所以 DP 必须由适配器维护队列，不能把 84 维直接当一步。
+    """
+    a = np.asarray(arr, dtype=np.float32)
+    if a.size == 0:
+        raise ValueError("策略返回空动作")
+    if a.size % action_dim != 0:
+        raise ValueError(f"动作维度 {a.size} 不是 action_dim={action_dim} 的整数倍（块长度不整）")
+    return [row.reshape(action_dim) for row in a.reshape(-1, action_dim)]
+
+
 def build_policy_obs(
     images: Mapping[str, Any],
     joint_state: Any,

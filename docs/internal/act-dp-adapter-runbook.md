@@ -334,3 +334,22 @@ sh: 1: cannot create /dev/tcp/127.0.0.1:8031: Directory nonexistent
 
 **另外**：`robot_dp_14.yaml` 里 `shape_meta` 写 `[3,-1,-1]`，那是训练配置占位；
 真实期望在 **ckpt** 里，必须载入后打印 `key_shape_map`。
+
+## 坑 12：DP 一次返回 6 步动作，被当成"一步 84 维"
+
+**症状**：`ValueError: 策略返回 84 维动作，与 action_dim=14 不符`（84 = 6×14）。
+
+**根因**：两个策略的返回形态不同，且官方用法也不同：
+
+| 策略 | 返回 | 官方怎么用 |
+|---|---|---|
+| ACT | 单步 `(14,)` | 每步推理一次（内部有 `query_frequency`/`temporal_agg` 缓冲） |
+| DP | 整块 `(n_action_steps, 14)` = `(6,14)` | `for action in actions: take_action(action)` —— **开环执行 6 步后**才重新推理 |
+
+harness 是每步问一个动作，所以适配器必须：
+1. 维护动作队列（`deque`）
+2. **队列空时才调 `get_action`**（等价官方的"整块开环"；每步都调等于每 6 步浪费 5 次推理，且行为偏离官方）
+3. 每步 `popleft` 一个 14 维
+4. episode 开始 `_reset` 时清队列（否则跨集会串动作）
+
+切块逻辑做成纯函数 `split_action_chunk(arr, action_dim)`，配 4 项单测（单步/整块/顺序/不整除报错）。

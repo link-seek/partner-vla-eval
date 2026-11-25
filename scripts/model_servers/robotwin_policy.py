@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import os
 import sys
+from collections import deque
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +43,7 @@ import numpy as np
 # 纯函数放在同目录的 robotwin_obs.py（零依赖、可单测）；serve 按路径加载本文件时
 # 目录不一定在 sys.path 里，所以显式加一次。
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from robotwin_obs import build_policy_obs  # noqa: E402
+from robotwin_obs import build_policy_obs, split_action_chunk  # noqa: E402
 
 from vla_eval.model_servers.base import SessionContext
 from vla_eval.model_servers.predict import PredictModelServer
@@ -154,6 +155,9 @@ class RoboTwinPolicyServer(PredictModelServer):
             }.items() if v is not None
         })
         self._usr_args.update({k: v for k, v in overrides.items() if v is not None})
+        # DP 返回 (n_action_steps, 14) 动作块，官方是开环执行整块再重新推理；
+        # harness 每步只问一个动作，所以这里排队逐步吐出（ACT 不用队列）。
+        self._chunk_queue: deque[np.ndarray] = deque()
         if ckpt_dir:
             self._usr_args["ckpt_dir"] = ckpt_dir
         self._usr_args["device"] = device
@@ -279,6 +283,7 @@ class RoboTwinPolicyServer(PredictModelServer):
         self._module = dp
 
     def _reset(self) -> None:
+        self._chunk_queue.clear()
         if self._model is not None and self._module is not None:
             self._module.reset_model(self._model)
 
@@ -311,13 +316,23 @@ class RoboTwinPolicyServer(PredictModelServer):
 
     def predict(self, obs: Observation, ctx: SessionContext) -> Action:
         self._load()
-        rw_obs = self._to_robotwin_obs(obs)
-        act = self._model.get_action(rw_obs)
-        arr = np.asarray(act, dtype=np.float32).reshape(-1)
         dim = int(self._usr_args.get("action_dim", 14))
-        if arr.size != dim:
-            raise ValueError(f"策略返回 {arr.size} 维动作，与 action_dim={dim} 不符")
-        return {"actions": arr.reshape(1, dim)}
+
+        if self.policy_kind == "dp":
+            # 队列空才推理（= 官方的"整块开环执行"），否则继续吐上一块的剩余步。
+            if not self._chunk_queue:
+                chunk = self._model.get_action(self._to_robotwin_obs(obs))
+                for a in split_action_chunk(chunk, dim):
+                    self._chunk_queue.append(a)
+            return {"actions": np.asarray(self._chunk_queue.popleft(), dtype=np.float32).reshape(1, dim)}
+
+        act = self._model.get_action(self._to_robotwin_obs(obs))
+        actions = split_action_chunk(act, dim)
+        if len(actions) != 1:
+            raise ValueError(
+                f"ACT 应返回单步动作，实际 {len(actions)} 步（{np.asarray(act).size} 维）；"
+                "若换成分块策略请走 dp 分支")
+        return {"actions": actions[0].reshape(1, dim)}
 
     async def on_episode_start(self, config: dict[str, Any], ctx: SessionContext) -> None:
         # 每个 episode 清一次时序状态（ACT 的 all_time_actions / DP 的动作队列）

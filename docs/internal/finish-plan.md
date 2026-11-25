@@ -12,6 +12,7 @@
 |---|---|---|
 | 考场相机是 **D435 = 240×320**；官方 `encode_obs` 必须 resize 到 **640×480** | 缺 resize 连跑 2 次 0/1；补上后 1/1；serve 日志 `image shapes={'head_camera': (240, 320, 3)}` | 适配器 `RESIZE_WH` 不可去 |
 | **ACT vs DP 图像契约**：ACT = 三路 + resize 640×480；DP = 三路但**不 resize**（原生 240×320）。DP 的 `DPRunner.get_action` 显式读三路（缺一路 KeyError），encoder 只消费 `head_cam` 且 assert 尺寸=(3,240,320) | 读 `dp_runner.py:91-95`（读三路）+ 载 ckpt 打印 `key_shape_map`（只 head_cam，240×320） | `robotwin_obs.py` 按策略分支 |
+| **动作返回形态不同**：ACT 返回单步 `(14,)`；DP 返回整块 `(6,14)`，官方开环执行 6 步再重新推理 | `dp_runner.py:get_action` 返回 `[:n_action_steps]`；`deploy_policy.eval` 是 `for action in actions` | 适配器维护动作队列，队列空才推理 |
 | qpos 顺序 = `left_arm(6)+lg+r_arm(6)+rg`，与官方 `joint_action["vector"]` 一致 | `_base_task.py:494` 源码 | 观测转换不再改 |
 | ACT 内部自做 qpos 归一化 | `act_policy.py:164` | 我们传原始 qpos 是对的 |
 | harness 的 `IMAGE_RGB` 维度=0，**不会**替我们 resize | `specs.py:177` | 必须在适配器层 resize |
