@@ -247,3 +247,34 @@ TARGET_EPISODES=50 bash scripts/data/rescue_partial.sh "$S" /tmp/rescue
 
 `NameError: name 'os' is not defined` —— 单测碰不到、`bash -n` 碰不到，只有真跑才崩。
 已由 lint 的 `ruff --select F821` 拦住。
+
+---
+
+## 镜像构建：为什么不在 GitHub runner 上打（2026-11-25 实测选择）
+
+`build-serve.yml` 打 robotwin 基座镜像时，runner 需要先把 **11.3GB** 的 bench 镜像从
+SWR（cn-north-4）**跨境**拉到 Azure：实测 77 分钟仍停在 `Build + push` 的拉取阶段，日志在运行中
+不可下载，只能干等。于是改为在 0002 本机构建（镜像已在本地，无需拉取）+ 推同区 SWR：
+
+| 方式 | 耗时 |
+|---|---|
+| GitHub runner（跨境拉 11.3GB） | >77 min（未完成，已取消） |
+| 0002 本地构建（COPY + pip） | ACT **6s** / DP **11s**；push 仅传新增层 |
+
+这属于**构建**，不是评测/验证负载（不占 GPU、不起仿真），所以在 0002 上做不违反
+"测试负载只跑临时 runner"的约束；B1 仍在 GPU1 上照常跑。
+
+**代价**：`build-serve.yml` 里的两个新 tag 目前只在手动路径验证过，CI 那条路没跑通（跨境拉基座慢）。
+如果以后要在 CI 里重建，建议先把基镜像也同步到可快速拉取的位置，或给 runner 加缓存。
+
+## DP 的依赖清单（实测，别再逐个试）
+
+只用 hydra/dill 不够。按报错顺序踩到的坑与最终可用组合：
+
+```
+hydra-core 1.3.8, dill 0.4.1, einops 0.8.2, zarr 2.18.3,
+numcodecs 0.13.1, numba 0.60.0, atomics 1.0.3, diffusers 0.27.2
+```
+- `diffusers>=0.34` 会调 `torch.accelerator`（需 torch≥2.6），本镜像 torch 2.4.1 → 必须 0.27.x
+- 推断路径**不需要** pytorch3d / r3m / robomimic / wandb / pygame / pymunk（import 测试证明）
+- 依赖正确性已写进 Dockerfile 的**构建期自检**：`import policy.DP.deploy_policy` 失败则构建失败

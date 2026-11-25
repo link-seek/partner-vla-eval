@@ -16,15 +16,34 @@ USER root
 COPY scripts/model_servers/robotwin_policy.py /opt/serve/robotwin_policy.py
 COPY scripts/model_servers/robotwin_obs.py /opt/serve/robotwin_obs.py
 
-# DP（diffusion_policy）在 robotwin 环境里缺这两个；ACT 不需要。
-# 只在构建期装（V100 上禁止现场 pip）。
+# DP（RoboTwin 官方 policy/DP 里的 vendored diffusion_policy）在 robotwin 环境里缺一批依赖。
+# 2026-11-25 实测：只补 hydra/dill 不够，import 依次报 einops → torch.accelerator(diffusers 太新)。
+# 最终可用组合（在 torch 2.4.1+cu121 / numpy 1.26.4 下实测 import 通过）：
+#   hydra-core 1.3.8, dill 0.4.1, einops 0.8.2, zarr 2.18.3, numcodecs 0.13.1,
+#   numba 0.60.0, atomics 1.0.3, diffusers 0.27.2   ← 0.41 需要 torch.accelerator(≥2.6)，不可用
+# 推断路径**不需要** pytorch3d / r3m / robomimic / wandb / pygame / pymunk（import 测试证明）。
+# ACT 不需要这些，故只在 POLICY=dp 时装。
+# 只在构建期装（V100 上禁止现场 pip）。默认源失败时回落清华镜像（国内构建更快）。
 RUN if [ "${POLICY}" = "dp" ]; then \
-      conda run -n robotwin pip install --no-cache-dir hydra-core dill; \
+      conda run -n robotwin pip install --no-cache-dir \
+        hydra-core==1.3.8 dill==0.4.1 einops==0.8.2 \
+        "zarr==2.18.3" numcodecs==0.13.1 numba==0.60.0 atomics==1.0.3 diffusers==0.27.2 \
+      || conda run -n robotwin pip install --no-cache-dir \
+        --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+        hydra-core==1.3.8 dill==0.4.1 einops==0.8.2 \
+        "zarr==2.18.3" numcodecs==0.13.1 numba==0.60.0 atomics==1.0.3 diffusers==0.27.2; \
     fi
 
 ENV PYTHONPATH=/opt/serve
-ENV POLY_POLICY=${POLICY}
+ENV ROBOTWIN_POLICY=${POLICY}
 WORKDIR /opt/serve
 
-# 自检：至少能 import 转换模块（不依赖 GPU，纯 numpy）
+# 自检 1：转换模块可导入（纯 numpy，不需要 GPU）
 RUN conda run -n robotwin python -c "import robotwin_obs; print('robotwin_obs OK', robotwin_obs.RESIZE_WH)"
+
+# 自检 2：DP 的依赖组合真的能导入官方 deploy_policy —— 让构建失败在镜像里，而不是等到 smoke。
+# 2026-11-25 就是这么逐个试出来的（hydra/dill → einops → diffusers 版本），以后回归会直接红。
+RUN if [ "${POLICY}" = "dp" ]; then \
+      cd /app/RoboTwin && conda run -n robotwin python -c \
+        "import policy.DP.deploy_policy as d; print('DP import OK:', d.get_model.__name__)"; \
+    fi

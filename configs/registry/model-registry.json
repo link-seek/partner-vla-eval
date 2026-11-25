@@ -116,7 +116,7 @@
     "act-baseline": {
       "family": "ACT（官方基线）",
       "ckpt": "Avada11/RoboTwin-Model-AgileX-ACT",
-      "serve_image": "",
+      "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-robotwin-act:0.8.0",
       "serve_yaml": "serve-robotwin-act.yaml",
       "prewarm": "none",
       "bench_tag": "0.8.0-ee-slim",
@@ -128,7 +128,7 @@
       "evidence": "官方 ACT 基线，按 task 分 ckpt（.ckpt + dataset_stats.pkl），无 lerobot/HF policy 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "适配器已跑通整集（1 task × 1 ep，400 步无错）。仍为 pending 的原因：serve 走的是 bench 镜像 + 本地挂载 /root/r01/mnt/model_servers，适配器未烘进镜像 → 无 serve_image_digest，不可复现。需另建 vla-serve-robotwin-act 镜像。",
+      "note": "适配器已烘进 vla-serve-robotwin-act（/opt/serve/），基座是 bench 镜像（钉 manifest digest），可复现。2026-11-25 整集 smoke：click_bell 1/1（400 步无错）。",
       "fast_init": "true",
       "ckpt_revision": "c248f2181c997ffa987d3a932b57f3c25c0482ed",
       "weight_type": "finetuned",
@@ -152,12 +152,13 @@
         "harness": "vla-eval 0.8.0 (bench sha256:b4cac6f7…)",
         "protocol": "demo_clean / seed 0 / 400 steps",
         "note": "对照实验：缺 640x480 resize 时同一配置连跑两次 0/1；补上后 1/1。根因为考场 D435 相机输出 240x320，官方 encode_obs 会 resize 到 640x480，适配器原先漏了。"
-      }
+      },
+      "serve_image_digest": "sha256:241ec8bb37d08954d54b093da3340b9ccbadced0a80dc153d5522c411dd09609"
     },
     "dp-baseline": {
       "family": "DP（官方基线）",
       "ckpt": "Avada11/RoboTwin-Model-AgileX-DP",
-      "serve_image": "",
+      "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-robotwin-dp:0.8.0",
       "serve_yaml": "serve-robotwin-dp.yaml",
       "prewarm": "none",
       "bench_tag": "0.8.0-ee-slim",
@@ -169,11 +170,17 @@
       "evidence": "官方 DP 基线，同 ACT 格式",
       "official_ref": "官方 leaderboard 基线",
       "license": "见上游 ckpt 卡片",
-      "note": "适配器与 yaml 已备，未 smoke。镜像缺 hydra/dill（diffusion_policy 已 vendored）→ 需另烘 vla-serve-robotwin-dp 镜像再验。ckpt_revision 已钉（HF sha）。",
+      "note": "镜像 vla-serve-robotwin-dp 已补齐 DP 全部推断依赖（hydra-core/dill/einops/zarr/numcodecs/numba/atomics/diffusers 0.27.2，构建期自检 import 通过；diffusers>=0.34 需 torch.accelerator(≥2.6) 不可用）。官方 get_model 用相对路径 + 4 段目录，serve 的 CWD 必须 /app/RoboTwin 且 ckpt 挂到 <task>-<setting>-<num>-<seed>/<ckpt>.ckpt。",
       "fast_init": "true",
       "ckpt_revision": "7e57ab03eb7658cc83272deba01c35b73905cb9d",
       "weight_type": "finetuned",
-      "regime": null
+      "regime": null,
+      "serve_image_digest": "sha256:61e602340e439a0b5c2156aca9ade7f2e4eca53872a20c9f610cadbe15300bbe",
+      "covered_tasks": [
+        "adjust_bottle",
+        "click_bell"
+      ],
+      "coverage_evidence": "2026-11-25 读 HF 文件清单（Avada11/RoboTwin-Model-AgileX-DP，320 个 .ckpt）：与 exam.tasks 交集 = {adjust_bottle, click_bell} → 2/5。每个 ckpt 约 1.5GB。"
     }
   }
 }
