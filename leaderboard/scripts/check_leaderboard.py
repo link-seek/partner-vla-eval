@@ -20,6 +20,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 LB = ROOT / "leaderboard" / "leaderboard.json"
 LB_GLOB = "leaderboard/leaderboard*.json"   # easy / hard 各一份，逐个校验
+PARTIAL_GLOB = "leaderboard/partial/*.json"  # 未跑满的结果，只进附录
+REGISTRY = ROOT / "configs" / "registry" / "model-registry.json"
 PROTO_EXPECT = {"leaderboard.json": None}   # 文件名 → 期望 protocol 前缀（None=不校验）
 SCHEMA = ROOT / "leaderboard" / "leaderboard.schema.json"
 VERSIONS = ROOT / "docker" / "versions.yaml"
@@ -64,6 +66,14 @@ def check_schema(data):
         errors.append(f"schema: {path}: {e.message}")
 
 
+def expected_n() -> int:
+    """协议目标集数（registry.exam.episodes）。榜单必须满格才进排名。"""
+    try:
+        return int(json.loads(REGISTRY.read_text())["exam"]["episodes"])
+    except Exception:
+        return 50
+
+
 def check_rows(data):
     seen = set()
     for i, r in enumerate(data.get("entries", [])):
@@ -78,6 +88,13 @@ def check_rows(data):
         if key in seen:
             errors.append(f"{tag}: 重复条目 (同 model/task/protocol)")
         seen.add(key)
+        exp = expected_n()
+        if isinstance(n, int) and n != exp and not data.get("allow_partial"):
+            errors.append(
+                f"{tag}: n={n} 不等于协议目标 {exp}（未跑满的结果只能放 leaderboard/partial/，"
+                "并标 partial: true；否决理由见 decisions-retention-partial-regression.md 决策 2）"
+            )
+
         rc = r.get("replicate_count")
         if rc == 1:
             warnings.append(f"{tag}: 单轮（n={n}），榜单需标'单轮勿作结论'")
@@ -180,6 +197,18 @@ def main() -> int:
             rc = 1
         else:
             print(f"   OK ({len(data.get('entries', []))} entries, protocol={data.get('protocol')})")
+    # 附录目录：必须是 partial 且带 n_target，避免被当正式数
+    for pf in sorted(ROOT.glob(PARTIAL_GLOB)):
+        try:
+            pd = json.loads(pf.read_text())
+        except json.JSONDecodeError:
+            errors.append(f"partial/{pf.name}: 非法 JSON")
+            continue
+        if pd.get("partial") is not True:
+            errors.append(f"partial/{pf.name}: 缺 partial: true（附录文件必须显式标记）")
+        if not pd.get("n_target"):
+            errors.append(f"partial/{pf.name}: 缺 n_target（无法说明离满格差多少）")
+
     for w in warnings:
         print("WARN:", w)
     if errors:

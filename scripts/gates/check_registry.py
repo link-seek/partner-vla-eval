@@ -38,6 +38,12 @@ def main() -> int:
     if not models:
         errors.append("models 为空")
 
+    bench_dig = (d.get("exam") or {}).get("bench_image_digest")
+    if not bench_dig:
+        errors.append("exam.bench_image_digest 缺失（benchmark 镜像也必须钉 digest）")
+    elif not (str(bench_dig).startswith("sha256:") and len(str(bench_dig)) == 71):
+        errors.append(f"exam.bench_image_digest 格式错（{bench_dig!r}）")
+
     for name, m in models.items():
         tag = f"models.{name}"
         for f in REQUIRED:
@@ -46,6 +52,13 @@ def main() -> int:
         st = m.get("status")
         if st is not None and st not in STATUSES:
             errors.append(f"{tag}: status={st!r} 不在 {STATUSES}")
+
+        dig = m.get("serve_image_digest")
+        if st == "verified":
+            if not dig:
+                errors.append(f"{tag}: status=verified 但缺 serve_image_digest（tag 可被重打，digest 不会）")
+            elif not str(dig).startswith("sha256:") or len(str(dig)) != 71:
+                errors.append(f"{tag}: serve_image_digest 格式应为 sha256:<64 hex>（实际 {dig!r}）")
 
         rev = m.get("ckpt_revision")
         if st == "verified":

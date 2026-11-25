@@ -14,7 +14,9 @@
     "seeds": "bundled（skip_expert=false，从 100000 起）",
     "difficulty": "Easy（Hard 待补）",
     "stack": "V100-32GB ×2（serve=GPU0, env=GPU1），cn-north-4 内网，OBS 归档",
-    "ranking_rule": "只在同 (weight_type, protocol) 内排名；shared=用作者发布的 ckpt，finetuned=在本考场数据上训过。两者不得合并成同一张排名表。"
+    "ranking_rule": "只在同 (weight_type, protocol) 内排名；shared=用作者发布的 ckpt，finetuned=在本考场数据上训过。两者不得合并成同一张排名表。",
+    "bench_image_digest": "sha256:b4cac6f706ba34f07e2242bde4ca398cd4045f2f38330ea023f3053133ff3eef",
+    "digest_note": "2026-11-25 从 SWR 取的实际 manifest digest。tag 可被重打覆盖，digest 不会；对外引用一律 tag@digest。"
   },
   "models": {
     "db-cogact": {
@@ -45,7 +47,8 @@
       },
       "ckpt_revision": "4c6404283bd00008f7c15ae986556bc0e03ebdff",
       "weight_type": "shared",
-      "regime": null
+      "regime": null,
+      "serve_image_digest": "sha256:f97b48e48c6e31e9d9eeba216458afa38bfff734138dffcb18357723f812e7de"
     },
     "x-vla-robotwin2": {
       "family": "X-VLA",
@@ -73,7 +76,8 @@
         "handover_block"
       ],
       "weight_type": "shared",
-      "regime": null
+      "regime": null,
+      "serve_image_digest": "sha256:f08fb2e6b8319f94203cd14d8a3791d5fb4218d666b69a1d72d9bc16d4a54fed"
     },
     "pi0-robotwin": {
       "family": "π0",

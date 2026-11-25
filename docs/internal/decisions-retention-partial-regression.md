@@ -141,3 +141,18 @@ sqlite 是**唯一**能：
 
 第 3 步要开一次机（约 30 分钟）。**B1 正在用机器，所以我建议排在 B1 之后**，
 和 ACT 的 1ep smoke 合并成同一个开机窗口一次做完。
+
+
+---
+
+## 落地情况（2026-11-25，A/A/A 已执行）
+
+| 决策 | 落地动作 | 状态 |
+|---|---|---|
+| 1 = A 全留 | sqlite 随 `matrix/` 长期保留；`RW_RESUME=1` 可跳过清盘；`rescue_partial.sh` 可救援 | ✅ |
+| 2 = A 只进附录 | `check_leaderboard` 强制 `n == exam.episodes(50)`；`leaderboard/partial/*.json` 必须 `partial: true` + `n_target` | ✅ |
+| 3 = 先测确定性 | 未跑（需开机，与 ACT smoke / A5 合并窗口） | ⏳ |
+| 附加（消灭最大漂移源） | 镜像钉 digest：bench `sha256:b4cac6f7…`、cogact `sha256:f97b48e4…`、xvla `sha256:f08fb2e6…`；`check_registry` 对 verified 强制要求 | ✅ |
+
+附录样例（真实数据，来自 2026-11-25 救援）：
+`leaderboard/partial/x-vla-robotwin2-hard-grab_roller.json` —— Hard grab_roller 12 集中 8 成功（非满格，不进排名）。
