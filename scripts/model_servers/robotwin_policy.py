@@ -21,7 +21,7 @@ harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval(
 每步只调一次 `get_action`，并在 episode 开始时 `reset_model`。
 
 ⚠️ 状态：**未验证**（2026-11-24 写就，机器被 Hard 评测占用，未做 smoke）。
-首次使用前必须按 `docs/internal/act-dp-adapter-runbook.md` 跑 1 task×1ep smoke。
+首次使用前必须按 `docs/howto/act-dp-adapter-runbook.md` 跑 1 task×1ep smoke。
 
 用法（serve yaml 里）：
     script: "scripts/model_servers/robotwin_policy.py"

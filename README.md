@@ -46,7 +46,8 @@ docs/                     GitHub Pages 源（just-the-docs）
   reports/                叙事报告（R01、工程化检视、目录检视）
   data/                   结果 JSON（每份报告一份，机器读）
   decks/                  汇报 deck（html + exports/pptx）
-  internal/               内部过程稿（整改计划、上游草稿）
+  adr/                    决策记录（编号 + 冻结，不进公开站）
+  howto/                  运维手册（不进公开站，如 runner 装机）
   archive/                论文 tex 等历史归档
 .github/workflows/        25 个 workflow（生产 + 镜像构建 + 一次性排障）
 ```

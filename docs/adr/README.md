@@ -48,5 +48,12 @@ A / B / C，各自的代价（要有数字或实测证据）。
 
 ## 现有决策的迁移
 
-`docs/internal/` 里的决策类内容（如 `decisions-retention-partial-regression.md`）按此格式迁入并编号；
-过程/进度类（整改计划、收口计划）**不进 ADR**，转 Discussion。
+已完成的迁移（2026-11-25）：
+
+| 原 | 现 |
+|---|---|
+| `docs/internal/decisions-retention-partial-regression.md` | `ADR-0002-artifact-retention-and-partial.md` |
+| `docs/internal/house-standards.md` | `ADR-0003-tooling-choices.md` |
+| `docs/internal/act-dp-adapter-runbook.md` | `docs/howto/act-dp-adapter-runbook.md` |
+| `docs/internal/serve-yaml-onboarding.md` | `docs/howto/serve-yaml-onboarding.md` |
+| `docs/internal/finish-plan.md`、`remediation-plan.md` | Discussion #1（过程/进度类，不进 ADR） |

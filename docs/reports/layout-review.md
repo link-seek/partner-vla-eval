@@ -55,7 +55,7 @@ $ git ls-files docs/upstream
 ```
 一个文件 `serve-yaml-onboarding.md` 从未提交。它要么该进 git 并归位，要么该删——当时两头不靠。
 
-**已处理（S1）**：移入 `docs/internal/serve-yaml-onboarding.md` 并纳入 git；空目录删除。
+**已处理（S1）**：移入 `docs/howto/serve-yaml-onboarding.md` 并纳入 git；空目录删除。
 该文件自述"DRAFT for upstream discussion (not yet submitted)"，属内部过程稿，符合 `docs/internal/` 定位。
 
 ### P3　docs 根混了三类东西
