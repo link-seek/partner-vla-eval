@@ -20,8 +20,9 @@ harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval(
 `n_action_steps` 动作队列）。所以这里绝不能设 chunk_size（否则双重缓冲，动作错位），
 每步只调一次 `get_action`，并在 episode 开始时 `reset_model`。
 
-⚠️ 状态：**未验证**（2026-11-24 写就，机器被 Hard 评测占用，未做 smoke）。
-首次使用前必须按 `docs/howto/act-dp-adapter-runbook.md` 跑 1 task×1ep smoke。
+✅ 状态：**已验通路**（2026-11-25）：ACT click_bell 1/1 success、num_errors=0；
+50 集校准跑进行中。2026-11-25 另修一处静默错误——官方只认 `policy_last.ckpt`，
+发布权重是 `policy_epoch_*_seed_*.ckpt`，不显式给 `ckpt_file` 会用随机权重跑满 400 步且不报错。
 
 用法（serve yaml 里）：
     script: "scripts/model_servers/robotwin_policy.py"
@@ -32,6 +33,7 @@ harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval(
 """
 from __future__ import annotations
 
+import glob
 import os
 import sys
 from pathlib import Path
@@ -217,6 +219,31 @@ class RoboTwinPolicyServer(PredictModelServer):
         self._parser_defaults = vars(get_args_parser().parse_args(required))
         return self._parser_defaults
 
+    def _act_ckpt_or_fail(self) -> None:
+        """官方 ACT 只认 `<ckpt_dir>/policy_last.ckpt`，缺了会**静默**留随机权重。
+
+        2026-11-25 实测：挂进去的是官方发布的 `policy_epoch_6000_seed_100.ckpt`，
+        官方加载器打一行 Warning 就继续跑，50 集全 0 却不报错。这里改成 fail-closed：
+        要么显式给 ckpt_file，要么目录里真有 policy_last.ckpt，否则直接失败。
+        """
+        if self.ckpt_file:
+            return
+        ckpt_dir = self._usr_args.get("ckpt_dir") or ""
+        if not ckpt_dir:
+            raise RuntimeError("ACT 需要 ckpt_dir 或 ckpt_file（缺了会用随机权重）")
+        last = os.path.join(ckpt_dir, "policy_last.ckpt")
+        if os.path.exists(last):
+            return
+        found = sorted(glob.glob(os.path.join(ckpt_dir, "*.ckpt")))
+        hint = (
+            f"目录里有 {[os.path.basename(x) for x in found]}；"
+            if found else "目录里没有 .ckpt；"
+        )
+        raise RuntimeError(
+            f"官方 ACT 只认 {last}，{hint}"
+            "不修就会静默用随机权重（跑满也不报错，分数全 0）。"
+            "传 ckpt_file=<容器内 .ckpt 路径>，或把权重软链成 policy_last.ckpt。")
+
     def _load(self) -> None:
         if self._model is not None:
             return
@@ -253,6 +280,7 @@ class RoboTwinPolicyServer(PredictModelServer):
                 )
 
         if self.policy_kind == "act":
+            self._act_ckpt_or_fail()
             merged = dict(self._official_defaults(dp))
             merged.update({k: v for k, v in self._usr_args.items() if v is not None})
         else:
