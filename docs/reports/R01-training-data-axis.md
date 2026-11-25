@@ -214,6 +214,21 @@ ckpt:
 
 `policy_last.ckpt` + `dataset_stats.pkl` 与 serve 契约一致（第 12 节），可直接进 S4。
 
+### 可重复入口（2026-11-25 干跑通过）
+
+S3 不再靠手敲命令：`scripts/r01/s3_train_act.sh` 把五个前置条件都封进去
+（训练镜像、`--ipc=host`、软链布局、`process_data`、40k 步换算、产物校验）。
+
+```bash
+# 干跑：1 epoch 验证链路
+bash scripts/r01/s3_train_act.sh --task click_bell --regime clean_50 --epochs 1 --dry-run
+
+# 正式：按 40k 步自动换算 epochs（50 集≈5714，550 集≈580）
+bash scripts/r01/s3_train_act.sh --task click_bell --regime clean_50
+```
+
+干跑输出：`policy_last.ckpt` + `dataset_stats.pkl` + `run.json`（task/regime/episodes/epochs/seed）。
+
 ### 磁盘/时间估算
 
 - 单 ckpt 321MB；一次训练至少留 5 个文件 ≈ 1.6GB → 20 个 ckpt ≈ **32GB**（`/data` 余 397GB，够）
