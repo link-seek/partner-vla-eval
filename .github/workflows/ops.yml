@@ -48,7 +48,18 @@ jobs:
     runs-on: [self-hosted, "${{ inputs.runner }}"]
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      # 不用 actions/checkout：self-hosted 的 workspace 常被 docker -v 建成 root 属主，
+      # checkout 会 EACCES 失败（2026-11-25 实测）。运维入口必须在"环境已经坏了"时也能跑，
+      # 所以直接把仓库 tarball 取到 /tmp，不碰 workspace。
+      - name: fetch ops scripts (no workspace dependency)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/ops-repo && mkdir -p /tmp/ops-repo
+          gh api "repos/${{ github.repository }}/tarball/${{ github.sha }}" \
+            | tar xz -C /tmp/ops-repo --strip-components=1
+          ls /tmp/ops-repo/scripts/ops/
       - name: ops action
         env:
           ACTION: ${{ inputs.action }}
@@ -60,4 +71,4 @@ jobs:
           PROD_HCLOUD_AK: ${{ secrets.PROD_HCLOUD_AK }}
           PROD_HCLOUD_SK: ${{ secrets.PROD_HCLOUD_SK }}
           TS_API_KEY: ${{ secrets.TS_API_KEY }}
-        run: bash scripts/ops/run.sh
+        run: bash /tmp/ops-repo/scripts/ops/run.sh
