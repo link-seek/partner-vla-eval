@@ -18,11 +18,14 @@ status: living
 |---|---|---|---|
 | `action_queue.py` | 74 | **公共** | 不动（队列语义与策略无关） |
 | `act_ckpt.py` | 45 | **公共**（权重路径 fail-closed） | 策略若也走 `policy_last.ckpt` 约定可直接复用 |
+| `policy_profiles.py` | 64 | **公共**（策略差异表） | **加一条 profile**：import 路径/必需参数/动作模式/ckpt 守卫 |
 | `robotwin_obs.py` | 153 | **公共**（图像/关节转换） | 只在"图像契约"不同时加分支 |
 | `robotwin_policy.py` | 349 | **策略骨架 + 两个 profile** | 加一段 profile（~30 行） |
 | `Dockerfile.serve-robotwin` | — | 构建 | 加一个 `POLICY=` tag |
 
-也就是说：**第三次接入 = 一个 profile + 一个镜像 tag**。
+也就是说：**第三次接入 = 一个 profile 条目 + 一个镜像 tag**。
+`policy_profiles.py` 把「导入路径、必需参数、是否合并官方默认值、单步还是整块、ckpt 守卫」
+都变成数据；已有动作模式（`single`/`queue`）的策略不需要改服务器代码。
 
 ---
 
