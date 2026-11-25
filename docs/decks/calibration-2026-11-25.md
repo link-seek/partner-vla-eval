@@ -83,6 +83,19 @@ status: living
 
 ACT/DP 是**官方自带的基线**，跑它们等于"用官方自己的模型验我们的尺子"，比第三方模型更有说服力。
 
+### 开跑前抓到并修掉一个静默错误
+
+ACT 首次 50 集起跑后 4 集全 0。查下来：官方 `get_model` 只认 `<ckpt_dir>/policy_last.ckpt`，
+而发布的权重叫 `policy_epoch_6000_seed_100.ckpt`，加载器打一行 Warning 就继续 → **随机权重跑满 400 步，不报错**。
+
+| 动作 | 结果 |
+|---|---|
+| 旧路径（只给 ckpt_dir） | 0/4，每集 400 步，无 error |
+| 修后 1 集 smoke（显式 `ckpt_file` + 严格断言） | **1/1 success，num_errors=0** |
+| 适配器改成 fail-closed | 缺 `policy_last` 且未给 `ckpt_file` 直接报错，不再静默 |
+
+这也解释了为什么"零 error"不能单独作为链路正确的证据——**error 计数抓不到随机权重**。
+
 ---
 
 ## 六、官方基线的官方值（从快照读，非手抄）

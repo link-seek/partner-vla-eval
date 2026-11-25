@@ -39,6 +39,8 @@ def _to_policy_obs(obs):
 #    单步：ACT 风格；整块：DP 风格（队列空才推理）
 
 # 4) 权重加载：官方 ckpt 文件名与加载方式（记得断言 missing/unexpected）
+#    2026-11-25 实测：ACT 只认 policy_last.ckpt；文件名不符会静默用随机权重。
+#    适配器现在 fail-closed：无 policy_last 又没给 ckpt_file 直接报错。
 #    坑：官方 ckpt 常叫 policy_epoch_<N>_seed<S>.ckpt，而 deploy_policy 只认 policy_last.ckpt
 #        → 写错会**静默**用随机权重
 
@@ -57,6 +59,7 @@ def _to_policy_obs(obs):
 | 2 | **观测键** | DP 显式读三路相机（缺一路 `KeyError`），但 encoder 只消费 `head_cam`。只看一层会来回改 |
 | 3 | **动作形态** | 整块 (n,14) 当单步 84 维会报维度错；每步都推理则偏离官方行为 |
 | 4 | **相对路径** | 官方 `get_model` 常用相对 CWD + 多段 ckpt 目录 → serve 的 CWD 必须对，ckpt 要挂到官方拼出来的路径 |
+| 5 | **权重文件名** | 官方 ACT 只认 `<ckpt_dir>/policy_last.ckpt`，而发布出来的是 `policy_epoch_6000_seed_100.ckpt`。不显式给 `ckpt_file` → **静默随机权重**，跑满 400 步、不报错、分数全 0（2026-11-25 实测 0/4 才发现） |
 
 **方法论**：判断"要给什么输入"，顺着**调用链**从最外层读到最内层——
 最外层（runner）决定**需要哪些键**，最内层（encoder）决定**数值形状**。

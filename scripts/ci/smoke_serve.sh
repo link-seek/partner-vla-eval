@@ -105,11 +105,27 @@ SERVE_YAML="$WORKDIR/${POLICY}-serve.yaml"
 RUN_YAML="$WORKDIR/${POLICY}-run.yaml"
 
 if [ "$POLICY" = "act" ]; then
+  # 官方只认 policy_last.ckpt；发布出来的通常是 policy_epoch_<N>_seed_<S>.ckpt。
+  # 不显式指定就会静默用随机权重（2026-11-25 实测：4 集全 0 且不报错）。
+  if [ -d "$CKPT_HOST" ]; then
+    if [ -e "$CKPT_HOST/policy_last.ckpt" ]; then
+      CKPT_CTR="/ckpt/policy_last.ckpt"
+    else
+      mapfile -t _cks < <(ls "$CKPT_HOST"/*.ckpt 2>/dev/null)
+      [ "${#_cks[@]}" -eq 1 ] || die "ACT 需要恰好 1 个 *.ckpt（实际 ${#_cks[@]}）；或显式软链 policy_last.ckpt"
+      CKPT_CTR="/ckpt/$(basename "${_cks[0]}")"
+    fi
+  else
+    die "ACT 的 CKPT_HOST 必须是目录（含 .ckpt 与 dataset_stats.pkl）：$CKPT_HOST"
+  fi
+  ok "ACT ckpt 显式加载：$CKPT_CTR"
   cat > "$SERVE_YAML" <<YML
 script: "/opt/serve/robotwin_policy.py"
 args:
   policy: act
+  task_name: $TASK
   ckpt_dir: /ckpt
+  ckpt_file: $CKPT_CTR
   action_dim: 14
   chunk_size: 50
   kl_weight: 10.0
