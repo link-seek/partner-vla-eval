@@ -18,6 +18,7 @@ nav_exclude: true
 | `act-dp-adapter-runbook.md` | ACT/DP 适配器首次 smoke（12 个坑） |
 | `serve-yaml-onboarding.md` | serve yaml 编写/对接（上游讨论草稿） |
 | `partner-onboarding-timing.md` | 伙伴接入要多久：交付物清单 + 机械实测 0.94s + 30 分钟拆解 + 4 个卡点 |
+| `partner-onboarding-fresh-reader-2026-11-25.md` | 独立读者（AI）只读文档走查：94s、9 个卡点、据此补的 7 条答案 |
 | `add-official-policy.md` | 接第三个官方策略要填的 6 个钩子 + 4 条硬契约 + 三层验收 |
 | `ops-entry.md` | **运维入口 ops.yml**：4 个 action 跑在哪个 runner、首次实证、3 个排错记录 |
 | `obs-lifecycle.md` | OBS 桶生命周期核对/调整 |

@@ -85,6 +85,20 @@ args:
 | `fast_init` | benchmark 侧参数（`action_type: ee` 时自动关），不在 serve yaml 里 |
 | dtype | 不是 yaml 字段，也不用你填：我们按卡型定——V100 上 X-VLA 用 fp32、DB-CogACT 用 fp16；换卡另定 |
 
+### 常见歧义（2026-11-25 独立读者实测）
+
+下面 7 条是"没看过本仓的人"按本教程走一遍时真实卡住的地方，直接给答案：
+
+| 问题 | 答案 |
+|---|---|
+| `model_path` 写一个还是多个？ | 看权重形态：**单仓共享**（X-VLA）写一个 repo，全 task 共用；**按 task 分目录**（DB-CogACT）逐个列，缺头的 task 不跑。表里"按 task 分头逐个列"只适用于后者 |
+| 精确 commit 写在哪？ | serve yaml **没有** revision 字段；commit 只填在对接表单，由我们钉进 registry / 榜单（示例：X-VLA `a157c58…`、DB-CogACT `4c6404…`）。不要写成 `repo@sha`，解析不了 |
+| 动作维度/rot6d 不知道怎么办？ | 填**原生产出**；不确定就写"不确定"，不要猜。spec 由 benchmark 定，smoke 会暴露不匹配。先例：X-VLA 原生 20D EE（rot6d），考场要 16D（quat），差异在 `-ee16` 变体镜像里转换 |
+| C 例为什么没有 `camera_keys`？ | 相机与状态由 benchmark 下发；`camera_keys` 是 CogACT server 自己的参数，只有需要它的族才填 |
+| `send_state` 是关节角还是 EE？ | benchmark 决定。RobotWin2 下发 **14 维关节角**；EE 模型由适配层转换，伙伴不用在 yaml 里声明 |
+| RobotWin 全量 task 清单在哪？ | [官方榜单](https://robotwin-platform.github.io/leaderboard)列了 50 个；本考场 5 个 task 见 `configs/registry/model-registry.json` 的 `exam.tasks` |
+| yaml 放哪、要不要交 `_base.yaml`？ | 伙伴**不落地文件**：yaml 发给我们，放入 `configs/model_servers/<family>/<benchmark>.yaml`，不覆盖上游；`_base.yaml` 不用交、不用改 |
+
 ## 交给我们
 
 yaml 已经写了的（相机、chunk、profile、domain_id）不用再填表，只补它写不了的：
