@@ -51,6 +51,29 @@ run 45606352244  ops / action=audit / runner=V100-0001
 1, Tesla V100-PCIE-32GB, 26142 MiB, 32768 MiB, 100 %   ← B1 在跑
 ```
 
+## 四个 action 的 dry-run 实证（2026-11-25）
+
+`DRY_RUN=true`（workflow 输入 `dry_run`）：只做目标解析 + TCP 22 探测 + 打印将执行的远端脚本，
+**跳过** hcloud 开机 / token mint / `config.sh` / `tailscale up`。全部跑在 `V100-0001`。
+
+| action | run | 结果 | 关键输出 |
+|---|---|---|---|
+| `audit` | 45606352244 | ✅ success | `remote(114.116.228.0) exit=0`，输出 df / du / docker images / nvidia-smi |
+| `repair-0001` | 45608298221 | ✅ success | `target=root@1.94.192.234`、`tcp 22: open`、`PROD_GH_TOKEN 在位（长度 40）`、`OBS 凭证在位（长度 20）` |
+| `repair-0002` | 45609058394 | ✅ success | `target=root@114.116.228.0`、`tcp 22: open`、`将通过 PROD_GH_TOKEN 现场 mint（dry-run 不真的 mint）`、打印完整远端脚本 |
+| `tailnet-join` | 45609069686 | ✅ success | `跳板 hw41=100.91.222.51 tcp 22: **closed**`、`目标 V100 tcp 22: open`、`TS_API_KEY 在位（长度 61）` |
+
+`tailnet-join` 那条 "closed" 就是前面说的**结构性缺口**：从 0001 到 hw41 不通，
+所以这个 action 的 dry-run 能证明"参数拼装对了"，但**不能**证明"能真的把 V100 拉回 tailnet"。
+要用它，得先有一个在 tailnet 上的 runner（或手工按 `docs/howto/tailnet-join.md` 做）。
+
+### 试跑中发现并修掉的两个真问题
+
+| 问题 | 表现 | 根因 | 修法 |
+|---|---|---|---|
+| `repair-0002` 一开始直接失败 | `FAIL: 缺环境变量 V100_REG_TOKEN` | 该 secret 早已被删——**这个修复能力在重构前就已经坏了** | 改成与 `repair-0001` 一致：用 `PROD_GH_TOKEN` 现场 mint |
+| `tailnet-join` 卡住不返回 | run 一直 in_progress | `tcp_check` 用 `/dev/tcp` **没有超时**，对不可达的 hw41 等到系统 TCP 超时 | `tcp_check` 加 `timeout 5` |
+
 ## 排错记录（都是实测踩到的）
 
 | 现象 | 原因 | 解法 |
