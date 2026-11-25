@@ -1,0 +1,20 @@
+# R01 训练镜像（DP 分支）
+#
+# 2026-11-25 实测：DP 训练入口 `policy/DP/train.py` 需要 wandb（模块级 import），
+# 而 vla-serve-robotwin-dp 镜像没有。按"V100 禁止现场 pip"，构建期装。
+#
+# 运行时：训练容器同样需要 `--ipc=host`。
+#
+# 已知缺口（不在本镜像范围）：1 epoch 冒烟跑通但没产出 ckpt——
+#   config 里 checkpoint_every=300、save_last_ckpt=True，实际保存路径/触发条件
+#   还需在 S3 首次正式训练时确认（不要假设 `<task>-<setting>-<num>/<num>.ckpt`）。
+ARG BASE=swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-robotwin-dp:0.8.0
+FROM ${BASE}
+
+USER root
+
+RUN conda run -n robotwin pip install --no-cache-dir wandb \
+    || conda run -n robotwin pip install --no-cache-dir \
+         -i https://pypi.tuna.tsinghua.edu.cn/simple wandb
+
+RUN conda run -n robotwin python -c "import wandb; print('dp train deps OK', wandb.__version__)"

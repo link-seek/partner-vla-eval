@@ -250,3 +250,20 @@ S3 本身就可能吃掉 7.5–11 天（单卡）。
 
 > **决定（2026-11-25）**：接受 **7.5–11 天 / ¥6000–8700**；**单卡串行**，不与评测抢卡。
 > 启动条件：002 上无其他评测（place_empty 结束后）再开始 S3。
+
+---
+
+## 14. DP 训练冒烟与已知缺口（2026-11-25）
+
+ACT 之外，DP 也做了一次 1 epoch 冒烟（`vla-robotwin-train-dp:dev`，click_bell clean_50）：
+
+| 项 | 结果 |
+|---|---|
+| `process_data.py` → zarr | 50/50 ep 成功 |
+| 训练 | 1 epoch / 29 batch，约 25s，loss ≈ 1.03 |
+| 参数 | 8.56e7 |
+| 缺依赖 | `wandb`（DP 镜像没有，构建期补：`docker/Dockerfile.robotwin-train-dp`） |
+| **缺口** | **没产出 ckpt**：`checkpoint_every=300`、`save_last_ckpt=True`，保存触发/路径未确认 |
+
+**结论**：DP 训练链路能跑，但"40k 步后 ckpt 落在哪"必须在 S3 首次正式训练时先确认，
+再批量跑 10 个 DP ckpt。不要假设 serve 侧的 `<task>-<setting>-<num>/<num>.ckpt` 路径。
