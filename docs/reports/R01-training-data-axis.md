@@ -157,3 +157,27 @@ adjust_bottle clean_50 n=50 sample=5 OK T=140..153
 
 注意：**不要用 `r01-prep.yml` 在评测期间补数据**——它最后一步会 `stop-ecs`，会把在跑的 B1/DP 一起关掉；
 补数据直接跑脚本（不占 GPU、不关机）。
+
+---
+
+## 12. 训练产物与 serve 契约（2026-11-25 实测）
+
+S3 训练 3–4 天后要立刻进 S4 评测，所以先确认"训练写出来的文件，serve 能不能直接吃"。
+
+### ACT：兼容，不需要额外软链
+
+官方 `policy/ACT/imitate_episodes.py` 末尾写：
+
+| 文件 | 位置 | 用途 |
+|---|---|---|
+| `policy_last.ckpt` | line 419 | serve 的 fail-closed 守卫认这个名字 |
+| `policy_epoch_<N>_seed_<S>.ckpt` | line 415 | 中间快照 |
+| `dataset_stats.pkl` | line 193 | qpos 归一化（serve 自动读） |
+
+结论：R01 的 ACT ckpt 放进 `ckpt_dir` 即可，`ckpt_file` 不用传，`act_ckpt.py` 的守卫会通过。
+
+### DP：路径要等 S3 首次训练后确认
+
+DP 的保存走 hydra workspace（`diffusion_policy/workspace/base_workspace.py` 的 `torch.save`），
+而 serve 侧按 `<task>-<setting>-<num>-<seed>/<num>.ckpt` 拼路径。两者是否一致**尚未实测**，
+S3 首次训练后必须先 `ls` 确认，再决定是否软链；不要等 20 个 ckpt 都训完才发现路径对不上。
