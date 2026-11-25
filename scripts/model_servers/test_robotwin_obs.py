@@ -77,7 +77,7 @@ def main() -> int:
     check("act 键位", set(act) == {"head_cam", "left_cam", "right_cam", "qpos"}, str(sorted(act)))
     check("act qpos 是 list", isinstance(act["qpos"], list))
     dp = build_policy_obs(imgs, np.arange(14, dtype=np.float32), "dp")
-    check("dp 键位", set(dp) == {"head_cam", "left_cam", "right_cam", "agent_pos"}, str(sorted(dp)))
+    check("dp 键位只有 head_cam + agent_pos", set(dp) == {"head_cam", "agent_pos"}, str(sorted(dp)))
     check("dp agent_pos 是 ndarray", isinstance(dp["agent_pos"], np.ndarray))
 
     try:
@@ -99,8 +99,13 @@ def main() -> int:
     same = resize_bilinear(small, 320, 240)
     check("尺寸相同则原样返回", np.array_equal(same, small))
     o2 = build_policy_obs(imgs_320, np.zeros(14, dtype=np.float32), "act")
-    check("build_policy_obs 输出 3x480x640（不再是 3x240x320）",
+    check("act 输出 3x480x640（已 resize）",
           all(v.shape == (3, 480, 640) for k, v in o2.items() if k in ("head_cam", "left_cam", "right_cam")))
+    # DP 契约：只 head_cam，保持原生 240x320（ckpt shape_meta 决定的，不能 resize）
+    o3 = build_policy_obs(imgs_320, np.zeros(14, dtype=np.float32), "dp")
+    check("dp 只送 head_cam", set(o3) == {"head_cam", "agent_pos"}, str(sorted(o3)))
+    check("dp head_cam 保持 3x240x320（不 resize）", o3["head_cam"].shape == (3, 240, 320),
+          str(o3["head_cam"].shape))
 
     # 回归：numpy 数组作为 joint_state 时不得触发"真值歧义"
     arr_js = np.zeros(14, dtype=np.float32)

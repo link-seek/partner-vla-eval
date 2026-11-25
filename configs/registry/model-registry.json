@@ -175,7 +175,7 @@
       "ckpt_revision": "7e57ab03eb7658cc83272deba01c35b73905cb9d",
       "weight_type": "finetuned",
       "regime": null,
-      "serve_image_digest": "sha256:ea6a2ab4f3452ec45b846927cd279b8d1861c30d44e8705e46dffa178b34ae80",
+      "serve_image_digest": "sha256:56f979628d2c424ce0a73bdf01c0441d107e3d46f3203fb20b035ae2f3c66415",
       "covered_tasks": [
         "adjust_bottle",
         "click_bell"

@@ -17,6 +17,12 @@ from typing import Any, Mapping
 import numpy as np
 
 CAMERAS = ("head_camera", "left_camera", "right_camera")
+# 两个官方策略对图像的契约**不同**（2026-11-25 实测，别再统一处理）：
+#   ACT: 官方 encode_obs 把三相机 resize 到 (w=640, h=480)
+#   DP : ckpt 里的 shape_meta 是 {'head_cam': (3, 240, 320), 'agent_pos': (14,)}
+#        —— 只用 head_cam，且是考场 D435 原生尺寸，**不 resize**
+#        （DP 的 MultiImageObsEncoder 直接 assert img.shape[1:] == key_shape_map[key]）
+# 之前对两者都 resize 并送三路相机 → DP 报 AssertionError（空消息，极难查）。
 # 官方 `encode_obs()` 把三相机统一 resize 到 (w=640, h=480) 再送进策略。
 # 考场 D435 相机实际是 320x240（task_config/demo_clean.yml: head_camera_type: D435），
 # 2026-11-25 实测：不做这步 resize 时 ACT 整集 0/1——模型按 640x480 训练，喂半分辨率就是分布外。
@@ -107,11 +113,17 @@ def build_policy_obs(
         raise ValueError(f"policy 只允许 act|dp（实际 {policy!r}）")
 
     out: dict[str, Any] = {}
-    for name in CAMERAS:
-        if name not in images:
-            raise KeyError(f"观测缺相机 {name}（拿到 {sorted(images)}）")
-        # 先按官方口径 resize 到 640x480，再转 CHW/0..1
-        out[SHORT[name]] = to_chw01(resize_bilinear(images[name], *RESIZE_WH))
+    if policy == "act":
+        # 三路相机 + resize 到图片训练尺寸 640x480
+        for name in CAMERAS:
+            if name not in images:
+                raise KeyError(f"观测缺相机 {name}（拿到 {sorted(images)}）")
+            out[SHORT[name]] = to_chw01(resize_bilinear(images[name], *RESIZE_WH))
+    else:
+        # DP：只 head_cam，原尺寸（ckpt 的 shape_meta 就是 (3,240,320)）
+        if "head_camera" not in images:
+            raise KeyError(f"DP 观测缺 head_camera（拿到 {sorted(images)}）")
+        out["head_cam"] = to_chw01(images["head_camera"])
 
     js = flat_joint_state(joint_state, action_dim)
     if policy == "act":

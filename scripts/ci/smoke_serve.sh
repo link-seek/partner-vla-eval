@@ -236,4 +236,6 @@ if err:
     sys.exit(1)
 sys.exit(0)
 PY
+ASSERT_RC=$?
+[ "$ASSERT_RC" = "0" ] || die "后置断言未通过（aggregate 里有报错，见上）"
 echo "[smoke] PASS（日志：$LOG）"
