@@ -80,9 +80,25 @@ status: living
 |---|---|---|
 | ~~ACT `click_bell` × 50ep~~ | **已完成：92%（46/50），50 种子** | 实花 ≈¥50 |
 | DP `click_bell` × 50ep | 进行中（1 集 smoke 1/1）；官方 54% 仅参考 | ≈¥104 |
-| place_empty_cup +100ep（CogACT） | 官方 28%，看是否收敛 | ≈¥208 |
+| place_empty_cup 新跑 100ep（CogACT） | 官方 28%，看是否收敛；**旧 50 集不可续 → n=100** | ≈¥380 |
 
 ACT/DP 是**官方自带的基线**，跑它们等于"用官方自己的模型验我们的尺子"，比第三方模型更有说服力。
+
+### place_empty_cup：旧的 50 集接不上，只能新跑 100（n=100）
+
+原计划"+100ep 凑 n=150"经核实**不可执行**：
+
+| 检查 | 结果 |
+|---|---|
+| OBS `obs://so101-sim-pipeline/eval/leaderboard/matrix/db-cogact/` | 只有 `adjust_bottle` / `place_phone_stand`，**无** `place_empty_cup` |
+| 0002 机器内 | 无该 task 的 sqlite/aggregate |
+| `resume=1` 的真实语义 | 只保留共享 `results/`；matrix 每轮仍 `rm -rf matrix/<model>/<task>`，且会把上一轮（B1 Hard）的 `results/` 残留收进新任务 → **污染** |
+
+所以派单参数改为：
+
+- run **45662682151**：`models=db-cogact, tasks=place_empty_cup, episodes=100, shards=8, protocol=easy, eval_cuda=0, resume=0`
+- 并发组 `gpu-ecs-0002-smoke` 排队在 B1 之后（不抢卡）
+- 结果口径是**新跑 100 集（n=100）**，不宣称 n=150
 
 ### 开跑前抓到并修掉一个静默错误
 
