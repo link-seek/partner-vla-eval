@@ -34,6 +34,7 @@ harness 的模型侧只需要"给观测、返回动作"，所以要绕开 `eval(
 from __future__ import annotations
 
 import glob
+import importlib
 import os
 import sys
 from pathlib import Path
@@ -46,6 +47,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from action_queue import ActionQueue  # noqa: E402
 from act_ckpt import resolve_act_ckpt  # noqa: E402
+from policy_profiles import get_profile  # noqa: E402
 from robotwin_obs import build_policy_obs, split_action_chunk  # noqa: E402
 
 from vla_eval.model_servers.base import SessionContext
@@ -132,9 +134,9 @@ class RoboTwinPolicyServer(PredictModelServer):
         port: int = 8000,
         **overrides: Any,
     ) -> None:
-        policy = policy.lower()
-        if policy not in ("act", "dp"):
-            raise ValueError(f"policy 只允许 act|dp（实际 {policy!r}）")
+        # 差异全部来自 profile 表（policy_profiles.py）：加策略 = 加一条数据
+        self.profile = get_profile(policy)
+        policy = self.profile.name
         # 策略自带时序缓冲，harness 层不得再切 chunk
         super().__init__(chunk_size=None, action_ensemble="newest")
         self.policy_kind = policy
@@ -236,35 +238,22 @@ class RoboTwinPolicyServer(PredictModelServer):
         if self.robotwin_root not in sys.path:
             sys.path.insert(0, self.robotwin_root)
 
-        if self.policy_kind == "act":
-            try:
-                from policy.ACT import deploy_policy as dp  # type: ignore
-            except ModuleNotFoundError as e:
-                raise RuntimeError(
-                    f"ACT 导入失败：缺 {e.name}。robotwin 镜像（0.8.0-ee-slim）实测可导入 ACT；"
-                    "若换镜像，需把 detr 等依赖烘进去（V100 禁止现场 pip）。"
-                ) from e
-        else:
-            try:
-                from policy.DP import deploy_policy as dp  # type: ignore
-            except ModuleNotFoundError as e:
-                raise RuntimeError(
-                    f"DP 导入失败：缺 {e.name}。实测 0.8.0-ee-slim 的 robotwin 环境缺 hydra/dill"
-                    "（diffusion_policy 本身是 vendored，不用另装）；"
-                    "需另烘一个 DP serve 镜像，再切 serve_image。"
-                ) from e
+        p = self.profile
+        try:
+            dp = importlib.import_module(p.import_path)
+        except ModuleNotFoundError as e:
+            raise RuntimeError(p.import_hint.format(missing=e.name)) from e
 
-        if self.policy_kind == "dp":
-            # DP 的 get_model 从 ckpt_dir 约定拼路径，需要 task_name/expert_data_num 等
-            missing = [k for k in ("task_name", "expert_data_num") if not self._usr_args.get(k)]
-            if missing:
-                raise ValueError(
-                    f"DP 需要 usr_args 里的 {missing}（官方按 <task>-<setting>-<num>-<seed> 拼 ckpt 路径）；"
-                    f"当前只有 {sorted(k for k, v in self._usr_args.items() if v is not None)}"
-                )
+        missing = [k for k in p.required_args if not self._usr_args.get(k)]
+        if missing:
+            raise ValueError(
+                f"{p.name} 需要 usr_args 里的 {missing}（官方按约定拼 ckpt 路径）；"
+                f"当前只有 {sorted(k for k, v in self._usr_args.items() if v is not None)}"
+            )
 
-        if self.policy_kind == "act":
+        if p.ckpt_guard == "policy_last":
             self._act_ckpt_or_fail()
+        if p.merge_official_defaults:
             merged = dict(self._official_defaults(dp))
             merged.update({k: v for k, v in self._usr_args.items() if v is not None})
         else:
@@ -281,10 +270,10 @@ class RoboTwinPolicyServer(PredictModelServer):
             sd = torch.load(self.ckpt_file, map_location=self.device)
             if isinstance(sd, dict) and "model" in sd:
                 sd = sd["model"]
-            missing, unexpected = self._model.policy.load_state_dict(sd, strict=False)
-            if missing:
+            missing_keys, unexpected = self._model.policy.load_state_dict(sd, strict=False)
+            if missing_keys:
                 raise RuntimeError(
-                    f"ckpt 缺 {len(missing)} 个键（前 3：{missing[:3]}）。"
+                    f"ckpt 缺 {len(missing_keys)} 个键（前 3：{missing_keys[:3]}）。"
                     "多半是 hidden_dim / dim_feedforward / dec_layers 与训练时不一致。"
                 )
             if unexpected:
@@ -330,7 +319,7 @@ class RoboTwinPolicyServer(PredictModelServer):
         self._load()
         dim = int(self._usr_args.get("action_dim", 14))
 
-        if self.policy_kind == "dp":
+        if self.profile.action_mode == "queue":
             # 队列空才推理（= 官方的"整块开环执行"），否则继续吐上一块的剩余步。
             if self._queue.pending == 0:
                 self._queue.push(self._model.get_action(self._to_robotwin_obs(obs)))

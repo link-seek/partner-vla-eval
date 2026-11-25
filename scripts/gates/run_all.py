@@ -50,6 +50,8 @@ GATES: list[tuple[str, list[str], str]] = [
      "观测转换（通道/resize/真值歧义）"),
     ("packaging", ["python3", "scripts/gates/check_adapter_packaging.py"],
      "适配器的本地依赖都被 COPY 进 serve 镜像（防运行时 ModuleNotFoundError）"),
+    ("profiles",   ["python3", "scripts/model_servers/test_policy_profiles.py"],
+     "策略 profile 表（加策略=加参数；动作模式/必需参数/ckpt 守卫）"),
     ("ckpt",       ["python3", "scripts/model_servers/test_act_ckpt.py"],
      "ACT 权重路径 fail-closed（policy_last vs epoch 权重，防静默随机）"),
     ("calibration", ["python3", "scripts/ci/calibration_row.py", "--selftest"],

@@ -35,7 +35,7 @@ scipy **只用于校准**：Wilson 实现与 `binomtest.proportion_ci(method="wi
 ## 后果
 
 - **收益**：`os`/`glob` 这类缺陷在 CI 就被拦；YAML/文档格式不再靠自觉
-- **代价**：门禁数量上升（已收敛为 `run_all.py` 单一入口，17 项）
+- **代价**：门禁数量上升（已收敛为 `run_all.py` 单一入口，18 项）
 - **明确没做**：trivy + SBOM（镜像对外分发前做）、GHCR 双推（适配器稳定后做）、renovate（pin > 10 再做）
 - **触发重议**：某个组件开始产生大量误报，或上游提供官方校验入口
 
