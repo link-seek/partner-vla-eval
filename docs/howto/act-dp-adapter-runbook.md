@@ -358,3 +358,50 @@ harness 是每步问一个动作，所以适配器必须：
 4. episode 开始 `_reset` 时清队列（否则跨集会串动作）
 
 切块逻辑做成纯函数 `split_action_chunk(arr, action_dim)`，配 4 项单测（单步/整块/顺序/不整除报错）。
+
+---
+
+## 坑 13（2026-11-25）：官方 ACT 只认 `policy_last.ckpt`，找不到就**静默随机权重**
+
+官方 `policy/ACT/deploy_policy.py` 的 `ACT.__init__`：
+
+```python
+ckpt_path = os.path.join(ckpt_dir, "policy_last.ckpt")
+if os.path.exists(ckpt_path):
+    ...
+else:
+    print(f"Warning: Could not find policy checkpoint at {ckpt_path}")
+```
+
+而公开权重叫 `policy_epoch_6000_seed_100.ckpt`。于是：
+
+| 配置 | 结果 |
+|---|---|
+| 只给 `ckpt_dir` | 4 集全 FAIL，每集 400 步，`num_errors=0` |
+| 显式 `ckpt_file` + 严格断言 | 1/1 success |
+
+**教训**：`num_errors=0` 不能证明链路正确，随机权重不会进 error 计数。
+现在的做法：`smoke_serve.sh` 解析目录里唯一的 `*.ckpt` 并传 `ckpt_file`；适配器 fail-closed
+（`act_ckpt.py`，9 项单测，第 16 道门）。
+
+## 坑 14（2026-11-25）：`test_num` 与 `episodes_per_task` 配反 = 同一集跑 50 次
+
+| 字段 | 正确 | 错误 |
+|---|---|---|
+| `episodes_per_task` | **1** | 50 |
+| `test_num` | **50**（不同种子的任务数） | 1 |
+
+错配的症状：50 集全 success、每集步数与耗时**完全一样**、aggregate 里 seed 全是 100000。
+看起来像 50/50，其实 n=1。
+
+现在 `smoke_serve.sh` 的后置断言会检查"不同种子数 == 期望集数"，不等直接 FAIL；
+`calibration_row.py` 也会拒绝这种 aggregate（`--allow-repeated-seeds` 才能放行）。
+
+## 坑 15（2026-11-25）：抽出公共件后，Dockerfile 没 COPY
+
+`robotwin_policy.py` 新增 `from action_queue import ...` / `from act_ckpt import ...` 后，
+Dockerfile 仍只 COPY policy + obs。构建期自检只 `import robotwin_obs`，所以镜像能建成，
+运行时才 `ModuleNotFoundError`。
+
+现在：Dockerfile 补齐 COPY + 构建期 `import robotwin_policy`；第 17 道门 `packaging`
+解析适配器 import ↔ Dockerfile COPY，缺一个直接红。
