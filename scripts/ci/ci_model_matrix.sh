@@ -20,6 +20,7 @@ SH="${MM_SHARDS:-8}"
 VID="${MM_VIDEO:-0}"
 PROTO="${MM_PROTOCOL:-easy}"   # easy=demo_clean | hard=demo_randomized
 REPLICATE="${MM_REPLICATE:-}"  # A5：重复轮标签（r2/r3…），空=首轮
+RESUME="${MM_RESUME:-0}"       # 1=保留 results/ 与 sqlite（续跑/救援）
 
 [ -f "$REG" ] || { echo "registry 不存在: $REG" >&2; exit 1; }
 
@@ -70,7 +71,7 @@ for model in ${MODELS//,/ }; do
       SERVE_IMAGE="$SERVE_IMAGE_V" RW_SERVE_YAML="$SERVE_YAML_V" RW_PREWARM="$PREWARM_V" \
       RW_ACTION_TYPE="$ACTION_V" RW_SKIP_EXPERT="$SKIP_V" RW_BENCH_TAG="$BENCH_V" RW_FAST_INIT="$FAST_V" \
       RW_CKPT_REPO="$CKPT_REPO_V" RW_CKPT_REV="$CKPT_REV_V" RW_TASK_CONFIG="$TASK_CFG" \
-      RW_REPLICATE="$REPLICATE" \
+      RW_REPLICATE="$REPLICATE" RW_RESUME="$RESUME" \
       bash scripts/ci/ci_robotwin_full.sh
     mkdir -p matrix/"$model"
     if ! ls -d results/robotwin-* >/dev/null 2>&1; then

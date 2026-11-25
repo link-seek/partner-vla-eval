@@ -33,7 +33,15 @@ if [ "${RW_TASK_CONFIG:-demo_clean}" = "demo_randomized" ]; then DIFF_TAG="-hard
 REP_TAG=""
 if [ -n "${RW_REPLICATE:-}" ]; then REP_TAG="-${RW_REPLICATE}"; fi
 OUTDIR="results/robotwin-${CHUNK_TAG}${DIFF_TAG}${REP_TAG}-x${RW_EPISODES}"
-results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR 会把上轮 libero 残留打进 artifact）
+if [ "${RW_RESUME:-0}" = "1" ]; then
+  # 续跑模式：保留 results/（含 recording-<eval_id>.sqlite）。
+  # 上游 vla-eval export 支持"Rerun to include subsequently recorded episodes"，
+  # 清掉就等于把续跑能力扔了（20h 的 run 崩一次全丢）。
+  echo "[0/6] RW_RESUME=1：保留 results/（含 sqlite），跳过 results_fresh/wipe"
+  mkdir -p results
+else
+  results_fresh  # 全清（smoke 同口径；10-23 教训：只清自家 OUTDIR 会把上轮 libero 残留打进 artifact）
+fi
 # 注意：mkdir OUTDIR 必须在 results_root_wipe 之后（wipe 清 results/* 会连 OUTDIR 一起扬掉）
 
 echo "[0/6] workspace 属主修复 + 缓存目录预建"
@@ -105,7 +113,9 @@ docker pull "$VERIFY_IMAGE"
 # 预检：stock tag（如 0.8.0）没有分片脚本，跑到底才 127 白烧一轮（11-09/11-23 两次，见 #11）
 docker run --rm --entrypoint bash "$ROBOTWIN_IMAGE" -c 'test -f /opt/patches/run_sharded.sh' \
   || { echo "REFUSE: $ROBOTWIN_IMAGE 缺 /opt/patches/run_sharded.sh（不是统一镜像，请用 0.8.0-ee-slim）" >&2; exit 1; }
-results_root_wipe "$ROBOTWIN_IMAGE"
+if [ "${RW_RESUME:-0}" != "1" ]; then
+  results_root_wipe "$ROBOTWIN_IMAGE"
+fi
 mkdir -p "$OUTDIR"  # wipe 之后建（见上注释）
 
 echo "[4/6] 预热权重（默认 DB-CogACT 按 task 子目录；RW_PREWARM=none 跳过，如 X-VLA 由 serve 镜像自理）"

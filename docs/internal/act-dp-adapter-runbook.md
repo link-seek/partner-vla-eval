@@ -180,3 +180,29 @@ TASKS=grab_roller EPISODES=1 SHARDS=1 bash scripts/ci/ci_robotwin_full.sh
    的 `status` 从 `dropped` 改成 `verified`，补 `ckpt_revision`
 2. 进 `model-matrix.yml` 跑 5 task（`weight_type` 已是 `finetuned`，会自动与 shared 分组）
 3. 更新 `docs/tutorial/leaderboard.md` 的准入表
+
+
+---
+
+## 附：部分结果救援（2026-11-25 实测通过）
+
+run 中途崩了不要重跑，先救：
+
+```bash
+# 机器上（sqlite 还在 results/ 里）
+S=$(find results -name 'recording-*.sqlite' | head -1)
+TARGET_EPISODES=50 bash scripts/data/rescue_partial.sh "$S" /tmp/rescue
+```
+
+实测（正在跑的 Hard grab_roller，12 集时的快照）：
+
+```
+[rescue] grab_roller: 8/12 完成度 12/50 (24%) [部分]
+[rescue] 注意：这是部分结果，只能进附录，不能当正式数
+```
+
+要点：
+- 用 `sqlite3 .backup` 取一致性快照（没有 sqlite3 时退化为 `cp`）
+- `vla-eval export` 支持增量："Rerun to include subsequently recorded episodes"
+- 下次同配置重跑时加 `resume=1`（workflow 输入），会跳过 `results_fresh`，
+  sqlite 保留 → 已完成的集数不会被重复跑掉

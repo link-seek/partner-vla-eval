@@ -35,6 +35,10 @@ on:
         description: "重复轮标签（r2/r3…，空=首轮）。A5：同集重跑测方差"
         required: false
         default: ""
+      resume:
+        description: "1=保留 results/ 与 recording sqlite（续跑/崩溃后救援）"
+        required: false
+        default: "0"
       obs_prefix:
         description: "OBS 前缀，结果进 <前缀>/leaderboard/<model>/<task>/（默认 obs://so101-sim-pipeline/eval）"
         required: false
@@ -118,6 +122,7 @@ jobs:
           MM_VIDEO: ${{ inputs.video }}
           MM_PROTOCOL: ${{ inputs.protocol }}
           MM_REPLICATE: ${{ inputs.replicate }}
+          MM_RESUME: ${{ inputs.resume }}
           ASSETS_MOUNT: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
           RW_VOLUMES: /data/robotwin-assets/c3ddfa8:/app/RoboTwin/assets:ro
         run: |
@@ -138,6 +143,7 @@ jobs:
           MM_MODELS: ${{ inputs.models }}
           MM_PROTOCOL: ${{ inputs.protocol }}
           MM_REPLICATE: ${{ inputs.replicate }}
+          MM_RESUME: ${{ inputs.resume }}
         run: |
           set -e
           mkdir -p matrix/summary
