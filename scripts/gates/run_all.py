@@ -48,6 +48,8 @@ GATES: list[tuple[str, list[str], str]] = [
      "采集器三种目录命名 + 禁止跨协议/跨轮回落"),
     ("adapter",    ["python3", "scripts/model_servers/test_robotwin_obs.py"],
      "观测转换（通道/resize/真值歧义）"),
+    ("packaging", ["python3", "scripts/gates/check_adapter_packaging.py"],
+     "适配器的本地依赖都被 COPY 进 serve 镜像（防运行时 ModuleNotFoundError）"),
     ("ckpt",       ["python3", "scripts/model_servers/test_act_ckpt.py"],
      "ACT 权重路径 fail-closed（policy_last vs epoch 权重，防静默随机）"),
     ("calibration", ["python3", "scripts/ci/calibration_row.py", "--selftest"],
