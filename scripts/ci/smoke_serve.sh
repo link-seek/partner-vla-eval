@@ -24,6 +24,7 @@ set -uo pipefail
 
 IMAGE=""; POLICY=""; CKPT_HOST=""; TASK="click_bell"; PORT="8021"
 WORKDIR="/root/r01/smoke"; DRY=0; ASSETS="${ASSETS:-/data/robotwin-assets/c3ddfa8}"
+EPISODES=1; GPU=0; TIMEOUT="${TIMEOUT:-900}"
 while [ $# -gt 0 ]; do
   case "$1" in
     --image) IMAGE="$2"; shift 2 ;;
@@ -33,6 +34,9 @@ while [ $# -gt 0 ]; do
     --port) PORT="$2"; shift 2 ;;
     --workdir) WORKDIR="$2"; shift 2 ;;
     --assets) ASSETS="$2"; shift 2 ;;
+    --episodes) EPISODES="$2"; shift 2 ;;
+    --gpu) GPU="$2"; shift 2 ;;
+    --timeout) TIMEOUT="$2"; shift 2 ;;
     --dry-run) DRY=1; shift ;;
     *) echo "未知参数 $1" >&2; exit 2 ;;
   esac
@@ -150,7 +154,7 @@ output_dir: "$CTR_RESULTS"
 benchmarks:
   - benchmark: "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark"
     name: $TASK
-    episodes_per_task: 1
+    episodes_per_task: $EPISODES
     params:
       task_name: $TASK
       task_config: demo_clean
@@ -172,11 +176,11 @@ docker rm -f "$CTR_NAME" >/dev/null 2>&1 || true
 # 教训（2026-11-25）：别用 `/dev/tcp` —— HEALTHCHECK 由容器里的 /bin/sh(dash) 执行，
 # /dev/tcp 是 bash 专有特性，dash 下报 "cannot create /dev/tcp/...: Directory nonexistent"，
 # 于是健康检查永远 unhealthy，看起来像"服务起不来"，其实服务好得很。
-docker run -d --name "$CTR_NAME" --gpus '"device=0"' --network host --entrypoint bash \
+docker run -d --name "$CTR_NAME" --gpus "\"device=$GPU\"" --network host --entrypoint bash \
   --health-cmd "curl -fsS -o /dev/null http://127.0.0.1:$PORT/config || exit 1" \
   --health-interval=5s --health-timeout=3s --health-retries=40 --health-start-period=15s \
   -v "$WORKDIR:$CTR_WD:ro" "${EXTRA_MOUNT[@]}" \
-  -e CUDA_VISIBLE_DEVICES=0 -e HF_HUB_OFFLINE=1 \
+  -e CUDA_VISIBLE_DEVICES=$GPU -e HF_HUB_OFFLINE=1 \
   "$IMAGE" -lc "cd $SERVE_CWD && conda run --no-capture-output -n robotwin vla-eval serve -c $CTR_WD/$(basename "$SERVE_YAML") --address 0.0.0.0:$PORT" >/dev/null
 
 docker_wait_healthy() {   # 标准做法：轮询 docker 自己的健康状态
@@ -200,10 +204,10 @@ fi
 ok "serve 健康检查通过（docker health=healthy，端口 $PORT）"
 
 # ---------------------------------------------------------------- run
-echo "[smoke] 跑 1 集（GPU0）"
-timeout 900 docker run --rm --gpus '"device=0"' --network host --entrypoint bash \
+echo "[smoke] 跑 $EPISODES 集（GPU$GPU）"
+timeout "$TIMEOUT" docker run --rm --gpus "\"device=$GPU\"" --network host --entrypoint bash \
   -v "$WORKDIR:$CTR_WD" -v "$ASSETS:/app/RoboTwin/assets:ro" \
-  -e CUDA_VISIBLE_DEVICES=0 \
+  -e CUDA_VISIBLE_DEVICES=$GPU \
   "$IMAGE" -lc "cd /app/RoboTwin && conda run --no-capture-output -n robotwin vla-eval run -c $CTR_WD/$(basename "$RUN_YAML")" \
   2>&1 | grep -viE '^\s*[0-9]+%|it/s|B/s'
 RC=${PIPESTATUS[0]}
