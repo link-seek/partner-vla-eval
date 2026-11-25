@@ -38,86 +38,40 @@ jobs:
           [ "$fail" = 0 ] && echo "SYNTAX OK"
           exit $fail
       - name: Shell lint (shellcheck, errors only)
-        # runner 预装 shellcheck 0.9.0，无需安装/下载。
-        # 只开 -S error：抓真 bug（未定义变量、坏引号、命令替换)，不纠缠风格。
-        run: |
-          find scripts -name '*.sh' -print0 | xargs -0 -r shellcheck -S error -x
+        # runner 预装 shellcheck 0.9.0，无需安装。只开 -S error：抓真 bug，不纠缠风格。
+        run: find scripts -name '*.sh' -print0 | xargs -0 -r shellcheck -S error -x
 
       - name: YAML lint (yamllint, relaxed)
-        # runner 预装 yamllint 1.38；config/前只查实话（缩进、重复键、tab）
         run: |
           printf 'extends: relaxed\nrules:\n  line-length: disable\n  comments-indentation: disable\n  document-start: disable\n' > /tmp/yamllint.yml
           yamllint -c /tmp/yamllint.yml .github/workflows configs
 
-      - name: YAML parse all workflows + actions
-        run: |
-          python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml') + glob.glob('.github/actions/*/action.yml')]; print('YAML OK')"
-      - name: versions.yaml consistency (no silent pin drift)
-        run: python3 scripts/gates/check_versions.py
-      - name: Leaderboard schema + report reconciliation
-        # 对照上游 leaderboard-validate.yml：榜单数据必须机器可验。
-        # 额外两条本仓规则：数字要与 docs/reports 对账；shared/finetuned 不许混排。
-        run: |
-          python3 -m pip install --quiet jsonschema
-          python3 leaderboard/scripts/check_leaderboard.py
-      - name: Task list not hardcoded (single source = registry.exam.tasks)
-        # 实测漂移：ci_robotwin_full.sh 默认含 stack_blocks_two、collect_matrix.sh 含
-        # place_phone_stand，两份都"跑得通"所以没人发现，代价是报告里 MISSING。
-        run: python3 scripts/gates/check_task_list.py
       - name: Python static check (ruff undefined names)
-        # 2026-11-25 教训：适配器里写了 os.environ 但没 import os，
-        # 单测碰不到、bash -n 也碰不到，只有真跑才崩（NameError）。F821 一条就能拦住。
+        # 2026-11-25 教训：写了 os.environ / glob 但没 import，单测碰不到、bash -n 碰不到，
+        # 只有真跑才崩。F821 一条就能拦住。
         run: |
           python3 -m pip install --quiet ruff
           ruff check --no-cache --select F821,F811,E9 scripts leaderboard/scripts
-      - name: Referenced paths must exist
-        # 漂移实例：README 曾引用 scripts/upstream/run_sharded.sh（已删）、
-        # 写 v0.7.0（实际 0.8.0）、"四类 workflow"（实际 25）。本步把引用可达变成门禁。
-        # 计划中/上游仓路径登记在 scripts/paths_allowlist.txt。
-        run: python3 scripts/gates/check_paths.py
-      - name: Report self-consistency (mean_success vs success/n, image present)
-        # A4：拦住"报告写 0.8.0 而 aggregate 是 0.0.0"、"mean_success 与 success/n 对不上"。
-        run: python3 scripts/gates/check_reports.py
-      - name: Model registry reproducibility gate
-        # A1：status=verified 必须能钉住权重（ckpt_revision 40-hex），否则复现必翻车。
-        run: python3 scripts/gates/check_registry.py
-      - name: Coverage gate (must refuse partial models)
-        # A3：缺格模型 dispatch 时就拒跑，不等到预热报 "Fetching 0 files"。
-        # 这里同时测反例（CogACT 只有 3 头）与正例（X-VLA 全 5）。
+
+      - name: All gates (single entry)
+        # 10 道门禁（paths/contracts/registry/versions/reports/coverage/leaderboard/stats/collect/adapter）
+        # 统一由 scripts/gates/run_all.py 调度：一条命令看全部结果，失败时打印该门的完整输出。
+        # 原来这里是一步一个门禁，红在哪要翻日志；合并后 CI 步骤数与门禁数解耦。
         run: |
-          set +e
-          TASKS=$(python3 scripts/data/bench_config.py tasks)
-          python3 scripts/gates/check_coverage.py --models db-cogact --tasks "$TASKS"
-          rc=$?
-          set -e
-          if [ "$rc" != "2" ]; then
-            echo "FAIL: 缺格模型应返回 2（拒跑），实际 $rc" >&2
-            exit 1
-          fi
-          echo "coverage negative case OK (refused with 2)"
-          python3 scripts/gates/check_coverage.py --models x-vla-robotwin2 --tasks "$TASKS"
-      - name: Collect-matrix regression (easily-silent mislabeling)
-        # 2026-11-25 实测：A5 的 easy-r2 收 0 个 task；修完若不收紧，hard 会回落裸名(easy)、
-        # r2 会回落 r1 —— 都只在数字上出错、不报错。测试钉住三种命名与两条严格性。
-        run: python3 scripts/data/test_collect_matrix.py
-      - name: Serve config contract (yaml keys ⊆ __init__ kwargs)
-        # 2026-11-25 两次静默失败都被这一条静态拦住：
-        #   顶层 server.port 被忽略（只认 args.port / --address）
-        #   args.left_arm_dim 未在 __init__ 声明 → unrecognized arguments
+          python3 -m pip install --quiet pyyaml numpy jsonschema
+          python3 scripts/gates/run_all.py
+
+      - name: Workflow syntax (actionlint is a separate workflow)
+        # actionlint 放在 .github/workflows/actionlint.yml（社区 action，pin 版本），此处只解析 YAML。
         run: |
-          python3 -m pip install --quiet pyyaml
-          python3 scripts/model_servers/test_serve_contract.py
-          bash scripts/ci/smoke_serve.sh --image x --policy act --ckpt-host . --workdir /tmp/smoke-dry --dry-run
-      - name: Stats unit tests (bootstrap / Wilson)
-        run: |
-          python3 -m pip install --quiet numpy
-          python3 scripts/data/test_stats.py
-      - name: Adapter unit tests (robotwin_obs)
-        # B3 最可能的失败点是观测转换（通道/归一化），这里用纯函数单测把它钉住。
-        # 只依赖 numpy（CI 基础镜像没有，装一下）。
-        run: |
-          python3 -m pip install --quiet numpy
-          python3 scripts/model_servers/test_robotwin_obs.py
+          python3 -c "
+          import glob, yaml, sys
+          bad = []
+          for f in glob.glob('.github/workflows/*.yml'):
+              try: yaml.safe_load(open(f))
+              except Exception as e: bad.append((f, e))
+          print('YAML OK' if not bad else bad); sys.exit(1 if bad else 0)"
+
       - name: Script cd-depth guard (scripts in subdirs must go up 2 levels)
         # C1 回归（2026-11-24）：脚本下沉到 scripts/ci/ 后，`cd "$(dirname "$0")/.."`
         # 只到 scripts/，导致 configs/registry/model-registry.json 找不到、跑批立刻失败。

@@ -8,8 +8,12 @@
 为什么这么设计：A2 的教训是"报告里的版本/数字不许手写"。所以这里所有数值都从 aggregate 来，
 报告里只允许出现 aggregate 里有的数；缺失就写 null，不猜。
 
+两种模式之外还有一个维护模式：
+  --backfill —— 给历史报告补 stats/hard_stats（只由报告自带的 success/n 推出，幂等）
+
 用法：
   python3 scripts/data/gen_reports.py <collected.json> <easy|hard> [out_dir]
+  python3 scripts/data/gen_reports.py --backfill [glob]
 """
 from __future__ import annotations
 
@@ -28,7 +32,36 @@ def model_dir_name(model: str) -> str:
     return {"x-vla-robotwin2": "xvla", "db-cogact": "cogact"}.get(model, model)
 
 
+def backfill(argv: list[str]) -> int:
+    """给历史报告补 stats / hard_stats（幂等；数值只由 success/n 推出，不猜）。"""
+    pattern = argv[0] if argv else "docs/data/*.json"
+    files = sorted(ROOT.glob(pattern))
+    changed = skipped = 0
+    for p in files:
+        try:
+            d = json.loads(p.read_text())
+        except json.JSONDecodeError:
+            skipped += 1
+            continue
+        todo = []
+        if isinstance(d.get("success"), int) and isinstance(d.get("n"), int) and not d.get("stats"):
+            todo.append(("stats", d["success"]))
+        if isinstance(d.get("hard_success"), (int, float)) and isinstance(d.get("n"), int) and not d.get("hard_stats"):
+            todo.append(("hard_stats", round(d["hard_success"] * d["n"])))
+        if not todo:
+            continue
+        for key, k in todo:
+            d[key] = summarize(k, d["n"])
+        p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n")
+        changed += 1
+        print(f"  补 {'/'.join(t[0] for t in todo):12s} {p.name}")
+    print(f"[backfill] 补 {changed} 份，跳过 {skipped} 份（幂等：已有 stats 不动）")
+    return 0
+
+
 def main() -> int:
+    if sys.argv[1:2] == ["--backfill"]:
+        return backfill(sys.argv[2:])
     src = Path(sys.argv[1])
     proto = sys.argv[2] if len(sys.argv) > 2 else "easy"
     outdir = Path(sys.argv[3]) if len(sys.argv) > 3 else (ROOT / "docs" / "data")

@@ -50,3 +50,6 @@ docs/tutorial-v1-2-stack-effects
 
 # 1d) 设计对比里提出的"待创建"配置文件
 configs/benchmarks/robotwin.yaml
+
+# 2) 计划中产物（Hard 收数后才生成）
+leaderboard/leaderboard.hard.json

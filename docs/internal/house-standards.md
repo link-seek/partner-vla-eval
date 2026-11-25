@@ -9,7 +9,7 @@
 
 | 问题 | 我的自造做法（已废弃/降级） | house 标准 | 本仓落点 |
 |---|---|---|---|
-| 取镜像 manifest digest | `docker inspect .RepoDigests \| sed`（还会和 `config.digest` 混淆） | `docker buildx imagetools inspect --format '{{.Manifest.Digest}}'` | `scripts/ci/rebuild_serve.sh`、`build-serve.yml` |
+| 取镜像 manifest digest | `docker inspect .RepoDigests \| sed`（还会和 `config.digest` 混淆） | `docker buildx imagetools inspect --format '{{.Manifest.Digest}}'` | `build-serve.yml`（临时 tag → digest → 不可变校验 → 转正） |
 | 版本 tag 被重打 | 无守卫，tag 可静默挪走 | **tag 不可变**：临时 tag 构建 → 取 digest → 与现有 tag 比对 → 不同则红，`force_retag=true` 才放行 | `build-serve.yml`（沿用 `docker-images/bake-stack.yml` 的语义） |
 | 转正到正式 tag | `docker push` 重传 | `docker buildx imagetools create -t <正式> <临时>`（registry 侧改 tag，不重传层），跨境失败重试 3 次 | 同上 |
 | workflow 静态校验 | 只 `yaml.safe_load` | **actionlint**（`raven-actions/actionlint@v2.2.0`，工具 pin `1.7.12`，shellcheck/pyflakes 关） | `.github/workflows/actionlint.yml` |
@@ -24,8 +24,8 @@
   digest 只能由**构建链路**写回这个文件，不能人眼抄。
 - `scripts/ci/smoke_serve.sh`：这是**测试**，不是基础设施。它把"接缝契约"变成断言
   （输出目录必须落在预期路径、端口必须空闲、容器必须 healthy、aggregate 必须在）。
-- `scripts/model_servers/test_serve_contract.py`：纯静态契约测试（yaml 顶层键 ⊆ 允许集、
-  args ⊆ `__init__` 参数、script 必须是镜像内路径）。不需要 GPU/docker，进 lint。
+- `scripts/gates/check_contracts.py`：纯静态契约门禁（task 清单不硬编码 + serve yaml 顶层键 ⊆ 允许集、
+  args ⊆ `__init__` 参数、script 必须是镜像内路径）。不需要 GPU/docker。
 
 ## 三、还没做到的（明确欠账，不假装完成）
 
@@ -42,3 +42,16 @@
 
 > 遇到"要写个脚本解决"的时候，先做两件事：查本仓有没有，再查 `docker-images` / `infra` 有没有。
 > 两边都没有，才自己写，并在这里登记"为什么必须自建"。
+
+## 五、合并记录（2026-11-25 晚）
+
+一天里为每个事故加一个脚本，等于把事故固化成结构。做了一次合并：
+
+| 原 | 现 | 说明 |
+|---|---|---|
+| `gates/check_task_list.py` + `model_servers/test_serve_contract.py` | `gates/check_contracts.py` | 同一类问题（配置契约），一个入口 |
+| `ci/rebuild_serve.sh` | `build-serve.yml` | 构建只有一条路：CI + 不可变守卫；不再有"本机构建脚本" |
+| `data/backfill_stats.py` | `gen_reports.py --backfill` | 报告相关只有一把工具 |
+| lint.yml 里 10 个门禁步骤 | `gates/run_all.py`（一步） | 一条命令看全部门禁结果 |
+
+原则：**一个事故不新增一个脚本**；先看能否并入既有入口。
