@@ -150,3 +150,30 @@ lm-eval 有 `groups` 加权；我们明确"不给跨模型总分"。**保持现�
 1. **续跑保留多久**：sqlite 会占盘（当前一个 task 的 recording 约几 MB）。保留最近 N 轮还是全留？
 2. **partial 结果能不能进榜**：n<50 的格子是标"部分"进榜，还是只进附录？我倾向只进附录，避免被当正式数。
 3. **回归测试频率**：每周一次 1 task（¥60）够不够，还是要覆盖 2 个 task 交叉验证？
+
+
+---
+
+## 七、组件调研：哪些"我手搓的"其实有现成的
+
+> 2026-11-25。起因：连续两次栽在同一类 bug 上（`os` 未导入 → 服务 500；`glob` 未导入 → 门禁崩），
+> 说明"靠人发现"这件事本身不可靠。逐项查了现成组件，结论如下（都附实测）。
+
+| 我要解决的问题 | 我原本的做法 | 现成组件 | 结论 |
+|---|---|---|---|
+| 未定义名字（`os`/`glob`） | 人眼 + 真跑 | **ruff `--select F821`** | ✅ 已接入。**今天这两个 bug 都是这一类**，接入后同类问题不可能再漏过 CI |
+| shell 语法 | `bash -n` | **shellcheck 0.9.0**（runner 预装，零下载） | ✅ 已接入 `-S error`，首次即全绿 |
+| YAML 规范 | 自写 `yaml.safe_load` | **yamllint 1.38**（runner 预装） | ✅ 已接入 `relaxed`；首次扫出 2 处行尾空格（已修） |
+| 榜单结构校验 | 手写必填/格式检查 | **jsonschema 4.26** | ✅ 早已在用（`leaderboard.schema.json`），手写检查仅作无依赖兜底 |
+| Wilson 置信区间 | 手写公式 | **scipy `binomtest.proportion_ci(method="wilson")`** | ⚖️ 实测**逐位一致**（49/50、44/50、39/50、8/12、8/50、1/1 六组，最大差 2.4e-6 来自取整）。CI 只装 numpy、不装 scipy（省 ~30MB），故保留 numpy 实现，但"等价于 scipy"有了证据，不再是"我觉得对" |
+| registry 字段校验 | 手写 `check_registry.py` | **pydantic 2.13.4**（考场镜像里就有） | ⏳ 建议后续替换：模型化后错误信息免费、字段类型自动校验。当前手写版够用，优先级低于收数 |
+| 配置语义校验 | 自写 YAML parse | **`vla-eval test --validate`**（上游自带） | ❌ **实测不可用**：① 容器内没有 `docker` CLI，直接 skip；② 把宿主 docker 挂进去后能跑，但内层 `vla-eval run` 不接收 `-c`，去读 `/etc/vla-eval.yaml` → `IsADirectoryError`。不适合当门禁 |
+| workflow 语义校验 | 自写 YAML parse | **actionlint** | ⏸ runner 未预装（需下载/镜像）。yamllint + 自写 parse 已覆盖"语法与缩进"，actionlint 的增量价值是表达式/上下文校验，收益不如上面几项，暂不做 |
+| task 清单真源 | 三处硬编码 | 上游**没有** task 注册表（`src/vla_eval/registry.py` 只是 lazyregistry 的 `ImportString` 解析） | ✅ 自建 `registry.exam.tasks` + `bench_config.py` 读取 + `check_task_list.py` 门禁（一行出现 ≥3 个 task 名即红）是对的选择 |
+
+### 一句话总结
+
+**该用组件的地方用组件（ruff / shellcheck / yamllint / jsonschema / scipy 校准），
+该自建的地方自建（task 真源、命中率区间、部分结果救援）——判据是"上游有没有、能不能真跑通"。**
+
+其中 `vla-eval test --validate` 是个典型：看着像现成轮子，实测两个坑都堵死，硬套只会浪费时间。
