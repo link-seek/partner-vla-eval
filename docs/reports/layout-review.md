@@ -1,5 +1,6 @@
 ---
 title: 目录划分检视：现状、问题、目标布局
+status: snapshot
 nav_exclude: true
 ---
 

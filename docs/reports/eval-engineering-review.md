@@ -1,5 +1,6 @@
 ---
 title: 评测工程化检视：对照开源社区，我们该改什么
+status: snapshot
 nav_exclude: true
 ---
 

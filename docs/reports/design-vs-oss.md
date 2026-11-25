@@ -1,5 +1,6 @@
 ---
 title: 设计对比：本仓 vs 开源评测框架
+status: snapshot
 nav_exclude: true
 ---
 
