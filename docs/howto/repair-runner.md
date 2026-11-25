@@ -9,8 +9,8 @@ nav_exclude: true
 > **用错会怎样**：`config.sh remove` 用错 token 会把正常 agent 踢掉；两台机器（0002/0001）
 > 的 agent 互斥，别把 0002 的凭证写到 0001 上。
 >
-> 自动化入口：`.github/workflows/repair-v100.yml`（0002，双 agent）、
-> `repair-v100-0001.yml`（0001，单 agent）。两者都登记为 `rare`（见 `scripts/gates/infra-inventory.json`）。
+> 自动化入口：`.github/workflows/ops.yml`，`action=repair-0002`（0002 双 agent）/ `repair-0001`（0001 单 agent）。
+> 逻辑在 `scripts/ops/repair-0002.sh`、`scripts/ops/repair-0001.sh`（可本地执行，凭证走环境变量）。
 > 本文是它们的**手工等价步骤**——workflow 挂了就照这里做。
 
 ## 0. 先确认现状

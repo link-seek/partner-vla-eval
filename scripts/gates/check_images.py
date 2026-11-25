@@ -29,7 +29,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 IMAGES = ROOT / "configs" / "registry" / "image-registry.json"
 MODELS = ROOT / "configs" / "registry" / "model-registry.json"
 KINDS = {"bench", "serve", "tool"}
-STATUSES = {"active", "legacy"}
+STATUSES = {"active", "retained"}
+# retained = 历史版本，明确保留（不删），但不得被新结果引用
 DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 fails: list[str] = []
@@ -63,8 +64,8 @@ def main() -> int:
         wf = i.get("workflow")
         if wf:
             check(f"{r}: workflow 存在", (ROOT / wf).exists(), wf)
-        if i.get("status") == "legacy":
-            check(f"{r}: legacy 不得被模型引用", not i.get("used_by"), "legacy 还被引用")
+        if i.get("status") == "retained":
+            check(f"{r}: retained 不得被模型引用", not i.get("used_by"), "retained 还被引用")
 
     print("[交叉校验] model-registry ↔ 镜像清单")
     by_ref = {i["ref"].split(":")[0] + ":" + i["ref"].split(":", 1)[1]: i for i in images}
@@ -91,11 +92,11 @@ def main() -> int:
 
     print("[清单健康]")
     active = sum(1 for i in images if i["status"] == "active")
-    legacy = len(images) - active
-    print(f"  active {active} / legacy {legacy} / mutable {sum(1 for i in images if i.get('mutable'))}")
+    retained = len(images) - active
+    print(f"  active {active} / retained {retained} / mutable {sum(1 for i in images if i.get('mutable'))}")
     for i in images:
-        if i["status"] == "legacy":
-            warns.append(f"{i['ref']} 标为 legacy，确认后可删（删除需人工执行，见 CONTRIBUTING）")
+        if i["status"] == "retained":
+            warns.append(f"{i['ref']} 标为 retained：明确保留（不删），禁止被新结果引用")
 
     if remote:
         print("[远端校验] 逐个向 SWR 解析 digest")
@@ -121,7 +122,7 @@ def main() -> int:
     if fails:
         print(f"\nIMAGES FAIL: {len(fails)} 项")
         return 1
-    print(f"\nIMAGES OK（{len(images)} 个：active {active} / legacy {legacy}）")
+    print(f"\nIMAGES OK（{len(images)} 个：active {active} / retained {retained}）")
     return 0
 
 

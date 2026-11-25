@@ -53,4 +53,4 @@
 
 **约定**：新增 workflow 请在上面对应小节补一行，并在 `scripts/gates/infra-inventory.json` 登记 `kind`。
 **一次性排障不要提交 workflow**——开分支做完即删（见 CONTRIBUTING 第二节）；
-确有长期价值的排障能力（如 `audit-v100`）登记为 `rare` 并写 owner/触发条件。
+确有长期价值的排障能力收敛进 `ops.yml`（一个入口 + 多 action），登记 `rare` 并写 owner/触发条件。

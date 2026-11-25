@@ -8,7 +8,7 @@ nav_exclude: true
 > **什么时候用**：runner 重装系统后 `tailscale status` 里看不到它；或换机后需要重新入网。
 > **用错会怎样**：key 一旦写进机器磁盘就等于泄漏；本文的 key **只在命令行传参**，不落盘、不进日志。
 >
-> 自动化入口：`.github/workflows/ts-join-v100.yml`（登记为 `rare`）。
+> 自动化入口：`.github/workflows/ops.yml`，`action=tailnet-join`（逻辑在 `scripts/ops/tailnet-join.sh`）。
 > 本文是它的手工等价步骤。
 
 ## 前提

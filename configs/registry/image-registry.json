@@ -7,10 +7,10 @@
       "ref": "vla-eval-robotwin:0.8.0",
       "digest": "sha256:506da95baec4a0cbcff0057c44ddd6553530a076d6db3f69f4f5e50f32d717ec",
       "kind": "bench",
-      "status": "legacy",
+      "status": "retained",
       "dockerfile": "docker/Dockerfile.robotwin-unified",
       "workflow": ".github/workflows/build-benchmark-slim.yml",
-      "note": "全量版（28.7G），已被 ee-slim 取代"
+      "note": "全量版（28.7G），已被 ee-slim 取代 ｜ 2026-11-25 决策：**保留**（镜像在 SWR，不占仓空间；新结果不得引用）"
     },
     {
       "ref": "vla-eval-robotwin:0.8.0-ee-slim",
@@ -131,9 +131,9 @@
       "ref": "vla-serve-xvla:0.8.0",
       "digest": "sha256:11ceb21345fcfbd2c2fb8139d8d6b7270d4d657655f3a51a2ec11ccf52dcca8c",
       "kind": "serve",
-      "status": "legacy",
+      "status": "retained",
       "dockerfile": "docker/Dockerfile.serve-xvla",
-      "note": "无当前 workflow 产出（旧版），保留待定"
+      "note": "无当前 workflow 产出（旧版），保留待定 ｜ 2026-11-25 决策：**保留**（镜像在 SWR，不占仓空间；新结果不得引用）"
     },
     {
       "ref": "vla-serve-xvla:0.8.0-ee16",
