@@ -123,5 +123,18 @@ nav_exclude: true
 
 证据：`/data/robotwin-train/manifest.json`（脚本生成）+ 每 task `find -name '*.hdf5' | wc -l = 550`。
 
+### 格式校验（2026-11-25，不只是数文件）
+
+`python3 scripts/data/check_robotwin_data.py --root /data/robotwin-train --sample 5`（robotwin 镜像内跑）：
+
+```
+adjust_bottle clean_50 n=50 sample=5 OK T=140..153
+...
+[S1] 抽样 50 个文件，失败组 0
+```
+
+检查项：`joint_action/vector` 必须 (T,14)、左右臂 (T,6)、gripper (T,)、三路相机帧数 = T、
+首帧 cv2 能解码、同一文件内 T 一致。**0 失败组**，可以进入 S3。
+
 注意：**不要用 `r01-prep.yml` 在评测期间补数据**——它最后一步会 `stop-ecs`，会把在跑的 B1/DP 一起关掉；
 补数据直接跑脚本（不占 GPU、不关机）。
