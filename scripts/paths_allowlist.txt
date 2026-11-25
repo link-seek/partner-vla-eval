@@ -47,3 +47,6 @@ leaderboard/tests
 # 3) 已删除的分支名（不是路径，但文档里用反引号记录了 SHA 以便恢复）
 docs/tutorial-ia
 docs/tutorial-v1-2-stack-effects
+
+# 1d) 设计对比里提出的"待创建"配置文件
+configs/benchmarks/robotwin.yaml
