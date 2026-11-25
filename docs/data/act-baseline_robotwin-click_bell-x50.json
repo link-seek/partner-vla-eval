@@ -1,0 +1,24 @@
+{
+  "model": "Avada11/RoboTwin-Model-AgileX-ACT (100-demo ckpt, qpos 14D)",
+  "task": "RobotWin click_bell x50（Easy / demo_clean，50 个不同种子）",
+  "mean_success": 0.92,
+  "n": 50,
+  "success": 46,
+  "errors": 0,
+  "versions": {
+    "harness": "0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-robotwin-act:0.8.0",
+    "ckpt": "Avada11/RoboTwin-Model-AgileX-ACT@c248f2181c997ffa987d3a932b57f3c25c0482ed",
+    "ckpt_path": "/data/act-official/click_bell/demo_clean-100/100/policy_epoch_6000_seed_100.ckpt"
+  },
+  "machine": "V100-32GB ×2（cn-north-4，0002）；serve=GPU0，env=GPU0（与 Hard 评测并行）",
+  "seeds": "100000–100049（test_num=50 × episodes_per_task=1，skip_expert_check=true）",
+  "date": "2026-11-25",
+  "artifacts": "本地 run /root/r01/act50v3（非 GitHub workflow）；aggregate: results/act/click_bell_aggregate.json",
+  "steps_success_median": 72,
+  "elapsed_success_median_s": 78.7,
+  "note": "公开 ckpt 为 demo_clean-100（100 demos/task），官方榜为 50 demos/task → 只作 100-demo 参考基线，不与官方 58% 作同口径差值与 ±4pp 判据。50 个不同种子、0 error，n=50 有效。",
+  "report_version": "v1 (docs/tutorial/leaderboard.md)",
+  "protocol_version": "robotwin-2.0.1"
+}
