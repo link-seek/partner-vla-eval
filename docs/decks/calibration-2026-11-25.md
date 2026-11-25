@@ -100,6 +100,23 @@ ACT/DP 是**官方自带的基线**，跑它们等于"用官方自己的模型�
 - 并发组 `gpu-ecs-0002-smoke` 排队在 B1 之后（不抢卡）
 - 结果口径是**新跑 100 集（n=100）**，不宣称 n=150
 
+### 为什么不能和 B1 并行跑（2026-11-25 实测）
+
+GPU0 在 DP 结束后空闲，但 place_empty 仍只能排队。查下来是两个硬约束：
+
+| 约束 | 证据 | 影响 |
+|---|---|---|
+| **serve 端口写死 8000** | `ci_robotwin_full.sh` 的 run yaml 是 `ws://localhost:8000`，健康检查也探 8000 | 第二个 run 会与 B1 的 serve 撞端口；改端口要同时改 serve/run/probe 三处，未验证前不能上 |
+| 本地跑缺 OBS AK/SK | 脚本第 3 步强制 `docker login` + `docker pull`（`${OBS_AK:?}`） | 不走 workflow 就没有这两个 secret，镜像虽在本地也过不去 |
+
+所以"并行"目前只解决了容器名与 GPU 参数化（PR #46），**端口还没参数化**；
+在补齐并冒烟前，place_empty 只能按并发组排队在 B1 之后。
+
+### B1 顺延（实测）
+
+`handover_block` 首集 39 分钟走到 325/800 步（约 **7.2 s/step**，其他 task 约 1 s/step），
+50 集 / 4 shards 预计 **10–20 小时**，B1 结束从 01:50Z 顺延到 **11-26 08:00–16:00Z**。
+
 ### 开跑前抓到并修掉一个静默错误
 
 ACT 首次 50 集起跑后 4 集全 0。查下来：官方 `get_model` 只认 `<ckpt_dir>/policy_last.ckpt`，
