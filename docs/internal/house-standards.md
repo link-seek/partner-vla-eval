@@ -15,7 +15,7 @@
 | workflow 静态校验 | 只 `yaml.safe_load` | **actionlint**（`raven-actions/actionlint@v2.2.0`，工具 pin `1.7.12`，shellcheck/pyflakes 关） | `.github/workflows/actionlint.yml` |
 | 镜像供应链扫描 | 无 | trivy（CRITICAL/HIGH `--exit-code 1`）+ SBOM(cyclonedx) + `.trivyignore` 白名单 | **未做**，列为后续（见三） |
 | 跨境拉基座慢 | 干脆搬到 0002 本机构建 | CI 构建 + **双推 GHCR/SWR**，境外 runner 走 GHCR（同 digest、同字节） | **未做**，列为后续（见三） |
-| 盯长任务 | `nohup bash 循环` | `gh run watch --exit-status`；巡检交给 Actions `schedule` | 本次改用 `gh run watch` |
+| 盯长任务 | `nohup bash 循环`（容器重启即死，且死了没人知道） | **不跑 daemon**：短等待用 `gh run watch`；长任务的"跑完自动做事"交给 `workflow_run` 触发器 | B1 的收数由 `post-run-collect.yml` 在 matrix 完成时自动触发（名称已核对一致），不需要守夜进程 |
 | 等容器就绪 | 手写 TCP 轮询 | Docker 原生 `--health-cmd` + 轮询 `.State.Health.Status` | `scripts/ci/smoke_serve.sh` |
 
 ## 二、本仓自己的东西（这些不是"非标"，是领域数据）
@@ -55,3 +55,13 @@
 | lint.yml 里 10 个门禁步骤 | `gates/run_all.py`（一步） | 一条命令看全部门禁结果 |
 
 原则：**一个事故不新增一个脚本**；先看能否并入既有入口。
+
+## 六、容器里不跑 daemon（2026-11-25 结论）
+
+我前后起了两个 `nohup` 盯任务进程（B1 评测、镜像构建），**都静默死了**：容器的进程组被回收时子进程一起走，
+而循环只在 20 分钟一次的心跳里写日志，所以"死了"和"还没到点"看起来一样。
+
+正确分工：
+- **要自动做的事**（收数、回填报告、更新榜单）→ 交给 Actions 的 `workflow_run` / `schedule`，它不依赖我的容器活着。
+- **我要知道进度** → 现查（`gh api .../runs/<id>` 或 `gh run watch`），不维护后台守护。
+- 需要长跑的本机任务 → 宿主机 cron/systemd 调 `opencode run`（AGENTS 已有此约定），不在容器内 `nohup`。
