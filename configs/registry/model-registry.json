@@ -63,7 +63,13 @@
       "ckpt_revision": "4c6404283bd00008f7c15ae986556bc0e03ebdff",
       "weight_type": "shared",
       "regime": null,
-      "serve_image_digest": "sha256:d2d0a7bfd90b58e10f9f28b32f5843200311ed7b781e7897d0c588be388a204f"
+      "serve_image_digest": "sha256:d2d0a7bfd90b58e10f9f28b32f5843200311ed7b781e7897d0c588be388a204f",
+      "public_tasks": [
+        "adjust_bottle",
+        "grab_roller",
+        "place_empty_cup",
+        "place_phone_stand"
+      ]
     },
     "x-vla-robotwin2": {
       "family": "X-VLA",
