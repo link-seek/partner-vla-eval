@@ -43,11 +43,13 @@ def main() -> int:
             print(f"ERROR: registry 里没有模型 {name}", file=sys.stderr)
             return 2
         covered = m.get("covered_tasks")
+        public = m.get("public_tasks") or []
         if not covered:
             # 未声明 covered_tasks：视为全覆盖，但提示补声明
             print(f"WARN: {name} 未声明 covered_tasks，按全覆盖处理（建议补）", file=sys.stderr)
             covered = tasks
-        cov = set(covered)
+        # 可跑 task = 考场覆盖 ∪ 公开权重里但不在考场的 task（如 CogACT 的 place_empty_cup）
+        cov = set(covered) | set(public)
         missing = [t for t in tasks if t not in cov]
         not_in_exam = [t for t in tasks if t not in exam]
         if not_in_exam:
