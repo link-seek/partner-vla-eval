@@ -155,12 +155,14 @@ for i in 1 2 3; do
       ${RW_CKPT_REV:+--revision "$RW_CKPT_REV"} "${INC[@]}" > /tmp/prewarm.log 2>&1; then
     # snapshot 即缓存下最新子目录（宿主/容器同挂载，路径对应）
     CACHE_NAME="models--$(echo "$CKPT_REPO" | tr '/' '-')"
-    SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots/"*/ 2>/dev/null | head -n 1)
-    if [ -n "$SNAP_HOST" ] && [ -d "$SNAP_HOST$FIRST_TASK" ]; then
-      SNAP="/root/.cache/huggingface/hub/$CACHE_NAME/snapshots/$(basename "$SNAP_HOST")"
+    # 不再用"最新 snapshot"猜哈希：直接按 task 目录反查（多 snapshot/时间戳不可靠）。
+    SNAP_TASK=$(find "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots" -maxdepth 2 -type d -name "$FIRST_TASK" 2>/dev/null | head -n 1)
+    if [ -n "$SNAP_TASK" ]; then
+      REL="${SNAP_TASK#"$WORK/.cache/hf/"}"          # hub/<repo>/snapshots/<sha>/<task>
+      SNAP="/root/.cache/huggingface/${REL%/$FIRST_TASK}"
       echo "snapshot: $SNAP"; break
     fi
-    echo "snapshot 目录异常"; ls "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots/" 2>/dev/null || true
+    echo "snapshot 目录异常（没找到 $FIRST_TASK）"; find "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots" -maxdepth 2 -type d 2>/dev/null | head -n 5 || true
   fi
   tail -n 5 /tmp/prewarm.log 2>/dev/null || true
   sleep 15
