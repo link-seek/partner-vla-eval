@@ -1,3 +1,9 @@
+---
+title: CloudRobo 评测能力读后：它做体检，我们做尺子
+status: snapshot
+nav_exclude: true
+---
+
 # CloudRobo 评测能力读后：它做体检，我们做尺子
 
 - 日期：2026-11-26
