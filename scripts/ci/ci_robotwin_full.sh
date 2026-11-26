@@ -133,7 +133,12 @@ if [ "${RW_PREWARM:-cogact}" = "none" ]; then
   echo "prewarm skipped"
 else
 FIRST_TASK=$(echo "${RW_TASKS:-grab_roller}" | cut -d, -f1)
-echo "ckpt: ${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}@${RW_CKPT_REV:-<main>}"
+# registry 的 ckpt 可能是 "Dexmal/robotwin-db-cogact/<task>"（给 model_path 的占位）；
+# prewarm 需要的是 HF repo id（两段），把 "/<task>" 去掉。2026-11-26 实测：
+# 不清会报 "Repo id must be in the form 'repo_name' or 'namespace/repo_name'"。
+CKPT_REPO="${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}"
+CKPT_REPO="${CKPT_REPO%/<task>}"
+echo "ckpt: $CKPT_REPO@${RW_CKPT_REV:-<main>}"
 for i in 1 2 3; do
   # 纯 CLI 预热：huggingface-cli 下载 + ls 定位 snapshot（不写 python）
   INC=()
@@ -146,10 +151,10 @@ for i in 1 2 3; do
     -v "$WORK/.cache/hf":/root/.cache/huggingface \
     -e HF_ENDPOINT=https://hf-mirror.com -e HF_HUB_VERBOSITY=warning \
     -e HF_TOKEN="${HF_TOKEN:-}" -e HF_HUB_DISABLE_XET=1 \
-    "$VERIFY_IMAGE" hf-download download "${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}" \
+    "$VERIFY_IMAGE" hf-download download "$CKPT_REPO" \
       ${RW_CKPT_REV:+--revision "$RW_CKPT_REV"} "${INC[@]}" > /tmp/prewarm.log 2>&1; then
     # snapshot 即缓存下最新子目录（宿主/容器同挂载，路径对应）
-    CACHE_NAME="models--$(echo "${RW_CKPT_REPO:-Dexmal/robotwin-db-cogact}" | tr '/' '-')"
+    CACHE_NAME="models--$(echo "$CKPT_REPO" | tr '/' '-')"
     SNAP_HOST=$(ls -dt "$WORK/.cache/hf/hub/$CACHE_NAME/snapshots/"*/ 2>/dev/null | head -n 1)
     if [ -n "$SNAP_HOST" ] && [ -d "$SNAP_HOST$FIRST_TASK" ]; then
       SNAP="/root/.cache/huggingface/hub/$CACHE_NAME/snapshots/$(basename "$SNAP_HOST")"
