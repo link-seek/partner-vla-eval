@@ -155,9 +155,11 @@ for i in 1 2 3; do
       ${RW_CKPT_REV:+--revision "$RW_CKPT_REV"} "${INC[@]}" > /tmp/prewarm.log 2>&1; then
     # snapshot 即缓存下最新子目录（宿主/容器同挂载，路径对应）
     CACHE_NAME="models--$(echo "$CKPT_REPO" | tr '/' '-')"
+    echo "[dbg] WORK=$WORK CACHE=$WORK/.cache/hf CACHE_NAME=$CACHE_NAME"
+    ls -la "$WORK/.cache/hf/hub" 2>&1 | head -n 6
     # 缓存是容器 root 写的，宿主机 runner 可能无法遍历（find 静默为空）。
     # 所以在**容器内**按 task 反查 snapshot，直接拿容器路径给 serve 用。
-    SNAP_TASK_CTR=$(docker run --rm       -v "$WORK/.cache/hf":/root/.cache/huggingface       "$VERIFY_IMAGE" bash -lc       "find /root/.cache/huggingface/hub/$CACHE_NAME/snapshots -maxdepth 2 -type d -name '$FIRST_TASK' 2>/dev/null | head -1" 2>/dev/null)
+    SNAP_TASK_CTR=$(docker run --rm       -v "$WORK/.cache/hf":/root/.cache/huggingface       "$VERIFY_IMAGE" bash -lc       "find /root/.cache/huggingface/hub/$CACHE_NAME/snapshots -maxdepth 2 -type d -name '$FIRST_TASK' 2>&1 | head -5")
     if [ -n "$SNAP_TASK_CTR" ]; then
       SNAP=$(dirname "$SNAP_TASK_CTR")
       echo "snapshot: $SNAP"; break
