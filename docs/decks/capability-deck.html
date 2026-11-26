@@ -416,20 +416,23 @@
   <!-- 10 progress -->
   <!-- 09e 平台评测对照 -->
   <section class="slide" data-screen-label="16 平台评测对照">
-    <div class="eyebrow">为什么自己做 · 平台评测 <span class="tag warn" style="margin-left:10px">公开文档口径</span></div>
-    <h2>平台自带评测，不等于可比分数</h2>
-    <p class="sub" style="margin-bottom:18px">以 CloudRobo（华为云，2026-11 文档）为样本：它的默认值是为<strong>共享算力、快速验证</strong>设的，不是为<strong>横向可比</strong>设的。三个默认值直接决定了我们的题测不了。</p>
-    <table style="font-size:14px">
-      <tr><th style="width:11%">维度</th><th style="width:31%">平台的默认</th><th style="width:25%">后果</th><th>我们的做法</th></tr>
-      <tr><td>考场</td><td>任务集仅 LIBERO；RoboTwin 不在列表</td><td>我们的题它不收</td><td>RoboTwin 2.0 全 50 task</td></tr>
-      <tr><td>单集时长</td><td>每轮 <strong>0–300 s</strong>（默认 90），文档未给放宽路径</td><td><code>handover_block</code> 约 80 min/集 → 恒 0</td><td>按 step 上限 800，跑完为止</td></tr>
-      <tr><td>读数</td><td>成功率 + 耗时</td><td>无 error 分类、无区间</td><td>n、errors、95% CI 逐格</td></tr>
-      <tr><td>复现</td><td>场景种子 0–10000（单种子）</td><td>换种子不可复核</td><td><code>protocol_version</code> + 逐集种子 + digest</td></tr>
-      <tr><td>校准</td><td>文档未提与官榜对照</td><td>不知道偏多少</td><td>对官榜 <strong>−1.40pp</strong>（第 15 道门）</td></tr>
+    <div class="eyebrow">单独对比 · CloudRobo（华为云）vs 我们的尺子 <span class="tag warn" style="margin-left:10px">公开文档口径</span></div>
+    <h2>一页对比：同一件事的两种解法</h2>
+    <table style="font-size:14px;margin-top:6px">
+      <tr><th style="width:15%">维度</th><th style="width:36%">CloudRobo</th><th>我们（partner-vla-eval）</th></tr>
+      <tr><td>定位</td><td>一站式平台：数据 → 训练 → 部署 → 评测 → 真机</td><td>评测底座：尺子 + 编排 + 门禁 + 校准</td></tr>
+      <tr><td>考场覆盖</td><td>任务集<strong>仅 LIBERO</strong>；RoboTwin 不在列表</td><td>RoboTwin 2.0 全 50 task（已跑 5 task × 50 ep）</td></tr>
+      <tr><td>单集时长</td><td>每轮 <strong>0–300 s</strong>（默认 90），文档未给放宽路径</td><td>按 step 上限 800，长程任务跑完为止（实测 80 min/集）</td></tr>
+      <tr><td>读数</td><td>成功率 + 耗时</td><td>n、errors、95% CI、成功集平均步数，逐格</td></tr>
+      <tr><td>复现</td><td>场景随机化种子单值（0–10000）</td><td><code>protocol_version</code> + 逐集种子表 + 镜像 digest</td></tr>
+      <tr><td>官榜校准</td><td>文档未提与官方榜对照</td><td>X-VLA 50 task：<strong>−1.40pp</strong>（第 15 道门守）</td></tr>
+      <tr><td>接入门槛</td><td>模型须部署为"运行中"在线服务；自有模型+本体需先做映射</td><td>adapter 模板化（<code>ActionQueue</code> / <code>policy_profiles</code>），1 集 smoke 即验</td></tr>
+      <tr><td>数据质量</td><td><strong>强项</strong>：安全/效率/平稳性三维、20+ 指标、PDF 报告、清洗 KEEP/TRIM/DROP</td><td>仅格式校验 + 统计（2750 文件 / 38 万帧 / 0 坏文件）</td></tr>
+      <tr><td>治理</td><td>平台侧无 CI 概念，评测参数随任务手填</td><td>18 道门，坏结果不进表</td></tr>
     </table>
-    <p class="quote" style="margin-top:26px">"能跑"和"可比"是两件事。平台评<strong>这套资产能不能用</strong>，我们评<strong>这个模型多少分、这个分可不可比</strong>——所以模型评测这一环，必须自己做。</p>
-    <p class="sub" style="margin-top:14px;font-size:13px">口径：support.huaweicloud.com 公开文档（2026-11 更新），未控制台实测；比较的是默认值，不代表平台不可改；300 s 是否硬截断待实测。</p>
-    <div class="foot"><span>16 平台评测对照</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <p class="quote" style="margin-top:22px;font-size:17px">公平地说：它强在<strong>一站式</strong>与<strong>数据体检</strong>，我们强在<strong>可比</strong>与<strong>可复核</strong>。它答"这套资产能不能用"，我们答"这个模型多少分、这个分可不可信"——所以模型评测这一环，必须自己做。</p>
+    <p class="sub" style="margin-top:10px;font-size:12.5px">口径：support.huaweicloud.com 公开文档（2026-11 更新），未控制台实测；比较默认值，不代表平台不可改；300 s 是否硬截断、超时是否计成功均待实测。</p>
+    <div class="foot"><span>16 平台评测对照</span><span class="dot"></span></div>
   </section>
 
   <section class="slide" data-screen-label="17 进度与缺口">
