@@ -40,20 +40,29 @@ jobs:
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ github.event.workflow_run.id || inputs.run_id }}
+          run-id: ${{ github.event.workflow_run.id || github.event.inputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: /tmp/collected
 
       - name: Show what we got
         run: |
-          echo "run=${{ github.event.workflow_run.id || inputs.run_id }} conclusion=${{ github.event.workflow_run.conclusion }}"
+          echo "run=${{ github.event.workflow_run.id || github.event.inputs.run_id }} conclusion=${{ github.event.workflow_run.conclusion }}"
           ls -l /tmp/collected 2>/dev/null || echo "（无 artifact）"
+
+      - name: Check collected files
+        id: check
+        run: |
+          if ls /tmp/collected/*/collected-*.json /tmp/collected/collected-*.json >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Fallback — pull matrix/ from OBS
         id: obs-fallback
         # 兜底：早于 artifact 步骤的 run 没有 artifact，但 Upload to OBS 已把 matrix/ 传上去。
         # 这里装 obsutil 拉回来，转成与 artifact 相同的形状（/tmp/collected/collected-*.json）。
-        if: steps.fetch.outcome != 'success'
+        if: steps.check.outputs.found != 'true'
         continue-on-error: true
         env:
           OBS_AK: ${{ secrets.PROD_HCLOUD_AK }}
@@ -81,11 +90,11 @@ jobs:
           done
 
       - name: Install python deps (numpy)
-        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
+        if: always() && (steps.check.outputs.found == 'true' || steps.obs-fallback.outcome == 'success')
         run: python3 -m pip install --quiet numpy
 
       - name: Backfill reports + leaderboard
-        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
+        if: always() && (steps.check.outputs.found == 'true' || steps.obs-fallback.outcome == 'success')
         run: |
           set -e
           shopt -s nullglob
@@ -98,18 +107,18 @@ jobs:
             echo "protocol=$proto"
             python3 scripts/data/gen_reports.py "$f" "$proto"
             python3 scripts/data/make_leaderboard.py "$f" "$proto" \
-              --run "${{ github.event.workflow_run.id || inputs.run_id }}"
+              --run "${{ github.event.workflow_run.id || github.event.inputs.run_id }}"
           done
           [ "$found" = 1 ] || { echo "artifact 里没有 collected-*.json"; exit 1; }
 
       - name: Gates
-        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
+        if: always() && (steps.check.outputs.found == 'true' || steps.obs-fallback.outcome == 'success')
         run: |
           python3 scripts/gates/check_reports.py
           python3 leaderboard/scripts/check_leaderboard.py
 
       - name: Commit results
-        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
+        if: always() && (steps.check.outputs.found == 'true' || steps.obs-fallback.outcome == 'success')
         run: |
           set -e
           git config user.name "post-run-collect"
@@ -118,6 +127,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "无变化，不提交"
           else
-            git commit -m "chore(auto): 收数 run ${{ github.event.workflow_run.id || inputs.run_id }} → 报告 hard_success/gap + 榜单"
+            git commit -m "chore(auto): 收数 run ${{ github.event.workflow_run.id || github.event.inputs.run_id }} → 报告 hard_success/gap + 榜单"
             git push
           fi
