@@ -21,6 +21,7 @@ nav_exclude: true
 
 目标不是重写 VLA Evaluation Harness，而是在其评测内核之上建立统一的：
 
+- ModelAdapter（每个模型族都有，上游配置只是其实现之一）
 - BenchmarkAdapter（RoboTwin / LIBERO / 后续考场）
 - RuntimeProfile（Docker / ECS / K8s，SAPIEN / MuJoCo 运行要求）
 - CheckpointCoordinator + ArtifactSink（episode 级增量归档）
@@ -141,7 +142,7 @@ Metaflow：
 |---|---|---|---|
 | A. 继续各 workflow 跑完后上传 | 改动最少 | 中途失败丢数据；LIBERO 再复制一套 | 拒绝 |
 | B. 给现有 RoboTwin 单独加 watchdog 上传 | 能先救 RoboTwin | LIBERO 再写一个；归档逻辑仍分散 | 拒绝 |
-| C. 统一 CheckpointCoordinator + BenchmarkAdapter | 两个考场共用；恢复语义一致；可扩资源 | 需要抽接口与迁移现有脚本 | **采用** |
+| C. 统一 ModelAdapter + BenchmarkAdapter + CheckpointCoordinator | 两个考场共用；恢复语义一致；可扩资源 | 需要抽接口与迁移现有脚本 | **采用** |
 | D. 直接引入 Argo / Metaflow / Ray 作为编排内核 | 生态成熟 | 对当前 GitHub Actions + 单机双卡过重；迁移风险大 | 暂不采用，借用其设计语义 |
 
 ---
@@ -156,10 +157,10 @@ Metaflow：
 EvalJobSpec（模型 / 考场 / 协议 / 资源 / sink）
         ↓
 GenericEvaluator
-        ↓
-BenchmarkAdapter
-  ├── RoboTwinAdapter
-  └── LiberoAdapter
+  ├── ModelAdapter（模型族）× ModelProfile（考场配置）
+  └── BenchmarkAdapter
+        ├── RoboTwinAdapter
+        └── LiberoAdapter
         ↓
 Harness EpisodeRunner + RecordingStore（上游）
         ↓
@@ -172,7 +173,48 @@ RunManifest
 ReportProjector（aggregate / 报告 / 榜单）
 ```
 
-### 2. BenchmarkAdapter 契约
+### 2. ModelAdapter 契约（始终存在）
+
+**每个模型族都必须有显式 ModelAdapter。** 上游 model server YAML 是 adapter 的实现素材，不是扩展边界本身。即使上游已经支持某模型，也要由 adapter 统一承担：
+
+- 权重解析与 revision pin；
+- serve 镜像 / digest；
+- 观测预处理（相机顺序、resize、归一化、状态维度）；
+- 动作后处理（维度、旋转表示、chunk/queue）；
+- reset / episode lifecycle；
+- healthcheck 与 readiness；
+- 模型错误到 `failure_reason` 的映射；
+- 资源与 benchmark profile 兼容性检查。
+
+```python
+class ModelAdapter(Protocol):
+    family: str
+
+    def capabilities(self) -> ModelCapabilities: ...
+    def resolve_weight(self, spec: ModelSpec) -> WeightRef: ...
+    def build_server(
+        self,
+        spec: ModelSpec,
+        profile: ModelProfile,
+        runtime: RuntimeProfile,
+    ) -> ServerHandle: ...
+    def preprocess_observation(self, obs: dict) -> dict: ...
+    def postprocess_action(self, action: Any) -> Action: ...
+    def reset(self) -> None: ...
+    def healthcheck(self) -> HealthReport: ...
+```
+
+`ModelProfile` 是同一模型族在不同考场的薄配置，例如：
+
+```text
+XVLAAdapter
+  ├── robotwin profile：EE16、三相机、RoboTwin chunk
+  └── libero profile：LIBERO 观测与动作契约
+```
+
+如果 profile 只需要转发上游 YAML，adapter 可以很薄，但**不能不存在**。GenericEvaluator 只依赖 `ModelAdapter`，不直接依赖上游 YAML、Docker 命令或具体模型包。
+
+### 3. BenchmarkAdapter 契约
 
 ```python
 class BenchmarkAdapter(Protocol):
@@ -180,14 +222,35 @@ class BenchmarkAdapter(Protocol):
 
     def tasks(self, suite: str) -> list[TaskSpec]: ...
     def resource_profile(self) -> ResourceRequest: ...
-    def model_profile(self, model: ModelSpec) -> ModelProfile: ...
+    def observation_spec(self) -> ObservationSpec: ...
+    def action_spec(self) -> ActionSpec: ...
     def run(self, ctx: EvalContext) -> Iterator[EpisodeRecord]: ...
     def finalize(self) -> RunFinalization: ...
 ```
 
-RoboTwin 与 LIBERO 只负责“怎么跑、怎么判”，不负责“怎么归档”。
+RoboTwin 与 LIBERO 只负责“怎么跑、怎么判、需要什么观测/动作”，不负责“模型怎么适配”和“数据怎么归档”。GenericEvaluator 在启动前校验：
 
-### 3. 统一 EpisodeRecord
+```text
+ModelAdapter.capabilities()
+  satisfies
+BenchmarkAdapter.observation_spec() + action_spec()
+```
+
+不满足就 fail fast，不烧卡。
+
+### 4. 复用矩阵
+
+| 场景 | ModelAdapter | ModelProfile | BenchmarkAdapter | ModelSpec |
+|---|---|---|---|---|
+| 同族新 ckpt、同考场 | 复用 | 复用 | 复用 | **新增** |
+| 同族模型、新考场 | 复用 | **新增薄 profile** | **新增考场 adapter** | 补 profile 引用 |
+| 新模型族、已支持考场 | **新增 adapter** | 通常新增 | 复用 | 新增 |
+| 新模型族、新考场 | **新增 adapter** | 新增 | **新增考场 adapter** | 新增 |
+| 上游已有模型+考场的 YAML | **仍需薄 adapter** | 可直接引用上游配置 | 复用 | 新增 |
+
+关键原则：**复用单位是 ModelAdapter，不是“上游有没有 YAML”。** YAML 只决定 adapter 是薄是厚，不决定 adapter 是否存在。
+
+### 5. 统一 EpisodeRecord
 
 ```json
 {
@@ -269,7 +332,7 @@ PENDING
 
 所有 checkpoint 对象不可变；不在同一 key 上覆盖。
 
-### 7. Post-run Collect 的新职责
+### 8. Post-run Collect 的新职责
 
 只允许：
 
@@ -297,11 +360,12 @@ manifest + committed episodes
 - 记录 aggregate、episode 顺序、error 分类；
 - 作为后续重构的 golden tests。
 
-### 阶段 1：抽 BenchmarkAdapter
+### 阶段 1：抽 ModelAdapter + BenchmarkAdapter
 
+- 现有 ACT / DP / X-VLA / CogACT serve 配置分别包装为显式 ModelAdapter；薄厚由模型族决定，不允许绕过 adapter；
 - 现有 `ci_robotwin_full.sh` 原样包装为 RoboTwinAdapter；
 - 现有 `ci_libero.sh` 包装为 LiberoAdapter；
-- 两者只暴露统一 `run() -> EpisodeRecord`。
+- 模型侧只暴露统一 server / observation / action 契约；考场侧只暴露统一 `run() -> EpisodeRecord`。
 
 ### 阶段 2：抽 GenericEvaluator
 
@@ -340,9 +404,10 @@ sinks.json        ArtifactSink 配置
 1. 在 RoboTwin 跑到第 12 集时强杀进程，前 11 集仍可从 OBS manifest 恢复。
 2. 换一台机器 resume，只跑未 committed episode，不重复已完成集。
 3. LIBERO 接入不需要修改 GenericEvaluator 或 CheckpointCoordinator。
-4. 第二台机器只需要增加 RuntimeProfile，不需要改 BenchmarkAdapter。
-5. 同一 episode 重复上传不会产生重复记录；重跑 attempt 只保留最后一次 committed。
-6. Post-run Collect 在原始数据缺失时必须失败，不能生成正式榜。
+4. 新模型族必须实现 ModelAdapter；同族新 ckpt 只加 ModelSpec，不重复写适配逻辑。
+5. 第二台机器只需要增加 RuntimeProfile，不需要改 ModelAdapter / BenchmarkAdapter。
+6. 同一 episode 重复上传不会产生重复记录；重跑 attempt 只保留最后一次 committed。
+7. Post-run Collect 在原始数据缺失时必须失败，不能生成正式榜。
 7. RoboTwin 重构前后 golden aggregate 一致。
 8. partial 仍遵守 ADR-0002：只进附录，不进正式榜。
 
@@ -355,7 +420,7 @@ sinks.json        ArtifactSink 配置
 - RoboTwin / LIBERO 共用一套完成、归档、恢复与报告语义；
 - 中途失败不丢已提交数据；
 - 新考场不再复制 workflow；
-- 新模型主要是 ModelSpec + serve profile；
+- 同族新 ckpt 只加 ModelSpec；新模型族必须实现 ModelAdapter；新考场通常只加 ModelProfile + BenchmarkAdapter；
 - 报告可重算，原始证据不可变；
 - 与上游 harness 的 SQLite / export / resume 能力对齐。
 
