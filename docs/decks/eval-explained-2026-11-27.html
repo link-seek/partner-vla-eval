@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>一次模型评测，到底在评什么？</title>
+<style>
+  :root{
+    --primary:#60a5fa;--secondary:#a78bfa;--success:#22c55e;--warning:#fbbf24;--danger:#fb7185;
+    --surface:#121722;--surface-2:#1a2130;--line:#26304a;--text:#f8fafc;--muted:#93a1bb;
+    --mono:"SF Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--surface);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+  .deck{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--fit,1));transform-origin:center center}
+  section.slide{position:absolute;inset:0;padding:72px 88px 96px;display:none;flex-direction:column;justify-content:center;background:var(--surface)}
+  section.slide.active{display:flex}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin-bottom:16px}
+  h1{font-size:62px;line-height:1.15;font-weight:700;letter-spacing:-.02em;max-width:24ch}
+  h2{font-size:40px;line-height:1.25;font-weight:650;letter-spacing:-.01em;margin-bottom:14px}
+  h3{font-size:21px;line-height:1.35;margin-bottom:10px}
+  .sub{color:var(--muted);font-size:19px;line-height:1.6;max-width:92ch}
+  .lead{font-size:22px;line-height:1.65;color:var(--muted);max-width:82ch;margin-top:20px}
+  .rule{height:1px;background:var(--line);margin:22px 0}
+  .foot{position:absolute;left:88px;right:88px;bottom:30px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .dot{display:flex;gap:6px}.dot i{width:6px;height:6px;border-radius:50%;background:#2b3550;display:block}.dot i.on{background:var(--primary)}
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th,td{text-align:left;padding:19px 17px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  tr:last-child td{border-bottom:none}
+  code{font-family:var(--mono);font-size:.9em;background:rgba(96,165,250,.10);color:#bfd8ff;padding:1px 6px;border-radius:5px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:14px}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:14px}
+  .card{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:24px}
+  .card .t{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .card .v{font-size:18px;line-height:1.6;color:#dbe3f0}
+  .card.good{border-color:rgba(34,197,94,.35)}.card.good .t{color:var(--success)}
+  .card.warn{border-color:rgba(251,191,36,.35)}.card.warn .t{color:var(--warning)}
+  .card.bad{border-color:rgba(251,113,133,.35)}.card.bad .t{color:var(--danger)}
+  ul{list-style:none}li{position:relative;padding-left:20px;margin-bottom:13px;font-size:18px;line-height:1.55;color:#dbe3f0}
+  li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:6px;border-radius:50%;background:var(--primary);opacity:.8}
+  li.dim::before{background:var(--muted)}li strong{color:var(--text);font-weight:600}
+  .quote{border-left:2px solid var(--primary);padding:6px 0 6px 20px;font-size:21px;line-height:1.65;color:#e6ecf7}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+  .tag.ok{color:var(--success);border-color:rgba(34,197,94,.4)}.tag.warn{color:var(--warning);border-color:rgba(251,191,36,.4)}.tag.next{color:#c4b5fd;border-color:rgba(167,139,250,.5)}
+  .chip-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}.chip{font-family:var(--mono);font-size:15px;padding:10px 14px;border:1px solid var(--line);border-radius:9px;color:#dbe3f0;background:var(--surface-2)}
+  .formula{font-family:var(--mono);font-size:28px;line-height:1.5;padding:24px 28px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);margin:18px 0;color:#dbe8ff}
+  .flow{display:flex;align-items:stretch;gap:12px;margin:18px 0}.flow .node{flex:1;border:1px solid var(--line);border-radius:12px;padding:18px 14px;background:var(--surface-2);text-align:center}.flow .node b{display:block;font-size:18px;margin-bottom:6px}.flow .node span{font-size:14px;color:var(--muted);line-height:1.45}.flow .arr{align-self:center;color:var(--primary);font-size:26px}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:14px}.kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:24px}.kpi .n{font-size:42px;font-weight:700;line-height:1}.kpi .l{font-size:15px;color:var(--muted);margin-top:10px;line-height:1.5}.kpi.ok .n{color:var(--success)}.kpi.warn .n{color:var(--warning)}.kpi.pri .n{color:var(--primary)}
+  .small{font-size:13px;color:var(--muted);line-height:1.55}.muted{color:var(--muted)}.good{color:var(--success)}.bad{color:var(--danger)}.warn{color:var(--warning)}
+  .tree{font-family:var(--mono);font-size:15px;line-height:1.65;color:#cbd7ea;background:#0d111b;border:1px solid var(--line);border-radius:12px;padding:20px 24px;white-space:pre}
+  .bar{height:18px;border-radius:9px;background:#26304a;position:relative;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--primary)}.bar.ok i{background:var(--success)}.bar.warn i{background:var(--warning)}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 01 -->
+  <section class="slide active" data-screen-label="01 封面">
+    <div class="eyebrow">模型评测科普 · 2026-11</div>
+    <h1>一次模型评测，<br/>到底在评什么？</h1>
+    <p class="lead">一个分数不是“模型跑了一次”，而是 <strong>模型 × 考场 × 环境 × 协议 × 运行 × 指标 × 证据 × 治理</strong> 的共同结果。少一个要素，这个分数就不可比。</p>
+    <div class="chip-row">
+      <span class="chip">01 模型</span><span class="chip">02 考场</span><span class="chip">03 环境</span><span class="chip">04 协议</span>
+      <span class="chip">05 运行</span><span class="chip">06 指标</span><span class="chip">07 证据</span><span class="chip">08 治理</span>
+    </div>
+    <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 02 -->
+  <section class="slide" data-screen-label="02 总览">
+    <div class="eyebrow">总览 · 八要素</div>
+    <h2>分数是八件事的交集，不是模型的一项属性</h2>
+    <div class="formula">可信分数 = 模型适配 × 考场覆盖 × 环境一致 × 协议固定 × 运行可靠 × 指标充分 × 证据完整 × 治理有效</div>
+    <div class="cols3">
+      <div class="card"><div class="t">Model · 模型</div><div class="v">权重版本、adapter、观测/动作契约、serve 镜像</div></div>
+      <div class="card"><div class="t">Benchmark · 考场</div><div class="v">task suite、覆盖、难度、成功判定</div></div>
+      <div class="card"><div class="t">Environment · 环境</div><div class="v">本体、仿真器、资产、物理与渲染</div></div>
+      <div class="card"><div class="t">Protocol · 协议</div><div class="v">种子、集数、步数、精度、随机化</div></div>
+      <div class="card"><div class="t">Runtime · 运行</div><div class="v">GPU、端口、分片、超时、资源隔离</div></div>
+      <div class="card"><div class="t">Metrics · 指标</div><div class="v">成功率、n、errors、CI、步数与耗时</div></div>
+      <div class="card"><div class="t">Evidence · 证据</div><div class="v">run id、manifest、原始 episode、checksum</div></div>
+      <div class="card"><div class="t">Governance · 治理</div><div class="v">registry、门禁、校准、榜单规则</div></div>
+      <div class="card warn"><div class="t">结论</div><div class="v">任一要素缺失，数字只能描述“这次运行”，不能支撑横向比较。</div></div>
+    </div>
+    <div class="foot"><span>02 总览</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide" data-screen-label="03 模型">
+    <div class="eyebrow">要素一 · 模型</div>
+    <h2>“用了哪个模型”至少要回答四层</h2>
+    <div class="cols3">
+      <div class="card"><div class="t">1 · 身份</div><div class="v">模型族、权重 repo、精确 revision、训练数据口径。分支名和 <code>latest</code> 不等于版本。</div></div>
+      <div class="card"><div class="t">2 · Adapter</div><div class="v">把模型输出变成考场能用的动作；把考场观测变成模型能用的输入。每个模型族都应有显式 adapter。</div></div>
+      <div class="card"><div class="t">3 · Serve 契约</div><div class="v">镜像 digest、相机顺序、resize、归一化、chunk/queue、reset、healthcheck。</div></div>
+      <div class="card"><div class="t">4 · 能力边界</div><div class="v">动作维度、状态维度、支持 task、是否需要额外资产。能力不匹配要 fail fast。</div></div>
+    </div>
+    <table style="margin-top:22px">
+      <tr><th style="width:18%">例子</th><th style="width:26%">模型侧</th><th style="width:28%">适配重点</th><th>出错表现</th></tr>
+      <tr><td>X-VLA</td><td>EE 16D（quat）</td><td>20D rot6d → 16D quat；三相机；EE planner</td><td>维度不匹配、全 0 分但无异常</td></tr>
+      <tr><td>ACT / DP</td><td>qpos 14D</td><td>ACT 要 640×480 resize；DP 不要 resize；动作块队列</td><td>观测口径错、动作不动</td></tr>
+      <tr><td>DB-CogACT</td><td>qpos 14D，按 task 分头</td><td>权重子目录、fp16、每 task 独立 serve</td><td>拉错 task 权重、缺头</td></tr>
+    </table>
+    <p class="sub" style="margin-top:14px"><strong>关键</strong>：上游有 YAML 不等于没有 adapter；YAML 可以是 adapter 的实现素材，但 adapter 仍是稳定扩展边界。</p>
+    <div class="foot"><span>03 模型</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide" data-screen-label="04 考场">
+    <div class="eyebrow">要素二 · 考场</div>
+    <h2>考什么，决定这个分数能说明什么</h2>
+    <div class="cols">
+      <div class="col">
+        <h3>Task suite 与覆盖</h3>
+        <table>
+          <tr><th>模型</th><th>本考场覆盖</th><th>能不能直接比</th></tr>
+          <tr><td>X-VLA</td><td>5 / 5</td><td class="good">可覆盖全表</td></tr>
+          <tr><td>DB-CogACT</td><td>3 / 5</td><td class="warn">只能比重合 task</td></tr>
+          <tr><td>ACT / DP</td><td>2 / 5</td><td class="warn">只能比重合 task</td></tr>
+        </table>
+      </div>
+      <div class="col">
+        <h3>难度不是“更多题”</h3>
+        <ul>
+          <li><strong>Easy</strong>：固定物体/位置，考基本操作能力</li>
+          <li><strong>Hard</strong>：纹理、光照、位姿随机化，考鲁棒性</li>
+          <li><strong>长程任务</strong>：交接、装配，考持续规划与恢复</li>
+        </ul>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi ok"><div class="n">98%</div><div class="l">grab_roller Easy<br/>同模型同考场</div></div>
+      <div class="kpi warn"><div class="n">44%</div><div class="l">grab_roller Hard<br/>同模型随机化后下降</div></div>
+      <div class="kpi pri"><div class="n">5</div><div class="l">RoboTwin 本考场 task<br/>覆盖必须披露</div></div>
+      <div class="kpi pri"><div class="n">50</div><div class="l">每 task 标准集数<br/>n 决定不确定性</div></div>
+    </div>
+    <p class="quote" style="margin-top:20px">只报 Easy，会把“固定摆位下能成功”说成“能操作”；不披露覆盖，会把“没权重”伪装成“模型不行”。</p>
+    <div class="foot"><span>04 考场</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide" data-screen-label="05 环境">
+    <div class="eyebrow">要素三 · 环境</div>
+    <h2>仿真器、本体、资产，都是“考卷”的一部分</h2>
+    <table>
+      <tr><th style="width:18%">层</th><th style="width:30%">管什么</th><th style="width:26%">典型差异</th><th>不一致的后果</th></tr>
+      <tr><td>本体 Embodiment</td><td>关节数、动作空间、相机、夹爪</td><td>14D qpos / 16D EE / 7D 单臂</td><td>动作维度或语义错</td></tr>
+      <tr><td>仿真后端</td><td>物理、碰撞、渲染、随机化</td><td>SAPIEN（RoboTwin/ManiSkill）<br/>MuJoCo（LIBERO/RoboCasa）</td><td>同一模型分数不可直接横比</td></tr>
+      <tr><td>场景资产</td><td>物体、桌面、材质、光照、URDF</td><td>资产 revision、挂载路径、实体数量</td><td>场景缺失、行为漂移</td></tr>
+      <tr><td>渲染与资源</td><td>GPU、EGL/CUDA、shared memory</td><td>SAPIEN 长驻进程可能 renderer 崩</td><td>episode error、假失败</td></tr>
+    </table>
+    <div class="cols" style="margin-top:24px">
+      <div class="card good"><div class="t">环境一致</div><div class="v">同镜像 digest + 同资产 revision + 同随机化配置，分数变化才能归因给模型或协议。</div></div>
+      <div class="card bad"><div class="t">环境不一致</div><div class="v">即使模型没变，材质、相机、物理参数、渲染后端变化也会移动成功率。</div></div>
+    </div>
+    <p class="sub" style="margin-top:16px"><strong>设计含义</strong>：考场 adapter 管 task 与判定；backend profile 管镜像、资产、渲染和资源。不要把这些全塞进模型 adapter。</p>
+    <div class="foot"><span>05 环境</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 06 -->
+  <section class="slide" data-screen-label="06 协议">
+    <div class="eyebrow">要素四 · 协议</div>
+    <h2>协议就是“这场考试的统一规则”</h2>
+    <table>
+      <tr><th style="width:18%">旋钮</th><th style="width:30%">它控制什么</th><th style="width:26%">改了会怎样</th><th>必须记录</th></tr>
+      <tr><td>种子 Seeds</td><td>场景随机化与 episode 顺序</td><td>同模型分数也会变</td><td>逐集种子表</td></tr>
+      <tr><td>集数 Episodes</td><td>统计样本量 n</td><td>置信区间宽度</td><td>目标 n / 实际 n</td></tr>
+      <tr><td>难度 Protocol</td><td>固定 / 随机化 / 干扰</td><td>考的是不同能力</td><td><code>protocol_version</code></td></tr>
+      <tr><td>步数上限</td><td>最长允许执行步数</td><td>长程任务被截断</td><td><code>max_steps</code></td></tr>
+      <tr><td>精度与栈</td><td>fp16 / fp32、镜像、planner</td><td>数值与动作轨迹变化</td><td>镜像 digest / dtype</td></tr>
+      <tr><td>重复轮 Replicate</td><td>同配置再跑一遍</td><td>估计运行方差</td><td>r2 / r3 标签</td></tr>
+    </table>
+    <div class="formula">协议版本 = 考场 + 集数 + 种子策略 + task_config + max_steps + harness + 镜像 digest</div>
+    <p class="quote">任一旋钮变化，都应该生成新版本；旧结果冻结，不覆盖。否则“同一个 92%”其实不是同一件事。</p>
+    <div class="foot"><span>06 协议</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 07 -->
+  <section class="slide" data-screen-label="07 运行">
+    <div class="eyebrow">要素五 · 运行</div>
+    <h2>同一套配置，运行方式也可能把结果跑坏</h2>
+    <div class="flow">
+      <div class="node"><b>Model Serve</b><span>GPU0<br/>权重 / adapter / 端口</span></div><div class="arr">→</div>
+      <div class="node"><b>Benchmark Env</b><span>GPU1<br/>SAPIEN / MuJoCo / 分片</span></div><div class="arr">→</div>
+      <div class="node"><b>Recorder</b><span>SQLite / JSONL<br/>逐 episode 提交</span></div><div class="arr">→</div>
+      <div class="node"><b>Artifact Sink</b><span>OBS / 对象存储<br/>checkpoint + manifest</span></div>
+    </div>
+    <div class="cols3">
+      <div class="card"><div class="t">资源隔离</div><div class="v">serve 与环境分卡；端口、容器名、GPU 必须可参数化。写死 8000 就没法并行。</div></div>
+      <div class="card"><div class="t">分片与吞吐</div><div class="v">分片提高吞吐，但过多会 OOM 或 renderer 崩。X-VLA 用 4，qpos 模型用 8。</div></div>
+      <div class="card"><div class="t">超时与恢复</div><div class="v">超时是协议的一部分；恢复要从持久化 manifest，不依赖本机临时目录。</div></div>
+      <div class="card"><div class="t">失败隔离</div><div class="v">单 episode 失败不应中止整场；error 与 fail 必须分开。</div></div>
+      <div class="card"><div class="t">可观测性</div><div class="v">日志、容器状态、GPU、episode 进度都要能定位“卡在哪”。</div></div>
+      <div class="card warn"><div class="t">运行不是细节</div><div class="v">端口冲突、错卡、旧容器、残留 results，都会让分数失真。</div></div>
+    </div>
+    <div class="foot"><span>07 运行</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 08 -->
+  <section class="slide" data-screen-label="08 指标">
+    <div class="eyebrow">要素六 · 指标</div>
+    <h2>成功率只是一个分子/分母，后面还有四层信息</h2>
+    <div class="formula">成功率 = success episodes / terminal episodes × 100%</div>
+    <table>
+      <tr><th style="width:18%">指标</th><th style="width:30%">回答什么</th><th style="width:26%">例子</th><th>缺了会怎样</th></tr>
+      <tr><td>点估计</td><td>这次大概多少分</td><td>46/50 = 92%</td><td>看起来精确，其实有噪声</td></tr>
+      <tr><td>样本量 n</td><td>这个数有多稳</td><td>n=50 / n=5000</td><td>n=12 和 n=50 被混着比</td></tr>
+      <tr><td>Errors</td><td>是模型失败还是基础设施坏了</td><td>0 error / 3 error</td><td> infra 故障被当成模型能力</td></tr>
+      <tr><td>95% CI</td><td>不确定性范围</td><td>92% → [81.2%, 96.8%]</td><td>把 4pp 差异当成结论</td></tr>
+      <tr><td>Steps / Time</td><td>成功得多快、多稳</td><td>平均步数、最大/最小耗时</td><td>忽略长尾与卡死</td></tr>
+      <tr><td>Failure taxonomy</td><td>为什么失败</td><td>grasp / timeout / model_act</td><td>无法定位改进方向</td></tr>
+    </table>
+    <p class="quote" style="margin-top:20px">一个可信的格子至少是：<strong>K/N + errors + 95% CI + 平均步数 + 协议版本</strong>。</p>
+    <div class="foot"><span>08 指标</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 09 -->
+  <section class="slide" data-screen-label="09 统计">
+    <div class="eyebrow">统计常识 · 为什么需要重复轮</div>
+    <h2>92% 一定比 80% 好吗？先看不确定性</h2>
+    <div class="cols">
+      <div class="col">
+        <div class="card good"><div class="t">ACT · click_bell</div><div class="v" style="font-size:30px"><strong>46/50 = 92%</strong></div><div class="bar ok"><i style="width:92%"></i></div><div class="small">95% Wilson CI：[81.2%, 96.8%]</div></div>
+      </div>
+      <div class="col">
+        <div class="card warn"><div class="t">DP · click_bell</div><div class="v" style="font-size:30px"><strong>40/50 = 80%</strong></div><div class="bar warn"><i style="width:80%"></i></div><div class="small">95% Wilson CI：[67.0%, 88.8%]</div></div>
+      </div>
+    </div>
+    <div class="formula">两个区间有重叠：[81.2%, 88.8%]<br/>单轮 n=50 只能描述差异，不能直接宣布 ACT 显著更强。</div>
+    <div class="cols3">
+      <div class="card"><div class="t">n 小</div><div class="v">区间宽，偶然性大；单集噪声可达 ±100pp。</div></div>
+      <div class="card"><div class="t">只跑一轮</div><div class="v">不知道多少差异来自运行方差，多少来自模型。</div></div>
+      <div class="card next"><div class="t">补 r2 / r3</div><div class="v">同配置重复，估计方差，再做合并与显著性判断。</div></div>
+    </div>
+    <p class="sub" style="margin-top:14px"><strong>科普结论</strong>：点估计是“观测值”，置信区间是“我们有多确定”；两者要一起读。</p>
+    <div class="foot"><span>09 统计</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-screen-label="10 证据">
+    <div class="eyebrow">要素七 · 证据</div>
+    <h2>分数必须能沿着一条链追回原始 episode</h2>
+    <div class="flow">
+      <div class="node"><b>Run ID</b><span>哪一次运行</span></div><div class="arr">→</div>
+      <div class="node"><b>Manifest</b><span>模型/协议/资源/完成状态</span></div><div class="arr">→</div>
+      <div class="node"><b>Aggregate</b><span>汇总指标</span></div><div class="arr">→</div>
+      <div class="node"><b>SQLite</b><span>逐集结果与步骤</span></div><div class="arr">→</div>
+      <div class="node"><b>JSONL / Video</b><span>原始轨迹与回放</span></div>
+    </div>
+    <div class="cols">
+      <div class="tree">&lt;run_id&gt;/
+  job.json
+  manifest.json
+  journals/
+    shard-000.jsonl
+  checkpoints/
+    seq-000001/
+      episode-000000.jsonl
+      episode-000000.meta.json
+  final/
+    aggregate.json
+    recording.sqlite
+    COMPLETED</div>
+      <div class="col">
+        <ul>
+          <li><strong>不可变</strong>：checkpoint 对象不覆盖，重复上传按 checksum 去重</li>
+          <li><strong>可恢复</strong>：manifest 记录已 committed episode</li>
+          <li><strong>可重算</strong>：aggregate 能从原始 episode 重新生成</li>
+          <li><strong>可审计</strong>：模型 revision、镜像 digest、协议版本都在 manifest 里</li>
+        </ul>
+      </div>
+    </div>
+    <p class="quote" style="margin-top:18px">只有 aggregate 没有原始数据，等于只有结论没有证据；只能信，不能验。</p>
+    <div class="foot"><span>10 证据</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide" data-screen-label="11 增量归档">
+    <div class="eyebrow">证据的关键 · 跑多少，存多少</div>
+    <h2>不能等全部跑完再复制；每集完成就应 checkpoint</h2>
+    <div class="flow">
+      <div class="node"><b>Episode 0</b><span>原子提交<br/>上传 + 回读</span></div><div class="arr">→</div>
+      <div class="node"><b>Episode 1</b><span>原子提交<br/>上传 + 回读</span></div><div class="arr">→</div>
+      <div class="node"><b>Episode 2</b><span>原子提交<br/>上传 + 回读</span></div><div class="arr">→</div>
+      <div class="node"><b>…</b><span>每集独立 checkpoint</span></div><div class="arr">→</div>
+      <div class="node"><b>Finalize</b><span>manifest + aggregate<br/>COMPLETED</span></div>
+    </div>
+    <table>
+      <tr><th style="width:20%">社区做法</th><th style="width:34%">机制</th><th>启示</th></tr>
+      <tr><td>VLA Harness</td><td>SQLite 每集原子事务、last committed attempt</td><td>本地已有可靠 recorder，补远程 sink</td></tr>
+      <tr><td>LeRobot</td><td>每 N episode 上传 Hub、支持 resume</td><td>episode 是天然边界</td></tr>
+      <tr><td>Ray Train</td><td>local staging → persistent → COMMITTED/VALIDATED</td><td>未持久化不算完成</td></tr>
+      <tr><td>Metaflow</td><td>step 边界 + 长任务 in-task checkpoint</td><td>长 task 必须边跑边存</td></tr>
+    </table>
+    <p class="quote" style="margin-top:18px">中途失败时，已完成集仍然可恢复；partial 可以出附录，但不能冒充完整结果。</p>
+    <div class="foot"><span>11 增量归档</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" data-screen-label="12 治理">
+    <div class="eyebrow">要素八 · 治理</div>
+    <h2>门禁不是“管得严”，是防止坏分数悄悄进表</h2>
+    <div class="cols">
+      <div class="col">
+        <h3>注册与覆盖</h3>
+        <ul>
+          <li>模型 key、权重 revision、镜像 digest</li>
+          <li><code>covered_tasks</code> 前置检查</li>
+          <li>协议版本与考场真源</li>
+          <li>shared / finetuned 分组，不能混排</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>机器门禁</h3>
+        <ul>
+          <li>版本、镜像、协议、报告、榜单</li>
+          <li>校准、打包、适配器、权重、文档</li>
+          <li>本仓 <strong>18 道门</strong>，PR 必过</li>
+          <li>partial 只进附录，不进正式榜</li>
+        </ul>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi pri"><div class="n">66.56%</div><div class="l">X-VLA 50 task<br/>我们的实测</div></div>
+      <div class="kpi pri"><div class="n">67.96%</div><div class="l">官方快照<br/>同口径</div></div>
+      <div class="kpi ok"><div class="n">−1.40pp</div><div class="l">校准差<br/>第 15 道门守</div></div>
+      <div class="kpi ok"><div class="n">18/18</div><div class="l">门禁全绿<br/>坏结果不进表</div></div>
+    </div>
+    <p class="quote" style="margin-top:20px">校准回答“我们的尺子偏多少”；门禁回答“这次结果有没有资格被看到”。</p>
+    <p class="sub" style="margin-top:12px">工程侧还要管：GPU/存储成本、密钥与数据权限、产物保留期限、发布责任人。</p>
+    <div class="foot"><span>12 治理</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide" data-screen-label="13 全流程">
+    <div class="eyebrow">串起来 · 一次评测的完整生命周期</div>
+    <h2>从“想测什么”到“这个分能说什么”</h2>
+    <div class="flow" style="flex-wrap:wrap">
+      <div class="node"><b>1 定义</b><span>要回答的问题<br/>模型 / task / 协议 / n</span></div><div class="arr">→</div>
+      <div class="node"><b>2 预检</b><span>覆盖 / 权重 / 镜像 / OBS</span></div><div class="arr">→</div>
+      <div class="node"><b>3 Smoke</b><span>1 集验契约，不追分数</span></div><div class="arr">→</div>
+      <div class="node"><b>4 启动</b><span>开资源 / serve / env</span></div><div class="arr">→</div>
+      <div class="node"><b>5 执行</b><span>逐 episode，失败隔离</span></div><div class="arr">→</div>
+      <div class="node"><b>6 归档</b><span>每集 checkpoint + manifest</span></div><div class="arr">→</div>
+      <div class="node"><b>7 验证</b><span>aggregate / errors / CI / gates</span></div><div class="arr">→</div>
+      <div class="node"><b>8 发布</b><span>报告 / 榜单 / 证据链接</span></div>
+    </div>
+    <div class="cols3">
+      <div class="card"><div class="t">输入</div><div class="v">EvalJobSpec：模型、考场、协议、资源、sink</div></div>
+      <div class="card"><div class="t">过程</div><div class="v">adapter 组合 + 原子记录 + 增量持久化</div></div>
+      <div class="card good"><div class="t">输出</div><div class="v">可信分数 + 不确定性 + 原始证据 + 完成状态</div></div>
+    </div>
+    <p class="quote" style="margin-top:20px">评测不是一条 shell 命令，是一条<strong>可恢复、可审计、可复现的证据生产链</strong>。</p>
+    <div class="foot"><span>13 全流程</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide" data-screen-label="14 失败案例">
+    <div class="eyebrow">避坑 · 最常见的八类失真</div>
+    <h2>很多“模型不行”，其实是评测坏了</h2>
+    <table style="font-size:16px">
+      <tr><th style="width:22%">现象</th><th style="width:30%">根因</th><th style="width:26%">怎么发现</th><th>怎么防</th></tr>
+      <tr><td>全 0 分、无异常</td><td>观测 resize / 归一化 / 相机错</td><td>单集 smoke + 动作/观测日志</td><td>adapter 契约测试</td></tr>
+      <tr><td>动作不动</td><td>随机权重、chunk 队列空、维度错</td><td>strict load + 有限值检查</td><td>权重 pin + spec 校验</td></tr>
+      <tr><td>结果突然变好</td><td>旧 <code>results/</code> 残留混入</td><td>run id / 文件时间线</td><td>新 run 清盘 + 独立目录</td></tr>
+      <tr><td>整轮 error</td><td>端口冲突、旧 serve、GPU 抢占</td><td>容器/端口/GPU 状态</td><td>参数化资源 + 串行门禁</td></tr>
+      <tr><td>长任务恒 0</td><td>超时上限太短</td><td>episode 耗时分布</td><td>step/time 协议匹配</td></tr>
+      <tr><td>partial 被当正式</td><td>n 不齐仍生成榜单</td><td>manifest / n_target</td><td>n == 目标才进榜</td></tr>
+      <tr><td>中途失败丢数据</td><td>只在最后上传</td><td>OBS 缺已完成 episode</td><td>每集 checkpoint</td></tr>
+      <tr><td>同名分数不可比</td><td>协议/镜像/种子未记录</td><td>manifest 缺字段</td><td>protocol_version + digest</td></tr>
+    </table>
+    <p class="quote" style="margin-top:18px">先证明“考试没坏”，再讨论“模型好不好”。顺序反了，结论一定是假的。</p>
+    <div class="foot"><span>14 失败案例</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide" data-screen-label="15 检查清单">
+    <div class="eyebrow">拿来就能用 · 12 个问题</div>
+    <h2>看到一个分数，先问这 12 个问题</h2>
+    <div class="cols">
+      <div class="col">
+        <ol style="font-size:19px;line-height:1.85;color:#dbe3f0;padding-left:26px">
+          <li>测的是哪个权重 revision？</li>
+          <li>用了哪个 adapter / serve 镜像 digest？</li>
+          <li>task 覆盖多少？缺的 task 为什么缺？</li>
+          <li>Easy 还是 Hard？随机化了什么？</li>
+          <li>种子策略和逐集种子表在哪？</li>
+          <li>n 是多少？跑满目标了吗？</li>
+        </ol>
+      </div>
+      <div class="col">
+        <ol start="7" style="font-size:19px;line-height:1.85;color:#dbe3f0;padding-left:26px">
+          <li>errors 是 0 吗？fail 和 error 分开了吗？</li>
+          <li>95% CI 有多宽？差异超过噪声了吗？</li>
+          <li>有没有 r2 / r3 重复轮？</li>
+          <li>原始 episode / sqlite / 视频能追到吗？</li>
+          <li>中途失败后，已完成数据还在吗？</li>
+          <li>过门禁了吗？和官方校准差多少？</li>
+        </ol>
+      </div>
+    </div>
+    <div class="formula">答不全 → 只能说“这次跑出了这个数”<br/>答得全 → 才能说“这个数可以比较、引用、复核”</div>
+    <div class="foot"><span>15 检查清单</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide" data-screen-label="16 总结">
+    <div class="eyebrow">总结 · 一句话记住</div>
+    <h2 style="font-size:50px">模型评测不是“跑个分”，<br/>是生产一份可采信的证据。</h2>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-top:30px">
+      <div class="kpi pri"><div class="n">可定义</div><div class="l">模型、考场、协议说清楚</div></div>
+      <div class="kpi ok"><div class="n">可复现</div><div class="l">同参数能跑出同数</div></div>
+      <div class="kpi ok"><div class="n">可审计</div><div class="l">每个数追得到原始证据</div></div>
+      <div class="kpi warn"><div class="n">可比较</div><div class="l">同口径、带 n 与不确定性</div></div>
+    </div>
+    <p class="quote" style="margin-top:34px;font-size:25px">八要素缺一个，分数就只是“观测”；八要素齐了，分数才是“结论”。</p>
+    <p class="sub" style="margin-top:18px">延伸材料：技术版 21 页 deck、ADR-0004 双考场运行时、CloudRobo 评测读后、R01 训练数据轴。</p>
+    <div class="foot"><span>16 总结</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('section.slide'));
+  var i=0;
+  function render(){slides.forEach(function(s,k){s.classList.toggle('active',k===i);});}
+  function go(n){i=(n+slides.length)%slides.length;render();}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){go(i+1);e.preventDefault();}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){go(i-1);e.preventDefault();}
+    if(e.key==='Home')go(0);if(e.key==='End')go(slides.length-1);
+  });
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){if(x0===null)return;var dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));x0=null;},{passive:true});
+  document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*.72)go(i+1);else if(e.clientX<window.innerWidth*.28)go(i-1);});
+  function fit(){var s=Math.min(window.innerWidth/1920,window.innerHeight/1080);document.documentElement.style.setProperty('--fit',String(s));}
+  window.addEventListener('resize',fit);fit();render();
+})();
+</script>
+</body>
+</html>
