@@ -1,0 +1,1692 @@
+{
+  "benchmark": "place_empty_cup",
+  "mode": "sync",
+  "harness_version": "0.0.0",
+  "created_at": "2026-11-27T05:51:49.172994+00:00",
+  "tasks": [
+    {
+      "task": "place_empty_cup",
+      "episodes": [
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "0ab53488-ba58-4282-9066-67730a9718ce",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4031.054,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100032,
+          "episode_idx": 0,
+          "instruction": "Lift the plastic cup for drinks up and drop it on the flat round wooden coaster.",
+          "task_idx": 27
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "27137ffa-4cc2-41d3-bf57-5db5eee79fb8",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4100.762,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100038,
+          "episode_idx": 0,
+          "instruction": "Set the medium-sized plastic blue cup onto the round coaster with light streaks using the arm.",
+          "task_idx": 33
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "3941d658-6fea-44c9-9b15-f069184b76a4",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4056.353,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100035,
+          "episode_idx": 0,
+          "instruction": "Direct the plastic cup for drinks to the light gray round grainy coaster and let it rest.",
+          "task_idx": 30
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "47d4c1db-90b4-4732-a2bb-51e894ba9645",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 138,
+          "elapsed_sec": 1161.645,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100030,
+          "episode_idx": 0,
+          "instruction": "Relocate the cup with light blue color precisely onto the flat round wooden coaster with arm",
+          "task_idx": 26
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "559b3843-9cb9-46cb-940c-e6db24bcfabd",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3991.251,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100036,
+          "episode_idx": 0,
+          "instruction": "Use arm to place the smooth blue cup for liquids on the flat surface gray wooden coaster",
+          "task_idx": 31
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "669182df-1440-4eb3-827d-0d0d56268852",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3938.061,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100040,
+          "episode_idx": 0,
+          "instruction": "Lift the cup with light blue color and stick it onto the smooth round palm-sized coaster.",
+          "task_idx": 34
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "7f786bda-ce1d-4bf2-bcb6-2cd4499b887e",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3899.944,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100042,
+          "episode_idx": 0,
+          "instruction": "Position the cup with light blue color carefully on the coaster with circular shape",
+          "task_idx": 36
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "8409ed17-6719-42e8-90f4-483b94c29c4d",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 155,
+          "elapsed_sec": 1174.513,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100029,
+          "episode_idx": 0,
+          "instruction": "Set the smooth blue cup for liquids onto the flat round wooden coaster using the arm.",
+          "task_idx": 25
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "95750389-6cf7-4a15-8f19-9653d31e36a1",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3606.659,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100044,
+          "episode_idx": 0,
+          "instruction": "Use the arm to put the smooth blue drinking cup onto the flat surface gray wooden coaster.",
+          "task_idx": 37
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "b3f76925-9633-43ec-bf85-a2e8f834316b",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4012.456,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100041,
+          "episode_idx": 0,
+          "instruction": "Using the arm, align the medium blue cylindrical cup over the flat round wooden coaster",
+          "task_idx": 35
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "d669ca91-b3c8-4fde-a20d-2c7f1529c799",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4137.869,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100033,
+          "episode_idx": 0,
+          "instruction": "Move the blue rounded-bottom cup to the light gray round grainy coaster and set it down.",
+          "task_idx": 28
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "f22e41e7-3f15-40ca-bd0b-ca2b42b1a12a",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 147,
+          "elapsed_sec": 1235.46,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100034,
+          "episode_idx": 0,
+          "instruction": "Stick the medium blue cylindrical cup onto the smooth round palm-sized coaster using the arm",
+          "task_idx": 29
+        },
+        {
+          "sid": "8e488fce-51d9-4f4c-9b46-9b615a0833e2",
+          "eid": "f70c2fc9-4daa-4321-9e3b-4c78b42bf245",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4022.123,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100037,
+          "episode_idx": 0,
+          "instruction": "Drop the smooth blue cup for liquids on top of the small coaster with grain texture.",
+          "task_idx": 32
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "02605099-2e40-44f3-b2dd-f144af88df0a",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3991.832,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100064,
+          "episode_idx": 0,
+          "instruction": "Set the cup with light blue color down on the round coaster with light streaks",
+          "task_idx": 53
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "274d17d6-2bb5-4811-acf2-c04867a6909b",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3991.099,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100061,
+          "episode_idx": 0,
+          "instruction": "Grab the medium blue cylindrical cup and lower it onto the round coaster",
+          "task_idx": 50
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "29963aa5-e207-47cc-a114-a308f2bec460",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4084.284,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100069,
+          "episode_idx": 0,
+          "instruction": "Lift the rounded base blue cup up and drop it on the flat round wooden coaster.",
+          "task_idx": 58
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "311f69dc-d7cc-48f2-ab1d-c83be4a62567",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 201,
+          "elapsed_sec": 1647.328,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100068,
+          "episode_idx": 0,
+          "instruction": "Stick the cup for holding liquids onto the flat round wooden coaster carefully.",
+          "task_idx": 57
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "3dae8090-7315-47cf-a496-6152b8f50cbe",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3964.998,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100072,
+          "episode_idx": 0,
+          "instruction": "Using the arm, align the rounded base blue cup over the light gray round grainy coaster",
+          "task_idx": 61
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "43ce0f2e-7844-4ad9-b3fd-9b86dc98ebbd",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3922.859,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100070,
+          "episode_idx": 0,
+          "instruction": "Use the arm to position the cup with smooth plastic surface onto the small coaster with grain texture.",
+          "task_idx": 59
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "75d57d87-7abf-4ffd-a55f-28c0bb111dbe",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 121,
+          "elapsed_sec": 1038.489,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100071,
+          "episode_idx": 0,
+          "instruction": "Use the arm to set the smooth blue drinking cup on the flat surface gray wooden coaster",
+          "task_idx": 60
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "772f1a9b-0e8f-4cd0-af46-0a70e96208dd",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 153,
+          "elapsed_sec": 1265.372,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100065,
+          "episode_idx": 0,
+          "instruction": "Stick the plastic cup for drinks onto the wooden coaster using the arm.",
+          "task_idx": 54
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "9388ccdf-e74a-4e4d-a05c-b803c8e256fb",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4040.779,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100062,
+          "episode_idx": 0,
+          "instruction": "Position the light blue plastic cup carefully on the grainy texture coaster",
+          "task_idx": 51
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "a9601797-abe9-4332-bde6-0730991829b0",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 133,
+          "elapsed_sec": 1004.771,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100073,
+          "episode_idx": 0,
+          "instruction": "Slide the light blue plastic cup onto the wooden coaster with the arm.",
+          "task_idx": 62
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "dab4e0e6-5934-497a-9222-7004911d2277",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4095.285,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100063,
+          "episode_idx": 0,
+          "instruction": "Set the light blue plastic cup securely on the coaster with circular shape using the arm.",
+          "task_idx": 52
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "e1c8d329-9d77-4271-ac8b-639d95520ec8",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4015.657,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100013,
+          "episode_idx": 0,
+          "instruction": "Grab the rounded base blue cup and place it on the round coaster.",
+          "task_idx": 11
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "e8ab6ac8-9649-495d-ac2d-204b5ce6a681",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 141,
+          "elapsed_sec": 1147.717,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100067,
+          "episode_idx": 0,
+          "instruction": "Position the plastic cup for drinks carefully on the round coaster",
+          "task_idx": 56
+        },
+        {
+          "sid": "a6d1bc15-b40e-4efa-806a-3c00c18f459b",
+          "eid": "fc20a441-9a53-4d96-be1f-9c657b8a73a8",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4066.124,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100066,
+          "episode_idx": 0,
+          "instruction": "Grab the smooth blue drinking cup and place it over the smooth round palm-sized coaster.",
+          "task_idx": 55
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "3fc3cde2-e80a-4590-b68e-c8a9a69f3c01",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4018.499,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100077,
+          "episode_idx": 0,
+          "instruction": "Lift the rounded base blue cup and stick it onto the wooden coaster.",
+          "task_idx": 66
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "410dc219-5f06-4adf-81f8-6f4505ec6d49",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4111.266,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100079,
+          "episode_idx": 0,
+          "instruction": "Stick the cup with smooth plastic surface onto the flat surface gray wooden coaster using the arm.",
+          "task_idx": 68
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "794e2679-9a2a-4c39-b4c2-d1cfaa608bf8",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 155,
+          "elapsed_sec": 1174.35,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100074,
+          "episode_idx": 0,
+          "instruction": "Grab the cup for holding liquids and lower it onto the light gray streaked wooden coaster",
+          "task_idx": 63
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "80509f9c-5619-4b98-9d94-0b8f5aa05011",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4052.943,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100078,
+          "episode_idx": 0,
+          "instruction": "Pick the blue rounded-bottom cup up and drop it on the smooth round palm-sized coaster.",
+          "task_idx": 67
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "80e14e0b-7c2c-4c94-9b9a-57891095b4be",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4051.27,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100081,
+          "episode_idx": 0,
+          "instruction": "Use the arm to slide the cup with light blue color onto the flat surface gray wooden coaster.",
+          "task_idx": 70
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "94fda0b3-87eb-4b3f-b50d-3e5c2b20c7f2",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4028.082,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100080,
+          "episode_idx": 0,
+          "instruction": "Lift the medium-sized plastic blue cup and stick it onto the round coaster.",
+          "task_idx": 69
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "9822a616-e151-4736-bec2-060e8d0ee52a",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4142.681,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100076,
+          "episode_idx": 0,
+          "instruction": "Align the cylindrical light blue cup and set it down on the grainy texture coaster",
+          "task_idx": 65
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "a569fa10-0741-4ebe-8a72-48c6c8e1d1b1",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3950.737,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100084,
+          "episode_idx": 0,
+          "instruction": "Grab the cup with light blue color and place it over the flat round wooden coaster.",
+          "task_idx": 73
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "a7ee6876-99f5-4018-b09c-439b8e6c0b92",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4034.952,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100075,
+          "episode_idx": 0,
+          "instruction": "Lift the cup for holding liquids and stick it onto the wooden coaster.",
+          "task_idx": 64
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "cefab4c3-57d9-4383-96c9-e9149254bc4b",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3951.707,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100085,
+          "episode_idx": 0,
+          "instruction": "Use the arm to set the rounded base blue cup on the coaster with circular shape",
+          "task_idx": 74
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "d40a3e2d-6ff1-4aea-82f7-fedfa83adf09",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 151,
+          "elapsed_sec": 1234.907,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100082,
+          "episode_idx": 0,
+          "instruction": "Use the arm to put the blue rounded-bottom cup onto the small coaster with grain texture.",
+          "task_idx": 71
+        },
+        {
+          "sid": "b6ab459f-5d65-4cae-84f4-22de834338eb",
+          "eid": "e2586e64-dbc0-4cc9-b835-a98643bcf696",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3948.287,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100083,
+          "episode_idx": 0,
+          "instruction": "Slide the medium-sized plastic blue cup gently onto the grainy texture coaster via the arm.",
+          "task_idx": 72
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "19a1785f-1ab3-437b-8a66-b03527e6e216",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 154,
+          "elapsed_sec": 1288.902,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100110,
+          "episode_idx": 0,
+          "instruction": "Position the smooth blue cup for liquids carefully on the flat round wooden coaster",
+          "task_idx": 95
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "622bee8e-cf06-4de6-bdb7-3d7a4d787481",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4036.855,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100107,
+          "episode_idx": 0,
+          "instruction": "Slide the light blue plastic cup gently onto the smooth round palm-sized coaster via the arm.",
+          "task_idx": 92
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "7d3a8f12-9ea4-4723-a375-3f7296e172dd",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4018.092,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100114,
+          "episode_idx": 0,
+          "instruction": "Slide the smooth blue drinking cup onto the small coaster with grain texture with the arm.",
+          "task_idx": 98
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "886fc369-81ad-4df8-b19d-a430dd2e8b69",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3979.064,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100115,
+          "episode_idx": 0,
+          "instruction": "Stick the light blue plastic cup onto the flat round wooden coaster using the arm",
+          "task_idx": 99
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "a0e201f9-8013-4198-9e55-a1f296a725b0",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4049.921,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100103,
+          "episode_idx": 0,
+          "instruction": "Grab the cup with smooth plastic surface and place it over the coaster with circular shape.",
+          "task_idx": 89
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "a45a6923-78d2-40aa-aa37-b4eec8bcf9bf",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 194,
+          "elapsed_sec": 1639.524,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100104,
+          "episode_idx": 0,
+          "instruction": "Grab the medium-sized plastic blue cup and place it on the wooden coaster.",
+          "task_idx": 90
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "bcf2a087-ace3-4863-9b6f-f5fb0214e756",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3996.414,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100106,
+          "episode_idx": 0,
+          "instruction": "Use an arm to drop the cup with light blue color on the round coaster with light streaks.",
+          "task_idx": 91
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "c992bc48-71c8-4032-9116-6d5d2bcf7028",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4088.065,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100113,
+          "episode_idx": 0,
+          "instruction": "Use an arm to place the medium blue cylindrical cup on the wooden coaster",
+          "task_idx": 97
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "d224a8ea-82a7-4f3c-bca5-c779450001a5",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 135,
+          "elapsed_sec": 1080.223,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100112,
+          "episode_idx": 0,
+          "instruction": "Position the smooth blue cup for liquids on the smooth round palm-sized coaster with the arm.",
+          "task_idx": 96
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "d9e4a9a1-2867-46d9-84d8-00267648e61e",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 2533.076,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100060,
+          "episode_idx": 0,
+          "instruction": "Drop the cylindrical light blue cup firmly on the round coaster using arm",
+          "task_idx": 49
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "dcc02599-ef17-40c5-a948-bead66b8d3e1",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4001.716,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100109,
+          "episode_idx": 0,
+          "instruction": "Slide the medium-sized plastic blue cup onto the round coaster with light streaks",
+          "task_idx": 94
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "e251e476-eafd-4fc6-b635-a1ce0962aae6",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3996.837,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100014,
+          "episode_idx": 0,
+          "instruction": "Align the cup for holding liquids and set it down on the grainy texture coaster",
+          "task_idx": 12
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "eb023008-ea75-4218-a765-013d317d5c4e",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 131,
+          "elapsed_sec": 1164.007,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100108,
+          "episode_idx": 0,
+          "instruction": "Slide the cup with light blue color onto the smooth round palm-sized coaster",
+          "task_idx": 93
+        },
+        {
+          "sid": "de2dd498-7d87-4f60-ab78-a11188626ca1",
+          "eid": "ef630ac7-e3b9-4d31-a3d7-fb3f7fad38d6",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3996.604,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100101,
+          "episode_idx": 0,
+          "instruction": "Set the cup with smooth plastic surface on the round coaster using the arm.",
+          "task_idx": 88
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "1d40b679-2e4c-4163-ab5d-355d84e62cfd",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4114.74,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100002,
+          "episode_idx": 0,
+          "instruction": "Set the cylindrical light blue cup onto the round coaster with light streaks using the arm.",
+          "task_idx": 2
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "31b007f8-e2c1-4dea-9228-56980775bbc9",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3996.258,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100010,
+          "episode_idx": 0,
+          "instruction": "Position the cylindrical light blue cup on the smooth round palm-sized coaster with the arm.",
+          "task_idx": 8
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "44e49ccb-9724-4157-a48d-bd329c7bb807",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4110.183,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100007,
+          "episode_idx": 0,
+          "instruction": "Stick the light blue plastic cup onto the small coaster with grain texture using the arm",
+          "task_idx": 5
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "59a4a586-3a77-48a5-b5b7-bf896c2602a3",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3357.112,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100012,
+          "episode_idx": 0,
+          "instruction": "Position the medium blue cylindrical cup above and drop it on the coaster made of smooth wood",
+          "task_idx": 10
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "5b23ab57-2d6f-4686-8614-a3d2c864f2c1",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4123.124,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100008,
+          "episode_idx": 0,
+          "instruction": "Lift the smooth blue cup for liquids up and drop it on the grainy texture coaster.",
+          "task_idx": 6
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "6113caf5-5e70-4a5d-bccb-ca49601a5498",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3996.625,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100000,
+          "episode_idx": 0,
+          "instruction": "Slide the plastic cup for drinks onto the round coaster with the arm.",
+          "task_idx": 0
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "6c00f43a-cee9-489b-a861-58f3acdf9234",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3974.721,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100005,
+          "episode_idx": 0,
+          "instruction": "Make sure the rounded base blue cup ends up on the round coaster.",
+          "task_idx": 4
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "b8f79d5f-e4de-439e-8afd-f807e090f13f",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3930.938,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100011,
+          "episode_idx": 0,
+          "instruction": "Use the arm to slide the cup with smooth plastic surface onto the round coaster.",
+          "task_idx": 9
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "e5f716dc-2a33-48f5-b1b3-56b3dad76b8a",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3918.277,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100009,
+          "episode_idx": 0,
+          "instruction": "Move the rounded base blue cup using the arm onto the light gray streaked wooden coaster.",
+          "task_idx": 7
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "f94a66d8-6254-49c7-8411-98df062b55e6",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4033.271,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100004,
+          "episode_idx": 0,
+          "instruction": "Move the medium blue cylindrical cup using the arm onto the grainy texture coaster.",
+          "task_idx": 3
+        },
+        {
+          "sid": "e7b7085a-b169-4b4f-ad78-02aa9a4fbd37",
+          "eid": "f9f54433-be93-44ee-8d3e-1f3af4715ccb",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4049.88,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100001,
+          "episode_idx": 0,
+          "instruction": "Use the arm to slide the cup with smooth plastic surface onto the grainy texture coaster.",
+          "task_idx": 1
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "06b0e56e-7d1b-4098-a07f-f7cfd415a8d3",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3961.094,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100058,
+          "episode_idx": 0,
+          "instruction": "Position the light blue plastic cup carefully on the flat surface gray wooden coaster",
+          "task_idx": 47
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "348ca204-d15d-4485-9a5e-80fc3e7d0292",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 148,
+          "elapsed_sec": 1174.617,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100056,
+          "episode_idx": 0,
+          "instruction": "Position the medium-sized plastic blue cup on the coaster with circular shape with the arm.",
+          "task_idx": 45
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "3dcc9158-8464-4faf-bc8b-274decbe4553",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3981.082,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100050,
+          "episode_idx": 0,
+          "instruction": "Use an arm to drop the medium blue cylindrical cup on the flat round wooden coaster.",
+          "task_idx": 41
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "5ca973fc-eb1f-4fae-87c3-8dd410ee4344",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4016.542,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100047,
+          "episode_idx": 0,
+          "instruction": "Use an arm to drop the smooth blue drinking cup on the round coaster.",
+          "task_idx": 39
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "6ee0e3d3-f729-4740-8619-1966c21811f1",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4084.023,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100059,
+          "episode_idx": 0,
+          "instruction": "Use the arm to position the light blue plastic cup onto the round coaster with light streaks.",
+          "task_idx": 48
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "6fcf4819-e3ff-495f-af8b-274c3ec2a779",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3976.173,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100046,
+          "episode_idx": 0,
+          "instruction": "Pick the cylindrical light blue cup up and drop it on the flat surface gray wooden coaster.",
+          "task_idx": 38
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "7076cfe5-cc35-419c-bb66-3091d2a08228",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 2493.664,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100028,
+          "episode_idx": 0,
+          "instruction": "Place the cylindrical light blue cup on top of the small coaster with grain texture",
+          "task_idx": 24
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "760aa645-d4d3-49f8-b9cd-b5792a4baa88",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4091.805,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100049,
+          "episode_idx": 0,
+          "instruction": "Drop the rounded base blue cup on top of the small coaster with grain texture.",
+          "task_idx": 40
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "96fc42a3-a6ac-44fc-baa2-7b7323b4db69",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3930.526,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100057,
+          "episode_idx": 0,
+          "instruction": "Use an arm to drop the plastic cup for drinks on the coaster made of smooth wood",
+          "task_idx": 46
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "ad530116-9df6-4cff-9fa3-dfbe8ece6dd8",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3979.566,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100051,
+          "episode_idx": 0,
+          "instruction": "Slide the light blue plastic cup onto the coaster made of smooth wood",
+          "task_idx": 42
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "e7773510-9b2a-4f83-9d05-62c71e033f07",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4106.646,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100052,
+          "episode_idx": 0,
+          "instruction": "Using the arm, drop the light blue plastic cup onto the grainy texture coaster.",
+          "task_idx": 43
+        },
+        {
+          "sid": "f3250720-5a92-4e81-9490-9a4c39ec7b08",
+          "eid": "e94565d6-e7c7-4cd9-a9ab-9094c46d0a1d",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4081.49,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100054,
+          "episode_idx": 0,
+          "instruction": "Place the medium blue cylindrical cup on top of the flat surface gray wooden coaster",
+          "task_idx": 44
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "0cb88c68-d34b-42b3-bcd1-e82257520fb3",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 150,
+          "elapsed_sec": 1229.502,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100088,
+          "episode_idx": 0,
+          "instruction": "Align the medium blue cylindrical cup and set it down on the wooden coaster",
+          "task_idx": 77
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "2c128a84-e2d5-491e-9d3e-8a63fafc61c8",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4108.576,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100091,
+          "episode_idx": 0,
+          "instruction": "Move the cup with smooth plastic surface to the light gray streaked wooden coaster",
+          "task_idx": 80
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "337bab99-6b3c-4cd7-9cf9-4bcb3d0a50b3",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4020.478,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100097,
+          "episode_idx": 0,
+          "instruction": "Place the blue rounded-bottom cup on top of the round coaster with light streaks",
+          "task_idx": 85
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "3fdb1faa-86ec-494f-a760-ca8412f3e532",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 147,
+          "elapsed_sec": 1176.452,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100087,
+          "episode_idx": 0,
+          "instruction": "Use the arm to position the cup with light blue color onto the coaster made of smooth wood.",
+          "task_idx": 76
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "52237f46-b8c3-4eaf-b11d-2375899c9873",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4053.605,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100093,
+          "episode_idx": 0,
+          "instruction": "Slide the cup with light blue color gently onto the grainy texture coaster via the arm.",
+          "task_idx": 82
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "54c1ea68-499a-45af-98cb-d86a74d53f70",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3559.59,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100100,
+          "episode_idx": 0,
+          "instruction": "Grab the cup with light blue color and place it on the flat round wooden coaster.",
+          "task_idx": 87
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "83e8533d-7224-478b-b4a4-38aadf75f831",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3928.668,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100096,
+          "episode_idx": 0,
+          "instruction": "Slide the smooth blue cup for liquids onto the coaster made of smooth wood with the arm.",
+          "task_idx": 84
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "905806dc-9044-412f-8078-f312db609227",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4016.569,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100092,
+          "episode_idx": 0,
+          "instruction": "Lift the blue rounded-bottom cup up and drop it on the round coaster.",
+          "task_idx": 81
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "96f59458-450e-45ab-ad0f-f02be775b1af",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3991.15,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100086,
+          "episode_idx": 0,
+          "instruction": "Slide the blue rounded-bottom cup gently onto the smooth round palm-sized coaster via the arm.",
+          "task_idx": 75
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "c523f29a-ccc5-463a-b145-2f406a4aebd0",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4154.901,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100089,
+          "episode_idx": 0,
+          "instruction": "Use the arm to set the blue rounded-bottom cup on the coaster made of smooth wood",
+          "task_idx": 78
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "c8f41e44-b092-4540-b8ce-5d7284b199af",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 153,
+          "elapsed_sec": 1322.484,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100094,
+          "episode_idx": 0,
+          "instruction": "Make sure the cup with light blue color ends up on the coaster with circular shape.",
+          "task_idx": 83
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "e24b38cc-48f3-4d19-b830-495d45174626",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3959.233,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100090,
+          "episode_idx": 0,
+          "instruction": "Stick the medium-sized plastic blue cup onto the smooth round palm-sized coaster using the arm.",
+          "task_idx": 79
+        },
+        {
+          "sid": "f7e0fcd4-4354-4dc4-bb51-91ae2b061635",
+          "eid": "e87b859f-ebb0-4c7c-be86-0d65d993bc05",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3904.031,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100099,
+          "episode_idx": 0,
+          "instruction": "Position the cylindrical light blue cup above and drop it on the flat surface gray wooden coaster",
+          "task_idx": 86
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "12a92ca2-65ec-4995-b120-2673d4b66ae9",
+          "episode_id": 0,
+          "metrics": {
+            "success": true
+          },
+          "steps": 150,
+          "elapsed_sec": 1126.576,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100015,
+          "episode_idx": 0,
+          "instruction": "Set the cup with smooth plastic surface carefully onto the flat surface gray wooden coaster",
+          "task_idx": 13
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "20fa0862-3b5a-4443-ae42-0663b6c69dfb",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4056.859,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100020,
+          "episode_idx": 0,
+          "instruction": "Stick the smooth blue cup for liquids onto the round coaster using the arm",
+          "task_idx": 18
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "22af8f88-5ab8-4399-9b0d-2e71ebd4d97a",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3951.452,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100025,
+          "episode_idx": 0,
+          "instruction": "Stick the medium-sized plastic blue cup onto the flat round wooden coaster using the arm",
+          "task_idx": 22
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "4160c8bf-3136-4dd1-8e05-792356eeebc5",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4041.107,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100016,
+          "episode_idx": 0,
+          "instruction": "Pick the cup with smooth plastic surface up and drop it on the light gray streaked wooden coaster.",
+          "task_idx": 14
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "451f1e22-08dd-40f9-a04b-7de27f2f4b19",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4026.735,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100018,
+          "episode_idx": 0,
+          "instruction": "Grab the smooth blue cup for liquids and place it on the round coaster with light streaks.",
+          "task_idx": 16
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "47b71f19-6333-4fdd-ad2b-86ec2508270d",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4072.631,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100023,
+          "episode_idx": 0,
+          "instruction": "Use an arm to place the cup with light blue color on the grainy texture coaster",
+          "task_idx": 20
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "68e3d530-634d-498f-88d6-f39145937b6c",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3983.137,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100024,
+          "episode_idx": 0,
+          "instruction": "Make sure the medium blue cylindrical cup ends up on the small coaster with grain texture.",
+          "task_idx": 21
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "a072594b-00a1-4587-9e41-cb9a5c88a594",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4059.202,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100019,
+          "episode_idx": 0,
+          "instruction": "Lift the cup with light blue color and stick it onto the round coaster.",
+          "task_idx": 17
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "ae4f02a7-ac23-4042-9943-4841a434fa4e",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 3971.523,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100021,
+          "episode_idx": 0,
+          "instruction": "Move the medium-sized plastic blue cup to the round coaster using the arm.",
+          "task_idx": 19
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "b41eb8d6-e924-49c0-a6bb-577ddb497f2e",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4085.372,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100017,
+          "episode_idx": 0,
+          "instruction": "Stick the smooth blue cup for liquids onto the round coaster with light streaks using the arm",
+          "task_idx": 15
+        },
+        {
+          "sid": "ff1c7aa3-832d-4e4e-91a1-309038faca53",
+          "eid": "b63d6f4c-2408-4c9e-9d45-0f73aafc19af",
+          "episode_id": 0,
+          "metrics": {
+            "success": false
+          },
+          "steps": 500,
+          "elapsed_sec": 4118.64,
+          "name": "place_empty_cup",
+          "suite": "robotwin",
+          "seed": 100026,
+          "episode_idx": 0,
+          "instruction": "Use arm to place the cup with light blue color on the flat surface gray wooden coaster",
+          "task_idx": 23
+        }
+      ],
+      "num_episodes": 100,
+      "avg_steps": 433.57,
+      "mean_success": 0.19
+    }
+  ],
+  "config": {
+    "benchmark": "vla_eval.benchmarks.robotwin.benchmark:RoboTwinBenchmark",
+    "mode": "sync",
+    "name": "place_empty_cup",
+    "subname": null,
+    "episodes_per_task": 1,
+    "max_steps": null,
+    "max_tasks": null,
+    "tasks": null,
+    "params": {
+      "task_name": "place_empty_cup",
+      "task_config": "demo_clean",
+      "seed": 0,
+      "instruction_type": "seen",
+      "test_num": 100,
+      "skip_expert_check": false,
+      "fast_init": true
+    },
+    "recording": {
+      "record_video": false
+    },
+    "hz": 10.0,
+    "throughput_mode": false,
+    "paced": true,
+    "wait_first_action": false
+  },
+  "eval_id": "b8cc6dfb-8009-436d-b049-bd1a43214605-place_empty_cup",
+  "server_info": {
+    "harness_version": "0.8.1.dev0+g41bd8a44d.d20261126",
+    "protocol_version": 1,
+    "model_server": "CogACTModelServer",
+    "capabilities": {},
+    "observation_params": {
+      "success_mode": "truncation"
+    },
+    "action_spec": {
+      "actions": {
+        "name": "raw",
+        "dims": 0,
+        "format": "raw"
+      }
+    },
+    "observation_spec": {
+      "image": {
+        "name": "image",
+        "dims": 0,
+        "format": "rgb_hwc_uint8"
+      },
+      "language": {
+        "name": "language",
+        "dims": 0,
+        "format": "language"
+      },
+      "left_camera": {
+        "name": "image",
+        "dims": 0,
+        "format": "rgb_hwc_uint8"
+      },
+      "right_camera": {
+        "name": "image",
+        "dims": 0,
+        "format": "rgb_hwc_uint8"
+      }
+    }
+  },
+  "render": {
+    "requested": "gpu",
+    "applied_env": {}
+  },
+  "seed": 0,
+  "metric_keys": {
+    "success": "mean"
+  },
+  "mean_success": 0.19,
+  "num_episodes_total": 100,
+  "num_errors": 0
+}

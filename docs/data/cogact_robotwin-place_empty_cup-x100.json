@@ -1,0 +1,21 @@
+{
+  "model": "Dexmal/robotwin-db-cogact/place_empty_cup (fp16, qpos 14D)",
+  "task": "RobotWin place_empty_cup x100（Easy / demo_clean）",
+  "mean_success": 0.19,
+  "n": 100,
+  "success": 19,
+  "errors": 0,
+  "versions": {
+    "harness": "0.8.0",
+    "benchmark_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-eval-robotwin:0.8.0-ee-slim",
+    "serve_image": "swr.cn-north-4.myhuaweicloud.com/link-seek/vla-serve-cogact:0.8.0",
+    "ckpt": "Dexmal/robotwin-db-cogact@4c6404283bd00008f7c15ae986556bc0e03ebdff"
+  },
+  "machine": "V100-32GB ×2（cn-north-4，0002）；serve=GPU0，env=GPU1",
+  "seeds": "100000–100099（test_num=100 × episodes_per_task=1）",
+  "date": "2026-11-27",
+  "artifacts": "GitHub run 45869132668（artifact results-easy）",
+  "note": "旧 50 集（10-28）不可续，本次新跑 100 集（n=100）；官方 28% 来自 Dexbotic 论文/官方 repo。",
+  "report_version": "v1 (docs/tutorial/leaderboard.md)",
+  "protocol_version": "robotwin-2.0.1"
+}
