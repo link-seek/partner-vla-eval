@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>一次模型评测，到底在评什么？</title>
+<title>模型评测，到底在评什么？（论文驱动科普版）</title>
 <style>
   :root{
     --primary:#60a5fa;--secondary:#a78bfa;--success:#22c55e;--warning:#fbbf24;--danger:#fb7185;
@@ -57,439 +57,430 @@
   .gloss b{color:var(--primary);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;margin-right:8px}
 </style>
 </head>
-<body>
-<div class="deck" id="deck">
+<body><div class="deck" id="deck">
 
   <!-- 01 -->
   <section class="slide active" data-screen-label="01 封面">
-    <div class="eyebrow">模型评测科普 · 2026-11</div>
-    <h1>一次模型评测，<br/>到底在评什么？</h1>
-    <p class="lead">一个分数不是“模型跑了一次”，而是 <strong>模型 × 考场 × 环境 × 协议 × 运行 × 指标 × 证据 × 治理</strong> 的共同结果。少一个要素，这个分数就不可比。<br/>这份材料分两层：先讲怎么生产可信分数，再讲怎么用对照实验评价模型。</p>
+    <div class="eyebrow">模型评测科普 · 论文驱动版 · 2026-11</div>
+    <h1>模型评测，<br/>到底在评什么？</h1>
+    <p class="lead">从 RoboTwin 2.0、LIBERO、CALVIN、SimplerEnv 和 vla-eval 的论文出发，拆开“跑分”与“评价模型”的区别，再给出一套普通人也能照着做的评价方法。</p>
     <div class="chip-row">
-      <span class="chip">01 模型</span><span class="chip">02 考场</span><span class="chip">03 环境</span><span class="chip">04 协议</span>
-      <span class="chip">05 运行</span><span class="chip">06 指标</span><span class="chip">07 证据</span><span class="chip">08 治理</span>
+      <span class="chip">RoboTwin 2.0</span><span class="chip">LIBERO</span><span class="chip">CALVIN</span><span class="chip">SimplerEnv</span><span class="chip">vla-eval</span>
     </div>
-    <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 02 -->
-  <section class="slide" data-screen-label="02 总览">
-    <div class="eyebrow">总览 · 八要素</div>
-    <h2>分数是八件事的交集，不是模型的一项属性</h2>
-    <div class="formula">可信分数 = 模型适配 × 考场覆盖 × 环境一致 × 协议固定 × 运行可靠 × 指标充分 × 证据完整 × 治理有效</div>
+  <section class="slide" data-screen-label="02 先看结论">
+    <div class="eyebrow">先看结论 · 三层答案</div>
+    <h2>一个分数只是观测；模型评价是一组受控实验</h2>
     <div class="cols3">
-      <div class="card"><div class="t">Model · 模型</div><div class="v">权重版本、adapter、观测/动作契约、serve 镜像</div></div>
-      <div class="card"><div class="t">Benchmark · 考场</div><div class="v">task suite、覆盖、难度、成功判定</div></div>
-      <div class="card"><div class="t">Environment · 环境</div><div class="v">本体、仿真器、资产、物理与渲染</div></div>
-      <div class="card"><div class="t">Protocol · 协议</div><div class="v">种子、集数、步数、精度、随机化</div></div>
-      <div class="card"><div class="t">Runtime · 运行</div><div class="v">GPU、端口、分片、超时、资源隔离</div></div>
-      <div class="card"><div class="t">Metrics · 指标</div><div class="v">成功率、n、errors、CI、步数与耗时</div></div>
-      <div class="card"><div class="t">Evidence · 证据</div><div class="v">run id、manifest、原始 episode、checksum</div></div>
-      <div class="card"><div class="t">Governance · 治理</div><div class="v">registry、门禁、校准、榜单规则</div></div>
-      <div class="card warn"><div class="t">结论</div><div class="v">任一要素缺失，数字只能描述“这次运行”，不能支撑横向比较。</div></div>
+      <div class="card"><div class="t">1 · Benchmark result</div><div class="v">一个 checkpoint，在一套协议和一个考场上跑出多少分。<br/><strong>回答：这次是多少。</strong></div></div>
+      <div class="card"><div class="t">2 · Controlled comparison</div><div class="v">保持其他条件不变，只改数据、方法或环境，比较差值。<br/><strong>回答：哪个因素带来了变化。</strong></div></div>
+      <div class="card good"><div class="t">3 · Model evaluation</div><div class="v">多考场、多协议、多训练条件，加基线、重复、失败分析和边界。<br/><strong>回答：模型擅长什么、何时失效。</strong></div></div>
     </div>
-<div class="gloss"><b>名词解释</b>checkpoint = 固定下来的一份权重快照；adapter = 模型与考场之间的转换层；protocol_version = 考场规则版本；digest = 镜像内容指纹。</div>
-    <div class="foot"><span>02 总览</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="formula">论文里的“模型评测” = 研究问题 + 对照设计 + 指标 + 统计 + 失败分析 + 适用边界</div>
+    <p class="quote">如果只说“模型考了 92%”，那是一次跑分；如果比较不同数据、训练方法、难度和考场，才是在评价模型。</p>
+    <div class="gloss"><b>名词解释</b>checkpoint = 固定权重；受控对照 = 只改一个关键变量；能力画像 = 模型在不同任务/条件下强弱的整体描述。</div>
+    <div class="foot"><span>02 先看结论</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 03 -->
-  <section class="slide" data-screen-label="03 跑分与评价">
-    <div class="eyebrow">概念先拆开 · 跑分 ≠ 评价</div>
-    <h2>跑出一个分数，不等于评价一个基模</h2>
-    <table>
-      <tr><th style="width:20%">层次</th><th style="width:30%">在研究什么</th><th style="width:25%">能得出的结论</th><th>不能得出的结论</th></tr>
-      <tr><td><strong>Benchmark result</strong><br/>跑分 / 单次评测</td><td>一个 checkpoint，在一套协议和一个考场上的观测</td><td>“这次跑了 92%”</td><td>“这个基模更强 / 泛化更好”</td></tr>
-      <tr><td><strong>Controlled comparison</strong><br/>受控对照</td><td>多个条件，只动一个关键变量，比较差值</td><td>“数据口径 B 比 A 高 6pp”</td><td>“所有数据策略都更好”</td></tr>
-      <tr><td><strong>Model evaluation</strong><br/>模型评价</td><td>多考场 × 多协议 × 多训练条件 + 基线 + 不确定性 + 失败分析</td><td>“模型在哪些能力上强、在哪些条件下失效”</td><td>超出测试分布的整体优劣</td></tr>
+  <section class="slide" data-screen-label="03 论文比较">
+    <div class="eyebrow">论文比较 · 它们到底在评什么</div>
+    <h2>四个 benchmark，四种不同的研究问题</h2>
+    <table style="font-size:15.5px">
+      <tr><th style="width:16%">论文</th><th style="width:22%">核心问题</th><th style="width:25%">怎么设计</th><th style="width:20%">主要指标</th><th>给我们的启示</th></tr>
+      <tr><td><strong>RoboTwin 2.0</strong></td><td>数据多样性与领域随机化能否提升双臂操作鲁棒性</td><td>50 task；50 clean demos；Easy/Hard 各 100 rollouts；仿真→真机</td><td>成功率；Hard−Easy；真机提升</td><td>数据与环境要作为自变量</td></tr>
+      <tr><td><strong>LIBERO</strong></td><td>策略能否迁移知识、避免遗忘</td><td>130 task / 4 suite；每 task 50 demos；3 seeds</td><td>FWT / NBT / AUC</td><td>指标要匹配研究问题</td></tr>
+      <tr><td><strong>CALVIN</strong></td><td>能否把语言指令组合成长程操作</td><td>34 task；4 环境；1000 条五步指令链；多种 train→test split</td><td>MTLC；LH-MTLC 1–5 步成功率</td><td>单题分数会隐藏组合失败</td></tr>
+      <tr><td><strong>SimplerEnv</strong></td><td>仿真能否可靠替代真机评测</td><td>真机/仿真配对评测；约 1500 episodes；视觉匹配+系统辨识</td><td>成功率；Pearson r；MMRV</td><td>评测工具本身也要被验证</td></tr>
     </table>
-    <div class="formula">一个分数 = 一次观测<br/>一组受控对照 = 一个因果关系候选<br/>多维评测 + 边界分析 = 对模型能力的评价</div>
-    <p class="quote">所以“模型评测就是跑个分数”只在最窄的操作层成立；<strong>评价基模必须比较不同数据、训练方法和考场条件下的表现。</strong></p>
-<div class="gloss"><b>名词解释</b>受控对照 = 其他条件尽量不变，只改一个变量；ablation = 逐个替换/拿掉因素看贡献；基线 = 判断“有没有提升”的参照。</div>
-    <div class="foot"><span>03 跑分与评价</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="formula">共同点：都不是“拿一个模型跑一次”，而是<strong>固定条件、改变因素、设计指标、重复实验、分析边界</strong>。</div>
+    <p class="sub" style="margin-top:12px">下一篇 vla-eval 把这些考场统一起来，并进一步回答：跨 benchmark 的可复现评价应该怎么做。</p>
+    <div class="gloss"><b>名词解释</b>suite = 一组有共同目的的 task；rollout = 一次完整尝试；split = 训练/测试环境划分；指标 = 你用什么数来判断好坏。</div>
+    <div class="foot"><span>03 论文比较</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 04 -->
-  <section class="slide" data-screen-label="04 对照轴">
-    <div class="eyebrow">模型评价 · 对照轴</div>
-    <h2>评价基模，要看它在不同条件下怎么变</h2>
-    <table>
-      <tr><th style="width:20%">对照轴</th><th style="width:32%">典型问题</th><th style="width:26%">控制量</th><th>输出</th></tr>
-      <tr><td>训练数据</td><td>clean vs randomized；50 vs 500；多样性是否值得</td><td>基模、训练预算、考场、种子</td><td>数据 ablation</td></tr>
-      <tr><td>训练方法</td><td>ACT vs DP；全参 vs LoRA；同算力下谁更有效</td><td>数据、目标、评测协议</td><td>方法对照</td></tr>
-      <tr><td>考场 / task</td><td>RoboTwin vs LIBERO；操作 vs 导航；长程 vs 短程</td><td>模型 checkpoint、资源</td><td>能力画像</td></tr>
-      <tr><td>协议 / 难度</td><td>Easy vs Hard；固定 vs 随机化；不同 max_steps</td><td>模型、数据、task 集</td><td>鲁棒性曲线</td></tr>
-      <tr><td>泛化域</td><td>跨本体、跨场景、仿真到真机、未见物体</td><td>训练条件、指标定义</td><td>泛化边界</td></tr>
-      <tr><td>统计可靠性</td><td>n、重复轮、置信区间、失败类型</td><td>同配置多次运行</td><td>显著性与稳定性</td></tr>
-    </table>
-    <div class="formula">R01 的例子：同一 ACT / DP 基模 × {50 clean, 50 clean + 500 randomized} × {Easy, Hard} × 5 task<br/>唯一自变量 = 训练数据口径；其余固定。</div>
-    <p class="sub" style="margin-top:12px"><strong>这才是“评价模型/训练方法”的骨架</strong>：先定义要回答的问题，再设计变量与对照，最后才跑分。</p>
-<div class="gloss"><b>名词解释</b>LoRA = 只训练少量新增参数的高效微调；embodiment = 机器人本体；泛化 = 在没见过的数据、场景或本体上仍能工作。</div>
-    <div class="foot"><span>04 对照轴</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
-  </section>
-
-  <!-- 05 -->
-  <section class="slide" data-screen-label="05 现有对照">
-    <div class="eyebrow">模型评价 · 我们现在的证据</div>
-    <h2>已有不少对照，但还不是完整的基模评价</h2>
-    <table>
-      <tr><th style="width:24%">对照</th><th style="width:18%">状态</th><th style="width:28%">回答什么</th><th>边界</th></tr>
-      <tr><td>栈变量：镜像 / 精度 / 种子 / 分片</td><td><span class="tag ok">已跑</span></td><td>分数里多少来自运行栈</td><td>方法有效性，不是模型能力</td></tr>
-      <tr><td>Easy vs Hard</td><td><span class="tag warn">部分</span></td><td>随机化下性能怎么掉</td><td>目前只有部分 task 满 50 集</td></tr>
-      <tr><td>X-VLA vs 官方 50 task</td><td><span class="tag ok">已跑</span></td><td>我们的尺子偏多少</td><td>校准，不是模型优劣</td></tr>
-      <tr><td>ACT / DP × 数据口径 A/B</td><td><span class="tag next">R01 已设计</span></td><td>同基模下数据多样性值多少分</td><td>S3/S4 未完成，不能下结论</td></tr>
-      <tr><td>RoboTwin vs LIBERO</td><td><span class="tag">待接</span></td><td>跨考场能力画像</td><td>动作/观测/后端不同，需 profile</td></tr>
-      <tr><td>跨本体 / 真机 / 未见场景</td><td><span class="tag">待补</span></td><td>泛化边界</td><td>当前结论不能外推</td></tr>
-      <tr><td>r2 / r3 重复轮</td><td><span class="tag warn">待跑</span></td><td>差异是否超过运行噪声</td><td>单轮只能报点估计</td></tr>
-    </table>
-    <p class="quote" style="margin-top:20px">八要素是<strong>生产可信分数的地基</strong>；真正评价一个基模，还要有<strong>研究问题、对照轴、基线、统计结论和适用边界</strong>。</p>
-<div class="gloss"><b>名词解释</b>校准 = 检查“尺子准不准”；能力评价 = 检查“模型强不强”。R01 未跑完时，A/B 只能写计划，不能写结论。</div>
-    <div class="foot"><span>05 现有对照</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
-  </section>
-
-  <!-- 03 -->
-  <section class="slide" data-screen-label="06 模型">
-    <div class="eyebrow">要素一 · 模型</div>
-    <h2>“用了哪个模型”至少要回答四层</h2>
-    <div class="cols3">
-      <div class="card"><div class="t">1 · 身份</div><div class="v">模型族、权重 repo、精确 revision、训练数据口径。分支名和 <code>latest</code> 不等于版本。</div></div>
-      <div class="card"><div class="t">2 · Adapter</div><div class="v">把模型输出变成考场能用的动作；把考场观测变成模型能用的输入。每个模型族都应有显式 adapter。</div></div>
-      <div class="card"><div class="t">3 · Serve 契约</div><div class="v">镜像 digest、相机顺序、resize、归一化、chunk/queue、reset、healthcheck。</div></div>
-      <div class="card"><div class="t">4 · 能力边界</div><div class="v">动作维度、状态维度、支持 task、是否需要额外资产。能力不匹配要 fail fast。</div></div>
-    </div>
-    <table style="margin-top:22px">
-      <tr><th style="width:18%">例子</th><th style="width:26%">模型侧</th><th style="width:28%">适配重点</th><th>出错表现</th></tr>
-      <tr><td>X-VLA</td><td>EE 16D（quat）</td><td>20D rot6d → 16D quat；三相机；EE planner</td><td>维度不匹配、全 0 分但无异常</td></tr>
-      <tr><td>ACT / DP</td><td>qpos 14D</td><td>ACT 要 640×480 resize；DP 不要 resize；动作块队列</td><td>观测口径错、动作不动</td></tr>
-      <tr><td>DB-CogACT</td><td>qpos 14D，按 task 分头</td><td>权重子目录、fp16、每 task 独立 serve</td><td>拉错 task 权重、缺头</td></tr>
-    </table>
-    <p class="sub" style="margin-top:14px"><strong>关键</strong>：上游有 YAML 不等于没有 adapter；YAML 可以是 adapter 的实现素材，但 adapter 仍是稳定扩展边界。</p>
-<div class="gloss"><b>名词解释</b>qpos = 关节角度；EE = 末端执行器位姿；quat / rot6d = 旋转的两种表示；chunk = 一次预测的一段动作；queue = 把动作块逐步播完的缓冲。</div>
-    <div class="foot"><span>06 模型</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
-  </section>
-
-  <!-- 04 -->
-  <section class="slide" data-screen-label="07 考场">
-    <div class="eyebrow">要素二 · 考场</div>
-    <h2>考什么，决定这个分数能说明什么</h2>
+  <section class="slide" data-screen-label="04 RoboTwin">
+    <div class="eyebrow">论文案例 1 · RoboTwin 2.0</div>
+    <h2>它评的不是“模型聪不聪明”，而是“数据能不能带来鲁棒性”</h2>
     <div class="cols">
       <div class="col">
-        <h3>Task suite 与覆盖</h3>
-        <table>
-          <tr><th>模型</th><th>本考场覆盖</th><th>能不能直接比</th></tr>
-          <tr><td>X-VLA</td><td>5 / 5</td><td class="good">可覆盖全表</td></tr>
-          <tr><td>DB-CogACT</td><td>3 / 5</td><td class="warn">只能比重合 task</td></tr>
-          <tr><td>ACT / DP</td><td>2 / 5</td><td class="warn">只能比重合 task</td></tr>
-        </table>
+        <h3>标准 benchmark 协议</h3>
+        <ul>
+          <li><strong>50 个双臂 task</strong>，Aloha AgileX 本体</li>
+          <li>每 task <strong>50 条 clean demos</strong> 用于训练</li>
+          <li>每 task 在 Easy / Hard 下各跑 <strong>100 rollouts</strong></li>
+          <li>Hard 加入杂乱场景、光照、背景纹理、桌高变化</li>
+        </ul>
       </div>
       <div class="col">
-        <h3>难度不是“更多题”</h3>
+        <h3>真正的评价实验</h3>
         <ul>
-          <li><strong>Easy</strong>：固定物体/位置，考基本操作能力</li>
-          <li><strong>Hard</strong>：纹理、光照、位姿随机化，考鲁棒性</li>
-          <li><strong>长程任务</strong>：交接、装配，考持续规划与恢复</li>
+          <li>32 task、两种数据：无随机化 vs 领域随机化</li>
+          <li>RDT / Pi0 分别训练，比较 5 个未见 task</li>
+          <li>RDT：14.8% → 16.6% → <strong>25.4%</strong></li>
+          <li>Pi0：21.0% → 20.6% → <strong>29.8%</strong></li>
         </ul>
       </div>
     </div>
     <div class="kpi-row">
-      <div class="kpi ok"><div class="n">98%</div><div class="l">grab_roller Easy<br/>同模型同考场</div></div>
-      <div class="kpi warn"><div class="n">44%</div><div class="l">grab_roller Hard<br/>同模型随机化后下降</div></div>
-      <div class="kpi pri"><div class="n">5</div><div class="l">RoboTwin 本考场 task<br/>覆盖必须披露</div></div>
-      <div class="kpi pri"><div class="n">50</div><div class="l">每 task 标准集数<br/>n 决定不确定性</div></div>
+      <div class="kpi pri"><div class="n">+10.6pp</div><div class="l">RDT 平均提升<br/>领域随机化数据</div></div>
+      <div class="kpi pri"><div class="n">+8.8pp</div><div class="l">Pi0 平均提升<br/>领域随机化数据</div></div>
+      <div class="kpi ok"><div class="n">+33pp</div><div class="l">真机最复杂场景<br/>10 real + 1k synthetic</div></div>
+      <div class="kpi warn"><div class="n">40.3pp</div><div class="l">Pi0 Easy→Hard 下降<br/>鲁棒性仍是难题</div></div>
     </div>
-    <p class="quote" style="margin-top:20px">只报 Easy，会把“固定摆位下能成功”说成“能操作”；不披露覆盖，会把“没权重”伪装成“模型不行”。</p>
-<div class="gloss"><b>名词解释</b>task = 一道操作题；episode = 一次完整尝试；coverage = 有权重且能覆盖的题目；Easy / Hard 不是题量不同，而是随机化程度不同。</div>
-    <div class="foot"><span>07 考场</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <p class="quote">论文的做法是：<strong>让数据口径成为自变量，让 Easy/Hard 和真机场景成为检验泛化的因变量。</strong></p>
+    <p class="small" style="margin-top:10px">来源：RoboTwin 2.0，arXiv:2506.18088，§4.3–4.5。</p>
+    <div class="gloss"><b>名词解释</b>领域随机化 = 训练时主动改变光照/背景/位姿等；未见 task = 训练时没出现过的新题；因变量 = 你观察的结果指标。</div>
+    <div class="foot"><span>04 RoboTwin</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 05 -->
-  <section class="slide" data-screen-label="08 环境">
-    <div class="eyebrow">要素三 · 环境</div>
-    <h2>仿真器、本体、资产，都是“考卷”的一部分</h2>
-    <table>
-      <tr><th style="width:18%">层</th><th style="width:30%">管什么</th><th style="width:26%">典型差异</th><th>不一致的后果</th></tr>
-      <tr><td>本体 Embodiment</td><td>关节数、动作空间、相机、夹爪</td><td>14D qpos / 16D EE / 7D 单臂</td><td>动作维度或语义错</td></tr>
-      <tr><td>仿真后端</td><td>物理、碰撞、渲染、随机化</td><td>SAPIEN（RoboTwin/ManiSkill）<br/>MuJoCo（LIBERO/RoboCasa）</td><td>同一模型分数不可直接横比</td></tr>
-      <tr><td>场景资产</td><td>物体、桌面、材质、光照、URDF</td><td>资产 revision、挂载路径、实体数量</td><td>场景缺失、行为漂移</td></tr>
-      <tr><td>渲染与资源</td><td>GPU、EGL/CUDA、shared memory</td><td>SAPIEN 长驻进程可能 renderer 崩</td><td>episode error、假失败</td></tr>
-    </table>
-    <div class="cols" style="margin-top:24px">
-      <div class="card good"><div class="t">环境一致</div><div class="v">同镜像 digest + 同资产 revision + 同随机化配置，分数变化才能归因给模型或协议。</div></div>
-      <div class="card bad"><div class="t">环境不一致</div><div class="v">即使模型没变，材质、相机、物理参数、渲染后端变化也会移动成功率。</div></div>
+  <section class="slide" data-screen-label="05 LIBERO">
+    <div class="eyebrow">论文案例 2 · LIBERO</div>
+    <h2>它评的是“知识迁移与遗忘”，所以不能只报成功率</h2>
+    <div class="cols">
+      <div class="col">
+        <h3>任务设计</h3>
+        <ul>
+          <li><strong>130 个语言条件操作 task</strong></li>
+          <li>Spatial / Object / Goal 各 10 task，分别隔离空间、物体、目标知识</li>
+          <li>LIBERO-100：90 个短程 task 用于预训练，10 个长程 task 用于 downstream 评测</li>
+          <li>每 task 提供 <strong>50 条人工遥操作 demos</strong></li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>指标与统计</h3>
+        <ul>
+          <li><strong>FWT</strong>：学新任务时，旧知识帮了多少</li>
+          <li><strong>NBT</strong>：学新任务后，旧任务退化了多少</li>
+          <li><strong>AUC</strong>：把学习过程中的表现综合成曲线下面积</li>
+          <li>3 seeds，均值±标准误；两尾 t-test，p=0.05</li>
+        </ul>
+      </div>
     </div>
-    <p class="sub" style="margin-top:16px"><strong>设计含义</strong>：考场 adapter 管 task 与判定；backend profile 管镜像、资产、渲染和资源。不要把这些全塞进模型 adapter。</p>
-<div class="gloss"><b>名词解释</b>URDF = 机器人结构描述；EGL / CUDA = 无显示器时的渲染方式；shared memory = 容器间共享内存；资产 revision = 场景文件版本。</div>
-    <div class="foot"><span>08 环境</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="formula">研究问题不同 → 指标不同：<br/>RoboTwin 问“成功率与鲁棒性”；LIBERO 问“迁移、遗忘与学习曲线”。</div>
+    <p class="quote">论文甚至发现：简单监督预训练可能<strong>伤害</strong>后续终身学习。若只看最终成功率，这个结论根本看不出来。</p>
+    <p class="small" style="margin-top:10px">来源：LIBERO，arXiv:2306.03310，§4.2、§5.1–5.2。</p>
+    <div class="gloss"><b>名词解释</b>FWT = forward transfer，前向迁移；NBT = negative backward transfer，负向后向迁移；AUC = 曲线下面积；遗忘 = 学新任务后旧任务变差。</div>
+    <div class="foot"><span>05 LIBERO</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 06 -->
-  <section class="slide" data-screen-label="09 协议">
-    <div class="eyebrow">要素四 · 协议</div>
-    <h2>协议就是“这场考试的统一规则”</h2>
-    <table>
-      <tr><th style="width:18%">旋钮</th><th style="width:30%">它控制什么</th><th style="width:26%">改了会怎样</th><th>必须记录</th></tr>
-      <tr><td>种子 Seeds</td><td>场景随机化与 episode 顺序</td><td>同模型分数也会变</td><td>逐集种子表</td></tr>
-      <tr><td>集数 Episodes</td><td>统计样本量 n</td><td>置信区间宽度</td><td>目标 n / 实际 n</td></tr>
-      <tr><td>难度 Protocol</td><td>固定 / 随机化 / 干扰</td><td>考的是不同能力</td><td><code>protocol_version</code></td></tr>
-      <tr><td>步数上限</td><td>最长允许执行步数</td><td>长程任务被截断</td><td><code>max_steps</code></td></tr>
-      <tr><td>精度与栈</td><td>fp16 / fp32、镜像、planner</td><td>数值与动作轨迹变化</td><td>镜像 digest / dtype</td></tr>
-      <tr><td>重复轮 Replicate</td><td>同配置再跑一遍</td><td>估计运行方差</td><td>r2 / r3 标签</td></tr>
+  <section class="slide" data-screen-label="06 CALVIN">
+    <div class="eyebrow">论文案例 3 · CALVIN</div>
+    <h2>单任务 53.9%，五步连续任务只有 0.08%</h2>
+    <div class="cols3">
+      <div class="card"><div class="t">任务</div><div class="v">34 个基础 task，4 个环境 A/B/C/D，7-DoF Franka，PyBullet。</div></div>
+      <div class="card"><div class="t">数据</div><div class="v">24 小时自由 play 数据，约 20K 语言指令；语言只标注约 1%。</div></div>
+      <div class="card"><div class="t">泛化 split</div><div class="v">D→D；ABCD→D；ABC→D（训练三环境、测试未见环境）。</div></div>
+    </div>
+    <table style="margin-top:20px">
+      <tr><th>评测</th><th>怎么测</th><th>基线结果</th><th>说明什么</th></tr>
+      <tr><td>MTLC 单任务</td><td>34 task，每 task 10 rollouts；测试语言是未见改写</td><td><strong>53.9%</strong></td><td>单题能力看起来不错</td></tr>
+      <tr><td>LH-MTLC 长程</td><td>1000 条指令链，每条连续 5 个 task</td><td>1 步 48.9%；5 步 <strong>0.08%</strong></td><td>组合、状态转移、语言 grounding 严重不足</td></tr>
     </table>
-    <div class="formula">协议版本 = 考场 + 集数 + 种子策略 + task_config + max_steps + harness + 镜像 digest</div>
-    <p class="quote">任一旋钮变化，都应该生成新版本；旧结果冻结，不覆盖。否则“同一个 92%”其实不是同一件事。</p>
-<div class="gloss"><b>名词解释</b>seed = 随机数种子；n = 样本量；max_steps = 单集最多走多少步；r2 = 同配置第二轮，用来看运行波动。</div>
-    <div class="foot"><span>09 协议</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <p class="quote">如果只报 53.9%，会以为模型“会操作”；加入连续任务，才看到它<strong>不会把技能组合成长程行为</strong>。</p>
+    <p class="small" style="margin-top:10px">来源：CALVIN，arXiv:2112.03227，§III-C。</p>
+    <div class="gloss"><b>名词解释</b>MTLC = 多任务语言控制；LH-MTLC = 长程多任务语言控制；grounding = 把“蓝色方块”这类语言对应到真实物体；split = 训练/测试环境组合。</div>
+    <div class="foot"><span>06 CALVIN</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 07 -->
-  <section class="slide" data-screen-label="10 运行">
-    <div class="eyebrow">要素五 · 运行</div>
-    <h2>同一套配置，运行方式也可能把结果跑坏</h2>
-    <div class="flow">
-      <div class="node"><b>Model Serve</b><span>GPU0<br/>权重 / adapter / 端口</span></div><div class="arr">→</div>
-      <div class="node"><b>Benchmark Env</b><span>GPU1<br/>SAPIEN / MuJoCo / 分片</span></div><div class="arr">→</div>
-      <div class="node"><b>Recorder</b><span>SQLite / JSONL<br/>逐 episode 提交</span></div><div class="arr">→</div>
-      <div class="node"><b>Artifact Sink</b><span>OBS / 对象存储<br/>checkpoint + manifest</span></div>
+  <section class="slide" data-screen-label="07 SimplerEnv">
+    <div class="eyebrow">论文案例 4 · SimplerEnv</div>
+    <h2>它先问：仿真这把尺子，本身准不准？</h2>
+    <div class="cols">
+      <div class="col">
+        <h3>配对真机/仿真评测</h3>
+        <ul>
+          <li>Google Robot 与 WidowX 两种真实本体</li>
+          <li>真机与仿真各约 <strong>1500 episodes</strong></li>
+          <li>比较不同策略的排名与表现是否一致</li>
+          <li>分析光照、背景、相机位姿、干扰物、桌纹等分布偏移</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3>两种弥合差距的方法</h3>
+        <ul>
+          <li><strong>Visual Matching</strong>：绿幕替换真实背景、贴真实纹理</li>
+          <li><strong>System Identification</strong>：用少量真机轨迹校准仿真控制参数</li>
+          <li>提出 <strong>MMRV</strong>：衡量仿真把真机策略排名弄错了多少</li>
+        </ul>
+      </div>
     </div>
-    <div class="cols3">
-      <div class="card"><div class="t">资源隔离</div><div class="v">serve 与环境分卡；端口、容器名、GPU 必须可参数化。写死 8000 就没法并行。</div></div>
-      <div class="card"><div class="t">分片与吞吐</div><div class="v">分片提高吞吐，但过多会 OOM 或 renderer 崩。X-VLA 用 4，qpos 模型用 8。</div></div>
-      <div class="card"><div class="t">超时与恢复</div><div class="v">超时是协议的一部分；恢复要从持久化 manifest，不依赖本机临时目录。</div></div>
-      <div class="card"><div class="t">失败隔离</div><div class="v">单 episode 失败不应中止整场；error 与 fail 必须分开。</div></div>
-      <div class="card"><div class="t">可观测性</div><div class="v">日志、容器状态、GPU、episode 进度都要能定位“卡在哪”。</div></div>
-      <div class="card warn"><div class="t">运行不是细节</div><div class="v">端口冲突、错卡、旧容器、残留 results，都会让分数失真。</div></div>
-    </div>
-<div class="gloss"><b>名词解释</b>serve = 常驻模型推理服务；shard = 把 episode 分给多个进程；GPU 隔离 = 避免 serve 与环境抢显存；healthcheck = 确认服务真的 ready。</div>
-    <div class="foot"><span>10 运行</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="formula">评测 simulator = 比较 sim 分数与 real 分数的相关性、排名一致性、对分布偏移的敏感性。</div>
+    <p class="quote">这篇论文提醒我们：<strong>模型评价之前，要先证明“考场”没有系统性骗人。</strong></p>
+    <p class="small" style="margin-top:10px">来源：SimplerEnv，arXiv:2405.05941；项目页 simpler-env.github.io。</p>
+    <div class="gloss"><b>名词解释</b>Pearson r = 线性相关系数；MMRV = 平均最大排名违反度，越低说明仿真排名越接近真机；系统辨识 = 用真实数据校准模拟器参数。</div>
+    <div class="foot"><span>07 SimplerEnv</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 08 -->
-  <section class="slide" data-screen-label="11 指标">
-    <div class="eyebrow">要素六 · 指标</div>
-    <h2>成功率只是一个分子/分母，后面还有四层信息</h2>
-    <div class="formula">成功率 = success episodes / terminal episodes × 100%</div>
-    <table>
-      <tr><th style="width:18%">指标</th><th style="width:30%">回答什么</th><th style="width:26%">例子</th><th>缺了会怎样</th></tr>
-      <tr><td>点估计</td><td>这次大概多少分</td><td>46/50 = 92%</td><td>看起来精确，其实有噪声</td></tr>
-      <tr><td>样本量 n</td><td>这个数有多稳</td><td>n=50 / n=5000</td><td>n=12 和 n=50 被混着比</td></tr>
-      <tr><td>Errors</td><td>是模型失败还是基础设施坏了</td><td>0 error / 3 error</td><td> infra 故障被当成模型能力</td></tr>
-      <tr><td>95% CI</td><td>不确定性范围</td><td>92% → [81.2%, 96.8%]</td><td>把 4pp 差异当成结论</td></tr>
-      <tr><td>Steps / Time</td><td>成功得多快、多稳</td><td>平均步数、最大/最小耗时</td><td>忽略长尾与卡死</td></tr>
-      <tr><td>Failure taxonomy</td><td>为什么失败</td><td>grasp / timeout / model_act</td><td>无法定位改进方向</td></tr>
-    </table>
-    <p class="quote" style="margin-top:20px">一个可信的格子至少是：<strong>K/N + errors + 95% CI + 平均步数 + 协议版本</strong>。</p>
-<div class="gloss"><b>名词解释</b>terminal episode = 已结束的尝试；error = 基础设施/协议坏了；fail = 正常尝试但没完成；Wilson CI = 小样本下也较稳的比例区间。</div>
-    <div class="foot"><span>11 指标</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  <section class="slide" data-screen-label="08 vla-eval">
+    <div class="eyebrow">论文案例 5 · vla-eval</div>
+    <h2>统一 harness 之后，真正困难的是协议与可复现性</h2>
+    <div class="cols3">
+      <div class="card"><div class="t">统一接口</div><div class="v">模型实现一次 <code>predict()</code>；benchmark 实现 reset/step/make_obs/get_result；全矩阵自动成立。</div></div>
+      <div class="card"><div class="t">复现审计</div><div class="v">DB-CogACT 跨 LIBERO / CALVIN / SimplerEnv；LIBERO 与 SimplerEnv 误差在 ±3pp 内。</div></div>
+      <div class="card warn"><div class="t">隐藏坑</div><div class="v">SimplerEnv 的 terminated 语义被误用会抬高分数；CALVIN 的归一化统计藏在训练代码里。</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi pri"><div class="n">47×</div><div class="l">2000 LIBERO episodes<br/>14h → 18min</div></div>
+      <div class="kpi pri"><div class="n">81%</div><div class="l">模型只评过 1 个 benchmark<br/>跨 benchmark 极少</div></div>
+      <div class="kpi warn"><div class="n">0.6%</div><div class="l">模型评过 ≥5 个 benchmark<br/>整体能力画像稀缺</div></div>
+      <div class="kpi ok"><div class="n">657</div><div class="l">榜单条目<br/>17 benchmarks</div></div>
+    </div>
+    <p class="quote">论文的结论很直接：<strong>跨 benchmark 评价既需要统一接口，也需要 canonical protocol 与完整配置留存。</strong></p>
+    <p class="small" style="margin-top:10px">来源：vla-eval，arXiv:2603.13966，§II–IV。</p>
+    <div class="gloss"><b>名词解释</b>canonical protocol = 官方认可的固定协议；normalization = 输入归一化；terminated = 环境告诉策略“本集结束”的标志。</div>
+    <div class="foot"><span>08 vla-eval</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 09 -->
-  <section class="slide" data-screen-label="12 统计">
-    <div class="eyebrow">统计常识 · 为什么需要重复轮</div>
-    <h2>92% 一定比 80% 好吗？先看不确定性</h2>
-    <div class="cols">
-      <div class="col">
-        <div class="card good"><div class="t">ACT · click_bell</div><div class="v" style="font-size:30px"><strong>46/50 = 92%</strong></div><div class="bar ok"><i style="width:92%"></i></div><div class="small">95% Wilson CI：[81.2%, 96.8%]</div></div>
-      </div>
-      <div class="col">
-        <div class="card warn"><div class="t">DP · click_bell</div><div class="v" style="font-size:30px"><strong>40/50 = 80%</strong></div><div class="bar warn"><i style="width:80%"></i></div><div class="small">95% Wilson CI：[67.0%, 88.8%]</div></div>
-      </div>
+  <section class="slide" data-screen-label="09 通用流程">
+    <div class="eyebrow">从论文提炼 · 通用评价流程</div>
+    <h2>评价一个模型，按这七步走</h2>
+    <div class="flow" style="flex-wrap:wrap">
+      <div class="node"><b>1 问题</b><span>要证明什么？</span></div><div class="arr">→</div>
+      <div class="node"><b>2 变量</b><span>改什么、固定什么？</span></div><div class="arr">→</div>
+      <div class="node"><b>3 基线</b><span>和谁比？</span></div><div class="arr">→</div>
+      <div class="node"><b>4 考场</b><span>同分布/OOD/跨考场</span></div><div class="arr">→</div>
+      <div class="node"><b>5 指标</b><span>成功率之外还要什么？</span></div><div class="arr">→</div>
+      <div class="node"><b>6 统计</b><span>n/重复/区间/显著性</span></div><div class="arr">→</div>
+      <div class="node"><b>7 结论</b><span>证据、失败、边界</span></div>
     </div>
-    <div class="formula">两个区间有重叠：[81.2%, 88.8%]<br/>单轮 n=50 只能描述差异，不能直接宣布 ACT 显著更强。</div>
     <div class="cols3">
-      <div class="card"><div class="t">n 小</div><div class="v">区间宽，偶然性大；单集噪声可达 ±100pp。</div></div>
-      <div class="card"><div class="t">只跑一轮</div><div class="v">不知道多少差异来自运行方差，多少来自模型。</div></div>
-      <div class="card next"><div class="t">补 r2 / r3</div><div class="v">同配置重复，估计方差，再做合并与显著性判断。</div></div>
+      <div class="card"><div class="t">输入</div><div class="v">研究问题 + 模型/数据/方法/预算 + 基线</div></div>
+      <div class="card"><div class="t">过程</div><div class="v">受控实验 + 多条件评测 + 原始证据留存</div></div>
+      <div class="card good"><div class="t">输出</div><div class="v">能力画像 + 效应量 + 不确定性 + 失败模式 + 适用边界</div></div>
     </div>
-    <p class="sub" style="margin-top:14px"><strong>科普结论</strong>：点估计是“观测值”，置信区间是“我们有多确定”；两者要一起读。</p>
-<div class="gloss"><b>名词解释</b>区间重叠 ≠ 证明没有差异；只说明当前证据不够强。要更确定，需要更大 n，或用 r2 / r3 合并重复轮。</div>
-    <div class="foot"><span>12 统计</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <p class="quote">论文不会问“怎么把 shell 跑完”，它们先问“什么实验能回答研究问题”。工程只是让实验可执行、可复现。</p>
+    <div class="gloss"><b>名词解释</b>OOD = 分布外；效应量 = 差异有多大；显著性 = 差异是否超过随机噪声；边界 = 结论不能外推到哪里。</div>
+    <div class="foot"><span>09 通用流程</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 10 -->
-  <section class="slide" data-screen-label="13 证据">
-    <div class="eyebrow">要素七 · 证据</div>
-    <h2>分数必须能沿着一条链追回原始 episode</h2>
-    <div class="flow">
-      <div class="node"><b>Run ID</b><span>哪一次运行</span></div><div class="arr">→</div>
-      <div class="node"><b>Manifest</b><span>模型/协议/资源/完成状态</span></div><div class="arr">→</div>
-      <div class="node"><b>Aggregate</b><span>汇总指标</span></div><div class="arr">→</div>
-      <div class="node"><b>SQLite</b><span>逐集结果与步骤</span></div><div class="arr">→</div>
-      <div class="node"><b>JSONL / Video</b><span>原始轨迹与回放</span></div>
+  <section class="slide" data-screen-label="10 定义问题">
+    <div class="eyebrow">方法 1 · 定义研究问题</div>
+    <h2>先把“模型好不好”拆成可验证的问题</h2>
+    <div class="cols3">
+      <div class="card"><div class="t">能力</div><div class="v">零样本能不能操作？长程组合行不行？失败恢复呢？</div></div>
+      <div class="card"><div class="t">数据</div><div class="v">50 vs 550 条、clean vs randomized，数据多样性值多少分？</div></div>
+      <div class="card"><div class="t">方法</div><div class="v">ACT vs DP、全参 vs LoRA，同预算谁更有效？</div></div>
+      <div class="card"><div class="t">鲁棒性</div><div class="v">换光照、材质、位姿、物体后，性能掉多少？</div></div>
+      <div class="card"><div class="t">泛化</div><div class="v">跨考场、跨本体、跨场景、仿真到真机，结论还成立吗？</div></div>
+      <div class="card"><div class="t">效率</div><div class="v">成功率、延迟、训练成本、样本效率怎么权衡？</div></div>
     </div>
-    <div class="cols">
-      <div class="tree">&lt;run_id&gt;/
-  job.json
-  manifest.json
-  journals/
-    shard-000.jsonl
-  checkpoints/
-    seq-000001/
-      episode-000000.jsonl
-      episode-000000.meta.json
-  final/
-    aggregate.json
-    recording.sqlite
-    COMPLETED</div>
-      <div class="col">
-        <ul>
-          <li><strong>不可变</strong>：checkpoint 对象不覆盖，重复上传按 checksum 去重</li>
-          <li><strong>可恢复</strong>：manifest 记录已 committed episode</li>
-          <li><strong>可重算</strong>：aggregate 能从原始 episode 重新生成</li>
-          <li><strong>可审计</strong>：模型 revision、镜像 digest、协议版本都在 manifest 里</li>
-        </ul>
-      </div>
-    </div>
-    <p class="quote" style="margin-top:18px">只有 aggregate 没有原始数据，等于只有结论没有证据；只能信，不能验。</p>
-<div class="gloss"><b>名词解释</b>manifest = 这次考试的清单与完成状态；aggregate = 从原始记录算出的汇总；checksum = 文件指纹，用来发现损坏或被改动。</div>
-    <div class="foot"><span>13 证据</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="formula">问题模板：在 [条件] 下，模型 [M] 相对 [基线 B]，在 [任务/指标] 上表现如何，差异是否超过噪声？</div>
+    <div class="gloss"><b>名词解释</b>claim = 想证明的一句话；零样本 = 不在目标 task 上微调；样本效率 = 达到同样效果需要多少数据。</div>
+    <div class="foot"><span>10 定义问题</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 11 -->
-  <section class="slide" data-screen-label="14 增量归档">
-    <div class="eyebrow">证据的关键 · 跑多少，存多少</div>
-    <h2>不能等全部跑完再复制；每集完成就应 checkpoint</h2>
-    <div class="flow">
-      <div class="node"><b>Episode 0</b><span>原子提交<br/>上传 + 回读</span></div><div class="arr">→</div>
-      <div class="node"><b>Episode 1</b><span>原子提交<br/>上传 + 回读</span></div><div class="arr">→</div>
-      <div class="node"><b>Episode 2</b><span>原子提交<br/>上传 + 回读</span></div><div class="arr">→</div>
-      <div class="node"><b>…</b><span>每集独立 checkpoint</span></div><div class="arr">→</div>
-      <div class="node"><b>Finalize</b><span>manifest + aggregate<br/>COMPLETED</span></div>
-    </div>
+  <section class="slide" data-screen-label="11 实验矩阵">
+    <div class="eyebrow">方法 2 · 实验矩阵</div>
+    <h2>固定模型与预算，只让要研究的变量变化</h2>
     <table>
-      <tr><th style="width:20%">社区做法</th><th style="width:34%">机制</th><th>启示</th></tr>
-      <tr><td>VLA Harness</td><td>SQLite 每集原子事务、last committed attempt</td><td>本地已有可靠 recorder，补远程 sink</td></tr>
-      <tr><td>LeRobot</td><td>每 N episode 上传 Hub、支持 resume</td><td>episode 是天然边界</td></tr>
-      <tr><td>Ray Train</td><td>local staging → persistent → COMMITTED/VALIDATED</td><td>未持久化不算完成</td></tr>
-      <tr><td>Metaflow</td><td>step 边界 + 长任务 in-task checkpoint</td><td>长 task 必须边跑边存</td></tr>
+      <tr><th style="width:20%">层</th><th style="width:34%">固定/记录</th><th style="width:26%">可变化</th><th>为什么</th></tr>
+      <tr><td>模型</td><td>checkpoint、revision、架构、动作空间</td><td>不同基模</td><td>分清模型与权重</td></tr>
+      <tr><td>数据</td><td>来源、清洗、数量、任务分布</td><td>clean/randomized、50/550</td><td>回答数据价值</td></tr>
+      <tr><td>方法</td><td>ACT/DP、超参、seed、日志</td><td>全参/LoRA、optimizer</td><td>避免混淆归因</td></tr>
+      <tr><td>预算</td><td>优化步数、GPU 小时、精度</td><td>等步数/等成本</td><td>固定 epoch 会偏袒大数据</td></tr>
+      <tr><td>协议</td><td>task、Easy/Hard、种子、max_steps、n</td><td>不同考场/难度</td><td>保证可比</td></tr>
     </table>
-    <p class="quote" style="margin-top:18px">中途失败时，已完成集仍然可恢复；partial 可以出附录，但不能冒充完整结果。</p>
-<div class="gloss"><b>名词解释</b>原子提交 = step 行和 episode 结果要么一起写进去，要么都不写；COMMITTED = 已可靠落盘；VALIDATED = 落盘后还校验过。</div>
-    <div class="foot"><span>14 增量归档</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="formula">R01：ACT/DP × {50 clean, 50 clean+500 randomized} × {Easy, Hard} × 5 task<br/>= 40 格；每格 50 episode，共 2000 episode。</div>
+    <div class="gloss"><b>名词解释</b>自变量 = 主动改变的因素；控制变量 = 保持不变的条件；算力预算 = 训练步数/GPU 小时/成本。</div>
+    <div class="foot"><span>11 实验矩阵</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 12 -->
-  <section class="slide" data-screen-label="15 治理">
-    <div class="eyebrow">要素八 · 治理</div>
-    <h2>门禁不是“管得严”，是防止坏分数悄悄进表</h2>
+  <section class="slide" data-screen-label="12 基线与消融">
+    <div class="eyebrow">方法 3 · 基线与消融</div>
+    <h2>没有参照，差异只是“看起来不同”</h2>
     <div class="cols">
-      <div class="col">
-        <h3>注册与覆盖</h3>
-        <ul>
-          <li>模型 key、权重 revision、镜像 digest</li>
-          <li><code>covered_tasks</code> 前置检查</li>
-          <li>协议版本与考场真源</li>
-          <li>shared / finetuned 分组，不能混排</li>
-        </ul>
-      </div>
-      <div class="col">
-        <h3>机器门禁</h3>
-        <ul>
-          <li>版本、镜像、协议、报告、榜单</li>
-          <li>校准、打包、适配器、权重、文档</li>
-          <li>本仓 <strong>18 道门</strong>，PR 必过</li>
-          <li>partial 只进附录，不进正式榜</li>
-        </ul>
-      </div>
+      <div class="col"><h3>基线</h3><ul><li>官方 checkpoint</li><li>简单策略/随机动作</li><li>同模型不同条件</li><li>同任务历史最佳</li></ul></div>
+      <div class="col"><h3>实验设计</h3><ul><li>单因素消融：只改一个因素</li><li>因子实验：看因素交互</li><li>负对照：证明设置生效</li><li>holdout：防止挑题</li></ul></div>
     </div>
-    <div class="kpi-row">
-      <div class="kpi pri"><div class="n">66.56%</div><div class="l">X-VLA 50 task<br/>我们的实测</div></div>
-      <div class="kpi pri"><div class="n">67.96%</div><div class="l">官方快照<br/>同口径</div></div>
-      <div class="kpi ok"><div class="n">−1.40pp</div><div class="l">校准差<br/>第 15 道门守</div></div>
-      <div class="kpi ok"><div class="n">18/18</div><div class="l">门禁全绿<br/>坏结果不进表</div></div>
-    </div>
-    <p class="quote" style="margin-top:20px">校准回答“我们的尺子偏多少”；门禁回答“这次结果有没有资格被看到”。</p>
-    <p class="sub" style="margin-top:12px">工程侧还要管：GPU/存储成本、密钥与数据权限、产物保留期限、发布责任人。</p>
-<div class="gloss"><b>名词解释</b>registry = 模型/考场真源表；gate = 机器门禁；shared = 作者发布权重，finetuned = 我们在考场数据上训过，两者不能混排。</div>
-    <div class="foot"><span>15 治理</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <table style="margin-top:16px"><tr><th>设计</th><th>能回答</th><th>常见错误</th></tr><tr><td>只换数据 A/B</td><td>数据的独立贡献</td><td>同时换步数、精度、考场</td></tr><tr><td>ACT/DP × A/B</td><td>数据收益是否依赖模型族</td><td>只看总体均值</td></tr><tr><td>RoboTwin + LIBERO</td><td>能力是否跨考场迁移</td><td>合成一个总分</td></tr></table>
+    <div class="gloss"><b>名词解释</b>基线 = 比较参照；消融 = 拿掉/替换因素看贡献；交互 = A 的效果在 B 下不同；holdout = 不参与调参的保留集。</div>
+    <div class="foot"><span>12 基线与消融</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 13 -->
-  <section class="slide" data-screen-label="16 全流程">
-    <div class="eyebrow">串起来 · 一次评测的完整生命周期</div>
-    <h2>从“想测什么”到“这个分能说什么”</h2>
-    <div class="flow" style="flex-wrap:wrap">
-      <div class="node"><b>1 定义</b><span>研究问题 / 对照轴<br/>模型 / task / 协议 / n</span></div><div class="arr">→</div>
-      <div class="node"><b>2 预检</b><span>覆盖 / 权重 / 镜像 / OBS</span></div><div class="arr">→</div>
-      <div class="node"><b>3 Smoke</b><span>1 集验契约，不追分数</span></div><div class="arr">→</div>
-      <div class="node"><b>4 启动</b><span>开资源 / serve / env</span></div><div class="arr">→</div>
-      <div class="node"><b>5 执行</b><span>逐 episode，失败隔离</span></div><div class="arr">→</div>
-      <div class="node"><b>6 归档</b><span>每集 checkpoint + manifest</span></div><div class="arr">→</div>
-      <div class="node"><b>7 验证</b><span>aggregate / errors / CI / gates</span></div><div class="arr">→</div>
-      <div class="node"><b>8 发布</b><span>报告 / 榜单 / 证据链接</span></div>
-    </div>
-    <div class="cols3">
-      <div class="card"><div class="t">输入</div><div class="v">EvalJobSpec：模型、考场、协议、资源、sink</div></div>
-      <div class="card"><div class="t">过程</div><div class="v">adapter 组合 + 原子记录 + 增量持久化</div></div>
-      <div class="card good"><div class="t">输出</div><div class="v">可信分数 + 不确定性 + 原始证据 + 完成状态</div></div>
-    </div>
-    <p class="quote" style="margin-top:20px">评测不是一条 shell 命令，是一条<strong>可恢复、可审计、可复现的证据生产链</strong>。</p>
-<div class="gloss"><b>名词解释</b>smoke = 1 集只验链路，不用来看分数；fail fast = 不烧卡就拒绝错误配置；projector = 从原始证据生成报告和榜单。</div>
-    <div class="foot"><span>16 全流程</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  <section class="slide" data-screen-label="13 多考场与泛化">
+    <div class="eyebrow">方法 4 · 多考场与泛化</div>
+    <h2>一个考场的高分，不等于模型有泛化能力</h2>
+    <table><tr><th>评测域</th><th>怎么设计</th><th>能说明</th><th>不能说明</th></tr><tr><td>同分布</td><td>同任务/场景/数据口径</td><td>是否学会目标能力</td><td>换环境行不行</td></tr><tr><td>分布外 OOD</td><td>换物体/材质/光照/位姿</td><td>鲁棒性</td><td>跨本体一定行</td></tr><tr><td>跨考场</td><td>RoboTwin + LIBERO + …</td><td>能力迁移</td><td>合成一个总分</td></tr><tr><td>跨本体</td><td>不同关节/相机/动作</td><td>embodiment 泛化</td><td>adapter 无偏差</td></tr><tr><td>Sim2Real</td><td>仿真训练、真机测试</td><td>真实外部效度</td><td>仿真可替代真机</td></tr></table>
+    <div class="formula">覆盖度 = 考了多少题；泛化 = 没见过的条件还能不能用。两者分开报告。</div>
+    <div class="gloss"><b>名词解释</b>In-distribution = 接近训练分布；OOD = 分布外；embodiment = 机器人本体；Sim2Real = 仿真到真实。</div>
+    <div class="foot"><span>13 多考场与泛化</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 14 -->
-  <section class="slide" data-screen-label="17 失败案例">
-    <div class="eyebrow">避坑 · 最常见的八类失真</div>
-    <h2>很多“模型不行”，其实是评测坏了</h2>
-    <table style="font-size:16px">
-      <tr><th style="width:22%">现象</th><th style="width:30%">根因</th><th style="width:26%">怎么发现</th><th>怎么防</th></tr>
-      <tr><td>全 0 分、无异常</td><td>观测 resize / 归一化 / 相机错</td><td>单集 smoke + 动作/观测日志</td><td>adapter 契约测试</td></tr>
-      <tr><td>动作不动</td><td>随机权重、chunk 队列空、维度错</td><td>strict load + 有限值检查</td><td>权重 pin + spec 校验</td></tr>
-      <tr><td>结果突然变好</td><td>旧 <code>results/</code> 残留混入</td><td>run id / 文件时间线</td><td>新 run 清盘 + 独立目录</td></tr>
-      <tr><td>整轮 error</td><td>端口冲突、旧 serve、GPU 抢占</td><td>容器/端口/GPU 状态</td><td>参数化资源 + 串行门禁</td></tr>
-      <tr><td>长任务恒 0</td><td>超时上限太短</td><td>episode 耗时分布</td><td>step/time 协议匹配</td></tr>
-      <tr><td>partial 被当正式</td><td>n 不齐仍生成榜单</td><td>manifest / n_target</td><td>n == 目标才进榜</td></tr>
-      <tr><td>中途失败丢数据</td><td>只在最后上传</td><td>OBS 缺已完成 episode</td><td>每集 checkpoint</td></tr>
-      <tr><td>同名分数不可比</td><td>协议/镜像/种子未记录</td><td>manifest 缺字段</td><td>protocol_version + digest</td></tr>
-    </table>
-    <p class="quote" style="margin-top:18px">先证明“考试没坏”，再讨论“模型好不好”。顺序反了，结论一定是假的。</p>
-<div class="gloss"><b>名词解释</b>随机权重 = 模型结构对了但没加载训练参数；partial = 没跑满目标 n；残留 results = 上一轮文件没清，污染了本轮。</div>
-    <div class="foot"><span>17 失败案例</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
+  <section class="slide" data-screen-label="14 统计与重复">
+    <div class="eyebrow">方法 5 · 统计与重复</div>
+    <h2>论文用 seeds、区间和显著性，不靠一句“更高”</h2>
+    <div class="cols3">
+      <div class="card"><div class="t">样本量 n</div><div class="v">RoboTwin 100 rollouts/task；LIBERO 3 seeds；SimplerEnv 288 episodes。</div></div>
+      <div class="card"><div class="t">不确定性</div><div class="v">LIBERO 报均值±标准误；CALVIN 用长程成功率分布；我们每格报 95% CI。</div></div>
+      <div class="card"><div class="t">显著性</div><div class="v">LIBERO 用两尾 t-test，p=0.05；多重比较要防止偶然显著。</div></div>
+      <div class="card"><div class="t">聚合</div><div class="v">总体平均会被简单题带偏；要同时看 per-task 与 macro-average。</div></div>
+      <div class="card"><div class="t">重复轮</div><div class="v">同配置 r2/r3，区分模型差异与运行方差。</div></div>
+      <div class="card warn"><div class="t">表述</div><div class="v">“未观察到显著差异”不等于“证明没有差异”。</div></div>
+    </div>
+    <div class="gloss"><b>名词解释</b>标准误 = 均值的不确定性；p-value = 在“没有差异”假设下看到当前结果的概率；macro-average = 每 task 先算再平均。</div>
+    <div class="foot"><span>14 统计与重复</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 15 -->
-  <section class="slide" data-screen-label="18 检查清单">
-    <div class="eyebrow">拿来就能用 · 12 个问题</div>
-    <h2>看到一个分数，先问这 12 个问题</h2>
+  <section class="slide" data-screen-label="15 失败分析">
+    <div class="eyebrow">方法 6 · 失败分析</div>
+    <h2>论文靠失败模式解释分数，不只看平均值</h2>
     <div class="cols">
-      <div class="col">
-        <ol style="font-size:19px;line-height:1.85;color:#dbe3f0;padding-left:26px">
-          <li>测的是哪个权重 revision？</li>
-          <li>用了哪个 adapter / serve 镜像 digest？</li>
-          <li>task 覆盖多少？缺的 task 为什么缺？</li>
-          <li>Easy 还是 Hard？随机化了什么？</li>
-          <li>种子策略和逐集种子表在哪？</li>
-          <li>n 是多少？跑满目标了吗？</li>
-        </ol>
-      </div>
-      <div class="col">
-        <ol start="7" style="font-size:19px;line-height:1.85;color:#dbe3f0;padding-left:26px">
-          <li>errors 是 0 吗？fail 和 error 分开了吗？</li>
-          <li>95% CI 有多宽？差异超过噪声了吗？</li>
-          <li>有没有 r2 / r3 重复轮？</li>
-          <li>原始 episode / sqlite / 视频能追到吗？</li>
-          <li>中途失败后，已完成数据还在吗？</li>
-          <li>过门禁了吗？和官方校准差多少？</li>
-        </ol>
-      </div>
+      <div class="col"><h3>量化</h3><ul><li>per-task 热力图与长尾</li><li>fail/error/timeout 分开</li><li>步数、耗时、重试分布</li><li>最难 task / 最坏种子</li></ul></div>
+      <div class="col"><h3>定性</h3><ul><li>视频：滑落、碰撞、振荡、停住</li><li>观测/动作：输入与维度是否错</li><li>训练日志：过拟合、数据污染</li><li>归因：感知/规划/控制/环境</li></ul></div>
     </div>
-    <div class="formula">答不全 → 只能说“这次跑出了这个数”<br/>答得全 → 才能说“这个数可以比较、引用、复核”</div>
-<div class="gloss"><b>名词解释</b>n_target = 计划跑多少集；r2 / r3 = 重复轮；CI = 不确定性范围。三项都不知道，分数只能当参考。</div>
-    <div class="foot"><span>18 检查清单</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
+    <table style="margin-top:16px"><tr><th>同分 80%</th><th>模型 A</th><th>模型 B</th><th>结论</th></tr><tr><td>能力画像</td><td>简单题 100%，难题 40%</td><td>简单题 85%，难题 75%</td><td>B 更均衡</td></tr><tr><td>失败方式</td><td>多为 timeout</td><td>多为 grasp miss</td><td>改进方向不同</td></tr></table>
+    <div class="gloss"><b>名词解释</b>热力图 = 用颜色看每 task 表现；长尾 = 少数难题拉低整体；grasp miss = 没抓到；timeout = 超时。</div>
+    <div class="foot"><span>15 失败分析</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 16 -->
-  <section class="slide" data-screen-label="19 总结">
-    <div class="eyebrow">总结 · 一句话记住</div>
-    <h2 style="font-size:50px">模型评测不是“跑个分”，<br/>是生产一份可采信的证据。</h2>
-    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-top:30px">
-      <div class="kpi pri"><div class="n">可定义</div><div class="l">模型、考场、协议说清楚</div></div>
-      <div class="kpi ok"><div class="n">可复现</div><div class="l">同参数能跑出同数</div></div>
-      <div class="kpi ok"><div class="n">可审计</div><div class="l">每个数追得到原始证据</div></div>
-      <div class="kpi warn"><div class="n">可比较</div><div class="l">同口径、带 n 与不确定性</div></div>
+  <section class="slide" data-screen-label="16 结论模板">
+    <div class="eyebrow">方法 7 · 结论模板</div>
+    <h2>结论必须同时写清证据、条件和边界</h2>
+    <div class="formula">在 [模型/权重] + [训练条件] + [考场/协议] + [资源] 下，<br/>相对 [基线]，[指标] 变化 [效应量 + 区间]；<br/>适用于 [范围]，不适用于 [未测条件]。</div>
+    <div class="cols"><div class="card bad"><div class="t">不合格</div><div class="v">“ACT 比 DP 好。”<br/>“数据越多越好。”<br/>“这个模型泛化强。”</div></div><div class="card good"><div class="t">可检验</div><div class="v">“V100 fp32、同 40k 步、RoboTwin 5 task 下，数据 B 对 ACT Hard 成功率提升 X pp（95% CI …），对 DP 未观察到同样收益；不跨本体、不跨真机。”</div></div></div>
+    <div class="gloss"><b>名词解释</b>边界 = 结论适用条件；可检验 = 别人能用同样数据/协议复核；未观察到 ≠ 证明没有。</div>
+    <div class="foot"><span>16 结论模板</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide" data-screen-label="17 工程地基">
+    <div class="eyebrow">工程地基 · 让实验真的跑得起来</div>
+    <h2>论文设计完实验后，还需要八要素保证分数可信</h2>
+    <div class="cols3">
+      <div class="card"><div class="t">模型</div><div class="v">权重、adapter、serve 契约</div></div>
+      <div class="card"><div class="t">考场</div><div class="v">task、覆盖、判定</div></div>
+      <div class="card"><div class="t">环境</div><div class="v">本体、仿真器、资产</div></div>
+      <div class="card"><div class="t">协议</div><div class="v">种子、n、难度、max_steps</div></div>
+      <div class="card"><div class="t">运行</div><div class="v">GPU、端口、分片、恢复</div></div>
+      <div class="card"><div class="t">指标</div><div class="v">成功率、errors、CI、steps</div></div>
+      <div class="card"><div class="t">证据</div><div class="v">run/manifest/原始 episode</div></div>
+      <div class="card"><div class="t">治理</div><div class="v">registry、门禁、校准</div></div>
+      <div class="card warn"><div class="t">顺序</div><div class="v">先设计评价，再做工程；不要用工程复杂度替代研究问题。</div></div>
     </div>
-    <p class="quote" style="margin-top:34px;font-size:25px">八要素缺一个，分数只是“观测”；八要素齐了，得到可信分数；<strong>有了受控对照与边界分析，才能评价模型。</strong></p>
-    <p class="sub" style="margin-top:18px">延伸材料：技术版 21 页 deck、ADR-0004 双考场运行时、CloudRobo 评测读后、R01 训练数据轴。</p>
-    <div class="foot"><span>19 总结</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
+    <div class="gloss"><b>名词解释</b>adapter = 模型与考场转换层；manifest = 运行清单；校准 = 检查尺子偏多少；门禁 = 阻止坏结果进表。</div>
+    <div class="foot"><span>17 工程地基</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 18 -->
+  <section class="slide" data-screen-label="18 模型与适配器">
+    <div class="eyebrow">工程 1 · 模型与适配器</div>
+    <h2>“用了哪个模型”至少有四层</h2>
+    <div class="cols3"><div class="card"><div class="t">身份</div><div class="v">模型族、权重 repo、revision、训练数据。</div></div><div class="card"><div class="t">Adapter</div><div class="v">观测预处理、动作后处理、chunk/queue、reset。</div></div><div class="card"><div class="t">Serve</div><div class="v">镜像 digest、相机、resize、归一化、healthcheck。</div></div><div class="card"><div class="t">能力</div><div class="v">动作维度、状态维度、支持 task。</div></div></div>
+    <table style="margin-top:18px"><tr><th>模型</th><th>契约</th><th>适配重点</th></tr><tr><td>X-VLA</td><td>EE 16D quat</td><td>20D rot6d→16D；三相机；planner</td></tr><tr><td>ACT / DP</td><td>qpos 14D</td><td>ACT 要 resize；DP 不要；动作块队列</td></tr><tr><td>DB-CogACT</td><td>qpos 14D，按 task 分头</td><td>权重子目录、fp16</td></tr></table>
+    <div class="gloss"><b>名词解释</b>qpos = 关节角；EE = 末端位姿；quat/rot6d = 旋转表示；chunk = 一段动作；queue = 动作缓冲；digest = 镜像指纹。</div>
+    <div class="foot"><span>18 模型与适配器</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 19 -->
+  <section class="slide" data-screen-label="19 考场与环境">
+    <div class="eyebrow">工程 2 · 考场与环境</div>
+    <h2>考卷由 task、本体、仿真器和资产共同组成</h2>
+    <table><tr><th>层</th><th>管什么</th><th>差异例子</th><th>不一致后果</th></tr><tr><td>Task suite</td><td>题目与覆盖</td><td>RoboTwin 50 / LIBERO 130</td><td>覆盖面不同，不能混排</td></tr><tr><td>本体</td><td>关节、动作、相机</td><td>14D qpos / 7D EE</td><td>维度或语义错</td></tr><tr><td>仿真后端</td><td>物理、碰撞、渲染</td><td>SAPIEN / MuJoCo / PyBullet</td><td>分数不可直接横比</td></tr><tr><td>资产</td><td>物体、材质、URDF</td><td>revision、挂载、实体数量</td><td>场景漂移</td></tr></table>
+    <div class="formula">同模型 + 同协议 + 不同环境 = 不同考试；先固定考场，才能归因给模型。</div>
+    <div class="gloss"><b>名词解释</b>suite = 一组 task；URDF = 机器人结构文件；SAPIEN/MuJoCo/PyBullet = 三种仿真后端；资产 revision = 场景文件版本。</div>
+    <div class="foot"><span>19 考场与环境</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 20 -->
+  <section class="slide" data-screen-label="20 协议与运行">
+    <div class="eyebrow">工程 3 · 协议与运行</div>
+    <h2>协议决定“怎么考”，运行决定“有没有考坏”</h2>
+    <div class="cols"><div class="col"><h3>协议</h3><ul><li>种子与逐集种子表</li><li>目标 n / 实际 n</li><li>Easy/Hard 与随机化</li><li>max_steps / timeout</li><li>精度、镜像、重复轮</li></ul></div><div class="col"><h3>运行</h3><ul><li>serve 与环境分卡</li><li>端口/容器名参数化</li><li>分片与资源隔离</li><li>失败隔离与恢复</li><li>日志、GPU、episode 进度</li></ul></div></div>
+    <div class="formula">protocol_version = 考场 + n + 种子策略 + task_config + max_steps + harness + 镜像 digest</div>
+    <div class="gloss"><b>名词解释</b>seed = 随机种子；max_steps = 单集最多步数；shard = 分片进程；resume = 从已完成点继续；fail fast = 不烧卡就拒绝错配置。</div>
+    <div class="foot"><span>20 协议与运行</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 21 -->
+  <section class="slide" data-screen-label="21 指标与统计">
+    <div class="eyebrow">工程 4 · 指标与统计</div>
+    <h2>成功率只是分子/分母，论文还会看迁移、长程与排名</h2>
+    <table><tr><th>指标</th><th>回答什么</th><th>论文例子</th></tr><tr><td>成功率</td><td>成功多少</td><td>RoboTwin / CALVIN</td></tr><tr><td>FWT / NBT / AUC</td><td>迁移、遗忘、学习曲线</td><td>LIBERO</td></tr><tr><td>LH-MTLC 1–5</td><td>长程组合能力</td><td>CALVIN</td></tr><tr><td>MMRV / Pearson r</td><td>仿真排名是否接近真机</td><td>SimplerEnv</td></tr><tr><td>n / CI / repeats</td><td>结论有多稳</td><td>所有论文都需要</td></tr></table>
+    <div class="gloss"><b>名词解释</b>CI = 置信区间；FWT/NBT = 前向/后向迁移；AUC = 曲线下面积；MMRV = 仿真排名误差；repeat = 同配置重复实验。</div>
+    <div class="foot"><span>21 指标与统计</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 22 -->
+  <section class="slide" data-screen-label="22 证据与归档">
+    <div class="eyebrow">工程 5 · 证据与增量归档</div>
+    <h2>论文结论也必须能追回原始 episode</h2>
+    <div class="flow"><div class="node"><b>Run ID</b><span>哪次运行</span></div><div class="arr">→</div><div class="node"><b>Manifest</b><span>配置/完成状态</span></div><div class="arr">→</div><div class="node"><b>Aggregate</b><span>汇总指标</span></div><div class="arr">→</div><div class="node"><b>SQLite</b><span>逐集结果</span></div><div class="arr">→</div><div class="node"><b>JSONL/Video</b><span>原始证据</span></div></div>
+    <div class="cols"><div class="tree">&lt;run_id&gt;/
+  manifest.json
+  journals/shard-000.jsonl
+  checkpoints/seq-000001/
+    episode-000000.jsonl
+  final/
+    aggregate.json
+    COMPLETED</div><div class="col"><ul><li>每集原子提交后立即 checkpoint</li><li>checksum 回读才算 committed</li><li>resume 从持久 manifest 恢复</li><li>partial 只进附录</li></ul></div></div>
+    <div class="gloss"><b>名词解释</b>manifest = 运行清单；aggregate = 汇总；checkpoint = 持久化断点；checksum = 文件指纹；partial = 没跑满目标 n。</div>
+    <div class="foot"><span>22 证据与归档</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 23 -->
+  <section class="slide" data-screen-label="23 治理与校准">
+    <div class="eyebrow">工程 6 · 治理与校准</div>
+    <h2>门禁防止坏分数进表，校准检查尺子偏多少</h2>
+    <div class="cols"><div class="col"><h3>注册与门禁</h3><ul><li>权重 revision / 镜像 digest</li><li>covered_tasks / protocol_version</li><li>shared / finetuned 分组</li><li>18 道机器门禁</li></ul></div><div class="col"><h3>校准案例</h3><ul><li>X-VLA 50 task：66.56%</li><li>官方快照：67.96%</li><li>差 <strong>−1.40pp</strong></li><li>第 15 道门自动守</li></ul></div></div>
+    <div class="formula">校准 = 我们的尺子偏多少；门禁 = 这次结果有没有资格被看到；模型评价 = 在这些可信分数上做受控比较。</div>
+    <div class="gloss"><b>名词解释</b>registry = 真源表；gate = 机器门禁；shared = 作者权重；finetuned = 在考场数据上训过；校准 = 与官方参照比。</div>
+    <div class="foot"><span>23 治理与校准</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 24 -->
+  <section class="slide" data-screen-label="24 全流程">
+    <div class="eyebrow">串起来 · 从研究问题到可引用结论</div>
+    <h2>一次完整的模型评价，比“跑分”多这些步骤</h2>
+    <div class="flow" style="flex-wrap:wrap"><div class="node"><b>1 问题</b><span>要证明什么</span></div><div class="arr">→</div><div class="node"><b>2 设计</b><span>变量/基线/考场</span></div><div class="arr">→</div><div class="node"><b>3 预检</b><span>权重/镜像/覆盖</span></div><div class="arr">→</div><div class="node"><b>4 Smoke</b><span>验契约</span></div><div class="arr">→</div><div class="node"><b>5 实验</b><span>多条件运行</span></div><div class="arr">→</div><div class="node"><b>6 归档</b><span>逐集证据</span></div><div class="arr">→</div><div class="node"><b>7 分析</b><span>统计/失败/边界</span></div><div class="arr">→</div><div class="node"><b>8 结论</b><span>可引用报告</span></div></div>
+    <p class="quote">跑分只是第 5 步；模型评价是 1–8 的完整闭环。</p>
+    <div class="gloss"><b>名词解释</b>smoke = 小规模验链路；预检 = 不烧卡排除错配置；分析 = 从原始证据得出效应、不确定性与失败模式。</div>
+    <div class="foot"><span>24 全流程</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 25 -->
+  <section class="slide" data-screen-label="25 常见失真">
+    <div class="eyebrow">避坑 · 八类常见失真</div>
+    <h2>很多“模型不行”，其实是评测坏了</h2>
+    <table style="font-size:16px"><tr><th>现象</th><th>根因</th><th>怎么防</th></tr><tr><td>全 0 分、无异常</td><td>resize/归一化/相机错</td><td>adapter 契约测试</td></tr><tr><td>动作不动</td><td>随机权重/chunk 空/维度错</td><td>strict load + spec 校验</td></tr><tr><td>结果突然变好</td><td>旧 results 残留</td><td>新 run 清盘</td></tr><tr><td>整轮 error</td><td>端口/旧 serve/GPU 抢占</td><td>资源参数化</td></tr><tr><td>长任务恒 0</td><td>超时太短</td><td>协议匹配任务时长</td></tr><tr><td>partial 当正式</td><td>n 不齐</td><td>n==目标才进榜</td></tr><tr><td>中途失败丢数据</td><td>只最后上传</td><td>逐集 checkpoint</td></tr><tr><td>同名分数不可比</td><td>协议/镜像/种子没记</td><td>manifest + digest</td></tr></table>
+    <div class="gloss"><b>名词解释</b>随机权重 = 没加载训练参数；partial = 没跑满；残留 = 上一轮文件污染；spec = 模型与考场的接口契约。</div>
+    <div class="foot"><span>25 常见失真</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 26 -->
+  <section class="slide" data-screen-label="26 十二问">
+    <div class="eyebrow">拿来就用 · 12 个问题</div>
+    <h2>看到一个模型结论，先问这 12 个问题</h2>
+    <div class="cols"><div class="col"><ol style="font-size:19px;line-height:1.85;padding-left:26px"><li>研究问题是什么？</li><li>权重 revision 是哪个？</li><li>改了哪些变量，固定了哪些？</li><li>基线是谁？</li><li>task 覆盖多少？</li><li>同分布还是 OOD？</li></ol></div><div class="col"><ol start="7" style="font-size:19px;line-height:1.85;padding-left:26px"><li>n / seeds / 重复轮是多少？</li><li>指标匹配研究问题吗？</li><li>区间/显著性看了吗？</li><li>失败模式是什么？</li><li>原始证据能追到吗？</li><li>结论边界写清了吗？</li></ol></div></div>
+    <div class="formula">答不全 → 只能说“这次跑出了这个数”<br/>答得全 → 才能说“这是对模型能力的评价”</div>
+    <div class="gloss"><b>名词解释</b>OOD = 分布外；seed = 随机种子；重复轮 = 同配置再跑；基线 = 比较参照；边界 = 结论适用范围。</div>
+    <div class="foot"><span>26 十二问</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 27 -->
+  <section class="slide" data-screen-label="27 总结">
+    <div class="eyebrow">总结 · 一句话记住</div>
+    <h2 style="font-size:48px">模型评测不是“跑个分”，<br/>是用受控实验回答一个研究问题。</h2>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-top:28px"><div class="kpi pri"><div class="n">有问题</div><div class="l">先定义要证明什么</div></div><div class="kpi ok"><div class="n">有对照</div><div class="l">变量、基线、条件</div></div><div class="kpi ok"><div class="n">有统计</div><div class="l">n、区间、重复</div></div><div class="kpi warn"><div class="n">有边界</div><div class="l">失败与适用范围</div></div></div>
+    <p class="quote" style="margin-top:30px;font-size:24px">工程八要素保证分数可信；受控实验保证结论有意义。两者缺一不可。</p>
+    <p class="sub" style="margin-top:16px">论文来源：RoboTwin 2.0（arXiv:2506.18088）· LIBERO（2306.03310）· CALVIN（2112.03227）· SimplerEnv（2405.05941）· vla-eval（2603.13966）。</p>
+    <div class="foot"><span>27 总结</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
   </section>
 
 </div>
