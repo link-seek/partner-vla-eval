@@ -40,7 +40,7 @@
   }
   section.slide{
     position:absolute;inset:0;
-    padding:64px 80px 88px;
+    padding:72px 88px 96px;
     display:none;
     flex-direction:column;
     justify-content:center;
@@ -52,8 +52,8 @@
     text-transform:uppercase;color:var(--primary);margin-bottom:18px;
   }
   h1{font-size:56px;line-height:1.12;font-weight:700;letter-spacing:-.02em}
-  h2{font-size:36px;line-height:1.25;font-weight:650;letter-spacing:-.01em;margin-bottom:10px}
-  .sub{color:var(--muted);font-size:17px;line-height:1.6;max-width:82ch}
+  h2{font-size:42px;line-height:1.25;font-weight:650;letter-spacing:-.01em;margin-bottom:16px}
+  .sub{color:var(--muted);font-size:20px;line-height:1.6;max-width:88ch}
   .rule{height:1px;background:var(--line);margin:26px 0}
   .grow{flex:1}
   /* cover */
@@ -64,17 +64,17 @@
   .cover .meta b{display:block;color:var(--text);font-weight:500;margin-top:6px;font-size:13px}
   /* kpi */
   .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:8px}
-  .kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:22px 20px}
-  .kpi .n{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:28px 24px}
+  .kpi .n{font-size:46px;font-weight:700;letter-spacing:-.02em;line-height:1}
   .kpi .n small{font-size:17px;font-weight:500;color:var(--muted);margin-left:4px}
-  .kpi .l{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .kpi .l{font-size:16px;color:var(--muted);margin-top:12px;line-height:1.55}
   .kpi.ok .n{color:var(--success)}
   .kpi.warn .n{color:var(--warning)}
   .kpi.pri .n{color:var(--primary)}
   /* table */
-  table{width:100%;border-collapse:collapse;font-size:15px}
-  th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  table{width:100%;border-collapse:collapse;font-size:18px}
+  th,td{text-align:left;padding:22px 18px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
   td.num{font-family:var(--mono);white-space:nowrap}
   tr:last-child td{border-bottom:none}
   .tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
@@ -85,13 +85,13 @@
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:8px}
   .col h3{font-size:14px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
   ul{list-style:none}
-  li{position:relative;padding-left:18px;margin-bottom:12px;font-size:15.5px;line-height:1.6;color:#dbe3f0}
+  li{position:relative;padding-left:20px;margin-bottom:16px;font-size:18px;line-height:1.6;color:#dbe3f0}
   li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--primary);opacity:.75}
   li.dim::before{background:var(--muted)}
   li strong{color:var(--text);font-weight:600}
   .quote{
     border-left:2px solid var(--primary);padding:6px 0 6px 20px;
-    font-size:19px;line-height:1.7;color:#e6ecf7;
+    font-size:22px;line-height:1.7;color:#e6ecf7;
   }
   .foot{
     position:absolute;left:80px;right:80px;bottom:30px;
@@ -106,9 +106,9 @@
   .big-stat small{font-size:22px;color:var(--muted);font-weight:500;margin-left:6px;letter-spacing:0}
   .muted{color:var(--muted)}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:16px}
-  .card{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:20px}
-  .card .t{font-size:13px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-  .card .v{font-size:15.5px;line-height:1.6;color:#dbe3f0}
+  .card{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:26px}
+  .card .t{font-size:14px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .card .v{font-size:18px;line-height:1.6;color:#dbe3f0}
   .card.next{border-color:rgba(139,92,246,.35)}
   .card.next .t{color:#c4b5fd}
 </style>
@@ -138,7 +138,7 @@
   <section class="slide" data-screen-label="02 已建成证据">
     <div class="eyebrow">已建成 · 六个可验证证据</div>
     <h2>供给端不是“感觉做得不错”，是六条硬证据</h2>
-    <table style="font-size:14px;margin-top:12px">
+    <table style="font-size:17px;margin-top:14px">
       <tr><th style="width:16%">能力</th><th style="width:38%">证据</th><th style="width:22%">能证明什么</th><th>边界 / 出处</th></tr>
       <tr><td>官榜校准</td><td>X-VLA 50 task：<strong>66.56%</strong> vs 官方 <strong>67.96%</strong>（−1.40pp，n=5000）</td><td>我们的尺子没有系统性偏差</td><td>第 15 道门；官方快照 + calibration_row</td></tr>
       <tr><td>官方 ACT</td><td>click_bell <strong>46/50 = 92%</strong>，50 seeds，0 error</td><td>公开 ckpt 能直接跑</td><td>demo_clean-100；PR #57 / #60</td></tr>
@@ -155,7 +155,7 @@
   <section class="slide" data-screen-label="03 为什么自己做">
     <div class="eyebrow">为什么必须自己做 · CloudRobo 公开文档对照</div>
     <h2>平台默认值解决“快速验证”，不解决“横向可比”</h2>
-    <table style="font-size:13.5px;margin-top:10px">
+    <table style="font-size:16.5px;margin-top:12px">
       <tr><th style="width:13%">维度</th><th style="width:30%">CloudRobo 默认</th><th style="width:30%">我们的尺子</th><th>实际影响</th></tr>
       <tr><td>考场</td><td>任务集仅 LIBERO；RoboTwin 不在列表</td><td>RoboTwin 2.0 全 50 task</td><td>我们的 50 个 task 它不收</td></tr>
       <tr><td>单集时长</td><td>每轮 0–300 s（默认 90），文档未给放宽路径</td><td>step 上限 800，80 min/集也跑完</td><td>长程任务在平台口径下不可评</td></tr>
@@ -174,7 +174,7 @@
   <section class="slide" data-screen-label="04 风险与缺口">
     <div class="eyebrow">风险 · 不回避，才能做决策</div>
     <h2>最大风险不是技术失败，是一直没有外部用户</h2>
-    <table style="font-size:14px;margin-top:12px">
+    <table style="font-size:17px;margin-top:14px">
       <tr><th style="width:18%">风险</th><th style="width:27%">现状证据</th><th style="width:25%">不处理的后果</th><th>对策 / 判据</th></tr>
       <tr><td><strong>外部引用 0</strong></td><td>没有合作方验收、采购比对或第三方复现；AI 读者仅临时证据</td><td>尺子无法变现，投入变自嗨</td><td>两周内 1 个真实用例；对方引用一次</td></tr>
       <tr><td><strong>统计力不足</strong></td><td>n=50、单轮，噪声带约 ±8pp</td><td>把点估计差异误判成模型优劣</td><td>补 r2；报告合并区间与重复轮差异</td></tr>
@@ -191,7 +191,7 @@
   <section class="slide" data-screen-label="05 两周行动">
     <div class="eyebrow">执行 · 两周计划</div>
     <h2>三件事，每件都有交付物、成本与验收标准</h2>
-    <table style="font-size:14px;margin-top:12px">
+    <table style="font-size:17px;margin-top:14px">
       <tr><th style="width:8%">优先级</th><th style="width:23%">动作</th><th style="width:24%">交付物</th><th style="width:22%">验收标准</th><th style="width:11%">成本</th><th>时间</th></tr>
       <tr><td><span class="tag warn">P0</span></td><td><strong>指定一个真实用例</strong><br/>合作方验收 / 采购比对 / 榜单提交三选一</td><td>一份可复现评测报告 + 原始产物索引 + 对方签收记录</td><td><strong>对方引用一次</strong>我们的报告或数字</td><td>人 1 名</td><td>第 1–10 天</td></tr>
       <tr><td><span class="tag warn">P0</span></td><td><strong>补重复轮 r2</strong><br/>1 模型 × 1 task × 50 ep × 2 轮</td><td>两轮 aggregate + 合并区间 + 差异是否显著的结论</td><td>报告能回答“差异是否显著”，不只报点估计</td><td>约 ¥20</td><td>第 3–7 天</td></tr>
@@ -210,7 +210,7 @@
   <section class="slide" data-screen-label="06 决策选项">
     <div class="eyebrow">拍板 · 三条路，推荐 B</div>
     <h2>不是“要不要继续”，是“继续投哪一层”</h2>
-    <table style="font-size:14px;margin-top:12px">
+    <table style="font-size:17px;margin-top:14px">
       <tr><th style="width:16%">选项</th><th style="width:24%">投入</th><th style="width:26%">回报</th><th style="width:18%">主要风险</th><th>建议</th></tr>
       <tr><td><strong>A · 停止</strong></td><td>保留现仓与产物，不新增</td><td>省 ¥32.87/h；已有材料可复用</td><td>沉没成本无法转成外部价值</td><td><span class="tag">不推荐</span></td></tr>
       <tr><td><strong>B · 需求优先</strong></td><td>1 人 × 2 周；r2 约 ¥20；S3 按已批预算执行</td><td>首个外部引用 + 显著性判断 + 数据体检</td><td>对方未必采用，但能拿到真实反馈</td><td><span class="tag ok">推荐</span></td></tr>
