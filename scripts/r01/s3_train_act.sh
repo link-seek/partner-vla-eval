@@ -76,7 +76,8 @@ conda run -n robotwin python imitate_episodes.py \
   --policy_class ACT --kl_weight 10 --chunk_size 50 \
   --hidden_dim 512 --batch_size $BATCH --dim_feedforward 3200 \
   --num_epochs $EPOCHS --lr 1e-5 --save_freq $SAVE_FREQ \
-  --state_dim 14 --seed $SEED 2>&1 | tail -6
+  --state_dim 14 --seed $SEED 2>&1 \
+  | grep --line-buffered -E "Train loss|Val loss|Training finished|Error|Traceback|out of memory"
 test -f /out/$RUN_NAME/policy_last.ckpt
 test -f /out/$RUN_NAME/dataset_stats.pkl
 ls -lh /out/$RUN_NAME/policy_last.ckpt /out/$RUN_NAME/dataset_stats.pkl

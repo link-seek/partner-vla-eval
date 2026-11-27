@@ -10,6 +10,11 @@ on:
   workflow_run:
     workflows: ["Model Matrix (base models x exam tasks)"]
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "要回填的 matrix run id（手动补收用）"
+        required: true
 
 concurrency:
   group: post-run-collect
@@ -35,13 +40,13 @@ jobs:
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: /tmp/collected
 
       - name: Show what we got
         run: |
-          echo "run=${{ github.event.workflow_run.id }} conclusion=${{ github.event.workflow_run.conclusion }}"
+          echo "run=${{ github.event.workflow_run.id || inputs.run_id }} conclusion=${{ github.event.workflow_run.conclusion }}"
           ls -l /tmp/collected 2>/dev/null || echo "（无 artifact）"
 
       - name: Fallback — pull matrix/ from OBS
@@ -75,6 +80,10 @@ jobs:
             [ -n "$(ls /tmp/collected 2>/dev/null)" ] && break
           done
 
+      - name: Install python deps (numpy)
+        if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
+        run: python3 -m pip install --quiet numpy
+
       - name: Backfill reports + leaderboard
         if: always() && (steps.fetch.outcome == 'success' || steps.obs-fallback.outcome == 'success')
         run: |
@@ -89,7 +98,7 @@ jobs:
             echo "protocol=$proto"
             python3 scripts/data/gen_reports.py "$f" "$proto"
             python3 scripts/data/make_leaderboard.py "$f" "$proto" \
-              --run "${{ github.event.workflow_run.id }}"
+              --run "${{ github.event.workflow_run.id || inputs.run_id }}"
           done
           [ "$found" = 1 ] || { echo "artifact 里没有 collected-*.json"; exit 1; }
 
@@ -109,6 +118,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "无变化，不提交"
           else
-            git commit -m "chore(auto): 收数 run ${{ github.event.workflow_run.id }} → 报告 hard_success/gap + 榜单"
+            git commit -m "chore(auto): 收数 run ${{ github.event.workflow_run.id || inputs.run_id }} → 报告 hard_success/gap + 榜单"
             git push
           fi
