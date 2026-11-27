@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>评测底座：执行汇报（6 页）</title>
+<style>
+  :root{
+    --primary:#60a5fa;
+    --secondary:#a78bfa;
+    --success:#22c55e;
+    --warning:#fbbf24;
+    --danger:#fb7185;
+    --surface:#121722;
+    --surface-2:#1a2130;
+    --line:#26304a;
+    --text:#f8fafc;
+    --muted:#93a1bb;
+    --mono:"SF Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--surface);color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  /* 16:9 固定舞台 + 按视口等比缩放。
+     原来 .deck 是 100%×100%、字号写死 px：在 1920×1080 上正常，
+     但在宽屏/超宽屏上内容会缩成左上角一小块（2026-11-25 实测反馈）。
+     改成固定 1920×1080 舞台居中，用 --fit 等比缩放；
+     视口正好 1920×1080 时 --fit=1，导出结果与改动前完全一致。 */
+  .deck{
+    position:fixed; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform:translate(-50%,-50%) scale(var(--fit,1));
+    transform-origin:center center;
+  }
+  section.slide{
+    position:absolute;inset:0;
+    padding:64px 80px 88px;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    background:var(--surface);
+  }
+  section.slide.active{display:flex}
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--primary);margin-bottom:18px;
+  }
+  h1{font-size:56px;line-height:1.12;font-weight:700;letter-spacing:-.02em}
+  h2{font-size:36px;line-height:1.25;font-weight:650;letter-spacing:-.01em;margin-bottom:10px}
+  .sub{color:var(--muted);font-size:17px;line-height:1.6;max-width:82ch}
+  .rule{height:1px;background:var(--line);margin:26px 0}
+  .grow{flex:1}
+  /* cover */
+  .cover{justify-content:center}
+  .cover h1{font-size:64px;max-width:22ch}
+  .cover .lead{margin-top:22px;font-size:19px;color:var(--muted);line-height:1.7;max-width:74ch}
+  .cover .meta{margin-top:44px;display:flex;gap:44px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .cover .meta b{display:block;color:var(--text);font-weight:500;margin-top:6px;font-size:13px}
+  /* kpi */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:8px}
+  .kpi{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:22px 20px}
+  .kpi .n{font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .kpi .n small{font-size:17px;font-weight:500;color:var(--muted);margin-left:4px}
+  .kpi .l{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .kpi.ok .n{color:var(--success)}
+  .kpi.warn .n{color:var(--warning)}
+  .kpi.pri .n{color:var(--primary)}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th,td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  td.num{font-family:var(--mono);white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+  .tag.ok{color:var(--success);border-color:rgba(34,197,94,.4)}
+  .tag.warn{color:var(--warning);border-color:rgba(251,191,36,.4)}
+  .tag.next{color:#c4b5fd;border-color:rgba(167,139,250,.5)}
+  /* two col */
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:8px}
+  .col h3{font-size:14px;font-family:var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  ul{list-style:none}
+  li{position:relative;padding-left:18px;margin-bottom:12px;font-size:15.5px;line-height:1.6;color:#dbe3f0}
+  li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--primary);opacity:.75}
+  li.dim::before{background:var(--muted)}
+  li strong{color:var(--text);font-weight:600}
+  .quote{
+    border-left:2px solid var(--primary);padding:6px 0 6px 20px;
+    font-size:19px;line-height:1.7;color:#e6ecf7;
+  }
+  .foot{
+    position:absolute;left:80px;right:80px;bottom:30px;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);
+  }
+  .dot{display:flex;gap:6px}
+  .dot i{width:6px;height:6px;border-radius:50%;background:#2b3550;display:block}
+  .dot i.on{background:var(--primary)}
+  code{font-family:var(--mono);font-size:.92em;background:rgba(96,165,250,.10);color:#bfd8ff;padding:1px 6px;border-radius:5px}
+  .big-stat{font-size:72px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--primary)}
+  .big-stat small{font-size:22px;color:var(--muted);font-weight:500;margin-left:6px;letter-spacing:0}
+  .muted{color:var(--muted)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:16px}
+  .card{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card .t{font-size:13px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .card .v{font-size:15.5px;line-height:1.6;color:#dbe3f0}
+  .card.next{border-color:rgba(139,92,246,.35)}
+  .card.next .t{color:#c4b5fd}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 01 -->
+  <section class="slide cover active" data-screen-label="01 结论">
+    <div class="eyebrow">执行汇报 · 2026-11-27</div>
+    <h1>这是把好尺子，<br/>但还没有人拿它量东西。</h1>
+    <p class="lead">partner-vla-eval 评测底座的价值判断与下一步。<br/>不是再证明"我们能跑分"，而是把第一笔<strong>外部引用</strong>跑通。</p>
+    <div class="meta">
+      <div>判断<b>内部能力：价值大</b></div>
+      <div>产品化<b>需求侧仍是 0</b></div>
+      <div>建议<b>继续投，但只投三件事</b></div>
+    </div>
+    <div class="foot"><span>01 结论</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 02 -->
+  <section class="slide" data-screen-label="02 已建成">
+    <div class="eyebrow">已建成 · 三个不可替代的能力</div>
+    <h2>供给端已经做到 80 分</h2>
+    <p class="sub" style="margin-bottom:22px">不是"跑过几个模型"，是三件别人通常没有的事：能对上官榜、能复现、能接上别人接不了的模型。</p>
+    <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+      <div class="kpi ok"><div class="n">−1.40pp</div><div class="l">X-VLA 50 task：66.56% vs 官方 67.96%<br/>校准门自动守，分数能引用</div></div>
+      <div class="kpi pri"><div class="n">可复现</div><div class="l">protocol_version + 镜像 digest + 逐集种子表<br/>run id → 原始产物，全程可追</div></div>
+      <div class="kpi warn"><div class="n">ACT 92%<div style="font-size:20px;margin-top:6px">DP 80%</div></div><div class="l">官方 ckpt 已接入，各 50 集参考<br/>1 集 smoke 先验，零 error</div></div>
+    </div>
+    <div class="rule"></div>
+    <p class="quote">再加上 <strong>18 道门</strong>：坏结果不进表，版本/镜像/校准/打包都由机器判定。基础设施已经不是瓶颈。</p>
+    <div class="foot"><span>02 已建成</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide" data-screen-label="03 为什么自己做">
+    <div class="eyebrow">为什么必须自己做 · 对标 CloudRobo</div>
+    <h2>平台解决"能不能跑"，尺子解决"可不可比"</h2>
+    <p class="sub" style="margin-bottom:20px">以华为云 CloudRobo 公开文档为样本（未控制台实测）：它强在一站式与数据体检；模型评测的默认值决定了我们的题测不了。</p>
+    <div class="cols" style="gap:32px">
+      <div class="col">
+        <h3 style="color:var(--warning)">CloudRobo 的默认</h3>
+        <ul>
+          <li class="dim"><strong>考场</strong>：任务集仅 LIBERO，RoboTwin 不在列表</li>
+          <li class="dim"><strong>时长</strong>：每轮 0–300 s（默认 90），文档未给放宽路径</li>
+          <li class="dim"><strong>读数</strong>：成功率 + 耗时，无 error 分类、无置信区间</li>
+          <li class="dim"><strong>复现</strong>：场景种子单值，未提官榜校准</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3 style="color:var(--success)">我们的尺子</h3>
+        <ul>
+          <li><strong>考场</strong>：RoboTwin 全 50 task，长程任务按 step 上限跑完</li>
+          <li><strong>读数</strong>：n / errors / 95% CI / 平均步数，逐格</li>
+          <li><strong>复现</strong>：逐集种子 + protocol_version + digest</li>
+          <li><strong>校准</strong>：对官榜 −1.40pp，第 15 道门守</li>
+        </ul>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:16px"><strong>公平地说</strong>：它的数据评测（安全/效率/平稳性三维、20+ 指标、PDF 报告）比我们深；我们赢在模型分数的可比与可复核。</p>
+    <div class="foot"><span>03 为什么自己做</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide" data-screen-label="04 最诚实的缺口">
+    <div class="eyebrow">风险 · 不写出来，别人也会问</div>
+    <h2>现在最缺的不是门禁，是使用</h2>
+    <div class="grid3" style="grid-template-columns:repeat(2,1fr);margin-top:18px">
+      <div class="card" style="border-color:rgba(251,113,133,.4)"><div class="t" style="color:var(--danger)">01 外部引用 = 0</div><div class="v">所有证据都是自证：自己跑、自己写、AI 读者也是临时证据。<br/><strong>尺子的价值 = 被引用次数，现在是 0。</strong></div></div>
+      <div class="card"><div class="t">02 统计力撑不起"谁更强"</div><div class="v">n=50、单轮，噪声带约 ±8pp。<br/>现在只能回答"这个配置多少分"，不能回答"模型 A 是否优于 B"。</div></div>
+      <div class="card"><div class="t">03 数据质量维度薄</div><div class="v">S1 只有格式校验 + 统计（2750 文件 / 38 万帧 / 0 坏文件）。<br/>安全、效率、平稳性三维还没建。</div></div>
+      <div class="card"><div class="t">04 成本线性</div><div class="v">¥32.87/h；20 个 ckpt 约 7.5–11 天、¥6000–8700。<br/>没有规模效应前，每加一个模型都是线性成本。</div></div>
+    </div>
+    <p class="quote" style="margin-top:26px">继续加门禁的边际收益，已经低于找第一个真实用户。</p>
+    <div class="foot"><span>04 最诚实的缺口</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide" data-screen-label="05 下一步">
+    <div class="eyebrow">建议 · 下一步只做三件事</div>
+    <h2>从"跑得可信"跨到"有人采信"</h2>
+    <div class="grid3" style="grid-template-columns:repeat(3,1fr);margin-top:18px">
+      <div class="card next"><div class="t">P0 · 找第一个真实引用</div><div class="v"><strong>一次</strong>合作方验收、采购比对或榜单提交。<br/>交付一份对方愿意引用的可复现报告。</div></div>
+      <div class="card next"><div class="t">P0 · 补重复轮 r2</div><div class="v">把 n 与重复轮补上。<br/>从"这个配置多少分"升级到"差异是否显著"。</div></div>
+      <div class="card next"><div class="t">P1 · 借数据三维</div><div class="v">安全 / 效率 / 平稳性；先复用维度名，阈值按 RoboTwin 数据分布校准。</div></div>
+    </div>
+    <div class="rule"></div>
+    <p class="quote">明确不做：<strong>不再加门禁、不再堆文档、不正面做"大而全平台"</strong>。把资源集中到"第一次被采用"。</p>
+    <div class="foot"><span>05 下一步</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 06 -->
+  <section class="slide" data-screen-label="06 决策">
+    <div class="eyebrow">需要拍板 · 资源与验收</div>
+    <h2>给两周，换一次"分数被采用"</h2>
+    <table style="font-size:16px;margin-top:14px">
+      <tr><th style="width:20%">项</th><th>建议</th><th style="width:25%">完成判据</th></tr>
+      <tr><td>真实用例</td><td>指定一个合作方的验收 / 采购比对 / 榜单提交场景</td><td>对方引用一次我们的报告</td></tr>
+      <tr><td>重复轮</td><td>选定 1 个模型 × 1 个 task 跑 r2，先验证显著性口径</td><td>报告能给"差异是否显著"</td></tr>
+      <tr><td>数据体检</td><td>S1 数据加安全 / 效率 / 平稳性三维，阈值标注来源</td><td>输出 1 份数据质量报告</td></tr>
+      <tr><td>投入</td><td>r2 试验约 ¥20；R01 S3 已确认 ¥6000–8700 / 7.5–11 天</td><td>不新增算力、不并行抢卡</td></tr>
+    </table>
+    <p class="quote" style="margin-top:30px">一句话：<strong>好尺子已经做出来了；下一步不是把它磨得更亮，是找第一个拿它量东西的人。</strong></p>
+    <p class="sub" style="margin-top:12px;font-size:12.5px">材料索引：21 页技术 deck（capability-deck.html）· 逐字稿（script-2026-11-25.md）· CloudRobo 读后（reports/cloudrobo-eval-2026-11-26.md）· R01 数据轴（reports/R01-training-data-axis.md）。</p>
+    <div class="foot"><span>06 决策</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('section.slide'));
+  var i=0;
+  function render(){slides.forEach(function(s,k){s.classList.toggle('active',k===i);});}
+  function go(n){i=(n+slides.length)%slides.length;render();}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){go(i+1);e.preventDefault();}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){go(i-1);e.preventDefault();}
+    if(e.key==='Home')go(0);if(e.key==='End')go(slides.length-1);
+  });
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){if(x0===null)return;var dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));x0=null;},{passive:true});
+  document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*.72)go(i+1);else if(e.clientX<window.innerWidth*.28)go(i-1);});
+  function fit(){var s=Math.min(window.innerWidth/1920,window.innerHeight/1080);document.documentElement.style.setProperty('--fit',String(s));}
+  window.addEventListener('resize',fit);fit();render();
+})();
+</script>
+</body>
+</html>
