@@ -52,6 +52,9 @@
   .small{font-size:13px;color:var(--muted);line-height:1.55}.muted{color:var(--muted)}.good{color:var(--success)}.bad{color:var(--danger)}.warn{color:var(--warning)}
   .tree{font-family:var(--mono);font-size:15px;line-height:1.65;color:#cbd7ea;background:#0d111b;border:1px solid var(--line);border-radius:12px;padding:20px 24px;white-space:pre}
   .bar{height:18px;border-radius:9px;background:#26304a;position:relative;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--primary)}.bar.ok i{background:var(--success)}.bar.warn i{background:var(--warning)}
+
+  .gloss{margin-top:12px;padding:10px 14px;border-left:2px solid var(--primary);background:rgba(96,165,250,.06);font-size:13.5px;line-height:1.5;color:#b9c7dc}
+  .gloss b{color:var(--primary);font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;margin-right:8px}
 </style>
 </head>
 <body>
@@ -61,12 +64,12 @@
   <section class="slide active" data-screen-label="01 封面">
     <div class="eyebrow">模型评测科普 · 2026-11</div>
     <h1>一次模型评测，<br/>到底在评什么？</h1>
-    <p class="lead">一个分数不是“模型跑了一次”，而是 <strong>模型 × 考场 × 环境 × 协议 × 运行 × 指标 × 证据 × 治理</strong> 的共同结果。少一个要素，这个分数就不可比。</p>
+    <p class="lead">一个分数不是“模型跑了一次”，而是 <strong>模型 × 考场 × 环境 × 协议 × 运行 × 指标 × 证据 × 治理</strong> 的共同结果。少一个要素，这个分数就不可比。<br/>这份材料分两层：先讲怎么生产可信分数，再讲怎么用对照实验评价模型。</p>
     <div class="chip-row">
       <span class="chip">01 模型</span><span class="chip">02 考场</span><span class="chip">03 环境</span><span class="chip">04 协议</span>
       <span class="chip">05 运行</span><span class="chip">06 指标</span><span class="chip">07 证据</span><span class="chip">08 治理</span>
     </div>
-    <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+    <div class="foot"><span>01 封面</span><span class="dot"><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 02 -->
@@ -85,11 +88,66 @@
       <div class="card"><div class="t">Governance · 治理</div><div class="v">registry、门禁、校准、榜单规则</div></div>
       <div class="card warn"><div class="t">结论</div><div class="v">任一要素缺失，数字只能描述“这次运行”，不能支撑横向比较。</div></div>
     </div>
-    <div class="foot"><span>02 总览</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>checkpoint = 固定下来的一份权重快照；adapter = 模型与考场之间的转换层；protocol_version = 考场规则版本；digest = 镜像内容指纹。</div>
+    <div class="foot"><span>02 总览</span><span class="dot"><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 03 -->
-  <section class="slide" data-screen-label="03 模型">
+  <section class="slide" data-screen-label="03 跑分与评价">
+    <div class="eyebrow">概念先拆开 · 跑分 ≠ 评价</div>
+    <h2>跑出一个分数，不等于评价一个基模</h2>
+    <table>
+      <tr><th style="width:20%">层次</th><th style="width:30%">在研究什么</th><th style="width:25%">能得出的结论</th><th>不能得出的结论</th></tr>
+      <tr><td><strong>Benchmark result</strong><br/>跑分 / 单次评测</td><td>一个 checkpoint，在一套协议和一个考场上的观测</td><td>“这次跑了 92%”</td><td>“这个基模更强 / 泛化更好”</td></tr>
+      <tr><td><strong>Controlled comparison</strong><br/>受控对照</td><td>多个条件，只动一个关键变量，比较差值</td><td>“数据口径 B 比 A 高 6pp”</td><td>“所有数据策略都更好”</td></tr>
+      <tr><td><strong>Model evaluation</strong><br/>模型评价</td><td>多考场 × 多协议 × 多训练条件 + 基线 + 不确定性 + 失败分析</td><td>“模型在哪些能力上强、在哪些条件下失效”</td><td>超出测试分布的整体优劣</td></tr>
+    </table>
+    <div class="formula">一个分数 = 一次观测<br/>一组受控对照 = 一个因果关系候选<br/>多维评测 + 边界分析 = 对模型能力的评价</div>
+    <p class="quote">所以“模型评测就是跑个分数”只在最窄的操作层成立；<strong>评价基模必须比较不同数据、训练方法和考场条件下的表现。</strong></p>
+<div class="gloss"><b>名词解释</b>受控对照 = 其他条件尽量不变，只改一个变量；ablation = 逐个替换/拿掉因素看贡献；基线 = 判断“有没有提升”的参照。</div>
+    <div class="foot"><span>03 跑分与评价</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide" data-screen-label="04 对照轴">
+    <div class="eyebrow">模型评价 · 对照轴</div>
+    <h2>评价基模，要看它在不同条件下怎么变</h2>
+    <table>
+      <tr><th style="width:20%">对照轴</th><th style="width:32%">典型问题</th><th style="width:26%">控制量</th><th>输出</th></tr>
+      <tr><td>训练数据</td><td>clean vs randomized；50 vs 500；多样性是否值得</td><td>基模、训练预算、考场、种子</td><td>数据 ablation</td></tr>
+      <tr><td>训练方法</td><td>ACT vs DP；全参 vs LoRA；同算力下谁更有效</td><td>数据、目标、评测协议</td><td>方法对照</td></tr>
+      <tr><td>考场 / task</td><td>RoboTwin vs LIBERO；操作 vs 导航；长程 vs 短程</td><td>模型 checkpoint、资源</td><td>能力画像</td></tr>
+      <tr><td>协议 / 难度</td><td>Easy vs Hard；固定 vs 随机化；不同 max_steps</td><td>模型、数据、task 集</td><td>鲁棒性曲线</td></tr>
+      <tr><td>泛化域</td><td>跨本体、跨场景、仿真到真机、未见物体</td><td>训练条件、指标定义</td><td>泛化边界</td></tr>
+      <tr><td>统计可靠性</td><td>n、重复轮、置信区间、失败类型</td><td>同配置多次运行</td><td>显著性与稳定性</td></tr>
+    </table>
+    <div class="formula">R01 的例子：同一 ACT / DP 基模 × {50 clean, 50 clean + 500 randomized} × {Easy, Hard} × 5 task<br/>唯一自变量 = 训练数据口径；其余固定。</div>
+    <p class="sub" style="margin-top:12px"><strong>这才是“评价模型/训练方法”的骨架</strong>：先定义要回答的问题，再设计变量与对照，最后才跑分。</p>
+<div class="gloss"><b>名词解释</b>LoRA = 只训练少量新增参数的高效微调；embodiment = 机器人本体；泛化 = 在没见过的数据、场景或本体上仍能工作。</div>
+    <div class="foot"><span>04 对照轴</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide" data-screen-label="05 现有对照">
+    <div class="eyebrow">模型评价 · 我们现在的证据</div>
+    <h2>已有不少对照，但还不是完整的基模评价</h2>
+    <table>
+      <tr><th style="width:24%">对照</th><th style="width:18%">状态</th><th style="width:28%">回答什么</th><th>边界</th></tr>
+      <tr><td>栈变量：镜像 / 精度 / 种子 / 分片</td><td><span class="tag ok">已跑</span></td><td>分数里多少来自运行栈</td><td>方法有效性，不是模型能力</td></tr>
+      <tr><td>Easy vs Hard</td><td><span class="tag warn">部分</span></td><td>随机化下性能怎么掉</td><td>目前只有部分 task 满 50 集</td></tr>
+      <tr><td>X-VLA vs 官方 50 task</td><td><span class="tag ok">已跑</span></td><td>我们的尺子偏多少</td><td>校准，不是模型优劣</td></tr>
+      <tr><td>ACT / DP × 数据口径 A/B</td><td><span class="tag next">R01 已设计</span></td><td>同基模下数据多样性值多少分</td><td>S3/S4 未完成，不能下结论</td></tr>
+      <tr><td>RoboTwin vs LIBERO</td><td><span class="tag">待接</span></td><td>跨考场能力画像</td><td>动作/观测/后端不同，需 profile</td></tr>
+      <tr><td>跨本体 / 真机 / 未见场景</td><td><span class="tag">待补</span></td><td>泛化边界</td><td>当前结论不能外推</td></tr>
+      <tr><td>r2 / r3 重复轮</td><td><span class="tag warn">待跑</span></td><td>差异是否超过运行噪声</td><td>单轮只能报点估计</td></tr>
+    </table>
+    <p class="quote" style="margin-top:20px">八要素是<strong>生产可信分数的地基</strong>；真正评价一个基模，还要有<strong>研究问题、对照轴、基线、统计结论和适用边界</strong>。</p>
+<div class="gloss"><b>名词解释</b>校准 = 检查“尺子准不准”；能力评价 = 检查“模型强不强”。R01 未跑完时，A/B 只能写计划，不能写结论。</div>
+    <div class="foot"><span>05 现有对照</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide" data-screen-label="06 模型">
     <div class="eyebrow">要素一 · 模型</div>
     <h2>“用了哪个模型”至少要回答四层</h2>
     <div class="cols3">
@@ -105,11 +163,12 @@
       <tr><td>DB-CogACT</td><td>qpos 14D，按 task 分头</td><td>权重子目录、fp16、每 task 独立 serve</td><td>拉错 task 权重、缺头</td></tr>
     </table>
     <p class="sub" style="margin-top:14px"><strong>关键</strong>：上游有 YAML 不等于没有 adapter；YAML 可以是 adapter 的实现素材，但 adapter 仍是稳定扩展边界。</p>
-    <div class="foot"><span>03 模型</span><span class="dot"><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>qpos = 关节角度；EE = 末端执行器位姿；quat / rot6d = 旋转的两种表示；chunk = 一次预测的一段动作；queue = 把动作块逐步播完的缓冲。</div>
+    <div class="foot"><span>06 模型</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 04 -->
-  <section class="slide" data-screen-label="04 考场">
+  <section class="slide" data-screen-label="07 考场">
     <div class="eyebrow">要素二 · 考场</div>
     <h2>考什么，决定这个分数能说明什么</h2>
     <div class="cols">
@@ -138,11 +197,12 @@
       <div class="kpi pri"><div class="n">50</div><div class="l">每 task 标准集数<br/>n 决定不确定性</div></div>
     </div>
     <p class="quote" style="margin-top:20px">只报 Easy，会把“固定摆位下能成功”说成“能操作”；不披露覆盖，会把“没权重”伪装成“模型不行”。</p>
-    <div class="foot"><span>04 考场</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>task = 一道操作题；episode = 一次完整尝试；coverage = 有权重且能覆盖的题目；Easy / Hard 不是题量不同，而是随机化程度不同。</div>
+    <div class="foot"><span>07 考场</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 05 -->
-  <section class="slide" data-screen-label="05 环境">
+  <section class="slide" data-screen-label="08 环境">
     <div class="eyebrow">要素三 · 环境</div>
     <h2>仿真器、本体、资产，都是“考卷”的一部分</h2>
     <table>
@@ -157,11 +217,12 @@
       <div class="card bad"><div class="t">环境不一致</div><div class="v">即使模型没变，材质、相机、物理参数、渲染后端变化也会移动成功率。</div></div>
     </div>
     <p class="sub" style="margin-top:16px"><strong>设计含义</strong>：考场 adapter 管 task 与判定；backend profile 管镜像、资产、渲染和资源。不要把这些全塞进模型 adapter。</p>
-    <div class="foot"><span>05 环境</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>URDF = 机器人结构描述；EGL / CUDA = 无显示器时的渲染方式；shared memory = 容器间共享内存；资产 revision = 场景文件版本。</div>
+    <div class="foot"><span>08 环境</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 06 -->
-  <section class="slide" data-screen-label="06 协议">
+  <section class="slide" data-screen-label="09 协议">
     <div class="eyebrow">要素四 · 协议</div>
     <h2>协议就是“这场考试的统一规则”</h2>
     <table>
@@ -175,11 +236,12 @@
     </table>
     <div class="formula">协议版本 = 考场 + 集数 + 种子策略 + task_config + max_steps + harness + 镜像 digest</div>
     <p class="quote">任一旋钮变化，都应该生成新版本；旧结果冻结，不覆盖。否则“同一个 92%”其实不是同一件事。</p>
-    <div class="foot"><span>06 协议</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>seed = 随机数种子；n = 样本量；max_steps = 单集最多走多少步；r2 = 同配置第二轮，用来看运行波动。</div>
+    <div class="foot"><span>09 协议</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 07 -->
-  <section class="slide" data-screen-label="07 运行">
+  <section class="slide" data-screen-label="10 运行">
     <div class="eyebrow">要素五 · 运行</div>
     <h2>同一套配置，运行方式也可能把结果跑坏</h2>
     <div class="flow">
@@ -196,11 +258,12 @@
       <div class="card"><div class="t">可观测性</div><div class="v">日志、容器状态、GPU、episode 进度都要能定位“卡在哪”。</div></div>
       <div class="card warn"><div class="t">运行不是细节</div><div class="v">端口冲突、错卡、旧容器、残留 results，都会让分数失真。</div></div>
     </div>
-    <div class="foot"><span>07 运行</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>serve = 常驻模型推理服务；shard = 把 episode 分给多个进程；GPU 隔离 = 避免 serve 与环境抢显存；healthcheck = 确认服务真的 ready。</div>
+    <div class="foot"><span>10 运行</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 08 -->
-  <section class="slide" data-screen-label="08 指标">
+  <section class="slide" data-screen-label="11 指标">
     <div class="eyebrow">要素六 · 指标</div>
     <h2>成功率只是一个分子/分母，后面还有四层信息</h2>
     <div class="formula">成功率 = success episodes / terminal episodes × 100%</div>
@@ -214,11 +277,12 @@
       <tr><td>Failure taxonomy</td><td>为什么失败</td><td>grasp / timeout / model_act</td><td>无法定位改进方向</td></tr>
     </table>
     <p class="quote" style="margin-top:20px">一个可信的格子至少是：<strong>K/N + errors + 95% CI + 平均步数 + 协议版本</strong>。</p>
-    <div class="foot"><span>08 指标</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>terminal episode = 已结束的尝试；error = 基础设施/协议坏了；fail = 正常尝试但没完成；Wilson CI = 小样本下也较稳的比例区间。</div>
+    <div class="foot"><span>11 指标</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 09 -->
-  <section class="slide" data-screen-label="09 统计">
+  <section class="slide" data-screen-label="12 统计">
     <div class="eyebrow">统计常识 · 为什么需要重复轮</div>
     <h2>92% 一定比 80% 好吗？先看不确定性</h2>
     <div class="cols">
@@ -236,11 +300,12 @@
       <div class="card next"><div class="t">补 r2 / r3</div><div class="v">同配置重复，估计方差，再做合并与显著性判断。</div></div>
     </div>
     <p class="sub" style="margin-top:14px"><strong>科普结论</strong>：点估计是“观测值”，置信区间是“我们有多确定”；两者要一起读。</p>
-    <div class="foot"><span>09 统计</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>区间重叠 ≠ 证明没有差异；只说明当前证据不够强。要更确定，需要更大 n，或用 r2 / r3 合并重复轮。</div>
+    <div class="foot"><span>12 统计</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 10 -->
-  <section class="slide" data-screen-label="10 证据">
+  <section class="slide" data-screen-label="13 证据">
     <div class="eyebrow">要素七 · 证据</div>
     <h2>分数必须能沿着一条链追回原始 episode</h2>
     <div class="flow">
@@ -274,11 +339,12 @@
       </div>
     </div>
     <p class="quote" style="margin-top:18px">只有 aggregate 没有原始数据，等于只有结论没有证据；只能信，不能验。</p>
-    <div class="foot"><span>10 证据</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>manifest = 这次考试的清单与完成状态；aggregate = 从原始记录算出的汇总；checksum = 文件指纹，用来发现损坏或被改动。</div>
+    <div class="foot"><span>13 证据</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 11 -->
-  <section class="slide" data-screen-label="11 增量归档">
+  <section class="slide" data-screen-label="14 增量归档">
     <div class="eyebrow">证据的关键 · 跑多少，存多少</div>
     <h2>不能等全部跑完再复制；每集完成就应 checkpoint</h2>
     <div class="flow">
@@ -296,11 +362,12 @@
       <tr><td>Metaflow</td><td>step 边界 + 长任务 in-task checkpoint</td><td>长 task 必须边跑边存</td></tr>
     </table>
     <p class="quote" style="margin-top:18px">中途失败时，已完成集仍然可恢复；partial 可以出附录，但不能冒充完整结果。</p>
-    <div class="foot"><span>11 增量归档</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>原子提交 = step 行和 episode 结果要么一起写进去，要么都不写；COMMITTED = 已可靠落盘；VALIDATED = 落盘后还校验过。</div>
+    <div class="foot"><span>14 增量归档</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 12 -->
-  <section class="slide" data-screen-label="12 治理">
+  <section class="slide" data-screen-label="15 治理">
     <div class="eyebrow">要素八 · 治理</div>
     <h2>门禁不是“管得严”，是防止坏分数悄悄进表</h2>
     <div class="cols">
@@ -331,15 +398,16 @@
     </div>
     <p class="quote" style="margin-top:20px">校准回答“我们的尺子偏多少”；门禁回答“这次结果有没有资格被看到”。</p>
     <p class="sub" style="margin-top:12px">工程侧还要管：GPU/存储成本、密钥与数据权限、产物保留期限、发布责任人。</p>
-    <div class="foot"><span>12 治理</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>registry = 模型/考场真源表；gate = 机器门禁；shared = 作者发布权重，finetuned = 我们在考场数据上训过，两者不能混排。</div>
+    <div class="foot"><span>15 治理</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 13 -->
-  <section class="slide" data-screen-label="13 全流程">
+  <section class="slide" data-screen-label="16 全流程">
     <div class="eyebrow">串起来 · 一次评测的完整生命周期</div>
     <h2>从“想测什么”到“这个分能说什么”</h2>
     <div class="flow" style="flex-wrap:wrap">
-      <div class="node"><b>1 定义</b><span>要回答的问题<br/>模型 / task / 协议 / n</span></div><div class="arr">→</div>
+      <div class="node"><b>1 定义</b><span>研究问题 / 对照轴<br/>模型 / task / 协议 / n</span></div><div class="arr">→</div>
       <div class="node"><b>2 预检</b><span>覆盖 / 权重 / 镜像 / OBS</span></div><div class="arr">→</div>
       <div class="node"><b>3 Smoke</b><span>1 集验契约，不追分数</span></div><div class="arr">→</div>
       <div class="node"><b>4 启动</b><span>开资源 / serve / env</span></div><div class="arr">→</div>
@@ -354,11 +422,12 @@
       <div class="card good"><div class="t">输出</div><div class="v">可信分数 + 不确定性 + 原始证据 + 完成状态</div></div>
     </div>
     <p class="quote" style="margin-top:20px">评测不是一条 shell 命令，是一条<strong>可恢复、可审计、可复现的证据生产链</strong>。</p>
-    <div class="foot"><span>13 全流程</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>smoke = 1 集只验链路，不用来看分数；fail fast = 不烧卡就拒绝错误配置；projector = 从原始证据生成报告和榜单。</div>
+    <div class="foot"><span>16 全流程</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 14 -->
-  <section class="slide" data-screen-label="14 失败案例">
+  <section class="slide" data-screen-label="17 失败案例">
     <div class="eyebrow">避坑 · 最常见的八类失真</div>
     <h2>很多“模型不行”，其实是评测坏了</h2>
     <table style="font-size:16px">
@@ -373,11 +442,12 @@
       <tr><td>同名分数不可比</td><td>协议/镜像/种子未记录</td><td>manifest 缺字段</td><td>protocol_version + digest</td></tr>
     </table>
     <p class="quote" style="margin-top:18px">先证明“考试没坏”，再讨论“模型好不好”。顺序反了，结论一定是假的。</p>
-    <div class="foot"><span>14 失败案例</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>随机权重 = 模型结构对了但没加载训练参数；partial = 没跑满目标 n；残留 results = 上一轮文件没清，污染了本轮。</div>
+    <div class="foot"><span>17 失败案例</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i></span></div>
   </section>
 
   <!-- 15 -->
-  <section class="slide" data-screen-label="15 检查清单">
+  <section class="slide" data-screen-label="18 检查清单">
     <div class="eyebrow">拿来就能用 · 12 个问题</div>
     <h2>看到一个分数，先问这 12 个问题</h2>
     <div class="cols">
@@ -403,11 +473,12 @@
       </div>
     </div>
     <div class="formula">答不全 → 只能说“这次跑出了这个数”<br/>答得全 → 才能说“这个数可以比较、引用、复核”</div>
-    <div class="foot"><span>15 检查清单</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
+<div class="gloss"><b>名词解释</b>n_target = 计划跑多少集；r2 / r3 = 重复轮；CI = 不确定性范围。三项都不知道，分数只能当参考。</div>
+    <div class="foot"><span>18 检查清单</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i></span></div>
   </section>
 
   <!-- 16 -->
-  <section class="slide" data-screen-label="16 总结">
+  <section class="slide" data-screen-label="19 总结">
     <div class="eyebrow">总结 · 一句话记住</div>
     <h2 style="font-size:50px">模型评测不是“跑个分”，<br/>是生产一份可采信的证据。</h2>
     <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-top:30px">
@@ -416,9 +487,9 @@
       <div class="kpi ok"><div class="n">可审计</div><div class="l">每个数追得到原始证据</div></div>
       <div class="kpi warn"><div class="n">可比较</div><div class="l">同口径、带 n 与不确定性</div></div>
     </div>
-    <p class="quote" style="margin-top:34px;font-size:25px">八要素缺一个，分数就只是“观测”；八要素齐了，分数才是“结论”。</p>
+    <p class="quote" style="margin-top:34px;font-size:25px">八要素缺一个，分数只是“观测”；八要素齐了，得到可信分数；<strong>有了受控对照与边界分析，才能评价模型。</strong></p>
     <p class="sub" style="margin-top:18px">延伸材料：技术版 21 页 deck、ADR-0004 双考场运行时、CloudRobo 评测读后、R01 训练数据轴。</p>
-    <div class="foot"><span>16 总结</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
+    <div class="foot"><span>19 总结</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i></span></div>
   </section>
 
 </div>
