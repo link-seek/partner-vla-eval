@@ -77,7 +77,9 @@ jobs:
           mkdir -p /tmp/collected
           for proto in hard easy; do
             echo "--- try $proto"
-            "$OBSUTIL" cp "$SRC/$proto/matrix/" ./matrix -r -f -e "$EP" -i "$OBS_AK" -k "$OBS_SK" 2>&1 | tail -3 || true
+            # obsutil cp 到已存在目录会再套一层 matrix/matrix；拷到 "." 才是 matrix/<model>/...
+            rm -rf matrix
+            "$OBSUTIL" cp "$SRC/$proto/matrix/" . -r -f -e "$EP" -i "$OBS_AK" -k "$OBS_SK" 2>&1 | tail -3 || true
             [ -d matrix ] || continue
             for m in $(ls matrix); do
               [ -d "matrix/$m" ] || continue
