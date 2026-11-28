@@ -19,10 +19,10 @@
 #
 # 用法：
 #   bash scripts/ci/smoke_serve.sh --image <img> --policy act|dp --ckpt-host <path> \
-#        [--task click_bell] [--port 8021] [--workdir /root/r01/smoke] [--dry-run]
+#        [--task click_bell] [--task-config demo_clean|demo_randomized] [--port 8021] [--dry-run]
 set -uo pipefail
 
-IMAGE=""; POLICY=""; CKPT_HOST=""; TASK="click_bell"; PORT="8021"
+IMAGE=""; POLICY=""; CKPT_HOST=""; TASK="click_bell"; TASK_CONFIG="${TASK_CONFIG:-demo_clean}"; CKPT_LAYOUT="${CKPT_LAYOUT:-official}"; SKIP_EXPERT="${SKIP_EXPERT:-true}"; PORT="8021"
 WORKDIR="/root/r01/smoke"; DRY=0; ASSETS="${ASSETS:-/data/robotwin-assets/c3ddfa8}"
 EPISODES=1; GPU=0; TIMEOUT="${TIMEOUT:-900}"
 while [ $# -gt 0 ]; do
@@ -31,6 +31,9 @@ while [ $# -gt 0 ]; do
     --policy) POLICY="$2"; shift 2 ;;
     --ckpt-host) CKPT_HOST="$2"; shift 2 ;;
     --task) TASK="$2"; shift 2 ;;
+    --task-config) TASK_CONFIG="$2"; shift 2 ;;
+    --ckpt-layout) CKPT_LAYOUT="$2"; shift 2 ;;
+    --skip-expert) SKIP_EXPERT="$2"; shift 2 ;;
     --port) PORT="$2"; shift 2 ;;
     --workdir) WORKDIR="$2"; shift 2 ;;
     --assets) ASSETS="$2"; shift 2 ;;
@@ -138,12 +141,22 @@ YML
 else
   # DP 官方 get_model 用相对路径 ./policy/DP/checkpoints/<task>-<setting>-<num>-<seed>/<num>.ckpt
   # 官方布局：<task>-<ckpt_setting>-<expert_data_num>/<seed>/<ckpt>.ckpt（HF 上只有前 3 段）
-  NAME="$(basename "$(dirname "$CKPT_HOST")")"                   # 例：100（= expert_data_num = seed）
-  SETTING_FULL="$(basename "$(dirname "$(dirname "$CKPT_HOST")")")"  # 例：click_bell-demo_clean-100
-  # 从 "<task>-<setting>-<num>" 里剥出 setting（不能简单 -%%-*-*，那样会把 demo_clean 切掉）
-  _t="${SETTING_FULL#"$TASK"-}"; SETTING="${_t%-"$NAME"}"
-  [ -n "$SETTING" ] || { echo "[smoke] FAIL: 无法从 $SETTING_FULL 推出 ckpt_setting（用 --ckpt-setting 显式给）" >&2; exit 1; }
-  CTR_CKPT="/app/RoboTwin/policy/DP/checkpoints/${SETTING_FULL}-${NAME}/$(basename "$CKPT_HOST")"
+  if [ "$CKPT_LAYOUT" = "serve" ]; then
+    # S3 训练产物布局：<task>-<setting>-<num>-<seed>/<num>.ckpt
+    DIR="$(basename "$(dirname "$CKPT_HOST")")"                 # grab_roller-clean_50-50-0
+    SEED="$(basename "$CKPT_HOST" .ckpt)"; SEED="${DIR##*-}"
+    _r="${DIR%-*}"; NUM="${_r##*-}"; _r2="${_r%-*}"; SETTING="${_r2##*-}"; TASK_IN="${_r2%-*}"
+    NAME="$NUM"; SETTING_FULL="${TASK_IN}-${SETTING}-${NUM}"
+    CTR_CKPT="/app/RoboTwin/policy/DP/checkpoints/${DIR}/$(basename "$CKPT_HOST")"
+  else
+    NAME="$(basename "$(dirname "$CKPT_HOST")")"                   # 例：100（= expert_data_num = seed）
+    SETTING_FULL="$(basename "$(dirname "$(dirname "$CKPT_HOST")")")"  # 例：click_bell-demo_clean-100
+    # 从 "<task>-<setting>-<num>" 里剥出 setting（不能简单 -%%-*-*，那样会把 demo_clean 切掉）
+    _t="${SETTING_FULL#"$TASK"-}"; SETTING="${_t%-"$NAME"}"
+    [ -n "$SETTING" ] || { echo "[smoke] FAIL: 无法从 $SETTING_FULL 推出 ckpt_setting（用 --ckpt-setting 显式给）" >&2; exit 1; }
+    SEED="$NAME"
+    CTR_CKPT="/app/RoboTwin/policy/DP/checkpoints/${SETTING_FULL}-${NAME}/$(basename "$CKPT_HOST")"
+  fi
   cat > "$SERVE_YAML" <<YML
 script: "/opt/serve/robotwin_policy.py"
 args:
@@ -151,7 +164,7 @@ args:
   task_name: $TASK
   ckpt_setting: $SETTING
   expert_data_num: $NAME
-  seed: $NAME
+  seed: $SEED
   checkpoint_num: $(basename "$CKPT_HOST" .ckpt)
   action_dim: 14
   left_arm_dim: 6
@@ -176,11 +189,11 @@ benchmarks:
     episodes_per_task: 1
     params:
       task_name: $TASK
-      task_config: demo_clean
+      task_config: $TASK_CONFIG
       seed: 0
       instruction_type: seen
       test_num: $EPISODES
-      skip_expert_check: true
+      skip_expert_check: $SKIP_EXPERT
       fast_init: false
       action_type: qpos
     action_dim: 14
@@ -195,11 +208,11 @@ docker rm -f "$CTR_NAME" >/dev/null 2>&1 || true
 # 教训（2026-11-25）：别用 `/dev/tcp` —— HEALTHCHECK 由容器里的 /bin/sh(dash) 执行，
 # /dev/tcp 是 bash 专有特性，dash 下报 "cannot create /dev/tcp/...: Directory nonexistent"，
 # 于是健康检查永远 unhealthy，看起来像"服务起不来"，其实服务好得很。
+# --gpus device=$GPU 已把目标卡隔离成容器内的 0 号；容器内再传 $GPU 会把唯一可见卡屏蔽。
 docker run -d --name "$CTR_NAME" --gpus "\"device=$GPU\"" --network host --entrypoint bash \
   --health-cmd "curl -fsS -o /dev/null http://127.0.0.1:$PORT/config || exit 1" \
   --health-interval=5s --health-timeout=3s --health-retries=40 --health-start-period=15s \
   -v "$WORKDIR:$CTR_WD:ro" "${EXTRA_MOUNT[@]}" \
-  # --gpus device=$GPU 已把目标卡隔离成容器内的 0 号；再传 $GPU 会把唯一可见卡屏蔽
   -e CUDA_VISIBLE_DEVICES=0 -e HF_HUB_OFFLINE=1 \
   "$IMAGE" -lc "cd $SERVE_CWD && conda run --no-capture-output -n robotwin vla-eval serve -c $CTR_WD/$(basename "$SERVE_YAML") --address 0.0.0.0:$PORT" >/dev/null
 
