@@ -19,9 +19,9 @@
     "mean": 124.1,
     "med": 100
   },
-  "hard_success": null,
-  "gap": null,
-  "note": "Easy only；Hard 待补。4 分片并行；零 error。",
+  "hard_success": 0.0,
+  "gap": 0.96,
+  "note": "Easy 0.960（n=50）vs Hard 0.000（n=50），落差 0.960。",
   "report_version": "v1 (docs/tutorial/leaderboard.md)",
   "stats": {
     "n": 50,
@@ -36,5 +36,26 @@
     ],
     "ci95_method": "wilson"
   },
-  "protocol_version": "robotwin-2.0.1"
+  "protocol_version": "robotwin-2.0.1",
+  "hard_n": 50,
+  "hard_success_count": 0,
+  "hard_errors": 0,
+  "hard_steps_success": {
+    "mean": 400.0,
+    "med": 400
+  },
+  "hard_stats": {
+    "n": 50,
+    "success": 0,
+    "mean_success": 0.0,
+    "stderr": 0.0,
+    "stderr_method": "bootstrap(2000)",
+    "stderr_analytic": 0.0,
+    "ci95": [
+      0.0,
+      0.0714
+    ],
+    "ci95_method": "wilson"
+  },
+  "hard_protocol": "demo_randomized"
 }
