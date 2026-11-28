@@ -267,3 +267,34 @@ ACT 之外，DP 也做了一次 1 epoch 冒烟（`vla-robotwin-train-dp:dev`，c
 
 **结论**：DP 训练链路能跑，但"40k 步后 ckpt 落在哪"必须在 S3 首次正式训练时先确认，
 再批量跑 10 个 DP ckpt。不要假设 serve 侧的 `<task>-<setting>-<num>/<num>.ckpt` 路径。
+
+---
+
+## 15. 首个 S3 ckpt 实测（2026-11-28）
+
+### 训练
+
+`grab_roller / clean_50`（40k 步 = 5715 epoch）实测：
+
+```
+5715/5715 [3:34:45]  → 单 ckpt 约 3h35m
+policy_last.ckpt 321M + dataset_stats.pkl 8.1K
+```
+
+之前 9–13 小时/ckpt 的估算是从 21 步小样本外推（含初始化开销）得出的，**高估了**。
+按实测：ACT 10 个 ckpt ≈ **36–45 小时**；DP 尚未实测，暂按同量级估。
+总周期从 7.5–11 天下调到 **约 4–6 天（含 S4 评测）**，预算相应约 ¥3500–5000。
+
+### 加载验证
+
+用 GPU1 跑 1 集 `grab_roller`（easy）：
+
+```
+[smoke] ACT ckpt 显式加载：/ckpt/policy_last.ckpt
+[smoke] grab_roller: 1/1 success, num_errors=0
+[smoke] PASS
+```
+
+顺带修了一个只在非 0 卡暴露的 bug：`--gpus device=1` 已把目标卡隔离成容器内 0 号，
+再传 `CUDA_VISIBLE_DEVICES=1` 会把唯一可见卡屏蔽（`No CUDA GPUs are available`）。
+现在 smoke_serve 在容器内固定 `CUDA_VISIBLE_DEVICES=0`。
