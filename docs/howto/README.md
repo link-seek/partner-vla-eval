@@ -17,6 +17,8 @@ nav_exclude: true
 | `tailnet-join.md` | runner 重装后重新加入 tailnet（经 hw41 跳板，key 不落盘） |
 | `act-dp-adapter-runbook.md` | ACT/DP 适配器首次 smoke（12 个坑） |
 | `serve-yaml-onboarding.md` | serve yaml 编写/对接（上游讨论草稿） |
+| `r01-s3-progress.md` | R01 S3 训练进度与长分支合并计划（ing） |
+| `partner-onboarding-human-kit.md` | 给真人的 30 分钟计时测试包（可直接转发） |
 | `partner-onboarding-timing.md` | 伙伴接入要多久：交付物清单 + 机械实测 0.94s + 30 分钟拆解 + 4 个卡点 |
 | `partner-onboarding-fresh-reader-2026-11-25.md` | 独立读者（AI）只读文档走查：94s、9 个卡点、据此补的 7 条答案 |
 | `add-official-policy.md` | 接第三个官方策略要填的 6 个钩子 + 4 条硬契约 + 三层验收 |
