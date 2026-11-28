@@ -23,6 +23,7 @@ concurrency:
 permissions:
   contents: write
   actions: read
+  pull-requests: write
 
 jobs:
   collect:
@@ -119,8 +120,11 @@ jobs:
           python3 scripts/gates/check_reports.py
           python3 leaderboard/scripts/check_leaderboard.py
 
-      - name: Commit results
+      - name: Commit results (branch + PR, never push main)
         if: always() && (steps.check.outputs.found == 'true' || steps.obs-fallback.outcome == 'success')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id || github.event.inputs.run_id }}
         run: |
           set -e
           git config user.name "post-run-collect"
@@ -128,7 +132,13 @@ jobs:
           git add docs/data leaderboard
           if git diff --cached --quiet; then
             echo "无变化，不提交"
-          else
-            git commit -m "chore(auto): 收数 run ${{ github.event.workflow_run.id || github.event.inputs.run_id }} → 报告 hard_success/gap + 榜单"
-            git push
+            exit 0
           fi
+          # main 受规则集保护，禁止直推；推分支并开 PR 由人合并。
+          BR="auto/collect-${RUN_ID}-$(date -u +%H%M%S)"
+          git checkout -b "$BR"
+          git commit -m "chore(auto): 收数 run ${RUN_ID} → 报告 hard_success/gap + 榜单"
+          git push -u origin "$BR"
+          gh pr create --base main --head "$BR" \
+            --title "chore(auto): 收数 run ${RUN_ID}（hard 报告 + 榜单）" \
+            --body "自动收数：run ${RUN_ID}。包含 docs/data 的 hard_success/gap 与 leaderboard.hard.json。main 受保护，故走 PR。"
