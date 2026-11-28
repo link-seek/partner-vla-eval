@@ -373,14 +373,18 @@
 
   <!-- 09c Easy vs Hard -->
   <section class="slide" data-screen-label="14 Easy vs Hard">
-    <div class="eyebrow">方法 · 难度旋钮 <span class="tag next" style="margin-left:10px">进行中</span></div>
-    <h2>Hard 不是"更难的 Easy"：同考场同模型，98% → 50%</h2>
+    <div class="eyebrow">方法 · 难度旋钮 <span class="tag ok" style="margin-left:10px">已跑完（单轮）</span></div>
+    <h2>Hard 不是"更难的 Easy"：同考场同模型，93% → 30%</h2>
     <table>
       <tr><th>task</th><th>Easy（demo_clean）</th><th>Hard（demo_randomized）</th><th>落差</th></tr>
       <tr><td>grab_roller</td><td>49/50 = 98%</td><td>22/50 = 44%</td><td><strong>−54pp</strong></td></tr>
       <tr><td>adjust_bottle</td><td>49/50 = 98%</td><td>28/50 = 56%</td><td><strong>−42pp</strong></td></tr>
+      <tr><td>place_phone_stand</td><td>48/50 = 96%</td><td>0/50 = 0%</td><td><strong>−96pp</strong></td></tr>
+      <tr><td>click_bell</td><td>48/50 = 96%</td><td>25/50 = 50%</td><td><strong>−46pp</strong></td></tr>
+      <tr><td>handover_block</td><td>39/50 = 78%</td><td>1/50 = 2%</td><td><strong>−76pp</strong></td></tr>
+      <tr><td><strong>5 task 合计</strong></td><td><strong>233/250 = 93.2%</strong></td><td><strong>76/250 = 30.4%</strong></td><td><strong>−62.8pp</strong></td></tr>
     </table>
-    <p class="sub" style="margin-top:16px">Hard 整轮 250 集仍在跑（当前 124 集，3 个 task 未出）。上表是<strong>已跑满 50 集</strong>的两个 task，属中途读数：<strong>不进榜</strong>，等整轮收完按 <code>protocol_version</code> 归档。</p>
+    <p class="sub" style="margin-top:16px">Hard 整轮 250 集已跑完（单轮 n=50）。这是<strong>本考场 5 task 子集</strong>，不是官方 50 task 全量；单轮也不进 ±4pp 校准，只作难度轴证据。</p>
     <p class="sub"><strong>这就是必须两列的原因</strong>：只报 Easy 会把"固定摆位下能成功"说成"能操作"；randomized 才是真实增益的判据（官方 §4.3 同结论）。</p>
     <div class="foot"><span>14 Easy vs Hard</span><span class="dot"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></span></div>
   </section>
