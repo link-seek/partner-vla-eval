@@ -199,7 +199,8 @@ docker run -d --name "$CTR_NAME" --gpus "\"device=$GPU\"" --network host --entry
   --health-cmd "curl -fsS -o /dev/null http://127.0.0.1:$PORT/config || exit 1" \
   --health-interval=5s --health-timeout=3s --health-retries=40 --health-start-period=15s \
   -v "$WORKDIR:$CTR_WD:ro" "${EXTRA_MOUNT[@]}" \
-  -e CUDA_VISIBLE_DEVICES=$GPU -e HF_HUB_OFFLINE=1 \
+  # --gpus device=$GPU 已把目标卡隔离成容器内的 0 号；再传 $GPU 会把唯一可见卡屏蔽
+  -e CUDA_VISIBLE_DEVICES=0 -e HF_HUB_OFFLINE=1 \
   "$IMAGE" -lc "cd $SERVE_CWD && conda run --no-capture-output -n robotwin vla-eval serve -c $CTR_WD/$(basename "$SERVE_YAML") --address 0.0.0.0:$PORT" >/dev/null
 
 docker_wait_healthy() {   # 标准做法：轮询 docker 自己的健康状态
@@ -226,7 +227,7 @@ ok "serve 健康检查通过（docker health=healthy，端口 $PORT）"
 echo "[smoke] 跑 $EPISODES 集（GPU$GPU）"
 timeout "$TIMEOUT" docker run --rm --gpus "\"device=$GPU\"" --network host --entrypoint bash \
   -v "$WORKDIR:$CTR_WD" -v "$ASSETS:/app/RoboTwin/assets:ro" \
-  -e CUDA_VISIBLE_DEVICES=$GPU \
+  -e CUDA_VISIBLE_DEVICES=0 \
   "$IMAGE" -lc "cd /app/RoboTwin && conda run --no-capture-output -n robotwin vla-eval run -c $CTR_WD/$(basename "$RUN_YAML")" \
   2>&1 | grep -viE '^\s*[0-9]+%|it/s|B/s'
 RC=${PIPESTATUS[0]}
